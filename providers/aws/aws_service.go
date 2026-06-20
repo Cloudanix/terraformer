@@ -18,6 +18,7 @@ import (
 	"context"
 	"os"
 	"regexp"
+	"sync"
 
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
@@ -34,11 +35,22 @@ type AWSService struct { //nolint
 
 var awsVariable = regexp.MustCompile(`(\${[0-9A-Za-z:]+})`)
 
-var configCache *aws.Config
+// configCache is keyed by region: terraformer imports global resources first
+// (region "aws-global") then loops the real regions in the same process. A single
+// shared config would freeze every later region to the first pass's endpoint,
+// causing wrong-region signing / aws-global DNS failures. Cache per region instead.
+var (
+	configCache   = map[string]*aws.Config{}
+	configCacheMu sync.Mutex
+)
 
 func (s *AWSService) generateConfig() (aws.Config, error) {
-	if configCache != nil {
-		return *configCache, nil
+	region, _ := s.GetArgs()["region"].(string)
+
+	configCacheMu.Lock()
+	defer configCacheMu.Unlock()
+	if c, ok := configCache[region]; ok {
+		return *c, nil
 	}
 
 	baseConfig, e := s.buildBaseConfig()
@@ -66,7 +78,7 @@ func (s *AWSService) generateConfig() (aws.Config, error) {
 			os.Setenv("AWS_SESSION_TOKEN", creds.SessionToken)
 		}
 	}
-	configCache = &baseConfig
+	configCache[region] = &baseConfig
 	return baseConfig, nil
 }
 
