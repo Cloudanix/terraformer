@@ -454,6 +454,8 @@ github.com/aws/aws-sdk-go-v2/service/configservice v1.43.5 h1:EZb5NJxZf20Tx4/yWk
 github.com/aws/aws-sdk-go-v2/service/configservice v1.43.5/go.mod h1:v3tquqvNb80onGXFvY1b12PaSLe4j3d1TG4HO4KsbG4=
 github.com/aws/aws-sdk-go-v2/service/datapipeline v1.19.5 h1:zkIKbco/gM4fmbU90ajz4ah3ErgAgot7aTE0PpIxNuE=
 github.com/aws/aws-sdk-go-v2/service/datapipeline v1.19.5/go.mod h1:+G+TF84SIgMdGDjZKKYPpx6LwXSN4QcywQGa8e2vJ1U=
+github.com/aws/aws-sdk-go-v2/service/dax v1.30.2 h1:4+h9xIQyCF8FsC3qPlM5I9gzADHDfxvp+R+9cP1etYI=
+github.com/aws/aws-sdk-go-v2/service/dax v1.30.2/go.mod h1:+0NMbNrYBuMneycjX4G4MvIMkS8HswcyV17jSUVd7u4=
 github.com/aws/aws-sdk-go-v2/service/devicefarm v1.20.5 h1:Qb3OR2IpH29EkESNmUtsyuj6DDfdM4X3Qnv7UmW4xOA=
 github.com/aws/aws-sdk-go-v2/service/devicefarm v1.20.5/go.mod h1:O66Kiw8O4IS2V4GQOv8CUDDsAWiRoENYyQXWSXBuvTw=
 github.com/aws/aws-sdk-go-v2/service/directconnect v1.30.1 h1:U2VtqwmOzP7sZYWmrnapl3j3KLxIntWyK0RU3uGBIPk=

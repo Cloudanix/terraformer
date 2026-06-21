@@ -427,6 +427,7 @@ require (
 require (
 	github.com/IBM/continuous-delivery-go-sdk/v2 v2.0.2
 	github.com/aws/aws-sdk-go v1.44.122
+	github.com/aws/aws-sdk-go-v2/service/dax v1.30.2
 	github.com/aws/aws-sdk-go-v2/service/directconnect v1.30.1
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4

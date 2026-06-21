@@ -110,6 +110,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_customer_gateway`
 *   `datapipeline`
     * `aws_datapipeline_pipeline`
+*   `dax`
+    * `aws_dax_cluster`
 *   `devicefarm`
     * `aws_devicefarm_project`
 *   `dlm`
