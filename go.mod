@@ -434,6 +434,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/directconnect v1.30.1
 	github.com/aws/aws-sdk-go-v2/service/directoryservice v1.39.4
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
+	github.com/aws/aws-sdk-go-v2/service/fsx v1.66.6
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6

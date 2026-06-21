@@ -197,6 +197,15 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_elasticsearch_domain`
 *   `firehose`
     * `aws_kinesis_firehose_delivery_stream`
+*   `fsx`
+    * `aws_fsx_windows_file_system`
+    * `aws_fsx_lustre_file_system`
+    * `aws_fsx_ontap_file_system`
+    * `aws_fsx_openzfs_file_system`
+    * `aws_fsx_backup`
+    * `aws_fsx_ontap_storage_virtual_machine`
+    * `aws_fsx_ontap_volume`
+    * `aws_fsx_openzfs_volume`
 *   `glacier`
     * `aws_glacier_vault`
 *   `glue`

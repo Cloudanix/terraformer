@@ -500,6 +500,8 @@ github.com/aws/aws-sdk-go-v2/service/emr v1.49.0 h1:iyNarFKc6R5kDCUGkBD7bBVYuIU1
 github.com/aws/aws-sdk-go-v2/service/emr v1.49.0/go.mod h1:mPh07TO8BmyIzp9VkTf6CI8NoC73iSnP//oSa+PNZQg=
 github.com/aws/aws-sdk-go-v2/service/firehose v1.22.5 h1:c9bCovMv4xhzuTab5LjN11E4jZz04SRqqpHcw3+WGWI=
 github.com/aws/aws-sdk-go-v2/service/firehose v1.22.5/go.mod h1:fI1Diyj3ls4HjwKVx1zX9/qQIORnF9skk5bzRydNbjs=
+github.com/aws/aws-sdk-go-v2/service/fsx v1.66.6 h1:iP9fvRdFULWS+fLYKwMem7hMdk8AWRnpAQI9P6Vl0jk=
+github.com/aws/aws-sdk-go-v2/service/fsx v1.66.6/go.mod h1:Pl2Bw0pmF0O3XDMhAb5dKae6aY6yQC4kjLnMNmaZJ6g=
 github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4 h1:V0+Qt6LrMLx+u8yb3TKnlCNA4Z9QvHrEtr2rg7HjU9o=
 github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4/go.mod h1:PBcxr4Qs2OQf9UaI3qRxeUZ4+HTcFkodhSmpTe7Xa6M=
 github.com/aws/aws-sdk-go-v2/service/glue v1.72.4 h1:4zoqdS+svLp0a83g7YsYRR/9cNdDlL2nWyshNsDUSe4=
