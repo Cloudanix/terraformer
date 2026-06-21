@@ -57,6 +57,7 @@ var serviceScope = map[string]regionScope{
 	"api_gatewayv2":     scopeRegional,
 	"appsync":           scopeRegional,
 	"auto_scaling":      scopeRegional,
+	"backup":            scopeRegional,
 	"batch":             scopeRegional,
 	"cloud9":            scopeRegional,
 	"cloudformation":    scopeRegional,

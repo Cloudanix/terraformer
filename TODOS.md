@@ -4,6 +4,36 @@ Deferred work captured during reviews. Each entry: What / Why / Context / Depend
 
 ---
 
+## T4 — Add a fixed-region scope and the globalaccelerator service
+
+**What:** Support AWS services whose control plane lives in a single fixed
+region that is neither us-east-1 nor "global" — starting with
+`globalaccelerator` (us-west-2 only), and emit `aws_globalaccelerator_accelerator`
+(+ listener/endpoint_group).
+
+**Why:** terraformer's region model only has regional / global (aws-global pass)
+/ eastOnly (us-east-1 pass) — see `serviceScope` (providers/aws/scope.go) and
+`SupportedGlobalResources` / `SupportedEastOnlyResources` (aws_provider.go).
+Global Accelerator's API only answers in **us-west-2**; marking it regional
+fails in every other region, and eastOnly hits the wrong region. The same
+pattern will recur for `route53-recovery-*` and `cur` (us-east-1, already an
+eastOnly case) — so a general "fixed region" binding is worth doing once.
+
+**Context:** The region passes are driven in `cmd/provider_cmd_aws.go`
+(`parseAndGroupResources` → global/eastOnly/regional groups, each a separate
+`Import()` pass). Adding a fixed-region binding means: (1) a new `scopeFixed`
+(or a `serviceScope` variant carrying a region string), (2) a new group +
+pass in provider_cmd_aws.go that pins the region, (3) the scope_test.go
+assertion updated to cover it. Once the machinery exists, the generator itself
+is trivial (ListAccelerators paginator, ARN import ID). The SDK module
+`github.com/aws/aws-sdk-go-v2/service/globalaccelerator` is already fetched.
+
+**Depends on / blocked by:** Touches the core region-pass machinery in
+cmd/provider_cmd_aws.go + scope.go; do it as its own change, not folded into a
+single-service PR. Deferred from the P1 batch (2026-06-21) for this reason.
+
+---
+
 ## T2 — Stream resources to disk per service (bound memory)
 
 **What:** Free each service's resources from memory after its files are written,

@@ -65,6 +65,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_autoscaling_group`
     * `aws_launch_configuration`
     * `aws_launch_template`
+*   `backup`
+    * `aws_backup_vault`
+    * `aws_backup_plan`
+    * `aws_backup_selection`
+    * `aws_backup_framework`
+    * `aws_backup_report_plan`
+    * `aws_backup_restore_testing_plan`
 *   `batch`
     * `aws_batch_compute_environment`
     * `aws_batch_job_definition`
