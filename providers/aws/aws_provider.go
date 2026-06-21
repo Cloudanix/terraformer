@@ -319,6 +319,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"sqs":               &AwsFacade{service: &SqsGenerator{}},
 		"sns":               &AwsFacade{service: &SnsGenerator{}},
 		"ssm":               &AwsFacade{service: &SsmGenerator{}},
+		"storagegateway":    &AwsFacade{service: &StorageGatewayGenerator{}},
 		"subnet":            &AwsFacade{service: &SubnetGenerator{}},
 		"swf":               &AwsFacade{service: &SWFGenerator{}},
 		"transfer":          &AwsFacade{service: &TransferGenerator{}},

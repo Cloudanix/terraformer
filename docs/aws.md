@@ -306,6 +306,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sqs_queue`
 *   `ssm`
     * `aws_ssm_parameter`
+*   `storagegateway`
+    * `aws_storagegateway_gateway`
 *   `subnet`
     * `aws_subnet`
 *   `swf`
