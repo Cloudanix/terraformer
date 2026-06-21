@@ -165,6 +165,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_elasticsearch_domain`
 *   `firehose`
     * `aws_kinesis_firehose_delivery_stream`
+*   `glacier`
+    * `aws_glacier_vault`
 *   `glue`
     * `aws_glue_crawler`
     * `aws_glue_catalog_database`

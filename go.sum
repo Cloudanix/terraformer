@@ -406,8 +406,8 @@ github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.29 h1:RdwIf/CuUsvJX3RgJa
 github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.29/go.mod h1:71wt8W2EgswdZy9Mf9KNnzxZ3TiZlv4caKghPktDOkA=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.7.2 h1:GrSw8s0Gs/5zZ0SX+gX4zQjRnRsMJDJ2sLur1gRBhEM=
 github.com/aws/aws-sdk-go-v2/internal/ini v1.7.2/go.mod h1:6fQQgfuGmw8Al/3M2IgIllycxV7ZW7WCdVSqfBeUiCY=
-github.com/aws/aws-sdk-go-v2/internal/v4a v1.2.9 h1:ugD6qzjYtB7zM5PN/ZIeaAIyefPaD82G8+SJopgvUpw=
-github.com/aws/aws-sdk-go-v2/internal/v4a v1.2.9/go.mod h1:YD0aYBWCrPENpHolhKw2XDlTIWae2GKXT1T4o6N6hiM=
+github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.30 h1:VTGy885W5DKBxWRUJbym9hytNaYzsyaPkCHGRRMAOhU=
+github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.30/go.mod h1:AS0HycUvJRFvTt613AYDOgO2jzw+00cVSMny8XB3yMY=
 github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.26.5 h1:UdqJHYgBmOYhVA1ixaECd4MTS7EoqWdDeP87YuDauB0=
 github.com/aws/aws-sdk-go-v2/service/accessanalyzer v1.26.5/go.mod h1:grUsKCGlUQ80qedCiWN8LMlqmm97v81jr/sM1GXBjfg=
 github.com/aws/aws-sdk-go-v2/service/acm v1.22.5 h1:GNTWQH4PWazAsb3VXePxGKwzi7OiU8AedMajRJoQEQ8=
@@ -490,6 +490,8 @@ github.com/aws/aws-sdk-go-v2/service/emr v1.49.0 h1:iyNarFKc6R5kDCUGkBD7bBVYuIU1
 github.com/aws/aws-sdk-go-v2/service/emr v1.49.0/go.mod h1:mPh07TO8BmyIzp9VkTf6CI8NoC73iSnP//oSa+PNZQg=
 github.com/aws/aws-sdk-go-v2/service/firehose v1.22.5 h1:c9bCovMv4xhzuTab5LjN11E4jZz04SRqqpHcw3+WGWI=
 github.com/aws/aws-sdk-go-v2/service/firehose v1.22.5/go.mod h1:fI1Diyj3ls4HjwKVx1zX9/qQIORnF9skk5bzRydNbjs=
+github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4 h1:V0+Qt6LrMLx+u8yb3TKnlCNA4Z9QvHrEtr2rg7HjU9o=
+github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4/go.mod h1:PBcxr4Qs2OQf9UaI3qRxeUZ4+HTcFkodhSmpTe7Xa6M=
 github.com/aws/aws-sdk-go-v2/service/glue v1.72.4 h1:4zoqdS+svLp0a83g7YsYRR/9cNdDlL2nWyshNsDUSe4=
 github.com/aws/aws-sdk-go-v2/service/glue v1.72.4/go.mod h1:ALQEuXs/XUdwrkAucRl3juNFbiomoaPICShOoGzHNiE=
 github.com/aws/aws-sdk-go-v2/service/iam v1.28.5 h1:Ts2eDDuMLrrmd0ARlg5zSoBQUvhdthgiNnPdiykTJs0=
