@@ -34,6 +34,35 @@ single-service PR. Deferred from the P1 batch (2026-06-21) for this reason.
 
 ---
 
+## T5 — Implement servicequotas with a non-default filter
+
+**What:** Add a `servicequotas` generator emitting `aws_servicequotas_service_quota`
+— but only for quotas that have actually been changed, not the thousands of
+untouched defaults.
+
+**Why:** `ListServiceQuotas` returns every quota for every service. A naive
+"comprehensive" import = ListServices → ListServiceQuotas per service (N+1 API
+explosion) and thousands of `aws_servicequotas_service_quota` resources that are
+just AWS defaults — noise, not managed infrastructure. Deferred from the P1
+batch (2026-06-21) because it needs a filtering design, unlike the other
+services.
+
+**Context:** SDK module `github.com/aws/aws-sdk-go-v2/service/servicequotas` is
+already fetched. The import ID for aws_servicequotas_service_quota is
+"<service-code>/<quota-code>". Filtering approaches to evaluate: (a)
+`ListRequestedServiceQuotaChangeHistory` to find quotas the account has
+requested changes for; (b) compare each quota's `Value` against
+`GetAWSDefaultServiceQuota` and emit only where they differ (extra API call per
+quota); (c) only emit quotas where `Adjustable` && a change request exists.
+Option (a) is likely the cheapest signal for "quotas the user manages". Follow
+the standard recipe (generator + registry + serviceScope regional entry + docs)
+once the filter is decided.
+
+**Depends on / blocked by:** None technical — just the filtering-policy
+decision. Independent of the region-machinery work in T4.
+
+---
+
 ## T2 — Stream resources to disk per service (bound memory)
 
 **What:** Free each service's resources from memory after its files are written,
