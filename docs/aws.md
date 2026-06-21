@@ -121,6 +121,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_docdb_cluster_instance`
     * `aws_docdb_cluster_parameter_group`
     * `aws_docdb_subnet_group`
+*   `ds`
+    * `aws_directory_service_directory`
 *   `dynamodb`
     * `aws_dynamodb_table`
 *   `ebs`

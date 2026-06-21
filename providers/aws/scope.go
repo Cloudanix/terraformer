@@ -75,6 +75,7 @@ var serviceScope = map[string]regionScope{
 	"devicefarm":        scopeRegional,
 	"dlm":               scopeRegional,
 	"docdb":             scopeRegional,
+	"ds":                scopeRegional,
 	"dx":                scopeRegional,
 	"dynamodb":          scopeRegional,
 	"ebs":               scopeRegional,
