@@ -117,6 +117,20 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_customer_gateway`
 *   `datapipeline`
     * `aws_datapipeline_pipeline`
+*   `datasync`
+    * `aws_datasync_task`
+    * `aws_datasync_agent`
+    * `aws_datasync_location_s3`
+    * `aws_datasync_location_nfs`
+    * `aws_datasync_location_smb`
+    * `aws_datasync_location_efs`
+    * `aws_datasync_location_hdfs`
+    * `aws_datasync_location_object_storage`
+    * `aws_datasync_location_azure_blob`
+    * `aws_datasync_location_fsx_windows_file_system`
+    * `aws_datasync_location_fsx_lustre_file_system`
+    * `aws_datasync_location_fsx_openzfs_file_system`
+    * `aws_datasync_location_fsx_ontap_file_system`
 *   `dax`
     * `aws_dax_cluster`
 *   `devicefarm`
