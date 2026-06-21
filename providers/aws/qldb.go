@@ -17,11 +17,9 @@ package aws
 import (
 	"context"
 
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/qldb"
+	"github.com/aws/aws-sdk-go-v2/service/qldb/types"
 )
-
-var qldbAllowEmptyValues = []string{"tags."}
 
 type QLDBGenerator struct {
 	AWSService
@@ -34,22 +32,15 @@ func (g *QLDBGenerator) InitResources() error {
 	}
 	svc := qldb.NewFromConfig(config)
 	p := qldb.NewListLedgersPaginator(svc, &qldb.ListLedgersInput{})
-	var resources []terraformutils.Resource
 	for p.HasMorePages() {
 		page, err := p.NextPage(context.TODO())
 		if err != nil {
 			return err
 		}
-		for _, ledger := range page.Ledgers {
-			ledgerName := StringValue(ledger.Name)
-			resources = append(resources, terraformutils.NewSimpleResource(
-				ledgerName,
-				ledgerName,
-				"aws_qldb_ledger",
-				"aws",
-				qldbAllowEmptyValues))
-		}
+		g.Resources = appendSimpleResources(g.Resources, page.Ledgers, "aws_qldb_ledger",
+			defaultAllowEmptyValues,
+			func(l types.LedgerSummary) string { return StringValue(l.Name) },
+			func(l types.LedgerSummary) string { return StringValue(l.Name) })
 	}
-	g.Resources = resources
 	return nil
 }
