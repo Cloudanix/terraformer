@@ -115,6 +115,7 @@ var serviceScope = map[string]regionScope{
 	"rds":               scopeRegional,
 	"redshift":          scopeRegional,
 	"resourcegroups":    scopeRegional,
+	"route53resolver":   scopeRegional,
 	"route_table":       scopeRegional,
 	"s3":                scopeRegional,
 	"secretsmanager":    scopeRegional,
