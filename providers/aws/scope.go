@@ -121,6 +121,7 @@ var serviceScope = map[string]regionScope{
 	"secretsmanager":    scopeRegional,
 	"securityhub":       scopeRegional,
 	"servicecatalog":    scopeRegional,
+	"servicediscovery":  scopeRegional,
 	"ses":               scopeRegional,
 	"sesv2":             scopeRegional,
 	"sfn":               scopeRegional,

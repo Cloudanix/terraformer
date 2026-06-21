@@ -435,6 +435,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
+	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.62.4
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
