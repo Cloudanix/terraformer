@@ -123,6 +123,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_devicefarm_project`
 *   `dlm`
     * `aws_dlm_lifecycle_policy`
+*   `dms`
+    * `aws_dms_replication_instance`
+    * `aws_dms_endpoint`
+    * `aws_dms_replication_task`
+    * `aws_dms_replication_subnet_group`
+    * `aws_dms_certificate`
+    * `aws_dms_event_subscription`
 *   `docdb`
     * `aws_docdb_cluster`
     * `aws_docdb_cluster_instance`

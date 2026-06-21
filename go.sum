@@ -454,6 +454,8 @@ github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.31.5 h1:7NweDhxX
 github.com/aws/aws-sdk-go-v2/service/cognitoidentityprovider v1.31.5/go.mod h1:Rtaozi1JFmyQgaxIdXYdvXBsVmk8Yv0wd3krebIR8FA=
 github.com/aws/aws-sdk-go-v2/service/configservice v1.43.5 h1:EZb5NJxZf20Tx4/yWkwqAGjY/iXr3Gkpgm6bCaeX5Hw=
 github.com/aws/aws-sdk-go-v2/service/configservice v1.43.5/go.mod h1:v3tquqvNb80onGXFvY1b12PaSLe4j3d1TG4HO4KsbG4=
+github.com/aws/aws-sdk-go-v2/service/databasemigrationservice v1.64.4 h1:GVdxO3vnct2qAnCmat2bmF0vHugzwk0Rspa9lAl4v/I=
+github.com/aws/aws-sdk-go-v2/service/databasemigrationservice v1.64.4/go.mod h1:faSpUFUvYfwdQRo+O6HqnM45xp25nVwBLQ6Ci2Mrkr8=
 github.com/aws/aws-sdk-go-v2/service/datapipeline v1.19.5 h1:zkIKbco/gM4fmbU90ajz4ah3ErgAgot7aTE0PpIxNuE=
 github.com/aws/aws-sdk-go-v2/service/datapipeline v1.19.5/go.mod h1:+G+TF84SIgMdGDjZKKYPpx6LwXSN4QcywQGa8e2vJ1U=
 github.com/aws/aws-sdk-go-v2/service/dax v1.30.2 h1:4+h9xIQyCF8FsC3qPlM5I9gzADHDfxvp+R+9cP1etYI=
