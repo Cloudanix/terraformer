@@ -212,6 +212,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_fsx_openzfs_volume`
 *   `glacier`
     * `aws_glacier_vault`
+*   `globalaccelerator`
+    * `aws_globalaccelerator_accelerator`
+    * `aws_globalaccelerator_listener`
+    * `aws_globalaccelerator_endpoint_group`
+    * `aws_globalaccelerator_custom_routing_accelerator`
 *   `glue`
     * `aws_glue_crawler`
     * `aws_glue_catalog_database`
