@@ -291,6 +291,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ses_receipt_rule`
     * `aws_ses_receipt_rule_set`
     * `aws_ses_template`
+*   `sesv2`
+    * `aws_sesv2_email_identity`
 *   `sfn`
     * `aws_sfn_activity`
     * `aws_sfn_state_machine`
