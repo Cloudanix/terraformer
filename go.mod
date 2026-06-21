@@ -431,6 +431,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/directconnect v1.30.1
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4
+	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
 	github.com/gofrs/uuid/v3 v3.1.2
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.0.0

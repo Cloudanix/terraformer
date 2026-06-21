@@ -306,6 +306,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_subnet`
 *   `swf`
     * `aws_swf_domain`
+*   `transfer`
+    * `aws_transfer_server`
 *   `transit_gateway`
     * `aws_ec2_transit_gateway_route_table`
     * `aws_ec2_transit_gateway_vpc_attachment`

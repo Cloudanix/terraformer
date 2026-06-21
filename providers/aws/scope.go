@@ -125,6 +125,7 @@ var serviceScope = map[string]regionScope{
 	"ssm":               scopeRegional,
 	"subnet":            scopeRegional,
 	"swf":               scopeRegional,
+	"transfer":          scopeRegional,
 	"transit_gateway":   scopeRegional,
 	"vpc":               scopeRegional,
 	"vpc_endpoint":      scopeRegional,
