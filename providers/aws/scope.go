@@ -132,6 +132,7 @@ var serviceScope = map[string]regionScope{
 	"sg":                      scopeRegional,
 	"sns":                     scopeRegional,
 	"sqs":                     scopeRegional,
+	"sso-admin":               scopeRegional,
 	"ssm":                     scopeRegional,
 	"storagegateway":          scopeRegional,
 	"subnet":                  scopeRegional,

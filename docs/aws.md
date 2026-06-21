@@ -366,6 +366,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sns_topic_subscription`
 *   `sqs`
     * `aws_sqs_queue`
+*   `sso-admin`
+    * `aws_ssoadmin_permission_set`
+    * `aws_ssoadmin_managed_policy_attachment`
 *   `ssm`
     * `aws_ssm_parameter`
 *   `storagegateway`
