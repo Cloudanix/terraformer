@@ -72,6 +72,7 @@ var serviceScope = map[string]regionScope{
 	"customer_gateway":  scopeRegional,
 	"datapipeline":      scopeRegional,
 	"devicefarm":        scopeRegional,
+	"dlm":               scopeRegional,
 	"docdb":             scopeRegional,
 	"dx":                scopeRegional,
 	"dynamodb":          scopeRegional,

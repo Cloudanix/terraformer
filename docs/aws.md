@@ -112,6 +112,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_datapipeline_pipeline`
 *   `devicefarm`
     * `aws_devicefarm_project`
+*   `dlm`
+    * `aws_dlm_lifecycle_policy`
 *   `docdb`
     * `aws_docdb_cluster`
     * `aws_docdb_cluster_instance`
