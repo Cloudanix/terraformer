@@ -59,6 +59,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_api_gateway_stage`
     * `aws_api_gateway_usage_plan`
     * `aws_api_gateway_vpc_link`
+*   `application-autoscaling`
+    * `aws_appautoscaling_target`
+    * `aws_appautoscaling_policy`
+    * `aws_appautoscaling_scheduled_action`
 *   `appsync`
     * `aws_appsync_graphql_api`
 *   `auto_scaling`
