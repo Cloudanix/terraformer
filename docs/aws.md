@@ -454,7 +454,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_directory_service_radius_settings`
 *   `dx`
     * `aws_dx_connection`
+    * `aws_dx_connection_association`
     * `aws_dx_gateway`
+    * `aws_dx_gateway_association`
+    * `aws_dx_gateway_association_proposal`
     * `aws_dx_private_virtual_interface`
     * `aws_dx_public_virtual_interface`
     * `aws_dx_transit_virtual_interface`

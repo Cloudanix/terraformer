@@ -329,7 +329,10 @@ aws_docdb_global_cluster
 aws_docdb_subnet_group
 aws_docdbelastic_cluster
 aws_dx_connection
+aws_dx_connection_association
 aws_dx_gateway
+aws_dx_gateway_association
+aws_dx_gateway_association_proposal
 aws_dx_lag
 aws_dx_private_virtual_interface
 aws_dx_public_virtual_interface

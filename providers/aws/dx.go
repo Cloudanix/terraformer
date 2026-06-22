@@ -40,13 +40,28 @@ func (g *DirectConnectGenerator) getDirectConnectGateways(svc *directconnect.Cli
 
 		// Process each DirectConnect Gateway
 		for _, dx := range output.DirectConnectGateways {
+			gwID := StringValue(dx.DirectConnectGatewayId)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				*dx.DirectConnectGatewayId, // Dereference the pointer
-				*dx.DirectConnectGatewayId,
+				gwID,
+				gwID,
 				"aws_dx_gateway",
 				"aws",
 				dxAllowEmptyValues,
 			))
+			if assocs, err := svc.DescribeDirectConnectGatewayAssociations(context.TODO(),
+				&directconnect.DescribeDirectConnectGatewayAssociationsInput{DirectConnectGatewayId: dx.DirectConnectGatewayId}); err == nil {
+				for _, a := range assocs.DirectConnectGatewayAssociations {
+					if a.AssociatedGateway == nil {
+						continue
+					}
+					assocGwID := StringValue(a.AssociatedGateway.Id)
+					if assocGwID == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						gwID+"/"+assocGwID, gwID+"_"+assocGwID, "aws_dx_gateway_association", "aws", dxAllowEmptyValues))
+				}
+			}
 		}
 
 		// Check if there are more pages
@@ -68,13 +83,41 @@ func (g *DirectConnectGenerator) getDirectConnectConnections(svc *directconnect.
 	}
 
 	for _, dx := range output.Connections {
+		connID := StringValue(dx.ConnectionId)
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-			*dx.ConnectionId, // Dereference the pointer
+			connID,
 			*dx.ConnectionName,
 			"aws_dx_connection",
 			"aws",
 			dxAllowEmptyValues,
 		))
+		if lagID := StringValue(dx.LagId); lagID != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				connID+"/"+lagID, connID+"_"+lagID, "aws_dx_connection_association", "aws", dxAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *DirectConnectGenerator) getGatewayAssociationProposals(svc *directconnect.Client) error {
+	input := &directconnect.DescribeDirectConnectGatewayAssociationProposalsInput{}
+	for {
+		output, err := svc.DescribeDirectConnectGatewayAssociationProposals(context.TODO(), input)
+		if err != nil {
+			return err
+		}
+		for _, p := range output.DirectConnectGatewayAssociationProposals {
+			id := StringValue(p.ProposalId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_dx_gateway_association_proposal", "aws", dxAllowEmptyValues))
+		}
+		if output.NextToken == nil {
+			break
+		}
+		input.NextToken = output.NextToken
 	}
 	return nil
 }
@@ -136,6 +179,10 @@ func (g *DirectConnectGenerator) InitResources() error {
 	}
 
 	if err := g.getDirectConnectLags(svc); err != nil {
+		log.Println(err)
+	}
+
+	if err := g.getGatewayAssociationProposals(svc); err != nil {
 		log.Println(err)
 	}
 
