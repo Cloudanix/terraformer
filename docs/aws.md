@@ -741,6 +741,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lightsail_lb_certificate`
 *   `m2`
     * `aws_m2_application`
+    * `aws_m2_environment`
+    * `aws_m2_deployment`
 *   `keyspaces`
     * `aws_keyspaces_keyspace`
 *   `kinesis`

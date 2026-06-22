@@ -35,9 +35,10 @@ func (g *M2Generator) InitResources() error {
 	}
 	svc := m2.NewFromConfig(config)
 
+	ctx := context.TODO()
 	p := m2.NewListApplicationsPaginator(svc, &m2.ListApplicationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -48,6 +49,36 @@ func (g *M2Generator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(app.Name), "aws_m2_application", "aws", defaultAllowEmptyValues))
+			appID := id
+			for dp := m2.NewListDeploymentsPaginator(svc, &m2.ListDeploymentsInput{ApplicationId: &appID}); dp.HasMorePages(); {
+				dpage, err := dp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, d := range dpage.Deployments {
+					did := StringValue(d.DeploymentId)
+					if did == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						did+","+appID, appID+"_"+did, "aws_m2_deployment", "aws", defaultAllowEmptyValues))
+				}
+			}
+		}
+	}
+
+	for ep := m2.NewListEnvironmentsPaginator(svc, &m2.ListEnvironmentsInput{}); ep.HasMorePages(); {
+		page, err := ep.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, e := range page.Environments {
+			id := StringValue(e.EnvironmentId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(e.Name), "aws_m2_environment", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
