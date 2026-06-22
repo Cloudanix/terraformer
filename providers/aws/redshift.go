@@ -51,6 +51,12 @@ func (g *RedshiftGenerator) loadClusters(svc *redshift.Client, accountID string)
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					resourceName, resourceName, "aws_redshift_cluster_iam_roles", "aws", RedshiftAllowEmptyValues))
 			}
+			if nsArn := StringValue(db.ClusterNamespaceArn); nsArn != "" {
+				if _, err := svc.GetResourcePolicy(context.TODO(), &redshift.GetResourcePolicyInput{ResourceArn: &nsArn}); err == nil {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						nsArn, resourceName, "aws_redshift_resource_policy", "aws", RedshiftAllowEmptyValues))
+				}
+			}
 			if partners, err := svc.DescribePartners(context.TODO(), &redshift.DescribePartnersInput{
 				AccountId: &accountID, ClusterIdentifier: db.ClusterIdentifier}); err == nil {
 				for _, pt := range partners.PartnerIntegrationInfoList {

@@ -859,6 +859,7 @@ aws_redshift_hsm_configuration
 aws_redshift_logging
 aws_redshift_parameter_group
 aws_redshift_partner
+aws_redshift_resource_policy
 aws_redshift_scheduled_action
 aws_redshift_snapshot_copy
 aws_redshift_snapshot_copy_grant
