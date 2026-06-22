@@ -242,6 +242,22 @@ func (Route53Generator) createCidrCollectionResources(svc *route53.Client) []ter
 			}
 			resources = append(resources, terraformutils.NewSimpleResource(
 				id, StringValue(c.Name), "aws_route53_cidr_collection", "aws", route53AllowEmptyValues))
+
+			collectionID := id
+			for lp := route53.NewListCidrLocationsPaginator(svc, &route53.ListCidrLocationsInput{CollectionId: &collectionID}); lp.HasMorePages(); {
+				lpage, err := lp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, loc := range lpage.CidrLocations {
+					name := StringValue(loc.LocationName)
+					if name == "" {
+						continue
+					}
+					resources = append(resources, terraformutils.NewSimpleResource(
+						collectionID+","+name, collectionID+"_"+name, "aws_route53_cidr_location", "aws", route53AllowEmptyValues))
+				}
+			}
 		}
 	}
 	return resources
