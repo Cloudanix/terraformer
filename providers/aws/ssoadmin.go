@@ -106,6 +106,38 @@ func (g *SSOAdminGenerator) InitResources() error {
 				}
 			}
 		}
+
+		apps := ssoadmin.NewListApplicationsPaginator(svc, &ssoadmin.ListApplicationsInput{InstanceArn: aws.String(instanceArn)})
+		for apps.HasMorePages() {
+			page, err := apps.NextPage(ctx)
+			if err != nil {
+				return err
+			}
+			for _, app := range page.Applications {
+				arn := StringValue(app.ApplicationArn)
+				if arn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, StringValue(app.Name), "aws_ssoadmin_application", "aws", defaultAllowEmptyValues))
+			}
+		}
+
+		issuers := ssoadmin.NewListTrustedTokenIssuersPaginator(svc, &ssoadmin.ListTrustedTokenIssuersInput{InstanceArn: aws.String(instanceArn)})
+		for issuers.HasMorePages() {
+			page, err := issuers.NextPage(ctx)
+			if err != nil {
+				return err
+			}
+			for _, issuer := range page.TrustedTokenIssuers {
+				arn := StringValue(issuer.TrustedTokenIssuerArn)
+				if arn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, StringValue(issuer.Name), "aws_ssoadmin_trusted_token_issuer", "aws", defaultAllowEmptyValues))
+			}
+		}
 	}
 
 	return nil
