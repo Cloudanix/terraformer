@@ -47,7 +47,32 @@ func (g *GrafanaGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(ws.Name), "aws_grafana_workspace", "aws", defaultAllowEmptyValues))
+			g.loadWorkspaceChildren(svc, id)
 		}
 	}
 	return nil
+}
+
+// loadWorkspaceChildren enumerates a workspace's SAML config and service accounts.
+func (g *GrafanaGenerator) loadWorkspaceChildren(svc *grafana.Client, workspaceID string) {
+	ctx := context.TODO()
+	if auth, err := svc.DescribeWorkspaceAuthentication(ctx, &grafana.DescribeWorkspaceAuthenticationInput{WorkspaceId: &workspaceID}); err == nil &&
+		auth.Authentication != nil && auth.Authentication.Saml != nil {
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			workspaceID, workspaceID, "aws_grafana_workspace_saml_configuration", "aws", defaultAllowEmptyValues))
+	}
+	for p := grafana.NewListWorkspaceServiceAccountsPaginator(svc, &grafana.ListWorkspaceServiceAccountsInput{WorkspaceId: &workspaceID}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, sa := range page.ServiceAccounts {
+			said := StringValue(sa.Id)
+			if said == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				workspaceID+"/"+said, workspaceID+"_"+said, "aws_grafana_workspace_service_account", "aws", defaultAllowEmptyValues))
+		}
+	}
 }
