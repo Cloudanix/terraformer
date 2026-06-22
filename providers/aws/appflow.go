@@ -49,5 +49,20 @@ func (g *AppFlowGenerator) InitResources() error {
 				name, name, "aws_appflow_flow", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for cp := appflow.NewDescribeConnectorProfilesPaginator(svc, &appflow.DescribeConnectorProfilesInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, profile := range page.ConnectorProfileDetails {
+			name := StringValue(profile.ConnectorProfileName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_appflow_connector_profile", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

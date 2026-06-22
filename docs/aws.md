@@ -164,6 +164,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appconfig_extension_association`
 *   `appflow`
     * `aws_appflow_flow`
+    * `aws_appflow_connector_profile`
 *   `appstream`
     * `aws_appstream_fleet`
     * `aws_appstream_stack`
@@ -185,6 +186,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_apprunner_vpc_ingress_connection`
 *   `appintegrations`
     * `aws_appintegrations_application`
+    * `aws_appintegrations_data_integration`
+    * `aws_appintegrations_event_integration`
 *   `appsync`
     * `aws_appsync_graphql_api`
     * `aws_appsync_datasource`

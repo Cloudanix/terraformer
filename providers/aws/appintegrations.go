@@ -48,5 +48,35 @@ func (g *AppIntegrationsGenerator) InitResources() error {
 				arn, StringValue(app.Name), "aws_appintegrations_application", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	ctx := context.TODO()
+	for dp := appintegrations.NewListDataIntegrationsPaginator(svc, &appintegrations.ListDataIntegrationsInput{}); dp.HasMorePages(); {
+		page, err := dp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, d := range page.DataIntegrations {
+			name := StringValue(d.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_appintegrations_data_integration", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for ep := appintegrations.NewListEventIntegrationsPaginator(svc, &appintegrations.ListEventIntegrationsInput{}); ep.HasMorePages(); {
+		page, err := ep.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, e := range page.EventIntegrations {
+			name := StringValue(e.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_appintegrations_event_integration", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
