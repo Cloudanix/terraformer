@@ -73,7 +73,11 @@ func (g *AppRunnerGenerator) InitResources() error {
 			return err
 		}
 		for _, x := range page.AutoScalingConfigurationSummaryList {
-			add(StringValue(x.AutoScalingConfigurationArn), "aws_apprunner_auto_scaling_configuration_version")
+			arn := StringValue(x.AutoScalingConfigurationArn)
+			add(arn, "aws_apprunner_auto_scaling_configuration_version")
+			if x.IsDefault != nil && *x.IsDefault {
+				add(arn, "aws_apprunner_default_auto_scaling_configuration_version")
+			}
 		}
 	}
 	for v := apprunner.NewListVpcConnectorsPaginator(svc, &apprunner.ListVpcConnectorsInput{}); v.HasMorePages(); {
