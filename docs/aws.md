@@ -571,6 +571,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_glue_ml_transform`
     * `aws_glue_schema`
     * `aws_glue_classifier`
+    * `aws_glue_data_catalog_encryption_settings`
+    * `aws_glue_resource_policy`
     * `aws_glue_user_defined_function`
 *   `guardduty`
     * `aws_guardduty_detector`

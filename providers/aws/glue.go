@@ -210,6 +210,19 @@ func (g *GlueGenerator) InitResources() error {
 		}
 	}
 
+	// Account-level singletons keyed by catalog (account) ID.
+	catalogID := StringValue(account)
+	if catalogID != "" {
+		if _, err := svc.GetDataCatalogEncryptionSettings(context.TODO(), &glue.GetDataCatalogEncryptionSettingsInput{CatalogId: account}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				catalogID, catalogID, "aws_glue_data_catalog_encryption_settings", "aws", defaultAllowEmptyValues))
+		}
+		if pol, err := svc.GetResourcePolicy(context.TODO(), &glue.GetResourcePolicyInput{}); err == nil && StringValue(pol.PolicyInJson) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				catalogID, catalogID, "aws_glue_resource_policy", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 

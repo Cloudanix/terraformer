@@ -395,11 +395,13 @@ aws_glue_catalog_table
 aws_glue_classifier
 aws_glue_connection
 aws_glue_crawler
+aws_glue_data_catalog_encryption_settings
 aws_glue_data_quality_ruleset
 aws_glue_dev_endpoint
 aws_glue_job
 aws_glue_ml_transform
 aws_glue_registry
+aws_glue_resource_policy
 aws_glue_schema
 aws_glue_security_configuration
 aws_glue_trigger
