@@ -193,6 +193,21 @@ func (g *QuickSightGenerator) InitResources() error {
 				}
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					accountID+"/"+namespace+"/"+name, name, "aws_quicksight_group", "aws", defaultAllowEmptyValues))
+				groupName := name
+				for mp := quicksight.NewListGroupMembershipsPaginator(svc, &quicksight.ListGroupMembershipsInput{AwsAccountId: aws.String(accountID), Namespace: &namespace, GroupName: &groupName}); mp.HasMorePages(); {
+					mpage, err := mp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, m := range mpage.GroupMemberList {
+						member := StringValue(m.MemberName)
+						if member == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							accountID+"/"+namespace+"/"+groupName+"/"+member, groupName+"_"+member, "aws_quicksight_group_membership", "aws", defaultAllowEmptyValues))
+					}
+				}
 			}
 		}
 		for up := quicksight.NewListUsersPaginator(svc, &quicksight.ListUsersInput{AwsAccountId: aws.String(accountID), Namespace: &namespace}); up.HasMorePages(); {
