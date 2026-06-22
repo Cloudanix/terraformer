@@ -307,7 +307,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codedeploy_deployment_config`
 *   `codeartifact`
     * `aws_codeartifact_domain`
+    * `aws_codeartifact_domain_permissions_policy`
     * `aws_codeartifact_repository`
+    * `aws_codeartifact_repository_permissions_policy`
 *   `codeguru-profiler`
     * `aws_codeguruprofiler_profiling_group`
 *   `codeguru-reviewer`
