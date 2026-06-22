@@ -66,6 +66,25 @@ func (g *CodeCommitGenerator) loadApprovalRuleTemplate(svc *codecommit.Client) e
 				"aws_codecommit_approval_rule_template",
 				"aws",
 				codecommitAllowEmptyValues))
+			tmpl := templateName
+			assocInput := &codecommit.ListRepositoriesForApprovalRuleTemplateInput{ApprovalRuleTemplateName: &tmpl}
+			for {
+				out, err := svc.ListRepositoriesForApprovalRuleTemplate(context.TODO(), assocInput)
+				if err != nil {
+					break
+				}
+				for _, repoName := range out.RepositoryNames {
+					if repoName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						tmpl+","+repoName, tmpl+"_"+repoName, "aws_codecommit_approval_rule_template_association", "aws", codecommitAllowEmptyValues))
+				}
+				if out.NextToken == nil {
+					break
+				}
+				assocInput.NextToken = out.NextToken
+			}
 		}
 	}
 	return nil

@@ -309,6 +309,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `codecommit`
     * `aws_codecommit_repository`
     * `aws_codecommit_trigger`
+    * `aws_codecommit_approval_rule_template`
+    * `aws_codecommit_approval_rule_template_association`
 *   `codedeploy`
     * `aws_codedeploy_app`
     * `aws_codedeploy_deployment_group`
