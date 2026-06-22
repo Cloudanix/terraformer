@@ -19,6 +19,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
+	"github.com/aws/aws-sdk-go-v2/service/ses/types"
 )
 
 var sesAllowEmptyValues = []string{"tags."}
@@ -104,6 +105,19 @@ func (g *SesGenerator) loadDomainIdentities(svc *ses.Client) error {
 						identity, identity, "aws_ses_domain_mail_from", "aws", sesAllowEmptyValues))
 				}
 			}
+			if na, err := svc.GetIdentityNotificationAttributes(context.TODO(), &ses.GetIdentityNotificationAttributesInput{Identities: []string{identity}}); err == nil {
+				if a, ok := na.NotificationAttributes[identity]; ok {
+					for notifType, topic := range map[string]*string{
+						"Bounce": a.BounceTopic, "Complaint": a.ComplaintTopic, "Delivery": a.DeliveryTopic,
+					} {
+						if StringValue(topic) == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							identity+"|"+notifType, identity+"_"+notifType, "aws_ses_identity_notification_topic", "aws", sesAllowEmptyValues))
+					}
+				}
+			}
 		}
 	}
 	return nil
@@ -154,12 +168,28 @@ func (g *SesGenerator) loadConfigurationSets(svc *ses.Client) error {
 	}
 
 	for _, configurationSet := range configurationSets.ConfigurationSets {
+		setName := StringValue(configurationSet.Name)
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-			StringValue(configurationSet.Name),
-			StringValue(configurationSet.Name),
+			setName,
+			setName,
 			"aws_ses_configuration_set",
 			"aws",
 			sesAllowEmptyValues))
+		if desc, err := svc.DescribeConfigurationSet(context.TODO(), &ses.DescribeConfigurationSetInput{
+			ConfigurationSetName: configurationSet.Name,
+			ConfigurationSetAttributeNames: []types.ConfigurationSetAttribute{
+				types.ConfigurationSetAttributeEventDestinations,
+			},
+		}); err == nil {
+			for _, ed := range desc.EventDestinations {
+				name := StringValue(ed.Name)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					setName+"/"+name, setName+"_"+name, "aws_ses_event_destination", "aws", sesAllowEmptyValues))
+			}
+		}
 	}
 	return nil
 }

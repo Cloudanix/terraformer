@@ -1191,6 +1191,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ses_domain_mail_from`
     * `aws_ses_receipt_filter`
     * `aws_ses_active_receipt_rule_set`
+    * `aws_ses_event_destination`
+    * `aws_ses_identity_notification_topic`
 *   `sesv2`
     * `aws_sesv2_email_identity`
     * `aws_sesv2_email_identity_feedback_attributes`
