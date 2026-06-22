@@ -563,6 +563,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_imagebuilder_workflow`
 *   `ivs`
     * `aws_ivs_channel`
+    * `aws_ivs_playback_key_pair`
+    * `aws_ivs_recording_configuration`
 *   `iam`
     * `aws_iam_access_key`
     * `aws_iam_account_alias`

@@ -49,5 +49,35 @@ func (g *IVSGenerator) InitResources() error {
 				arn, StringValue(channel.Name), "aws_ivs_channel", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for kp := ivs.NewListPlaybackKeyPairsPaginator(svc, &ivs.ListPlaybackKeyPairsInput{}); kp.HasMorePages(); {
+		page, err := kp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, k := range page.KeyPairs {
+			arn := StringValue(k.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(k.Name), "aws_ivs_playback_key_pair", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for rc := ivs.NewListRecordingConfigurationsPaginator(svc, &ivs.ListRecordingConfigurationsInput{}); rc.HasMorePages(); {
+		page, err := rc.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, r := range page.RecordingConfigurations {
+			arn := StringValue(r.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(r.Name), "aws_ivs_recording_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
