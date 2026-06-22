@@ -72,6 +72,17 @@ func (g *SESv2Generator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_sesv2_configuration_set", "aws", defaultAllowEmptyValues))
+			setName := name
+			if dest, err := svc.GetConfigurationSetEventDestinations(context.TODO(), &sesv2.GetConfigurationSetEventDestinationsInput{ConfigurationSetName: &setName}); err == nil {
+				for _, ed := range dest.EventDestinations {
+					edName := StringValue(ed.Name)
+					if edName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						setName+"|"+edName, setName+"_"+edName, "aws_sesv2_configuration_set_event_destination", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
