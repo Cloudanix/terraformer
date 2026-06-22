@@ -905,6 +905,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_quicksight_theme`
     * `aws_quicksight_folder`
     * `aws_quicksight_vpc_connection`
+    * `aws_quicksight_namespace`
+    * `aws_quicksight_group`
+    * `aws_quicksight_user`
 *   `redshift-serverless`
     * `aws_redshiftserverless_namespace`
     * `aws_redshiftserverless_workgroup`

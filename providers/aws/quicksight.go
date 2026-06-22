@@ -135,5 +135,52 @@ func (g *QuickSightGenerator) InitResources() error {
 			add(StringValue(x.VPCConnectionId), "aws_quicksight_vpc_connection")
 		}
 	}
+
+	var namespaces []string
+	for p := quicksight.NewListNamespacesPaginator(svc, &quicksight.ListNamespacesInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.Namespaces {
+			name := StringValue(x.Name)
+			if name == "" {
+				continue
+			}
+			namespaces = append(namespaces, name)
+			add(name, "aws_quicksight_namespace")
+		}
+	}
+	for _, ns := range namespaces {
+		namespace := ns
+		for gp := quicksight.NewListGroupsPaginator(svc, &quicksight.ListGroupsInput{AwsAccountId: aws.String(accountID), Namespace: &namespace}); gp.HasMorePages(); {
+			page, err := gp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, grp := range page.GroupList {
+				name := StringValue(grp.GroupName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID+"/"+namespace+"/"+name, name, "aws_quicksight_group", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for up := quicksight.NewListUsersPaginator(svc, &quicksight.ListUsersInput{AwsAccountId: aws.String(accountID), Namespace: &namespace}); up.HasMorePages(); {
+			page, err := up.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, u := range page.UserList {
+				name := StringValue(u.UserName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID+"/"+namespace+"/"+name, name, "aws_quicksight_user", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
 	return nil
 }
