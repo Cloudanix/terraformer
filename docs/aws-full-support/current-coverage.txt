@@ -591,6 +591,7 @@ aws_lightsail_disk
 aws_lightsail_distribution
 aws_lightsail_domain
 aws_lightsail_instance
+aws_lightsail_instance_public_ports
 aws_lightsail_key_pair
 aws_lightsail_lb
 aws_lightsail_lb_certificate

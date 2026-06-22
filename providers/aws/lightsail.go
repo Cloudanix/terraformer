@@ -47,6 +47,9 @@ func (g *LightsailGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_lightsail_instance", "aws", defaultAllowEmptyValues))
+			// Port states are a singleton on the instance, imported by instance name.
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_lightsail_instance_public_ports", "aws", defaultAllowEmptyValues))
 		}
 		if out.NextPageToken == nil {
 			break
