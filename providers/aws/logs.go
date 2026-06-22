@@ -20,6 +20,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs"
+	cloudwatchlogstypes "github.com/aws/aws-sdk-go-v2/service/cloudwatchlogs/types"
 )
 
 var logsAllowEmptyValues = []string{"tags."}
@@ -110,6 +111,11 @@ func (g *LogsGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				group+"|"+name, group+"_"+name, "aws_cloudwatch_log_subscription_filter", "aws", logsAllowEmptyValues))
 		}
+		if dp, err := svc.GetDataProtectionPolicy(ctx, &cloudwatchlogs.GetDataProtectionPolicyInput{LogGroupIdentifier: &group}); err == nil &&
+			dp.PolicyDocument != nil && StringValue(dp.PolicyDocument) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				group, group, "aws_cloudwatch_log_data_protection_policy", "aws", logsAllowEmptyValues))
+		}
 	}
 
 	dests := cloudwatchlogs.NewDescribeDestinationsPaginator(svc, &cloudwatchlogs.DescribeDestinationsInput{})
@@ -125,6 +131,36 @@ func (g *LogsGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_cloudwatch_log_destination", "aws", logsAllowEmptyValues))
+			if StringValue(d.AccessPolicy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name, name, "aws_cloudwatch_log_destination_policy", "aws", logsAllowEmptyValues))
+			}
+		}
+	}
+
+	if rp, err := svc.DescribeResourcePolicies(ctx, &cloudwatchlogs.DescribeResourcePoliciesInput{}); err == nil {
+		for _, p := range rp.ResourcePolicies {
+			name := StringValue(p.PolicyName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_log_resource_policy", "aws", logsAllowEmptyValues))
+		}
+	}
+
+	for _, pt := range cloudwatchlogstypes.PolicyType("").Values() {
+		ap, err := svc.DescribeAccountPolicies(ctx, &cloudwatchlogs.DescribeAccountPoliciesInput{PolicyType: pt})
+		if err != nil {
+			continue
+		}
+		for _, p := range ap.AccountPolicies {
+			name := StringValue(p.PolicyName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name+":"+string(p.PolicyType), name, "aws_cloudwatch_log_account_policy", "aws", logsAllowEmptyValues))
 		}
 	}
 

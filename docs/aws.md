@@ -845,6 +845,10 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `logs`
     * `aws_cloudwatch_log_group`
     * `aws_cloudwatch_log_destination`
+    * `aws_cloudwatch_log_destination_policy`
+    * `aws_cloudwatch_log_data_protection_policy`
+    * `aws_cloudwatch_log_resource_policy`
+    * `aws_cloudwatch_log_account_policy`
     * `aws_cloudwatch_query_definition`
     * `aws_cloudwatch_log_metric_filter`
     * `aws_cloudwatch_log_subscription_filter`
