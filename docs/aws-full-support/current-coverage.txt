@@ -984,6 +984,7 @@ aws_shield_protection
 aws_shield_protection_group
 aws_shield_subscription
 aws_signer_signing_profile
+aws_signer_signing_profile_permission
 aws_sns_platform_application
 aws_sns_topic
 aws_sns_topic_subscription

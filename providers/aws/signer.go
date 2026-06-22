@@ -47,6 +47,17 @@ func (g *SignerGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_signer_signing_profile", "aws", defaultAllowEmptyValues))
+			profileName := name
+			if perms, err := svc.ListProfilePermissions(context.TODO(), &signer.ListProfilePermissionsInput{ProfileName: &profileName}); err == nil {
+				for _, perm := range perms.Permissions {
+					sid := StringValue(perm.StatementId)
+					if sid == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						profileName+"/"+sid, profileName+"_"+sid, "aws_signer_signing_profile_permission", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
