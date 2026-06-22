@@ -16,7 +16,9 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/connect"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -26,17 +28,21 @@ type ConnectGenerator struct {
 	AWSService
 }
 
-// InitResources enumerates Connect instances. Import ID is the instance id.
+// InitResources enumerates Connect instances and their per-instance children
+// (queues, routing profiles, contact flows, hours of operation, security
+// profiles, users). Child import IDs are "<instance-id>:<resource-id>".
 func (g *ConnectGenerator) InitResources() error {
 	config, e := g.generateConfig()
 	if e != nil {
 		return e
 	}
 	svc := connect.NewFromConfig(config)
+	ctx := context.TODO()
 
+	var instanceIDs []string
 	p := connect.NewListInstancesPaginator(svc, &connect.ListInstancesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,9 +51,80 @@ func (g *ConnectGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			instanceIDs = append(instanceIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(instance.InstanceAlias), "aws_connect_instance", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for _, instanceID := range instanceIDs {
+		g.loadConnectChildren(svc, instanceID)
+	}
 	return nil
+}
+
+func (g *ConnectGenerator) loadConnectChildren(svc *connect.Client, instanceID string) {
+	ctx := context.TODO()
+	add := func(childID, tfType string) {
+		if childID != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				fmt.Sprintf("%s:%s", instanceID, childID),
+				fmt.Sprintf("%s_%s", instanceID, childID),
+				tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+	for q := connect.NewListQueuesPaginator(svc, &connect.ListQueuesInput{InstanceId: aws.String(instanceID)}); q.HasMorePages(); {
+		page, err := q.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.QueueSummaryList {
+			add(StringValue(x.Id), "aws_connect_queue")
+		}
+	}
+	for r := connect.NewListRoutingProfilesPaginator(svc, &connect.ListRoutingProfilesInput{InstanceId: aws.String(instanceID)}); r.HasMorePages(); {
+		page, err := r.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.RoutingProfileSummaryList {
+			add(StringValue(x.Id), "aws_connect_routing_profile")
+		}
+	}
+	for c := connect.NewListContactFlowsPaginator(svc, &connect.ListContactFlowsInput{InstanceId: aws.String(instanceID)}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.ContactFlowSummaryList {
+			add(StringValue(x.Id), "aws_connect_contact_flow")
+		}
+	}
+	for h := connect.NewListHoursOfOperationsPaginator(svc, &connect.ListHoursOfOperationsInput{InstanceId: aws.String(instanceID)}); h.HasMorePages(); {
+		page, err := h.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.HoursOfOperationSummaryList {
+			add(StringValue(x.Id), "aws_connect_hours_of_operation")
+		}
+	}
+	for s := connect.NewListSecurityProfilesPaginator(svc, &connect.ListSecurityProfilesInput{InstanceId: aws.String(instanceID)}); s.HasMorePages(); {
+		page, err := s.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.SecurityProfileSummaryList {
+			add(StringValue(x.Id), "aws_connect_security_profile")
+		}
+	}
+	for u := connect.NewListUsersPaginator(svc, &connect.ListUsersInput{InstanceId: aws.String(instanceID)}); u.HasMorePages(); {
+		page, err := u.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.UserSummaryList {
+			add(StringValue(x.Id), "aws_connect_user")
+		}
+	}
 }

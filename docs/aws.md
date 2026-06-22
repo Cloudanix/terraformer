@@ -237,6 +237,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cognito_identity_provider`
 *   `connect`
     * `aws_connect_instance`
+    * `aws_connect_queue`
+    * `aws_connect_routing_profile`
+    * `aws_connect_contact_flow`
+    * `aws_connect_hours_of_operation`
+    * `aws_connect_security_profile`
+    * `aws_connect_user`
 *   `customer-profiles`
     * `aws_customerprofiles_domain`
 *   `dataexchange`
