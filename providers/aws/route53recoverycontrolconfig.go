@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/route53recoverycontrolconfig"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,6 +35,7 @@ func (g *Route53RecoveryControlConfigGenerator) InitResources() error {
 		return e
 	}
 	svc := route53recoverycontrolconfig.NewFromConfig(config)
+	var clusterArns []string
 	p := route53recoverycontrolconfig.NewListClustersPaginator(svc, &route53recoverycontrolconfig.ListClustersInput{})
 	for p.HasMorePages() {
 		page, err := p.NextPage(context.TODO())
@@ -45,8 +47,60 @@ func (g *Route53RecoveryControlConfigGenerator) InitResources() error {
 			if arn == "" {
 				continue
 			}
+			clusterArns = append(clusterArns, arn)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(c.Name), "aws_route53recoverycontrolconfig_cluster", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	ctx := context.TODO()
+	for _, clusterArn := range clusterArns {
+		ca := clusterArn
+		for cp := route53recoverycontrolconfig.NewListControlPanelsPaginator(svc, &route53recoverycontrolconfig.ListControlPanelsInput{ClusterArn: &ca}); cp.HasMorePages(); {
+			page, err := cp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, panel := range page.ControlPanels {
+				panelArn := StringValue(panel.ControlPanelArn)
+				if panelArn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					panelArn, StringValue(panel.Name), "aws_route53recoverycontrolconfig_control_panel", "aws", defaultAllowEmptyValues))
+				for rp := route53recoverycontrolconfig.NewListRoutingControlsPaginator(svc, &route53recoverycontrolconfig.ListRoutingControlsInput{ControlPanelArn: aws.String(panelArn)}); rp.HasMorePages(); {
+					rpage, err := rp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, rc := range rpage.RoutingControls {
+						a := StringValue(rc.RoutingControlArn)
+						if a != "" {
+							g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+								a, StringValue(rc.Name), "aws_route53recoverycontrolconfig_routing_control", "aws", defaultAllowEmptyValues))
+						}
+					}
+				}
+				for sp := route53recoverycontrolconfig.NewListSafetyRulesPaginator(svc, &route53recoverycontrolconfig.ListSafetyRulesInput{ControlPanelArn: aws.String(panelArn)}); sp.HasMorePages(); {
+					spage, err := sp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, rule := range spage.SafetyRules {
+						var a string
+						switch {
+						case rule.ASSERTION != nil:
+							a = StringValue(rule.ASSERTION.SafetyRuleArn)
+						case rule.GATING != nil:
+							a = StringValue(rule.GATING.SafetyRuleArn)
+						}
+						if a != "" {
+							g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+								a, a, "aws_route53recoverycontrolconfig_safety_rule", "aws", defaultAllowEmptyValues))
+						}
+					}
+				}
+			}
 		}
 	}
 	return nil

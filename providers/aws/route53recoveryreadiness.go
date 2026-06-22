@@ -49,5 +49,49 @@ func (g *Route53RecoveryReadinessGenerator) InitResources() error {
 				name, name, "aws_route53recoveryreadiness_cell", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	ctx := context.TODO()
+	for rc := route53recoveryreadiness.NewListReadinessChecksPaginator(svc, &route53recoveryreadiness.ListReadinessChecksInput{}); rc.HasMorePages(); {
+		page, err := rc.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ReadinessChecks {
+			name := StringValue(x.ReadinessCheckName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_route53recoveryreadiness_readiness_check", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for rg := route53recoveryreadiness.NewListRecoveryGroupsPaginator(svc, &route53recoveryreadiness.ListRecoveryGroupsInput{}); rg.HasMorePages(); {
+		page, err := rg.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.RecoveryGroups {
+			name := StringValue(x.RecoveryGroupName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_route53recoveryreadiness_recovery_group", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for rs := route53recoveryreadiness.NewListResourceSetsPaginator(svc, &route53recoveryreadiness.ListResourceSetsInput{}); rs.HasMorePages(); {
+		page, err := rs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ResourceSets {
+			name := StringValue(x.ResourceSetName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_route53recoveryreadiness_resource_set", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

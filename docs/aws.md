@@ -1016,8 +1016,14 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53domains_registered_domain`
 *   `route53recoveryreadiness`
     * `aws_route53recoveryreadiness_cell`
+    * `aws_route53recoveryreadiness_readiness_check`
+    * `aws_route53recoveryreadiness_recovery_group`
+    * `aws_route53recoveryreadiness_resource_set`
 *   `route53recoverycontrolconfig`
     * `aws_route53recoverycontrolconfig_cluster`
+    * `aws_route53recoverycontrolconfig_control_panel`
+    * `aws_route53recoverycontrolconfig_routing_control`
+    * `aws_route53recoverycontrolconfig_safety_rule`
 *   `route53profiles`
     * `aws_route53profiles_profile`
 *   `route53resolver`
