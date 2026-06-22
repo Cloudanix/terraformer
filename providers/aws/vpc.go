@@ -31,13 +31,32 @@ type VpcGenerator struct {
 func (VpcGenerator) createResources(vpcs *ec2.DescribeVpcsOutput) []terraformutils.Resource {
 	var resources []terraformutils.Resource
 	for _, vpc := range vpcs.Vpcs {
+		vpcID := StringValue(vpc.VpcId)
 		resources = append(resources, terraformutils.NewSimpleResource(
-			StringValue(vpc.VpcId),
-			StringValue(vpc.VpcId),
+			vpcID,
+			vpcID,
 			"aws_vpc",
 			"aws",
 			VpcAllowEmptyValues,
 		))
+		// Secondary IPv4 CIDR associations (the primary CIDR belongs to aws_vpc).
+		primaryCidr := StringValue(vpc.CidrBlock)
+		for _, assoc := range vpc.CidrBlockAssociationSet {
+			assocID := StringValue(assoc.AssociationId)
+			if assocID == "" || StringValue(assoc.CidrBlock) == primaryCidr {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				vpcID+","+assocID, assocID, "aws_vpc_ipv4_cidr_block_association", "aws", VpcAllowEmptyValues))
+		}
+		for _, assoc := range vpc.Ipv6CidrBlockAssociationSet {
+			assocID := StringValue(assoc.AssociationId)
+			if assocID == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				assocID, assocID, "aws_vpc_ipv6_cidr_block_association", "aws", VpcAllowEmptyValues))
+		}
 	}
 	return resources
 }

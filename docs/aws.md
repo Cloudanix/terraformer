@@ -1388,6 +1388,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ec2_transit_gateway_route`
 *   `vpc`
     * `aws_vpc`
+    * `aws_vpc_ipv4_cidr_block_association`
+    * `aws_vpc_ipv6_cidr_block_association`
     * `aws_vpc_network_performance_metric_subscription`
 *   `vpc_endpoint`
     * `aws_vpc_endpoint`
