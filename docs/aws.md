@@ -1282,6 +1282,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssm_document`
     * `aws_ssm_maintenance_window`
     * `aws_ssm_patch_baseline`
+    * `aws_ssm_default_patch_baseline`
     * `aws_ssm_association`
     * `aws_ssm_activation`
     * `aws_ssm_resource_data_sync`

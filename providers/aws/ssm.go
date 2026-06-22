@@ -206,6 +206,7 @@ func (g *SsmGenerator) addMaintenanceWindowChildren(svc *ssm.Client, windowID st
 
 func (g *SsmGenerator) addPatchBaselines(svc *ssm.Client) error {
 	// Self-owned baselines only — skip the AWS-managed default baselines.
+	selfBaselines := map[string]bool{}
 	p := ssm.NewDescribePatchBaselinesPaginator(svc, &ssm.DescribePatchBaselinesInput{
 		Filters: []types.PatchOrchestratorFilter{{Key: aws.String("OWNER"), Values: []string{"Self"}}},
 	})
@@ -219,8 +220,21 @@ func (g *SsmGenerator) addPatchBaselines(svc *ssm.Client) error {
 			if id == "" {
 				continue
 			}
+			selfBaselines[id] = true
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(baseline.BaselineName), "aws_ssm_patch_baseline", "aws", ssmAllowEmptyValues))
+		}
+	}
+	// A custom default baseline (set per OS) maps to aws_ssm_default_patch_baseline.
+	for _, os := range types.OperatingSystem("").Values() {
+		out, err := svc.GetDefaultPatchBaseline(context.TODO(), &ssm.GetDefaultPatchBaselineInput{OperatingSystem: os})
+		if err != nil {
+			continue
+		}
+		id := StringValue(out.BaselineId)
+		if selfBaselines[id] {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, string(os), "aws_ssm_default_patch_baseline", "aws", ssmAllowEmptyValues))
 		}
 	}
 	return nil
