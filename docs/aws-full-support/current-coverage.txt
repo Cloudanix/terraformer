@@ -1033,6 +1033,7 @@ aws_signer_signing_profile
 aws_signer_signing_profile_permission
 aws_sns_platform_application
 aws_sns_topic
+aws_sns_topic_data_protection_policy
 aws_sns_topic_subscription
 aws_spot_fleet_request
 aws_spot_instance_request

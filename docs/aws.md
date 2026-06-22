@@ -1308,6 +1308,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_security_group_rule` (if a rule cannot be inlined)
 *   `sns`
     * `aws_sns_topic`
+    * `aws_sns_topic_data_protection_policy`
     * `aws_sns_topic_subscription`
     * `aws_sns_platform_application`
 *   `sqs`

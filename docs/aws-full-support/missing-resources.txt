@@ -257,7 +257,6 @@ aws_sesv2_email_identity_policy
 aws_simpledb_domain
 aws_snapshot_create_volume_permission
 aws_sns_sms_preferences
-aws_sns_topic_data_protection_policy
 aws_sns_topic_policy
 aws_spot_datafeed_subscription
 aws_sqs_queue_policy

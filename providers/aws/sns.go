@@ -59,6 +59,11 @@ func (g *SnsGenerator) InitResources() error {
 				snsAllowEmptyValues,
 			))
 
+			if dp, err := svc.GetDataProtectionPolicy(context.TODO(), &sns.GetDataProtectionPolicyInput{ResourceArn: topic.TopicArn}); err == nil && StringValue(dp.DataProtectionPolicy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					StringValue(topic.TopicArn), topicName, "aws_sns_topic_data_protection_policy", "aws", snsAllowEmptyValues))
+			}
+
 			topicSubsPage := sns.NewListSubscriptionsByTopicPaginator(svc, &sns.ListSubscriptionsByTopicInput{
 				TopicArn: topic.TopicArn,
 			})
