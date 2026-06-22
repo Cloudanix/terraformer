@@ -20,7 +20,9 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 var tgwAllowEmptyValues = []string{"tags."}
@@ -103,6 +105,34 @@ func (g *TransitGatewayGenerator) loadRouteTableAssociations(svc *ec2.Client, rt
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				rtb+"_"+att, rtb+"_"+att, "aws_ec2_transit_gateway_route_table_propagation", "aws", tgwAllowEmptyValues))
+		}
+	}
+	for p := ec2.NewGetTransitGatewayPrefixListReferencesPaginator(svc, &ec2.GetTransitGatewayPrefixListReferencesInput{TransitGatewayRouteTableId: &rtb}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, ref := range page.TransitGatewayPrefixListReferences {
+			plID := StringValue(ref.PrefixListId)
+			if plID == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				rtb+"_"+plID, rtb+"_"+plID, "aws_ec2_transit_gateway_prefix_list_reference", "aws", tgwAllowEmptyValues))
+		}
+	}
+	// Static routes only (propagated routes are not Terraform-managed).
+	if routes, err := svc.SearchTransitGatewayRoutes(ctx, &ec2.SearchTransitGatewayRoutesInput{
+		TransitGatewayRouteTableId: &rtb,
+		Filters:                    []ec2types.Filter{{Name: aws.String("type"), Values: []string{"static"}}},
+	}); err == nil {
+		for _, r := range routes.Routes {
+			cidr := StringValue(r.DestinationCidrBlock)
+			if cidr == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				rtb+"_"+cidr, rtb+"_"+cidr, "aws_ec2_transit_gateway_route", "aws", tgwAllowEmptyValues))
 		}
 	}
 }
