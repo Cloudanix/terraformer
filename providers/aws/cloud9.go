@@ -52,6 +52,17 @@ func (g *Cloud9Generator) InitResources() error {
 			"aws_cloud9_environment_ec2",
 			"aws",
 			cloud9AllowEmptyValues))
+		envID := environmentID
+		if members, err := svc.DescribeEnvironmentMemberships(context.TODO(), &cloud9.DescribeEnvironmentMembershipsInput{EnvironmentId: &envID}); err == nil {
+			for _, m := range members.Memberships {
+				userArn := StringValue(m.UserArn)
+				if userArn == "" || m.Permissions == types.PermissionsOwner {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					envID+"#"+userArn, envID+"_member", "aws_cloud9_environment_membership", "aws", cloud9AllowEmptyValues))
+			}
+		}
 	}
 	return nil
 }

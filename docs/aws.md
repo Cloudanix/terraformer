@@ -262,6 +262,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_budgets_budget_action`
 *   `cloud9`
     * `aws_cloud9_environment_ec2`
+    * `aws_cloud9_environment_membership`
 *   `cloudformation`
     * `aws_cloudformation_stack`
     * `aws_cloudformation_stack_set`
