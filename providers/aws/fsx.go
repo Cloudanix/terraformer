@@ -125,5 +125,53 @@ func (g *FsxGenerator) InitResources() error {
 		}
 	}
 
+	dras := fsx.NewDescribeDataRepositoryAssociationsPaginator(svc, &fsx.DescribeDataRepositoryAssociationsInput{})
+	for dras.HasMorePages() {
+		page, err := dras.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.Associations {
+			id := StringValue(a.AssociationId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_fsx_data_repository_association", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	caches := fsx.NewDescribeFileCachesPaginator(svc, &fsx.DescribeFileCachesInput{})
+	for caches.HasMorePages() {
+		page, err := caches.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.FileCaches {
+			id := StringValue(c.FileCacheId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_fsx_file_cache", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	snaps := fsx.NewDescribeSnapshotsPaginator(svc, &fsx.DescribeSnapshotsInput{})
+	for snaps.HasMorePages() {
+		page, err := snaps.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, sn := range page.Snapshots {
+			id := StringValue(sn.SnapshotId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(sn.Name), "aws_fsx_openzfs_snapshot", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	return nil
 }

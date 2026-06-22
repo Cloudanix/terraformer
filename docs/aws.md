@@ -236,6 +236,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_config_config_rule`
     * `aws_config_configuration_recorder`
     * `aws_config_delivery_channel`
+    * `aws_config_configuration_aggregator`
+    * `aws_config_conformance_pack`
 *   `customer_gateway`
     * `aws_customer_gateway`
 *   `datapipeline`
@@ -269,6 +271,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_dms_replication_subnet_group`
     * `aws_dms_certificate`
     * `aws_dms_event_subscription`
+    * `aws_dms_replication_config`
 *   `docdb`
     * `aws_docdb_cluster`
     * `aws_docdb_cluster_instance`
@@ -388,6 +391,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_fsx_lustre_file_system`
     * `aws_fsx_ontap_file_system`
     * `aws_fsx_openzfs_file_system`
+    * `aws_fsx_data_repository_association`
+    * `aws_fsx_file_cache`
+    * `aws_fsx_openzfs_snapshot`
     * `aws_fsx_backup`
     * `aws_fsx_ontap_storage_virtual_machine`
     * `aws_fsx_ontap_volume`
@@ -781,6 +787,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
     * `aws_servicecatalog_product`
+    * `aws_servicecatalog_tag_option`
+    * `aws_servicecatalog_service_action`
 *   `servicecatalog-appregistry`
     * `aws_servicecatalogappregistry_application`
 *   `servicediscovery`

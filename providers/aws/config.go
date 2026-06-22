@@ -43,7 +43,43 @@ func (g *ConfigGenerator) InitResources() error {
 		return err
 	}
 	err = g.addDeliveryChannels(client, configurationRecorderRefs)
-	return err
+	if err != nil {
+		return err
+	}
+	return g.addConfigExtras(client)
+}
+
+func (g *ConfigGenerator) addConfigExtras(svc *configservice.Client) error {
+	ctx := context.TODO()
+	for p := configservice.NewDescribeConfigurationAggregatorsPaginator(svc, &configservice.DescribeConfigurationAggregatorsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.ConfigurationAggregators {
+			name := StringValue(a.ConfigurationAggregatorName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_config_configuration_aggregator", "aws", configAllowEmptyValues))
+		}
+	}
+	for p := configservice.NewDescribeConformancePacksPaginator(svc, &configservice.DescribeConformancePacksInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, cp := range page.ConformancePackDetails {
+			name := StringValue(cp.ConformancePackName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_config_conformance_pack", "aws", configAllowEmptyValues))
+		}
+	}
+	return nil
 }
 
 func (g *ConfigGenerator) addConfigurationRecorders(svc *configservice.Client) ([]string, error) {

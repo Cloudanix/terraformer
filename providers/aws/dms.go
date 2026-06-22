@@ -113,5 +113,17 @@ func (g *DmsGenerator) InitResources() error {
 			func(es types.EventSubscription) string { return StringValue(es.CustSubscriptionId) })
 	}
 
+	replConfigs := dms.NewDescribeReplicationConfigsPaginator(svc, &dms.DescribeReplicationConfigsInput{})
+	for replConfigs.HasMorePages() {
+		page, err := replConfigs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.ReplicationConfigs, "aws_dms_replication_config",
+			defaultAllowEmptyValues,
+			func(rc types.ReplicationConfig) string { return StringValue(rc.ReplicationConfigArn) },
+			func(rc types.ReplicationConfig) string { return StringValue(rc.ReplicationConfigIdentifier) })
+	}
+
 	return nil
 }

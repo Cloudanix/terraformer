@@ -75,6 +75,38 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 		}
 	}
 
+	tagOptions := servicecatalog.NewListTagOptionsPaginator(svc, &servicecatalog.ListTagOptionsInput{})
+	for tagOptions.HasMorePages() {
+		page, err := tagOptions.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, t := range page.TagOptionDetails {
+			id := StringValue(t.Id)
+			if id == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, id, "aws_servicecatalog_tag_option", "aws", servicecatalogAllowEmptyValues))
+		}
+	}
+
+	serviceActions := servicecatalog.NewListServiceActionsPaginator(svc, &servicecatalog.ListServiceActionsInput{})
+	for serviceActions.HasMorePages() {
+		page, err := serviceActions.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, sa := range page.ServiceActionSummaries {
+			id := StringValue(sa.Id)
+			if id == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, StringValue(sa.Name), "aws_servicecatalog_service_action", "aws", servicecatalogAllowEmptyValues))
+		}
+	}
+
 	g.Resources = resources
 	return nil
 }
