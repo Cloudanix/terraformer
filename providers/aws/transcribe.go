@@ -48,5 +48,49 @@ func (g *TranscribeGenerator) InitResources() error {
 				name, name, "aws_transcribe_vocabulary", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	ctx := context.TODO()
+	for lm := transcribe.NewListLanguageModelsPaginator(svc, &transcribe.ListLanguageModelsInput{}); lm.HasMorePages(); {
+		page, err := lm.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, m := range page.Models {
+			name := StringValue(m.ModelName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_transcribe_language_model", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for mv := transcribe.NewListMedicalVocabulariesPaginator(svc, &transcribe.ListMedicalVocabulariesInput{}); mv.HasMorePages(); {
+		page, err := mv.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, v := range page.Vocabularies {
+			name := StringValue(v.VocabularyName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_transcribe_medical_vocabulary", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for vf := transcribe.NewListVocabularyFiltersPaginator(svc, &transcribe.ListVocabularyFiltersInput{}); vf.HasMorePages(); {
+		page, err := vf.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, f := range page.VocabularyFilters {
+			name := StringValue(f.VocabularyFilterName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_transcribe_vocabulary_filter", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

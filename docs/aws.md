@@ -1151,6 +1151,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_swf_domain`
 *   `transcribe`
     * `aws_transcribe_vocabulary`
+    * `aws_transcribe_language_model`
+    * `aws_transcribe_medical_vocabulary`
+    * `aws_transcribe_vocabulary_filter`
 *   `transfer`
     * `aws_transfer_server`
     * `aws_transfer_connector`
