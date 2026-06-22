@@ -78,7 +78,61 @@ func (g *S3Generator) createResources(config aws.Config, buckets *s3.ListBuckets
 				attributes,
 				S3AllowEmptyValues,
 				S3AdditionalFields))
+			resources = append(resources, g.bucketSubresources(svc, resourceName)...)
 		}
+	}
+	return resources
+}
+
+// bucketSubresources probes each split-out S3 bucket configuration and emits a
+// resource only where the configuration actually exists — mirroring how the
+// bucket policy is handled above. All these resources import by bucket name.
+// Most "Get*" calls error (NoSuch*Configuration) when unset, which we treat as
+// "not configured" and skip.
+func (g *S3Generator) bucketSubresources(svc *s3.Client, bucket string) []terraformutils.Resource {
+	ctx := context.TODO()
+	var resources []terraformutils.Resource
+	add := func(tfType string) {
+		resources = append(resources, terraformutils.NewSimpleResource(
+			bucket, bucket+"_"+tfType, tfType, "aws", S3AllowEmptyValues))
+	}
+
+	if out, err := svc.GetBucketVersioning(ctx, &s3.GetBucketVersioningInput{Bucket: &bucket}); err == nil && out.Status != "" {
+		add("aws_s3_bucket_versioning")
+	}
+	if out, err := svc.GetBucketLifecycleConfiguration(ctx, &s3.GetBucketLifecycleConfigurationInput{Bucket: &bucket}); err == nil && len(out.Rules) > 0 {
+		add("aws_s3_bucket_lifecycle_configuration")
+	}
+	if _, err := svc.GetBucketEncryption(ctx, &s3.GetBucketEncryptionInput{Bucket: &bucket}); err == nil {
+		add("aws_s3_bucket_server_side_encryption_configuration")
+	}
+	if _, err := svc.GetPublicAccessBlock(ctx, &s3.GetPublicAccessBlockInput{Bucket: &bucket}); err == nil {
+		add("aws_s3_bucket_public_access_block")
+	}
+	if out, err := svc.GetBucketCors(ctx, &s3.GetBucketCorsInput{Bucket: &bucket}); err == nil && len(out.CORSRules) > 0 {
+		add("aws_s3_bucket_cors_configuration")
+	}
+	if out, err := svc.GetBucketLogging(ctx, &s3.GetBucketLoggingInput{Bucket: &bucket}); err == nil && out.LoggingEnabled != nil {
+		add("aws_s3_bucket_logging")
+	}
+	if _, err := svc.GetBucketWebsite(ctx, &s3.GetBucketWebsiteInput{Bucket: &bucket}); err == nil {
+		add("aws_s3_bucket_website_configuration")
+	}
+	if out, err := svc.GetBucketOwnershipControls(ctx, &s3.GetBucketOwnershipControlsInput{Bucket: &bucket}); err == nil && out.OwnershipControls != nil {
+		add("aws_s3_bucket_ownership_controls")
+	}
+	if out, err := svc.GetObjectLockConfiguration(ctx, &s3.GetObjectLockConfigurationInput{Bucket: &bucket}); err == nil && out.ObjectLockConfiguration != nil {
+		add("aws_s3_bucket_object_lock_configuration")
+	}
+	if _, err := svc.GetBucketReplication(ctx, &s3.GetBucketReplicationInput{Bucket: &bucket}); err == nil {
+		add("aws_s3_bucket_replication_configuration")
+	}
+	if out, err := svc.GetBucketAccelerateConfiguration(ctx, &s3.GetBucketAccelerateConfigurationInput{Bucket: &bucket}); err == nil && out.Status != "" {
+		add("aws_s3_bucket_accelerate_configuration")
+	}
+	if out, err := svc.GetBucketNotificationConfiguration(ctx, &s3.GetBucketNotificationConfigurationInput{Bucket: &bucket}); err == nil &&
+		(out.EventBridgeConfiguration != nil || len(out.LambdaFunctionConfigurations) > 0 || len(out.QueueConfigurations) > 0 || len(out.TopicConfigurations) > 0) {
+		add("aws_s3_bucket_notification")
 	}
 	return resources
 }
