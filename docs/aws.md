@@ -141,6 +141,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_apigatewayv2_authorizer`
     * `aws_apigatewayv2_model`
     * `aws_apigatewayv2_integration`
+    * `aws_apigatewayv2_integration_response`
     * `aws_apigatewayv2_route`
     * `aws_apigatewayv2_route_response`
     * `aws_apigatewayv2_stage`

@@ -111,6 +111,20 @@ func (g *APIGatewayV2Generator) loadAPIChildren(ctx context.Context, svc *apigat
 	for _, i := range integrations.Items {
 		id := StringValue(i.IntegrationId)
 		g.add(fmt.Sprintf("%s/%s", apiID, id), fmt.Sprintf("%s_%s", apiID, id), "aws_apigatewayv2_integration")
+
+		intResponses, err := svc.GetIntegrationResponses(ctx, &apigatewayv2.GetIntegrationResponsesInput{
+			ApiId: aws.String(apiID), IntegrationId: aws.String(id),
+		})
+		if err != nil {
+			continue
+		}
+		for _, ir := range intResponses.Items {
+			irID := StringValue(ir.IntegrationResponseId)
+			if irID == "" {
+				continue
+			}
+			g.add(fmt.Sprintf("%s/%s/%s", apiID, id, irID), fmt.Sprintf("%s_%s", id, irID), "aws_apigatewayv2_integration_response")
+		}
 	}
 
 	routes, err := svc.GetRoutes(ctx, &apigatewayv2.GetRoutesInput{ApiId: aws.String(apiID)})
