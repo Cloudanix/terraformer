@@ -171,7 +171,51 @@ func (g *ElastiCacheGenerator) InitResources() error {
 	if err := g.loadUserGroups(svc); err != nil {
 		return err
 	}
+	if err := g.loadServerlessCaches(svc); err != nil {
+		return err
+	}
+	if err := g.loadGlobalReplicationGroups(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *ElastiCacheGenerator) loadServerlessCaches(svc *elasticache.Client) error {
+	p := elasticache.NewDescribeServerlessCachesPaginator(svc, &elasticache.DescribeServerlessCachesInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, c := range page.ServerlessCaches {
+			name := StringValue(c.ServerlessCacheName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_elasticache_serverless_cache", "aws", elastiCacheAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *ElastiCacheGenerator) loadGlobalReplicationGroups(svc *elasticache.Client) error {
+	p := elasticache.NewDescribeGlobalReplicationGroupsPaginator(svc, &elasticache.DescribeGlobalReplicationGroupsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, rg := range page.GlobalReplicationGroups {
+			id := StringValue(rg.GlobalReplicationGroupId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_elasticache_global_replication_group", "aws", elastiCacheAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

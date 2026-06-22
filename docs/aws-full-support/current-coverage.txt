@@ -54,6 +54,7 @@ aws_backup_vault
 aws_batch_compute_environment
 aws_batch_job_definition
 aws_batch_job_queue
+aws_batch_scheduling_policy
 aws_bcmdataexports_export
 aws_bedrock_custom_model
 aws_bedrock_guardrail
@@ -161,6 +162,8 @@ aws_dms_replication_task
 aws_docdb_cluster
 aws_docdb_cluster_instance
 aws_docdb_cluster_parameter_group
+aws_docdb_event_subscription
+aws_docdb_global_cluster
 aws_docdb_subnet_group
 aws_docdbelastic_cluster
 aws_dx_connection
@@ -186,6 +189,7 @@ aws_ec2_transit_gateway_peering_attachment
 aws_ec2_transit_gateway_route_table
 aws_ec2_transit_gateway_vpc_attachment
 aws_ecr_lifecycle_policy
+aws_ecr_pull_through_cache_rule
 aws_ecr_repository
 aws_ecr_repository_policy
 aws_ecrpublic_repository
@@ -207,8 +211,10 @@ aws_eks_node_group
 aws_elastic_beanstalk_application
 aws_elastic_beanstalk_environment
 aws_elasticache_cluster
+aws_elasticache_global_replication_group
 aws_elasticache_parameter_group
 aws_elasticache_replication_group
+aws_elasticache_serverless_cache
 aws_elasticache_subnet_group
 aws_elasticache_user
 aws_elasticache_user_group
@@ -360,11 +366,17 @@ aws_medialive_input
 aws_medialive_input_security_group
 aws_memorydb_cluster
 aws_mq_broker
+aws_mq_configuration
 aws_msk_cluster
 aws_mskconnect_connector
 aws_mwaa_environment
 aws_nat_gateway
 aws_neptune_cluster
+aws_neptune_cluster_parameter_group
+aws_neptune_event_subscription
+aws_neptune_global_cluster
+aws_neptune_parameter_group
+aws_neptune_subnet_group
 aws_neptunegraph_graph
 aws_network_acl
 aws_network_interface

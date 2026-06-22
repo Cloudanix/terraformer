@@ -154,6 +154,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_batch_compute_environment`
     * `aws_batch_job_definition`
     * `aws_batch_job_queue`
+    * `aws_batch_scheduling_policy`
 *   `budgets`
     * `aws_budgets_budget`
 *   `cloud9`
@@ -272,6 +273,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_docdb_cluster`
     * `aws_docdb_cluster_instance`
     * `aws_docdb_cluster_parameter_group`
+    * `aws_docdb_global_cluster`
+    * `aws_docdb_event_subscription`
     * `aws_docdb_subnet_group`
 *   `ds`
     * `aws_directory_service_directory`
@@ -315,6 +318,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `ecr`
     * `aws_ecr_lifecycle_policy`
     * `aws_ecr_repository`
+    * `aws_ecr_pull_through_cache_rule`
     * `aws_ecr_repository_policy`
 *   `ecrpublic`
     * `aws_ecrpublic_repository`
@@ -343,6 +347,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_elasticache_replication_group`
     * `aws_elasticache_user`
     * `aws_elasticache_user_group`
+    * `aws_elasticache_serverless_cache`
+    * `aws_elasticache_global_replication_group`
 *   `elastic_beanstalk`
     * `aws_elastic_beanstalk_application`
     * `aws_elastic_beanstalk_environment`
@@ -524,6 +530,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_memorydb_cluster`
 *   `neptune`
     * `aws_neptune_cluster`
+    * `aws_neptune_cluster_parameter_group`
+    * `aws_neptune_parameter_group`
+    * `aws_neptune_subnet_group`
+    * `aws_neptune_event_subscription`
+    * `aws_neptune_global_cluster`
 *   `neptune-graph`
     * `aws_neptunegraph_graph`
 *   `opensearch`
@@ -578,6 +589,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_medialive_input_security_group`
 *   `mq`
     * `aws_mq_broker`
+    * `aws_mq_configuration`
 *   `msk`
     * `aws_msk_cluster`
 *   `nacl`

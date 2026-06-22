@@ -59,5 +59,19 @@ func (g *MQGenerator) InitResources() error {
 		return err
 	}
 
+	// Configurations: ListConfigurations is a single call (no paginator).
+	configs, err := svc.ListConfigurations(context.TODO(), &mq.ListConfigurationsInput{})
+	if err != nil {
+		return err
+	}
+	for _, c := range configs.Configurations {
+		id := StringValue(c.Id)
+		if id == "" {
+			continue
+		}
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			id, StringValue(c.Name), "aws_mq_configuration", "aws", mqAllowEmptyValues))
+	}
+
 	return nil
 }

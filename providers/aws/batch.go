@@ -34,7 +34,29 @@ func (g *BatchGenerator) InitResources() error {
 	if err := g.loadJobQueues(batchClient); err != nil {
 		return err
 	}
+	if err := g.loadSchedulingPolicies(batchClient); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *BatchGenerator) loadSchedulingPolicies(batchClient *batch.Client) error {
+	p := batch.NewListSchedulingPoliciesPaginator(batchClient, &batch.ListSchedulingPoliciesInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, sp := range page.SchedulingPolicies {
+			arn := StringValue(sp.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_batch_scheduling_policy", "aws", BatchAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

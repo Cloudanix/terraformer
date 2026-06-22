@@ -75,6 +75,22 @@ func (g *EcrGenerator) InitResources() error {
 			}
 		}
 	}
+
+	rules := ecr.NewDescribePullThroughCacheRulesPaginator(svc, &ecr.DescribePullThroughCacheRulesInput{})
+	for rules.HasMorePages() {
+		page, err := rules.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, r := range page.PullThroughCacheRules {
+			prefix := StringValue(r.EcrRepositoryPrefix)
+			if prefix == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				prefix, prefix, "aws_ecr_pull_through_cache_rule", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

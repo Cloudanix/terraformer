@@ -50,5 +50,58 @@ func (g *NeptuneGenerator) InitResources() error {
 				id, id, "aws_neptune_cluster", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	add := func(name, tfType string) {
+		if name != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+	ctx := context.TODO()
+	for p := neptune.NewDescribeDBClusterParameterGroupsPaginator(svc, &neptune.DescribeDBClusterParameterGroupsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.DBClusterParameterGroups {
+			add(StringValue(x.DBClusterParameterGroupName), "aws_neptune_cluster_parameter_group")
+		}
+	}
+	for p := neptune.NewDescribeDBParameterGroupsPaginator(svc, &neptune.DescribeDBParameterGroupsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.DBParameterGroups {
+			add(StringValue(x.DBParameterGroupName), "aws_neptune_parameter_group")
+		}
+	}
+	for p := neptune.NewDescribeDBSubnetGroupsPaginator(svc, &neptune.DescribeDBSubnetGroupsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.DBSubnetGroups {
+			add(StringValue(x.DBSubnetGroupName), "aws_neptune_subnet_group")
+		}
+	}
+	for p := neptune.NewDescribeEventSubscriptionsPaginator(svc, &neptune.DescribeEventSubscriptionsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.EventSubscriptionsList {
+			add(StringValue(x.CustSubscriptionId), "aws_neptune_event_subscription")
+		}
+	}
+	for p := neptune.NewDescribeGlobalClustersPaginator(svc, &neptune.DescribeGlobalClustersInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.GlobalClusters {
+			add(StringValue(x.GlobalClusterIdentifier), "aws_neptune_global_cluster")
+		}
+	}
 	return nil
 }

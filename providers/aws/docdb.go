@@ -47,6 +47,43 @@ func (g *DocDBGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	if err := g.getDocDBExtras(svc); err != nil {
+		log.Println(err)
+	}
+
+	return nil
+}
+
+func (g *DocDBGenerator) getDocDBExtras(svc *docdb.Client) error {
+	ctx := context.TODO()
+	for p := docdb.NewDescribeGlobalClustersPaginator(svc, &docdb.DescribeGlobalClustersInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, gc := range page.GlobalClusters {
+			id := StringValue(gc.GlobalClusterIdentifier)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_docdb_global_cluster", "aws", docDBAllowEmptyValues))
+		}
+	}
+	for p := docdb.NewDescribeEventSubscriptionsPaginator(svc, &docdb.DescribeEventSubscriptionsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, es := range page.EventSubscriptionsList {
+			id := StringValue(es.CustSubscriptionId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_docdb_event_subscription", "aws", docDBAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
