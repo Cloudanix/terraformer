@@ -59,5 +59,27 @@ func (g *BudgetsGenerator) InitResources() error {
 	}
 
 	g.Resources = g.createResources(output.Budgets, account)
+
+	accountID := StringValue(account)
+	for _, budget := range output.Budgets {
+		budgetName := StringValue(budget.BudgetName)
+		if budgetName == "" {
+			continue
+		}
+		for ap := budgets.NewDescribeBudgetActionsForBudgetPaginator(budgetsSvc, &budgets.DescribeBudgetActionsForBudgetInput{AccountId: account, BudgetName: budget.BudgetName}); ap.HasMorePages(); {
+			page, err := ap.NextPage(context.TODO())
+			if err != nil {
+				break
+			}
+			for _, a := range page.Actions {
+				actionID := StringValue(a.ActionId)
+				if actionID == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID+":"+actionID+":"+budgetName, accountID+"_"+actionID, "aws_budgets_budget_action", "aws", []string{}))
+			}
+		}
+	}
 	return nil
 }
