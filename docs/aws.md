@@ -1192,6 +1192,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3outposts_endpoint`
 *   `s3tables`
     * `aws_s3tables_table_bucket`
+    * `aws_s3tables_namespace`
+    * `aws_s3tables_table`
 *   `secretsmanager`
     * `aws_secretsmanager_secret`
     * `aws_secretsmanager_secret_rotation`
