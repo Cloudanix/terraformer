@@ -56,6 +56,16 @@ func (g *QuickSightGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				accountID+","+id, id, "aws_quicksight_data_set", "aws", defaultAllowEmptyValues))
+			if sched, err := svc.ListRefreshSchedules(ctx, &quicksight.ListRefreshSchedulesInput{AwsAccountId: aws.String(accountID), DataSetId: aws.String(id)}); err == nil {
+				for _, s := range sched.RefreshSchedules {
+					sid := StringValue(s.ScheduleId)
+					if sid == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						accountID+","+id+","+sid, id+"_"+sid, "aws_quicksight_refresh_schedule", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
@@ -105,7 +115,25 @@ func (g *QuickSightGenerator) InitResources() error {
 			return err
 		}
 		for _, x := range page.TemplateSummaryList {
-			add(StringValue(x.TemplateId), "aws_quicksight_template")
+			templateID := StringValue(x.TemplateId)
+			add(templateID, "aws_quicksight_template")
+			if templateID == "" {
+				continue
+			}
+			for ap := quicksight.NewListTemplateAliasesPaginator(svc, &quicksight.ListTemplateAliasesInput{AwsAccountId: aws.String(accountID), TemplateId: aws.String(templateID)}); ap.HasMorePages(); {
+				apage, err := ap.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, a := range apage.TemplateAliasList {
+					alias := StringValue(a.AliasName)
+					if alias == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						accountID+","+templateID+","+alias, templateID+"_"+alias, "aws_quicksight_template_alias", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	for p := quicksight.NewListThemesPaginator(svc, &quicksight.ListThemesInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {

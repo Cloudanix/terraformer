@@ -747,7 +747,9 @@ aws_quicksight_data_source
 aws_quicksight_folder
 aws_quicksight_group
 aws_quicksight_namespace
+aws_quicksight_refresh_schedule
 aws_quicksight_template
+aws_quicksight_template_alias
 aws_quicksight_theme
 aws_quicksight_user
 aws_quicksight_vpc_connection
