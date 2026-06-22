@@ -29,8 +29,9 @@ resource to import into, so a generator would emit un-refreshable HCL:
 - **iotanalytics** — AWS has deprecated the service ("no longer available for
   use"); the SDK package itself is marked deprecated. Removed from the registry.
 
-## Structurally not independently listable (≈212 of current missing-resources.txt)
-Per the §3 diff (`missing-resources.txt`, currently 507 entries), ~212 are
+## Structurally not independently listable (the bulk of current missing-resources.txt)
+Per the §3 diff (`missing-resources.txt`, currently **240** entries after the
+buildable tail was ground down, coverage 250→1231), the large majority are
 resource *classes* that have no standalone List/Describe API — they are
 attachments, associations, sub-policies, role/permission assignments, default-*
 singletons, accepters, and per-parent settings. Terraform models them as their
@@ -38,16 +39,14 @@ own resources, but AWS only exposes them as fields of (or actions on) a parent,
 so they cannot be enumerated to import on their own. Current breakdown by
 suffix (from `missing-resources.txt`):
 
-    *_association / *_associations   64
-    *_policy / *_policies            61   (resource/access policies inlined on the parent or set via a Put* action)
-    *_attachment                     25
-    *_default* / *_setting(s)        18   (account/region singletons set via Put*/Update*, no list)
+    *_policy / *_policies            31   (resource/access policies inlined on the parent or set via a Put* action)
+    *_association / *_associations   26
     *_accepter                       16   (the *accepting* side of a cross-account handshake — no list)
-    *_tag / *_tags                    9
-    *_permission(s)                   8
-    *_member(ship)                    6
-    *_principal*                      5
-    *_assignment                      4
+    *_attachment                     15
+    *_tag / *_tags                    7
+    *_*exclusive                      6   (Terraform-only management constructs, no AWS object)
+    *_permission(s)                   5
+    *_default* / *_setting(s)         4   (account/region singletons set via Put*/Update*, no list)
 
 These are excluded by the same provider/list-API bound as §1: AWS exposes them
 only through a Get/Describe on the *named parent* (you must already know the
@@ -56,11 +55,15 @@ Where a parent-scoped list *does* exist (e.g. `aws_route53_resolver_firewall_rul
 via `ListFirewallRules`, `aws_quicksight_group` via `ListGroups`), the resource
 is **built**, not excluded — see the per-service generators.
 
-The balance of `missing-resources.txt` (~295) splits into: (a) the remaining
-buildable per-parent/composite tail of plan §9 — built service-by-service each
-batch (re-run `gen-gap-list.sh` to watch it shrink; coverage 250→964 so far),
-and (b) resources whose backing SDK is not vendored in the pinned module set
-(see below) or that are data-plane/report-only (next section).
+The balance of `missing-resources.txt` (240 total) splits into: (a) resources
+whose backing SDK is not vendored in the pinned module set (see below), (b)
+data-plane/report-only objects with no `terraform import` (next sections), and
+(c) `aws_default_*` adopt-existing resources (`aws_default_vpc`,
+`aws_default_subnet`, `aws_default_route_table`, `aws_default_security_group`,
+`aws_default_vpc_dhcp_options`) which represent pre-existing AWS defaults a user
+*adopts* rather than infrastructure to reverse-import. The clean-import,
+non-conflicting buildable tail of plan §9 has been ground down to empty —
+every remaining entry maps to one of these documented exclusion classes.
 
 ## SDK not vendored in the pinned aws-sdk-go-v2 module set
 Generators cannot be written against SDKs absent from `go.mod`'s pinned
@@ -70,14 +73,26 @@ dependency is added (deliberately out of scope to avoid an unrequested dep bump)
 - **lexmodelbuildingservice** v1 (`aws_lex_bot`, `aws_lex_intent`, `aws_lex_slot_type`, `aws_lex_bot_alias`) — note the v2 `aws_lexv2models_*` set IS built
 - **devopsguru** (`aws_devopsguru_*` — notification_channel, resource_collection, service_integration, event_sources_config)
 - **drs** (`aws_drs_replication_configuration_template`)
-- **eventbridge** `ListEndpoints` (`aws_cloudwatch_event_endpoint`)
-- **paymentcryptography** (unregistered service: `aws_paymentcryptography_key`, `aws_paymentcryptography_key_alias`)
+- **eventbridge** `ListEndpoints` (`aws_cloudwatch_event_endpoint`) — the pinned
+  `cloudwatchevents` v1 SDK has no global-endpoints API
+- **paymentcryptography** (`aws_paymentcryptography_key_alias`)
+- **codecatalyst** (`aws_codecatalyst_project`, `aws_codecatalyst_dev_environment`, `aws_codecatalyst_source_repository`)
+- **computeoptimizer** (`aws_computeoptimizer_enrollment_status`, `aws_computeoptimizer_recommendation_preferences`)
+- **costoptimizationhub** (`aws_costoptimizationhub_enrollment_status`, `aws_costoptimizationhub_preferences`)
+- **simpledb** (`aws_simpledb_domain`), **worklink** (`aws_worklink_fleet`, `aws_worklink_website_certificate_authority_association`)
+- **customerprofiles** (`aws_customerprofiles_profile` — data-plane), **dataexchange** revisions (data-plane)
+- Operations absent from pinned SDKs: `aws_ecr_repository_creation_template`
+  (ECR `ListRepositoryCreationTemplates`), `aws_eks_access_entry` /
+  `aws_eks_access_policy_association` (`ListAccessEntries`),
+  `aws_lambda_function_recursion_config` (`GetFunctionRecursionConfig`),
+  `aws_dynamodb_resource_policy` (`GetResourcePolicy`),
+  `aws_codebuild_fleet` (`ListFleets`)
 
 ## No import / data-plane object resources (not reverse-importable)
 Provider resources that either have no `terraform import` support or represent
 data-plane objects/actions rather than durable infrastructure, so terraformer
 cannot reverse them: `aws_s3_object`, `aws_s3_bucket_object`, `aws_s3_object_copy`,
-`aws_dynamodb_table_item`, `aws_dynamodb_table_export`, `aws_kms_ciphertext`,
+`aws_dynamodb_table_item`, `aws_kms_ciphertext`,
 `aws_ec2_instance_state`, `aws_*_snapshot_copy` / `aws_*_snapshot_import`
 (create-from-source actions), `aws_iot_logging_options` /
 `aws_iot_indexing_configuration` / `aws_iot_event_configurations` (no import),
