@@ -240,7 +240,37 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			return err
 		}
 		for _, x := range pg.IpamPools {
-			add(aws.ToString(x.IpamPoolId), "aws_vpc_ipam_pool")
+			poolID := aws.ToString(x.IpamPoolId)
+			add(poolID, "aws_vpc_ipam_pool")
+			if poolID == "" {
+				continue
+			}
+			for cp := ec2.NewGetIpamPoolCidrsPaginator(svc, &ec2.GetIpamPoolCidrsInput{IpamPoolId: aws.String(poolID)}); cp.HasMorePages(); {
+				cpage, err := cp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, c := range cpage.IpamPoolCidrs {
+					cidr := aws.ToString(c.Cidr)
+					if cidr != "" {
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							cidr+"_"+poolID, cidr+"_"+poolID, "aws_vpc_ipam_pool_cidr", "aws", ec2AllowEmptyValues))
+					}
+				}
+			}
+			for ap := ec2.NewGetIpamPoolAllocationsPaginator(svc, &ec2.GetIpamPoolAllocationsInput{IpamPoolId: aws.String(poolID)}); ap.HasMorePages(); {
+				apage, err := ap.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, a := range apage.IpamPoolAllocations {
+					allocID := aws.ToString(a.IpamPoolAllocationId)
+					if allocID != "" {
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							allocID+"_"+poolID, allocID+"_"+poolID, "aws_vpc_ipam_pool_cidr_allocation", "aws", ec2AllowEmptyValues))
+					}
+				}
+			}
 		}
 	}
 	for p := ec2.NewDescribeIpamScopesPaginator(svc, &ec2.DescribeIpamScopesInput{}); p.HasMorePages(); {

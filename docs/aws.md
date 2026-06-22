@@ -457,6 +457,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpc_endpoint_service`
     * `aws_vpc_ipam`
     * `aws_vpc_ipam_pool`
+    * `aws_vpc_ipam_pool_cidr`
+    * `aws_vpc_ipam_pool_cidr_allocation`
     * `aws_vpc_ipam_scope`
     * `aws_vpc_ipam_resource_discovery`
 *   `ecr`
