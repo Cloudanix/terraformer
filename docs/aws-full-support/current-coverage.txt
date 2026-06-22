@@ -217,6 +217,7 @@ aws_connect_security_profile
 aws_connect_user
 aws_connect_user_hierarchy_group
 aws_connect_user_hierarchy_structure
+aws_connect_vocabulary
 aws_controltower_landing_zone
 aws_cur_report_definition
 aws_customer_gateway

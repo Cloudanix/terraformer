@@ -175,4 +175,18 @@ func (g *ConnectGenerator) loadConnectChildren(svc *connect.Client, instanceID s
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			instanceID, instanceID, "aws_connect_user_hierarchy_structure", "aws", defaultAllowEmptyValues))
 	}
+	for v := connect.NewSearchVocabulariesPaginator(svc, &connect.SearchVocabulariesInput{InstanceId: aws.String(instanceID)}); v.HasMorePages(); {
+		page, err := v.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.VocabularySummaryList {
+			id := StringValue(x.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				instanceID+":"+id, instanceID+"_"+id, "aws_connect_vocabulary", "aws", defaultAllowEmptyValues))
+		}
+	}
 }
