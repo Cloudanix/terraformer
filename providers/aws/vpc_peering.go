@@ -31,13 +31,19 @@ type VpcPeeringConnectionGenerator struct {
 func (g *VpcPeeringConnectionGenerator) createResources(peerings *ec2.DescribeVpcPeeringConnectionsOutput) []terraformutils.Resource {
 	var resources []terraformutils.Resource
 	for _, peering := range peerings.VpcPeeringConnections {
+		id := StringValue(peering.VpcPeeringConnectionId)
 		resources = append(resources, terraformutils.NewSimpleResource(
-			StringValue(peering.VpcPeeringConnectionId),
-			StringValue(peering.VpcPeeringConnectionId),
+			id,
+			id,
 			"aws_vpc_peering_connection",
 			"aws",
 			peeringAllowEmptyValues,
 		))
+		// Peering options (accepter/requester) are a singleton on active connections.
+		if peering.Status != nil && peering.Status.Code == "active" {
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpc_peering_connection_options", "aws", peeringAllowEmptyValues))
+		}
 	}
 
 	return resources
