@@ -103,5 +103,38 @@ func (g *NeptuneGenerator) InitResources() error {
 			add(StringValue(x.GlobalClusterIdentifier), "aws_neptune_global_cluster")
 		}
 	}
+	for p := neptune.NewDescribeDBClusterEndpointsPaginator(svc, &neptune.DescribeDBClusterEndpointsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.DBClusterEndpoints {
+			add(StringValue(x.DBClusterEndpointIdentifier), "aws_neptune_cluster_endpoint")
+		}
+	}
+	for p := neptune.NewDescribeDBInstancesPaginator(svc, &neptune.DescribeDBInstancesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.DBInstances {
+			if StringValue(x.Engine) != "neptune" {
+				continue
+			}
+			add(StringValue(x.DBInstanceIdentifier), "aws_neptune_cluster_instance")
+		}
+	}
+	for p := neptune.NewDescribeDBClusterSnapshotsPaginator(svc, &neptune.DescribeDBClusterSnapshotsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.DBClusterSnapshots {
+			if StringValue(x.Engine) != "neptune" {
+				continue
+			}
+			add(StringValue(x.DBClusterSnapshotIdentifier), "aws_neptune_cluster_snapshot")
+		}
+	}
 	return nil
 }

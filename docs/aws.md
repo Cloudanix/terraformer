@@ -621,6 +621,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_neptune_subnet_group`
     * `aws_neptune_event_subscription`
     * `aws_neptune_global_cluster`
+    * `aws_neptune_cluster_endpoint`
+    * `aws_neptune_cluster_instance`
+    * `aws_neptune_cluster_snapshot`
 *   `neptune-graph`
     * `aws_neptunegraph_graph`
 *   `opensearch`
