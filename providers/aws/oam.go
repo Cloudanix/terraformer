@@ -49,6 +49,10 @@ func (g *OAMGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_oam_sink", "aws", defaultAllowEmptyValues))
+			if pol, err := svc.GetSinkPolicy(ctx, &oam.GetSinkPolicyInput{SinkIdentifier: sink.Arn}); err == nil && StringValue(pol.Policy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, arn, "aws_oam_sink_policy", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 

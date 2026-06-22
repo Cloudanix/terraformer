@@ -746,6 +746,7 @@ aws_networkmonitor_monitor
 aws_networkmonitor_probe
 aws_oam_link
 aws_oam_sink
+aws_oam_sink_policy
 aws_opensearch_domain
 aws_opensearch_domain_policy
 aws_opensearch_domain_saml_options

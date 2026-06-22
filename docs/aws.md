@@ -1013,6 +1013,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_internetmonitor_monitor`
 *   `oam`
     * `aws_oam_sink`
+    * `aws_oam_sink_policy`
     * `aws_oam_link`
 *   `rum`
     * `aws_rum_app_monitor`
