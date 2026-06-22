@@ -19,6 +19,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 var SubnetAllowEmptyValues = []string{"tags."}
@@ -59,6 +60,26 @@ func (g *SubnetGenerator) InitResources() error {
 			return err
 		}
 		g.Resources = append(g.Resources, g.createResources(page)...)
+		for _, subnet := range page.Subnets {
+			subnetID := StringValue(subnet.SubnetId)
+			if subnetID == "" {
+				continue
+			}
+			out, err := svc.GetSubnetCidrReservations(context.TODO(), &ec2.GetSubnetCidrReservationsInput{SubnetId: subnet.SubnetId})
+			if err != nil {
+				continue
+			}
+			reservations := append([]ec2types.SubnetCidrReservation{}, out.SubnetIpv4CidrReservations...)
+			reservations = append(reservations, out.SubnetIpv6CidrReservations...)
+			for _, r := range reservations {
+				rid := StringValue(r.SubnetCidrReservationId)
+				if rid == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					subnetID+":"+rid, subnetID+"_"+rid, "aws_ec2_subnet_cidr_reservation", "aws", SubnetAllowEmptyValues))
+			}
+		}
 	}
 	return nil
 }

@@ -1280,6 +1280,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_storagegateway_stored_iscsi_volume`
 *   `subnet`
     * `aws_subnet`
+    * `aws_ec2_subnet_cidr_reservation`
 *   `swf`
     * `aws_swf_domain`
 *   `transcribe`
