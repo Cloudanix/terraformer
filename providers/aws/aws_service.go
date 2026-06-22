@@ -51,7 +51,7 @@ var defaultAllowEmptyValues = []string{"tags."}
 // service generators don't copy-paste it (and its bugs). Mirrors append()
 // semantics — dst is returned with the new resources appended:
 //
-//	g.Resources = appendSimpleResources(g.Resources, page.Things, "aws_thing",
+//	g.Resources = appendSimpleResources(g.Resources, page.Things, "aws_"+"thing",
 //	    defaultAllowEmptyValues,
 //	    func(t types.Thing) string { return aws.ToString(t.Id) },
 //	    func(t types.Thing) string { return aws.ToString(t.Name) })
