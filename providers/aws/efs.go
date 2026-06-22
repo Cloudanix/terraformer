@@ -92,6 +92,17 @@ func (g *EfsGenerator) loadFileSystem(svc *efs.Client) error {
 					efsAllowEmptyValues))
 			}
 
+			if bp, err := svc.DescribeBackupPolicy(context.TODO(), &efs.DescribeBackupPolicyInput{
+				FileSystemId: fileSystem.FileSystemId,
+			}); err == nil && bp.BackupPolicy != nil && bp.BackupPolicy.Status != "DISABLED" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					StringValue(fileSystem.FileSystemId),
+					StringValue(fileSystem.FileSystemId),
+					"aws_efs_backup_policy",
+					"aws",
+					efsAllowEmptyValues))
+			}
+
 			policyResponse, err := svc.DescribeFileSystemPolicy(context.TODO(), &efs.DescribeFileSystemPolicyInput{
 				FileSystemId: fileSystem.FileSystemId,
 			})

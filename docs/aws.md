@@ -547,6 +547,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_efs_file_system`
     * `aws_efs_replication_configuration`
     * `aws_efs_file_system_policy`
+    * `aws_efs_backup_policy`
     * `aws_efs_mount_target`
 *   `eip`
     * `aws_eip`

@@ -405,6 +405,7 @@ aws_ecs_service
 aws_ecs_task_definition
 aws_ecs_task_set
 aws_efs_access_point
+aws_efs_backup_policy
 aws_efs_file_system
 aws_efs_file_system_policy
 aws_efs_mount_target
