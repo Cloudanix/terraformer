@@ -136,6 +136,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appflow_flow`
 *   `appstream`
     * `aws_appstream_fleet`
+    * `aws_appstream_stack`
+    * `aws_appstream_image_builder`
 *   `appmesh`
     * `aws_appmesh_mesh`
 *   `apprunner`

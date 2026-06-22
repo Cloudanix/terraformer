@@ -49,8 +49,30 @@ func (g *AppStreamGenerator) InitResources() error {
 				name, name, "aws_appstream_fleet", "aws", defaultAllowEmptyValues))
 		}
 		if out.NextToken == nil {
-			return nil
+			break
 		}
 		token = out.NextToken
 	}
+
+	if stacks, err := svc.DescribeStacks(context.TODO(), &appstream.DescribeStacksInput{}); err == nil {
+		for _, s := range stacks.Stacks {
+			name := StringValue(s.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_appstream_stack", "aws", defaultAllowEmptyValues))
+		}
+	}
+	if builders, err := svc.DescribeImageBuilders(context.TODO(), &appstream.DescribeImageBuildersInput{}); err == nil {
+		for _, b := range builders.ImageBuilders {
+			name := StringValue(b.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_appstream_image_builder", "aws", defaultAllowEmptyValues))
+		}
+	}
+	return nil
 }
