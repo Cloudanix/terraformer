@@ -1287,6 +1287,10 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `shield`
     * `aws_shield_protection`
     * `aws_shield_protection_group`
+    * `aws_shield_protection_health_check_association`
+    * `aws_shield_application_layer_automatic_response`
+    * `aws_shield_drt_access_role_arn_association`
+    * `aws_shield_drt_access_log_bucket_association`
     * `aws_shield_subscription`
     * `aws_shield_proactive_engagement`
 *   `signer`

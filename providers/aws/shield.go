@@ -50,6 +50,19 @@ func (g *ShieldGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_shield_protection", "aws", defaultAllowEmptyValues))
+			for _, hc := range p.HealthCheckIds {
+				if hc == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id+"+"+hc, id+"_hc", "aws_shield_protection_health_check_association", "aws", defaultAllowEmptyValues))
+			}
+			if p.ApplicationLayerAutomaticResponseConfiguration != nil {
+				if resourceArn := StringValue(p.ResourceArn); resourceArn != "" {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						resourceArn, id+"_alar", "aws_shield_application_layer_automatic_response", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
@@ -66,6 +79,20 @@ func (g *ShieldGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_shield_protection_group", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	if drt, err := svc.DescribeDRTAccess(ctx, &shield.DescribeDRTAccessInput{}); err == nil {
+		if roleArn := StringValue(drt.RoleArn); roleArn != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				roleArn, roleArn, "aws_shield_drt_access_role_arn_association", "aws", defaultAllowEmptyValues))
+		}
+		for _, bucket := range drt.LogBucketList {
+			if bucket == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				bucket, bucket, "aws_shield_drt_access_log_bucket_association", "aws", defaultAllowEmptyValues))
 		}
 	}
 
