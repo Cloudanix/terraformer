@@ -104,6 +104,21 @@ func (g *DynamoDbGenerator) InitResources() error {
 		}
 		startName = out.LastEvaluatedGlobalTableName
 	}
+
+	for ep := dynamodb.NewListExportsPaginator(svc, &dynamodb.ListExportsInput{}); ep.HasMorePages(); {
+		page, err := ep.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, e := range page.ExportSummaries {
+			arn := StringValue(e.ExportArn)
+			if arn == "" || e.ExportStatus != "COMPLETED" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_dynamodb_table_export", "aws", dynamodbAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
