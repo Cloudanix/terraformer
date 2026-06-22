@@ -1078,6 +1078,7 @@ aws_vpc
 aws_vpc_dhcp_options
 aws_vpc_endpoint
 aws_vpc_endpoint_connection_notification
+aws_vpc_endpoint_private_dns
 aws_vpc_endpoint_service
 aws_vpc_ipam
 aws_vpc_ipam_pool

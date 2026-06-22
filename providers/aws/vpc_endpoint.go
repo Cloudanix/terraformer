@@ -31,13 +31,18 @@ type VpcEndpointGenerator struct {
 func (g *VpcEndpointGenerator) createResources(vpceps *ec2.DescribeVpcEndpointsOutput) []terraformutils.Resource {
 	var resources []terraformutils.Resource
 	for _, vpcEndpoint := range vpceps.VpcEndpoints {
+		id := StringValue(vpcEndpoint.VpcEndpointId)
 		resources = append(resources, terraformutils.NewSimpleResource(
-			StringValue(vpcEndpoint.VpcEndpointId),
-			StringValue(vpcEndpoint.VpcEndpointId),
+			id,
+			id,
 			"aws_vpc_endpoint",
 			"aws",
 			VpcAllowEmptyValues,
 		))
+		if vpcEndpoint.VpcEndpointType == "Interface" && vpcEndpoint.PrivateDnsEnabled != nil && *vpcEndpoint.PrivateDnsEnabled {
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpc_endpoint_private_dns", "aws", VpcEndpointAllowEmptyValues))
+		}
 	}
 	return resources
 }
