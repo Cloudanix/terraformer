@@ -132,6 +132,26 @@ func (g *SSOAdminGenerator) InitResources() error {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						arn, arn, "aws_ssoadmin_application_assignment_configuration", "aws", defaultAllowEmptyValues))
 				}
+				aaInput := &ssoadmin.ListApplicationAssignmentsInput{ApplicationArn: aws.String(arn)}
+				for {
+					aaOut, err := svc.ListApplicationAssignments(ctx, aaInput)
+					if err != nil {
+						break
+					}
+					for _, a := range aaOut.ApplicationAssignments {
+						pid := StringValue(a.PrincipalId)
+						if pid == "" {
+							continue
+						}
+						pt := string(a.PrincipalType)
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							pid+","+pt+","+arn, pid+"_"+arn, "aws_ssoadmin_application_assignment", "aws", defaultAllowEmptyValues))
+					}
+					if aaOut.NextToken == nil {
+						break
+					}
+					aaInput.NextToken = aaOut.NextToken
+				}
 				for sp := ssoadmin.NewListApplicationAccessScopesPaginator(svc, &ssoadmin.ListApplicationAccessScopesInput{ApplicationArn: aws.String(arn)}); sp.HasMorePages(); {
 					spage, err := sp.NextPage(ctx)
 					if err != nil {
