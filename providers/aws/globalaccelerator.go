@@ -108,6 +108,35 @@ func (g *GlobalAcceleratorGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(a.Name), "aws_globalaccelerator_custom_routing_accelerator", "aws", defaultAllowEmptyValues))
+
+			for lp := globalaccelerator.NewListCustomRoutingListenersPaginator(svc, &globalaccelerator.ListCustomRoutingListenersInput{AcceleratorArn: aws.String(arn)}); lp.HasMorePages(); {
+				lpage, err := lp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, l := range lpage.Listeners {
+					listenerArn := StringValue(l.ListenerArn)
+					if listenerArn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						listenerArn, listenerArn, "aws_globalaccelerator_custom_routing_listener", "aws", defaultAllowEmptyValues))
+					for ep := globalaccelerator.NewListCustomRoutingEndpointGroupsPaginator(svc, &globalaccelerator.ListCustomRoutingEndpointGroupsInput{ListenerArn: aws.String(listenerArn)}); ep.HasMorePages(); {
+						epage, err := ep.NextPage(ctx)
+						if err != nil {
+							break
+						}
+						for _, grp := range epage.EndpointGroups {
+							gArn := StringValue(grp.EndpointGroupArn)
+							if gArn == "" {
+								continue
+							}
+							g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+								gArn, gArn, "aws_globalaccelerator_custom_routing_endpoint_group", "aws", defaultAllowEmptyValues))
+						}
+					}
+				}
+			}
 		}
 	}
 
