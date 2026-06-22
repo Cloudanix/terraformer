@@ -165,7 +165,51 @@ func (g *ElastiCacheGenerator) InitResources() error {
 	if err := g.loadSubnetGroups(svc); err != nil {
 		return err
 	}
+	if err := g.loadUsers(svc); err != nil {
+		return err
+	}
+	if err := g.loadUserGroups(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *ElastiCacheGenerator) loadUsers(svc *elasticache.Client) error {
+	p := elasticache.NewDescribeUsersPaginator(svc, &elasticache.DescribeUsersInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, user := range page.Users {
+			id := StringValue(user.UserId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_elasticache_user", "aws", elastiCacheAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *ElastiCacheGenerator) loadUserGroups(svc *elasticache.Client) error {
+	p := elasticache.NewDescribeUserGroupsPaginator(svc, &elasticache.DescribeUserGroupsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, group := range page.UserGroups {
+			id := StringValue(group.UserGroupId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_elasticache_user_group", "aws", elastiCacheAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
