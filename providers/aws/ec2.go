@@ -146,6 +146,21 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			if endpointID == "" {
 				continue
 			}
+			for np := ec2.NewDescribeClientVpnTargetNetworksPaginator(svc, &ec2.DescribeClientVpnTargetNetworksInput{ClientVpnEndpointId: aws.String(endpointID)}); np.HasMorePages(); {
+				npage, err := np.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, n := range npage.ClientVpnTargetNetworks {
+					assocID := aws.ToString(n.AssociationId)
+					if assocID == "" {
+						continue
+					}
+					id := endpointID + "," + assocID
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id, id, "aws_ec2_client_vpn_network_association", "aws", ec2AllowEmptyValues))
+				}
+			}
 			for rp := ec2.NewDescribeClientVpnRoutesPaginator(svc, &ec2.DescribeClientVpnRoutesInput{ClientVpnEndpointId: aws.String(endpointID)}); rp.HasMorePages(); {
 				rpage, err := rp.NextPage(ctx)
 				if err != nil {
