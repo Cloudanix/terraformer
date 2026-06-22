@@ -375,6 +375,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_securityhub_account`
     * `aws_securityhub_member`
     * `aws_securityhub_standards_subscription`
+    * `aws_securityhub_action_target`
+    * `aws_securityhub_insight`
+    * `aws_securityhub_finding_aggregator`
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
 *   `servicediscovery`

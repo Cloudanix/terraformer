@@ -52,7 +52,73 @@ func (g *SecurityhubGenerator) InitResources() error {
 		return err
 	}
 	err = g.addStandardsSubscription(client, *account)
-	return err
+	if err != nil {
+		return err
+	}
+	if err := g.addActionTargets(client); err != nil {
+		return err
+	}
+	if err := g.addInsights(client); err != nil {
+		return err
+	}
+	return g.addFindingAggregators(client)
+}
+
+func (g *SecurityhubGenerator) addActionTargets(svc *securityhub.Client) error {
+	p := securityhub.NewDescribeActionTargetsPaginator(svc, &securityhub.DescribeActionTargetsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, at := range page.ActionTargets {
+			arn := StringValue(at.ActionTargetArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(at.Name), "aws_securityhub_action_target", "aws", securityhubAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *SecurityhubGenerator) addInsights(svc *securityhub.Client) error {
+	p := securityhub.NewGetInsightsPaginator(svc, &securityhub.GetInsightsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, insight := range page.Insights {
+			arn := StringValue(insight.InsightArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(insight.Name), "aws_securityhub_insight", "aws", securityhubAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *SecurityhubGenerator) addFindingAggregators(svc *securityhub.Client) error {
+	p := securityhub.NewListFindingAggregatorsPaginator(svc, &securityhub.ListFindingAggregatorsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, fa := range page.FindingAggregators {
+			arn := StringValue(fa.FindingAggregatorArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_securityhub_finding_aggregator", "aws", securityhubAllowEmptyValues))
+		}
+	}
+	return nil
 }
 
 func (g *SecurityhubGenerator) addAccount(client *securityhub.Client, accountNumber string) (bool, error) {
