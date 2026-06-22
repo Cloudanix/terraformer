@@ -945,6 +945,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_msk_vpc_connection`
 *   `nacl`
     * `aws_network_acl`
+    * `aws_network_acl_rule`
 *   `network-firewall`
     * `aws_networkfirewall_firewall`
     * `aws_networkfirewall_firewall_policy`

@@ -16,6 +16,7 @@ package aws
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -31,17 +32,37 @@ func (NaclGenerator) createResources(nacls *ec2.DescribeNetworkAclsOutput) []ter
 	resources := []terraformutils.Resource{}
 	var resourceType string
 	for _, nacl := range nacls.NetworkAcls {
-		if nacl.IsDefault != nil && *nacl.IsDefault {
+		isDefault := nacl.IsDefault != nil && *nacl.IsDefault
+		if isDefault {
 			resourceType = "aws_default_network_acl"
 		} else {
 			resourceType = "aws_network_acl"
 		}
+		naclID := StringValue(nacl.NetworkAclId)
 		resources = append(resources, terraformutils.NewSimpleResource(
-			StringValue(nacl.NetworkAclId),
-			StringValue(nacl.NetworkAclId),
+			naclID,
+			naclID,
 			resourceType,
 			"aws",
 			NaclAllowEmptyValues))
+		// Standalone rules only for non-default ACLs; skip the implicit 32767 deny.
+		if isDefault {
+			continue
+		}
+		for _, entry := range nacl.Entries {
+			if entry.RuleNumber == nil || *entry.RuleNumber == 32767 {
+				continue
+			}
+			ruleNum := strconv.Itoa(int(*entry.RuleNumber))
+			protocol := StringValue(entry.Protocol)
+			egress := "false"
+			if entry.Egress != nil && *entry.Egress {
+				egress = "true"
+			}
+			id := naclID + ":" + ruleNum + ":" + protocol + ":" + egress
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, id, "aws_network_acl_rule", "aws", NaclAllowEmptyValues))
+		}
 	}
 	return resources
 }
