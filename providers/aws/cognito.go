@@ -37,6 +37,11 @@ func (g *CognitoGenerator) loadIdentityPools(svc *cognitoidentity.Client) error 
 				"aws_cognito_identity_pool",
 				"aws",
 				[]string{}))
+			poolID := id
+			if roles, err := svc.GetIdentityPoolRoles(context.TODO(), &cognitoidentity.GetIdentityPoolRolesInput{IdentityPoolId: &poolID}); err == nil && len(roles.Roles) > 0 {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					poolID, poolID, "aws_cognito_identity_pool_roles_attachment", "aws", []string{}))
+			}
 		}
 	}
 
