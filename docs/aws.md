@@ -1075,6 +1075,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3_bucket_replication_configuration`
     * `aws_s3_bucket_accelerate_configuration`
     * `aws_s3_bucket_notification`
+    * `aws_s3_bucket_request_payment_configuration`
+    * `aws_s3_bucket_acl`
+    * `aws_s3_bucket_analytics_configuration`
+    * `aws_s3_bucket_metric`
+    * `aws_s3_bucket_inventory`
+    * `aws_s3_bucket_intelligent_tiering_configuration`
+    * `aws_s3_directory_bucket`
 *   `s3control`
     * `aws_s3control_storage_lens_configuration`
     * `aws_s3control_access_grants_instance`

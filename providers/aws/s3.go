@@ -134,6 +134,40 @@ func (g *S3Generator) bucketSubresources(svc *s3.Client, bucket string) []terraf
 		(out.EventBridgeConfiguration != nil || len(out.LambdaFunctionConfigurations) > 0 || len(out.QueueConfigurations) > 0 || len(out.TopicConfigurations) > 0) {
 		add("aws_s3_bucket_notification")
 	}
+	if out, err := svc.GetBucketRequestPayment(ctx, &s3.GetBucketRequestPaymentInput{Bucket: &bucket}); err == nil && out.Payer == "Requester" {
+		add("aws_s3_bucket_request_payment_configuration")
+	}
+	if _, err := svc.GetBucketAcl(ctx, &s3.GetBucketAclInput{Bucket: &bucket}); err == nil {
+		add("aws_s3_bucket_acl")
+	}
+
+	// Named, listable per-bucket configurations; import ID is "<bucket>:<id>".
+	addNamed := func(id, tfType string) {
+		if id != "" {
+			resources = append(resources, terraformutils.NewSimpleResource(
+				bucket+":"+id, bucket+"_"+id, tfType, "aws", S3AllowEmptyValues))
+		}
+	}
+	if out, err := svc.ListBucketAnalyticsConfigurations(ctx, &s3.ListBucketAnalyticsConfigurationsInput{Bucket: &bucket}); err == nil {
+		for _, c := range out.AnalyticsConfigurationList {
+			addNamed(StringValue(c.Id), "aws_s3_bucket_analytics_configuration")
+		}
+	}
+	if out, err := svc.ListBucketMetricsConfigurations(ctx, &s3.ListBucketMetricsConfigurationsInput{Bucket: &bucket}); err == nil {
+		for _, c := range out.MetricsConfigurationList {
+			addNamed(StringValue(c.Id), "aws_s3_bucket_metric")
+		}
+	}
+	if out, err := svc.ListBucketInventoryConfigurations(ctx, &s3.ListBucketInventoryConfigurationsInput{Bucket: &bucket}); err == nil {
+		for _, c := range out.InventoryConfigurationList {
+			addNamed(StringValue(c.Id), "aws_s3_bucket_inventory")
+		}
+	}
+	if out, err := svc.ListBucketIntelligentTieringConfigurations(ctx, &s3.ListBucketIntelligentTieringConfigurationsInput{Bucket: &bucket}); err == nil {
+		for _, c := range out.IntelligentTieringConfigurationList {
+			addNamed(StringValue(c.Id), "aws_s3_bucket_intelligent_tiering_configuration")
+		}
+	}
 	return resources
 }
 
@@ -151,6 +185,22 @@ func (g *S3Generator) InitResources() error {
 		return err
 	}
 	g.Resources = g.createResources(config, buckets, g.GetArgs()["region"].(string))
+
+	// S3 Express directory buckets (separate API).
+	for p := s3.NewListDirectoryBucketsPaginator(svc, &s3.ListDirectoryBucketsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, b := range page.Buckets {
+			name := StringValue(b.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_s3_directory_bucket", "aws", S3AllowEmptyValues))
+		}
+	}
 	return nil
 }
 
