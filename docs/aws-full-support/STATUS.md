@@ -66,9 +66,17 @@ remaining §4a service — fetch its module, then follow the §5 recipe.
 Every change: one focused commit + docs/aws.md + serviceScope entry where new.
 `go build ./...` and `go test ./...` green.
 
+## Milestone: all net-new services registered
+Every AWS service in the provider that (a) has a terraform-provider-aws resource
+and (b) exposes a List/Describe API is now registered — **234 services**. The
+remaining `missing-resources.txt` entries are exclusively (1) sub-resources of
+already-registered services (deepening work) or (2) documented exclusions in
+`no-list-api.md` (no independent list API, data-plane, deprecated, aliases, or
+account singletons). No buildable net-new *service* remains.
+
 ## Coverage tally
 
-**206 services registered** in `GetSupportedService()` (was 90 at the start of
+**234 services registered** in `GetSupportedService()` (was 90 at the start of
 this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; §4a P4 done
 across 6 batches. `go build ./...` and `go test ./...` green; `serviceScope`
 assertion passes (incl. the new `route53domains` eastOnly entry); `go mod tidy`
