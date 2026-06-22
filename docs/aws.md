@@ -1358,6 +1358,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `workspaces`
     * `aws_workspaces_directory`
     * `aws_workspaces_ip_group`
+    * `aws_workspaces_connection_alias`
     * `aws_workspaces_workspace`
 *   `workspaces-web`
     * `aws_workspacesweb_portal`

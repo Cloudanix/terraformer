@@ -39,6 +39,32 @@ func (g *WorkspacesGenerator) InitResources() error {
 	if err := g.loadWorkspacesIPGroup(svc); err != nil {
 		return err
 	}
+	if err := g.loadConnectionAliases(svc); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *WorkspacesGenerator) loadConnectionAliases(svc *workspaces.Client) error {
+	var nextToken *string
+	for {
+		out, err := svc.DescribeConnectionAliases(context.TODO(), &workspaces.DescribeConnectionAliasesInput{NextToken: nextToken})
+		if err != nil {
+			return err
+		}
+		for _, alias := range out.ConnectionAliases {
+			id := StringValue(alias.AliasId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_workspaces_connection_alias", "aws", workspacesAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		nextToken = out.NextToken
+	}
 	return nil
 }
 

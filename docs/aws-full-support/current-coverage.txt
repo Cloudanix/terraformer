@@ -1087,6 +1087,7 @@ aws_wafv2_web_acl
 aws_wafv2_web_acl_association
 aws_wafv2_web_acl_logging_configuration
 aws_wellarchitected_workload
+aws_workspaces_connection_alias
 aws_workspaces_directory
 aws_workspaces_ip_group
 aws_workspaces_workspace
