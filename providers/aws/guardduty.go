@@ -138,6 +138,17 @@ func (g *GuardDutyGenerator) addDetectorChildren(svc *guardduty.Client, detector
 		}
 	}
 
+	if det, err := svc.GetDetector(ctx, &guardduty.GetDetectorInput{DetectorId: aws.String(detectorID)}); err == nil {
+		for _, f := range det.Features {
+			feature := string(f.Name)
+			if feature == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				detectorID+"/"+feature, detectorID+"_"+feature, "aws_guardduty_detector_feature", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	members := guardduty.NewListMembersPaginator(svc, &guardduty.ListMembersInput{DetectorId: aws.String(detectorID)})
 	for members.HasMorePages() {
 		page, err := members.NextPage(ctx)
