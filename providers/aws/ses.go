@@ -49,7 +49,32 @@ func (g *SesGenerator) InitResources() error {
 	if err := g.loadRuleSets(svc); err != nil {
 		return err
 	}
+	if err := g.loadReceiptExtras(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *SesGenerator) loadReceiptExtras(svc *ses.Client) error {
+	ctx := context.TODO()
+	if filters, err := svc.ListReceiptFilters(ctx, &ses.ListReceiptFiltersInput{}); err == nil {
+		for _, f := range filters.Filters {
+			name := StringValue(f.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_ses_receipt_filter", "aws", sesAllowEmptyValues))
+		}
+	}
+	if active, err := svc.DescribeActiveReceiptRuleSet(ctx, &ses.DescribeActiveReceiptRuleSetInput{}); err == nil && active.Metadata != nil {
+		name := StringValue(active.Metadata.Name)
+		if name != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_ses_active_receipt_rule_set", "aws", sesAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
@@ -69,6 +94,16 @@ func (g *SesGenerator) loadDomainIdentities(svc *ses.Client) error {
 				"aws_ses_domain_identity",
 				"aws",
 				sesAllowEmptyValues))
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				identity, identity, "aws_ses_domain_dkim", "aws", sesAllowEmptyValues))
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				identity, identity, "aws_ses_domain_identity_verification", "aws", sesAllowEmptyValues))
+			if attrs, err := svc.GetIdentityMailFromDomainAttributes(context.TODO(), &ses.GetIdentityMailFromDomainAttributesInput{Identities: []string{identity}}); err == nil {
+				if a, ok := attrs.MailFromDomainAttributes[identity]; ok && StringValue(a.MailFromDomain) != "" {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						identity, identity, "aws_ses_domain_mail_from", "aws", sesAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
