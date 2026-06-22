@@ -88,6 +88,41 @@ func (g *SecurityhubGenerator) InitResources() error {
 				arn, StringValue(cp.Name), "aws_securityhub_configuration_policy", "aws", securityhubAllowEmptyValues))
 		}
 	}
+
+	ctx := context.TODO()
+	for p := securityhub.NewListEnabledProductsForImportPaginator(client, &securityhub.ListEnabledProductsForImportInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, arn := range page.ProductSubscriptions {
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_securityhub_product_subscription", "aws", securityhubAllowEmptyValues))
+		}
+	}
+
+	for p := securityhub.NewListOrganizationAdminAccountsPaginator(client, &securityhub.ListOrganizationAdminAccountsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, a := range page.AdminAccounts {
+			id := StringValue(a.AccountId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_securityhub_organization_admin_account", "aws", securityhubAllowEmptyValues))
+		}
+	}
+
+	if _, err := client.DescribeOrganizationConfiguration(ctx, &securityhub.DescribeOrganizationConfigurationInput{}); err == nil {
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			*account, *account, "aws_securityhub_organization_configuration", "aws", securityhubAllowEmptyValues))
+	}
 	return nil
 }
 

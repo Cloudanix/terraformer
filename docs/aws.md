@@ -938,6 +938,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_securityhub_finding_aggregator`
     * `aws_securityhub_automation_rule`
     * `aws_securityhub_configuration_policy`
+    * `aws_securityhub_product_subscription`
+    * `aws_securityhub_organization_admin_account`
+    * `aws_securityhub_organization_configuration`
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
     * `aws_servicecatalog_product`
