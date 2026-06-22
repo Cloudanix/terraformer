@@ -84,8 +84,6 @@ meta entries (`configure`, `login`, …). These have no importable infrastructur
 ## Needs more than a single-paginator generator (built where feasible)
 Built with extra handling: `quicksight`/`s3control` (account-id scoped),
 `mediaconvert` (DescribeEndpoints first), `globalaccelerator`/`shield`
-(partition-global), `route53domains` (us-east-1 only).
-
-Not yet built — multi-step / region-specific control plane, revisit on demand:
-- **route53-recovery-control-config**, **route53-recovery-readiness** — recovery
-  control plane with its own regional endpoints.
+(partition-global), `route53domains` (us-east-1 only),
+`route53recoverycontrolconfig`/`route53recoveryreadiness` (nested
+cluster→panel→routing-control/safety-rule and readiness check/group/resource-set).
