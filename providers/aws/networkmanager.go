@@ -79,6 +79,24 @@ func (g *NetworkManagerGenerator) InitResources() error {
 		}
 	}
 
+	attachmentTypes := map[string]string{
+		"CONNECT":                     "aws_networkmanager_connect_attachment",
+		"SITE_TO_SITE_VPN":            "aws_networkmanager_site_to_site_vpn_attachment",
+		"TRANSIT_GATEWAY_ROUTE_TABLE": "aws_networkmanager_transit_gateway_route_table_attachment",
+		"VPC":                         "aws_networkmanager_vpc_attachment",
+	}
+	for ap := networkmanager.NewListAttachmentsPaginator(svc, &networkmanager.ListAttachmentsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.Attachments {
+			if tfType, ok := attachmentTypes[string(a.AttachmentType)]; ok {
+				add(StringValue(a.AttachmentId), tfType)
+			}
+		}
+	}
+
 	for pp := networkmanager.NewListPeeringsPaginator(svc, &networkmanager.ListPeeringsInput{}); pp.HasMorePages(); {
 		page, err := pp.NextPage(ctx)
 		if err != nil {
