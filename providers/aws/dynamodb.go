@@ -70,6 +70,17 @@ func (g *DynamoDbGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				tableName, tableName, "aws_dynamodb_contributor_insights", "aws", dynamodbAllowEmptyValues))
 		}
+		if out, err := svc.DescribeTable(context.TODO(),
+			&dynamodb.DescribeTableInput{TableName: &tableName}); err == nil && out.Table != nil {
+			for _, r := range out.Table.Replicas {
+				region := StringValue(r.RegionName)
+				if region == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					tableName+":"+region, tableName+"_"+region, "aws_dynamodb_table_replica", "aws", dynamodbAllowEmptyValues))
+			}
+		}
 	}
 
 	// Legacy (v2017.11.29) global tables. Newer global tables are modeled as
