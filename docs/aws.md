@@ -366,6 +366,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_detective_organization_admin_account`
 *   `devicefarm`
     * `aws_devicefarm_project`
+    * `aws_devicefarm_device_pool`
+    * `aws_devicefarm_upload`
+    * `aws_devicefarm_network_profile`
     * `aws_devicefarm_instance_profile`
     * `aws_devicefarm_test_grid_project`
 *   `dlm`

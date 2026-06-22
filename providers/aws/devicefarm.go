@@ -33,22 +33,61 @@ func (g *DeviceFarmGenerator) InitResources() error {
 		return e
 	}
 	svc := devicefarm.NewFromConfig(config)
+	ctx := context.TODO()
 	p := devicefarm.NewListProjectsPaginator(svc, &devicefarm.ListProjectsInput{})
 	var resources []terraformutils.Resource
+	var projectArns []string
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(ctx)
 		if e != nil {
 			return e
 		}
 		for _, project := range page.Projects {
 			projectArn := StringValue(project.Arn)
 			projectName := StringValue(project.Name)
+			projectArns = append(projectArns, projectArn)
 			resources = append(resources, terraformutils.NewSimpleResource(
 				projectArn,
 				projectName,
 				"aws_devicefarm_project",
 				"aws",
 				devicefarmAllowEmptyValues))
+		}
+	}
+
+	for _, projectArn := range projectArns {
+		arn := projectArn
+		for dp := devicefarm.NewListDevicePoolsPaginator(svc, &devicefarm.ListDevicePoolsInput{Arn: &arn}); dp.HasMorePages(); {
+			page, err := dp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, x := range page.DevicePools {
+				if a := StringValue(x.Arn); a != "" {
+					resources = append(resources, terraformutils.NewSimpleResource(
+						a, StringValue(x.Name), "aws_devicefarm_device_pool", "aws", devicefarmAllowEmptyValues))
+				}
+			}
+		}
+		for up := devicefarm.NewListUploadsPaginator(svc, &devicefarm.ListUploadsInput{Arn: &arn}); up.HasMorePages(); {
+			page, err := up.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, x := range page.Uploads {
+				if a := StringValue(x.Arn); a != "" {
+					resources = append(resources, terraformutils.NewSimpleResource(
+						a, StringValue(x.Name), "aws_devicefarm_upload", "aws", devicefarmAllowEmptyValues))
+				}
+			}
+		}
+		if np, err := svc.ListNetworkProfiles(ctx, &devicefarm.ListNetworkProfilesInput{Arn: &arn}); err == nil {
+			for _, x := range np.NetworkProfiles {
+				if a := StringValue(x.Arn); a != "" {
+					resources = append(resources, terraformutils.NewSimpleResource(
+						a, StringValue(x.Name), "aws_devicefarm_network_profile", "aws", devicefarmAllowEmptyValues))
+				}
+			}
 		}
 	}
 	if profiles, err := svc.ListInstanceProfiles(context.TODO(), &devicefarm.ListInstanceProfilesInput{}); err == nil {
