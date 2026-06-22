@@ -16,6 +16,7 @@ package aws
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/service/lightsail"
 
@@ -77,6 +78,14 @@ func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
 		for _, x := range out.Buckets {
 			bucket := StringValue(x.Name)
 			add(bucket, "aws_lightsail_bucket")
+			for _, r := range x.ResourcesReceivingAccess {
+				rName := StringValue(r.Name)
+				if rName == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					bucket+","+rName, bucket+"_"+rName, "aws_lightsail_bucket_resource_access", "aws", defaultAllowEmptyValues))
+			}
 			if keys, err := svc.GetBucketAccessKeys(ctx, &lightsail.GetBucketAccessKeysInput{BucketName: x.Name}); err == nil {
 				for _, k := range keys.AccessKeys {
 					keyID := StringValue(k.AccessKeyId)
@@ -96,7 +105,21 @@ func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
 	}
 	if out, err := svc.GetContainerServices(ctx, &lightsail.GetContainerServicesInput{}); err == nil {
 		for _, x := range out.ContainerServices {
-			add(StringValue(x.ContainerServiceName), "aws_lightsail_container_service")
+			csName := StringValue(x.ContainerServiceName)
+			add(csName, "aws_lightsail_container_service")
+			if csName == "" {
+				continue
+			}
+			if deps, err := svc.GetContainerServiceDeployments(ctx, &lightsail.GetContainerServiceDeploymentsInput{ServiceName: x.ContainerServiceName}); err == nil {
+				for _, d := range deps.Deployments {
+					if d.Version == nil {
+						continue
+					}
+					ver := strconv.Itoa(int(*d.Version))
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						csName+"/"+ver, csName+"_"+ver, "aws_lightsail_container_service_deployment_version", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	if out, err := svc.GetRelationalDatabases(ctx, &lightsail.GetRelationalDatabasesInput{}); err == nil {
@@ -116,7 +139,17 @@ func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
 	}
 	if out, err := svc.GetDomains(ctx, &lightsail.GetDomainsInput{}); err == nil {
 		for _, x := range out.Domains {
-			add(StringValue(x.Name), "aws_lightsail_domain")
+			domain := StringValue(x.Name)
+			add(domain, "aws_lightsail_domain")
+			for _, e := range x.DomainEntries {
+				eName, eType, eTarget := StringValue(e.Name), StringValue(e.Type), StringValue(e.Target)
+				if eName == "" || eType == "" {
+					continue
+				}
+				id := eName + "_" + domain + "_" + eType + "_" + eTarget
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, eName+"_"+eType, "aws_lightsail_domain_entry", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	if out, err := svc.GetKeyPairs(ctx, &lightsail.GetKeyPairsInput{}); err == nil {

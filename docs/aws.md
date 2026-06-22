@@ -768,12 +768,15 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `lightsail`
     * `aws_lightsail_instance`
     * `aws_lightsail_bucket`
+    * `aws_lightsail_bucket_resource_access`
     * `aws_lightsail_certificate`
     * `aws_lightsail_container_service`
+    * `aws_lightsail_container_service_deployment_version`
     * `aws_lightsail_database`
     * `aws_lightsail_disk`
     * `aws_lightsail_distribution`
     * `aws_lightsail_domain`
+    * `aws_lightsail_domain_entry`
     * `aws_lightsail_key_pair`
     * `aws_lightsail_lb`
     * `aws_lightsail_static_ip`
