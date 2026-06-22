@@ -48,6 +48,21 @@ func (g *CodeBuildGenerator) InitResources() error {
 				codebuildAllowEmptyValues))
 		}
 	}
+
+	rg := codebuild.NewListReportGroupsPaginator(svc, &codebuild.ListReportGroupsInput{})
+	for rg.HasMorePages() {
+		page, err := rg.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, arn := range page.ReportGroups {
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_codebuild_report_group", "aws", codebuildAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

@@ -101,6 +101,7 @@ aws_cloudwatch_metric_alarm
 aws_cloudwatch_metric_stream
 aws_codeartifact_domain
 aws_codebuild_project
+aws_codebuild_report_group
 aws_codecommit_approval_rule_template
 aws_codecommit_repository
 aws_codedeploy_app

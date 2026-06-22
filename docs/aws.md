@@ -200,6 +200,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudwatch_metric_stream`
 *   `codebuild`
     * `aws_codebuild_project`
+    * `aws_codebuild_report_group`
 *   `codecommit`
     * `aws_codecommit_repository`
 *   `codedeploy`
