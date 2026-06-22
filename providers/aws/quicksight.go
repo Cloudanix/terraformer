@@ -43,6 +43,11 @@ func (g *QuickSightGenerator) InitResources() error {
 	svc := quicksight.NewFromConfig(config)
 	ctx := context.TODO()
 
+	if sub, err := svc.DescribeAccountSubscription(ctx, &quicksight.DescribeAccountSubscriptionInput{AwsAccountId: aws.String(accountID)}); err == nil && sub.AccountInfo != nil {
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			accountID, accountID, "aws_quicksight_account_subscription", "aws", defaultAllowEmptyValues))
+	}
+
 	dataSets := quicksight.NewListDataSetsPaginator(svc, &quicksight.ListDataSetsInput{AwsAccountId: aws.String(accountID)})
 	for dataSets.HasMorePages() {
 		page, err := dataSets.NextPage(ctx)

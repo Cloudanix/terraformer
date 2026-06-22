@@ -1097,6 +1097,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_rds_integration`
     * `aws_rds_export_task`
 *   `quicksight`
+    * `aws_quicksight_account_subscription`
     * `aws_quicksight_data_set`
     * `aws_quicksight_data_source`
     * `aws_quicksight_analysis`
