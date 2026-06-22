@@ -1091,4 +1091,6 @@ aws_workspaces_directory
 aws_workspaces_ip_group
 aws_workspaces_workspace
 aws_workspacesweb_portal
+aws_xray_encryption_config
+aws_xray_group
 aws_xray_sampling_rule

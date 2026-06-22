@@ -39,5 +39,28 @@ func (g *XrayGenerator) InitResources() error {
 		}
 	}
 
+	for gp := xray.NewGetGroupsPaginator(svc, &xray.GetGroupsInput{}); gp.HasMorePages(); {
+		page, err := gp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, grp := range page.Groups {
+			arn := StringValue(grp.GroupARN)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(grp.GroupName), "aws_xray_group", "aws", xrayAllowEmptyValues))
+		}
+	}
+
+	// Encryption config is a region-level singleton; import ID is the region.
+	if region := config.Region; region != "" {
+		if _, err := svc.GetEncryptionConfig(context.TODO(), &xray.GetEncryptionConfigInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				region, region, "aws_xray_encryption_config", "aws", xrayAllowEmptyValues))
+		}
+	}
+
 	return nil
 }

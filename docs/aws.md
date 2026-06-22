@@ -1363,6 +1363,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_workspacesweb_portal`
 *   `xray`
     * `aws_xray_sampling_rule`
+    * `aws_xray_group`
+    * `aws_xray_encryption_config`
 
 #### Global services
 
