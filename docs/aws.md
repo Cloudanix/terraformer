@@ -453,6 +453,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_identitystore_group_membership`
 *   `igw`
     * `aws_internet_gateway`
+*   `inspector`
+    * `aws_inspector_assessment_target`
+    * `aws_inspector_assessment_template`
 *   `inspector2`
     * `aws_inspector2_delegated_admin_account`
     * `aws_inspector2_member_association`
