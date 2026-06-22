@@ -1237,6 +1237,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssm_resource_data_sync`
     * `aws_ssm_maintenance_window_target`
     * `aws_ssm_maintenance_window_task`
+    * `aws_ssm_patch_group`
 *   `ssmquicksetup`
     * `aws_ssmquicksetup_configuration_manager`
 *   `ssm-contacts`

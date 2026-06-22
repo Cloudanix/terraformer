@@ -354,7 +354,6 @@ aws_sqs_queue_policy
 aws_sqs_queue_redrive_allow_policy
 aws_sqs_queue_redrive_policy
 aws_ssm_default_patch_baseline
-aws_ssm_patch_group
 aws_ssm_service_setting
 aws_ssmincidents_replication_set
 aws_ssoadmin_account_assignment

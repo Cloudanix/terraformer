@@ -88,6 +88,25 @@ func (g *SsmGenerator) addActivationsAndSyncs(svc *ssm.Client) error {
 				id, id, "aws_ssm_activation", "aws", ssmAllowEmptyValues))
 		}
 	}
+	for pg := ssm.NewDescribePatchGroupsPaginator(svc, &ssm.DescribePatchGroupsInput{}); pg.HasMorePages(); {
+		page, err := pg.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, m := range page.Mappings {
+			group := StringValue(m.PatchGroup)
+			if group == "" || m.BaselineIdentity == nil {
+				continue
+			}
+			baseline := StringValue(m.BaselineIdentity.BaselineId)
+			if baseline == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				group+","+baseline, group+"_"+baseline, "aws_ssm_patch_group", "aws", ssmAllowEmptyValues))
+		}
+	}
+
 	var syncToken *string
 	for {
 		out, err := svc.ListResourceDataSync(ctx, &ssm.ListResourceDataSyncInput{NextToken: syncToken})
