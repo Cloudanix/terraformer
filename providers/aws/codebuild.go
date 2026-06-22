@@ -33,19 +33,56 @@ func (g *CodeBuildGenerator) InitResources() error {
 		return e
 	}
 	svc := codebuild.NewFromConfig(config)
+	ctx := context.TODO()
+	var projectNames []string
 	p := codebuild.NewListProjectsPaginator(svc, &codebuild.ListProjectsInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(ctx)
 		if e != nil {
 			return e
 		}
 		for _, project := range page.Projects {
+			projectNames = append(projectNames, project)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				project,
 				project,
 				"aws_codebuild_project",
 				"aws",
 				codebuildAllowEmptyValues))
+		}
+	}
+
+	// Webhooks are embedded in each project; batch-fetch in chunks of 100.
+	for i := 0; i < len(projectNames); i += 100 {
+		end := i + 100
+		if end > len(projectNames) {
+			end = len(projectNames)
+		}
+		out, err := svc.BatchGetProjects(ctx, &codebuild.BatchGetProjectsInput{Names: projectNames[i:end]})
+		if err != nil {
+			continue
+		}
+		for _, proj := range out.Projects {
+			if proj.Webhook == nil {
+				continue
+			}
+			name := StringValue(proj.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_codebuild_webhook", "aws", codebuildAllowEmptyValues))
+		}
+	}
+
+	if creds, err := svc.ListSourceCredentials(ctx, &codebuild.ListSourceCredentialsInput{}); err == nil {
+		for _, c := range creds.SourceCredentialsInfos {
+			arn := StringValue(c.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_codebuild_source_credential", "aws", codebuildAllowEmptyValues))
 		}
 	}
 

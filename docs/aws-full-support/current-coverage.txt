@@ -145,6 +145,8 @@ aws_cloudwatch_query_definition
 aws_codeartifact_domain
 aws_codebuild_project
 aws_codebuild_report_group
+aws_codebuild_source_credential
+aws_codebuild_webhook
 aws_codecommit_approval_rule_template
 aws_codecommit_repository
 aws_codedeploy_app
