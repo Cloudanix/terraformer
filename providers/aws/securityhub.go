@@ -258,6 +258,21 @@ func (g *SecurityhubGenerator) addStandardsSubscription(svc *securityhub.Client,
 					"depends_on": []string{"aws_securityhub_account.tfer--" + accountNumber},
 				},
 			))
+			subArn := id
+			for cp := securityhub.NewDescribeStandardsControlsPaginator(svc, &securityhub.DescribeStandardsControlsInput{StandardsSubscriptionArn: &subArn}); cp.HasMorePages(); {
+				cpage, err := cp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, ctrl := range cpage.Controls {
+					arn := StringValue(ctrl.StandardsControlArn)
+					if arn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						arn, arn, "aws_securityhub_standards_control", "aws", securityhubAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

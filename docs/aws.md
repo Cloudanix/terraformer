@@ -1196,6 +1196,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_securityhub_product_subscription`
     * `aws_securityhub_organization_admin_account`
     * `aws_securityhub_organization_configuration`
+    * `aws_securityhub_standards_control`
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
     * `aws_servicecatalog_product`
