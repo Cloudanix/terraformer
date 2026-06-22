@@ -36,6 +36,7 @@ func (g *AthenaGenerator) InitResources() error {
 	svc := athena.NewFromConfig(config)
 	ctx := context.TODO()
 
+	var workgroupNames []string
 	workgroups := athena.NewListWorkGroupsPaginator(svc, &athena.ListWorkGroupsInput{})
 	for workgroups.HasMorePages() {
 		page, err := workgroups.NextPage(ctx)
@@ -47,8 +48,40 @@ func (g *AthenaGenerator) InitResources() error {
 			if name == "" {
 				continue
 			}
+			workgroupNames = append(workgroupNames, name)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_athena_workgroup", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, wgName := range workgroupNames {
+		wg := wgName
+		for nq := athena.NewListNamedQueriesPaginator(svc, &athena.ListNamedQueriesInput{WorkGroup: &wg}); nq.HasMorePages(); {
+			page, err := nq.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, id := range page.NamedQueryIds {
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_athena_named_query", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for ps := athena.NewListPreparedStatementsPaginator(svc, &athena.ListPreparedStatementsInput{WorkGroup: &wg}); ps.HasMorePages(); {
+			page, err := ps.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, s := range page.PreparedStatements {
+				name := StringValue(s.StatementName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					wg+"/"+name, wg+"_"+name, "aws_athena_prepared_statement", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 
