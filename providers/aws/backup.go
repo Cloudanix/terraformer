@@ -53,12 +53,15 @@ func (g *BackupGenerator) InitResources() error {
 			return err
 		}
 		for _, v := range page.BackupVaultList {
-			vaultNames = append(vaultNames, StringValue(v.BackupVaultName))
+			name := StringValue(v.BackupVaultName)
+			vaultNames = append(vaultNames, name)
+			tfType := "aws_backup_vault"
+			if v.VaultType == types.VaultTypeLogicallyAirGappedBackupVault {
+				tfType = "aws_backup_logically_air_gapped_vault"
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, tfType, "aws", defaultAllowEmptyValues))
 		}
-		g.Resources = appendSimpleResources(g.Resources, page.BackupVaultList, "aws_backup_vault",
-			defaultAllowEmptyValues,
-			func(v types.BackupVaultListMember) string { return StringValue(v.BackupVaultName) },
-			func(v types.BackupVaultListMember) string { return StringValue(v.BackupVaultName) })
 	}
 
 	for _, vault := range vaultNames {
