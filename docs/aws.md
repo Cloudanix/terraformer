@@ -653,6 +653,16 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_pinpointsmsvoicev2_phone_number`
 *   `pinpoint`
     * `aws_pinpoint_app`
+    * `aws_pinpoint_adm_channel`
+    * `aws_pinpoint_apns_channel`
+    * `aws_pinpoint_apns_sandbox_channel`
+    * `aws_pinpoint_apns_voip_channel`
+    * `aws_pinpoint_apns_voip_sandbox_channel`
+    * `aws_pinpoint_baidu_channel`
+    * `aws_pinpoint_email_channel`
+    * `aws_pinpoint_gcm_channel`
+    * `aws_pinpoint_sms_channel`
+    * `aws_pinpoint_event_stream`
 *   `proton`
     * `aws_proton_environment`
 *   `qbusiness`
