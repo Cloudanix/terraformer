@@ -221,7 +221,6 @@ aws_load_balancer_policy
 aws_location_tracker_association
 aws_macie2_invitation_accepter
 aws_media_store_container_policy
-aws_medialive_multiplex_program
 aws_msk_cluster_policy
 aws_msk_scram_secret_association
 aws_network_acl_association

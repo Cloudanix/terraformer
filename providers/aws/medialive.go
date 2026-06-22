@@ -62,6 +62,21 @@ func (g *MediaLiveGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_medialive_multiplex", "aws", medialiveAllowEmptyValues))
+			multiplexID := id
+			for pp := medialive.NewListMultiplexProgramsPaginator(svc, &medialive.ListMultiplexProgramsInput{MultiplexId: &multiplexID}); pp.HasMorePages(); {
+				ppage, err := pp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, prog := range ppage.MultiplexPrograms {
+					name := StringValue(prog.ProgramName)
+					if name == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						multiplexID+"/"+name, multiplexID+"_"+name, "aws_medialive_multiplex_program", "aws", medialiveAllowEmptyValues))
+				}
+			}
 		}
 	}
 

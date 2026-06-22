@@ -911,6 +911,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_media_convert_queue`
 *   `medialive`
     * `aws_medialive_multiplex`
+    * `aws_medialive_multiplex_program`
     * `aws_medialive_channel`
     * `aws_medialive_input`
     * `aws_medialive_input_security_group`
