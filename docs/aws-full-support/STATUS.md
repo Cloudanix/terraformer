@@ -76,8 +76,8 @@ account singletons). No buildable net-new *service* remains.
 
 ## Coverage tally
 
-Current coverage: 234 services / **1090** `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = **381** — now overwhelmingly documented exclusions:
+Current coverage: 234 services / **1120** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **351** — now overwhelmingly documented exclusions:
 ~215 structurally-unlistable suffixes (association/attachment/policy/accepter/
 settings), unvendored-SDK resources (evidently, lex v1, devopsguru, drs,
 eventbridge endpoints, paymentcryptography, simpledb), and data-plane/no-import
