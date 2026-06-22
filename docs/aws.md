@@ -59,6 +59,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `bedrock`
     * `aws_bedrock_custom_model`
     * `aws_bedrock_guardrail`
+    * `aws_bedrock_guardrail_version`
+    * `aws_bedrock_provisioned_model_throughput`
 *   `bcmdataexports`
     * `aws_bcmdataexports_export`
 *   `bedrockagent`

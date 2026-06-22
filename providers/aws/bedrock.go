@@ -65,6 +65,27 @@ func (g *BedrockGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(gr.Name), "aws_bedrock_guardrail", "aws", defaultAllowEmptyValues))
+			arn := StringValue(gr.Arn)
+			version := StringValue(gr.Version)
+			if arn != "" && version != "" && version != "DRAFT" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn+","+version, id+"_"+version, "aws_bedrock_guardrail_version", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	for pmt := bedrock.NewListProvisionedModelThroughputsPaginator(svc, &bedrock.ListProvisionedModelThroughputsInput{}); pmt.HasMorePages(); {
+		page, err := pmt.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, m := range page.ProvisionedModelSummaries {
+			arn := StringValue(m.ProvisionedModelArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(m.ProvisionedModelName), "aws_bedrock_provisioned_model_throughput", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
