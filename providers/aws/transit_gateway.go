@@ -57,21 +57,54 @@ func (g *TransitGatewayGenerator) getTransitGatewayRouteTables(svc *ec2.Client) 
 			return err
 		}
 		for _, tgwrt := range page.TransitGatewayRouteTables {
-			// Default route table are automatically created on the tgw creation
-			if *tgwrt.DefaultAssociationRouteTable {
-				continue
-			} else {
+			rtbID := StringValue(tgwrt.TransitGatewayRouteTableId)
+			// Default route tables are auto-created with the tgw, so not emitted as
+			// aws_ec2_transit_gateway_route_table, but their associations/propagations
+			// are still importable resources.
+			if !*tgwrt.DefaultAssociationRouteTable {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-					StringValue(tgwrt.TransitGatewayRouteTableId),
-					StringValue(tgwrt.TransitGatewayRouteTableId),
-					"aws_ec2_transit_gateway_route_table",
-					"aws",
-					tgwAllowEmptyValues,
-				))
+					rtbID, rtbID, "aws_ec2_transit_gateway_route_table", "aws", tgwAllowEmptyValues))
 			}
+			g.loadRouteTableAssociations(svc, rtbID)
 		}
 	}
 	return nil
+}
+
+func (g *TransitGatewayGenerator) loadRouteTableAssociations(svc *ec2.Client, rtbID string) {
+	if rtbID == "" {
+		return
+	}
+	ctx := context.TODO()
+	rtb := rtbID
+	for p := ec2.NewGetTransitGatewayRouteTableAssociationsPaginator(svc, &ec2.GetTransitGatewayRouteTableAssociationsInput{TransitGatewayRouteTableId: &rtb}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, a := range page.Associations {
+			att := StringValue(a.TransitGatewayAttachmentId)
+			if att == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				rtb+"_"+att, rtb+"_"+att, "aws_ec2_transit_gateway_route_table_association", "aws", tgwAllowEmptyValues))
+		}
+	}
+	for p := ec2.NewGetTransitGatewayRouteTablePropagationsPaginator(svc, &ec2.GetTransitGatewayRouteTablePropagationsInput{TransitGatewayRouteTableId: &rtb}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, prop := range page.TransitGatewayRouteTablePropagations {
+			att := StringValue(prop.TransitGatewayAttachmentId)
+			if att == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				rtb+"_"+att, rtb+"_"+att, "aws_ec2_transit_gateway_route_table_propagation", "aws", tgwAllowEmptyValues))
+		}
+	}
 }
 
 func (g *TransitGatewayGenerator) getTransitGatewayVpcAttachments(svc *ec2.Client) error {

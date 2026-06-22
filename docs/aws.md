@@ -1226,6 +1226,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `transit_gateway`
     * `aws_ec2_transit_gateway_route_table`
     * `aws_ec2_transit_gateway_vpc_attachment`
+    * `aws_ec2_transit_gateway_route_table_association`
+    * `aws_ec2_transit_gateway_route_table_propagation`
 *   `vpc`
     * `aws_vpc`
 *   `vpc_endpoint`
