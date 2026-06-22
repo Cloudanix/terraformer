@@ -623,6 +623,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_kendra_thesaurus`
 *   `lexv2-models`
     * `aws_lexv2models_bot`
+    * `aws_lexv2models_bot_version`
+    * `aws_lexv2models_bot_locale`
+    * `aws_lexv2models_intent`
+    * `aws_lexv2models_slot`
+    * `aws_lexv2models_slot_type`
 *   `iotevents`
     * `aws_iotevents_detector_model`
 *   `iotsitewise`

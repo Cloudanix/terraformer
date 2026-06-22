@@ -310,11 +310,6 @@ aws_lex_bot
 aws_lex_bot_alias
 aws_lex_intent
 aws_lex_slot_type
-aws_lexv2models_bot_locale
-aws_lexv2models_bot_version
-aws_lexv2models_intent
-aws_lexv2models_slot
-aws_lexv2models_slot_type
 aws_licensemanager_association
 aws_licensemanager_grant
 aws_licensemanager_grant_accepter

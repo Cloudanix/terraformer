@@ -487,6 +487,11 @@ aws_lb_listener_rule
 aws_lb_target_group
 aws_lb_target_group_attachment
 aws_lexv2models_bot
+aws_lexv2models_bot_locale
+aws_lexv2models_bot_version
+aws_lexv2models_intent
+aws_lexv2models_slot
+aws_lexv2models_slot_type
 aws_licensemanager_license_configuration
 aws_lightsail_bucket
 aws_lightsail_certificate
