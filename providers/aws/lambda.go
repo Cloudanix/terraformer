@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -202,6 +203,40 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 						lambdaAllowEmptyValues,
 					))
 				}
+			}
+
+			ppc := lambda.NewListProvisionedConcurrencyConfigsPaginator(svc, &lambda.ListProvisionedConcurrencyConfigsInput{FunctionName: function.FunctionName})
+			for ppc.HasMorePages() {
+				ppage, err := ppc.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, pc := range ppage.ProvisionedConcurrencyConfigs {
+					arn := StringValue(pc.FunctionArn)
+					parts := strings.Split(arn, ":")
+					qualifier := parts[len(parts)-1]
+					if qualifier == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						functionName+","+qualifier,
+						functionName+"_"+qualifier,
+						"aws_lambda_provisioned_concurrency_config",
+						"aws",
+						lambdaAllowEmptyValues,
+					))
+				}
+			}
+
+			if rmc, err := svc.GetRuntimeManagementConfig(context.TODO(), &lambda.GetRuntimeManagementConfigInput{FunctionName: function.FunctionName}); err == nil &&
+				rmc.UpdateRuntimeOn != "" && rmc.UpdateRuntimeOn != "Auto" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					StringValue(function.FunctionName),
+					StringValue(function.FunctionName),
+					"aws_lambda_runtime_management_config",
+					"aws",
+					lambdaAllowEmptyValues,
+				))
 			}
 		}
 	}

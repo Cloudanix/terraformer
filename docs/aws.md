@@ -621,6 +621,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lambda_function_url`
     * `aws_lambda_layer_version`
     * `aws_lambda_permission`
+    * `aws_lambda_provisioned_concurrency_config`
+    * `aws_lambda_runtime_management_config`
 *   `logs`
     * `aws_cloudwatch_log_group`
     * `aws_cloudwatch_log_destination`
