@@ -640,6 +640,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_globalaccelerator_custom_routing_endpoint_group`
 *   `grafana`
     * `aws_grafana_workspace`
+    * `aws_grafana_license_association`
+    * `aws_grafana_role_association`
     * `aws_grafana_workspace_saml_configuration`
     * `aws_grafana_workspace_service_account`
     * `aws_grafana_workspace_service_account_token`

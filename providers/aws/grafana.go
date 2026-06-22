@@ -47,6 +47,10 @@ func (g *GrafanaGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(ws.Name), "aws_grafana_workspace", "aws", defaultAllowEmptyValues))
+			if ws.LicenseType != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_grafana_license_association", "aws", defaultAllowEmptyValues))
+			}
 			g.loadWorkspaceChildren(svc, id)
 		}
 	}
@@ -60,6 +64,22 @@ func (g *GrafanaGenerator) loadWorkspaceChildren(svc *grafana.Client, workspaceI
 		auth.Authentication != nil && auth.Authentication.Saml != nil {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			workspaceID, workspaceID, "aws_grafana_workspace_saml_configuration", "aws", defaultAllowEmptyValues))
+	}
+	seenRole := map[string]bool{}
+	for pp := grafana.NewListPermissionsPaginator(svc, &grafana.ListPermissionsInput{WorkspaceId: &workspaceID}); pp.HasMorePages(); {
+		page, err := pp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, perm := range page.Permissions {
+			role := string(perm.Role)
+			if role == "" || seenRole[role] {
+				continue
+			}
+			seenRole[role] = true
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				role+"/"+workspaceID, role+"_"+workspaceID, "aws_grafana_role_association", "aws", defaultAllowEmptyValues))
+		}
 	}
 	for p := grafana.NewListWorkspaceServiceAccountsPaginator(svc, &grafana.ListWorkspaceServiceAccountsInput{WorkspaceId: &workspaceID}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
