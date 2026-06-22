@@ -88,6 +88,22 @@ func (g *CloudFormationGenerator) InitResources() error {
 		}
 	}
 
+	cfTypes := cloudformation.NewListTypesPaginator(svc, &cloudformation.ListTypesInput{Visibility: types.VisibilityPrivate})
+	for cfTypes.HasMorePages() {
+		page, err := cfTypes.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, t := range page.TypeSummaries {
+			arn := StringValue(t.TypeArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(t.TypeName), "aws_cloudformation_type", "aws", cloudFormationAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 

@@ -61,7 +61,34 @@ func (g *SecurityhubGenerator) InitResources() error {
 	if err := g.addInsights(client); err != nil {
 		return err
 	}
-	return g.addFindingAggregators(client)
+	if err := g.addFindingAggregators(client); err != nil {
+		return err
+	}
+	if rules, err := client.ListAutomationRules(context.TODO(), &securityhub.ListAutomationRulesInput{}); err == nil {
+		for _, r := range rules.AutomationRulesMetadata {
+			arn := StringValue(r.RuleArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(r.RuleName), "aws_securityhub_automation_rule", "aws", securityhubAllowEmptyValues))
+		}
+	}
+	for p := securityhub.NewListConfigurationPoliciesPaginator(client, &securityhub.ListConfigurationPoliciesInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, cp := range page.ConfigurationPolicySummaries {
+			arn := StringValue(cp.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(cp.Name), "aws_securityhub_configuration_policy", "aws", securityhubAllowEmptyValues))
+		}
+	}
+	return nil
 }
 
 func (g *SecurityhubGenerator) addActionTargets(svc *securityhub.Client) error {

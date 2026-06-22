@@ -171,6 +171,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudformation_stack`
     * `aws_cloudformation_stack_set`
     * `aws_cloudformation_stack_set_instance`
+    * `aws_cloudformation_type`
 *   `cloudfront`
     * `aws_cloudfront_distribution`
     * `aws_cloudfront_cache_policy`
@@ -186,6 +187,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudhsm_v2_hsm`
 *   `cloudtrail`
     * `aws_cloudtrail`
+    * `aws_cloudtrail_event_data_store`
 *   `cloudwatch`
     * `aws_cloudwatch_dashboard`
     * `aws_cloudwatch_event_rule`
@@ -437,6 +439,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_guardduty_threatintelset`
     * `aws_guardduty_member`
     * `aws_guardduty_publishing_destination`
+    * `aws_guardduty_malware_protection_plan`
 *   `imagebuilder`
     * `aws_imagebuilder_image_pipeline`
 *   `ivs`
@@ -800,6 +803,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_securityhub_action_target`
     * `aws_securityhub_insight`
     * `aws_securityhub_finding_aggregator`
+    * `aws_securityhub_automation_rule`
+    * `aws_securityhub_configuration_policy`
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
     * `aws_servicecatalog_product`

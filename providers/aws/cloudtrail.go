@@ -53,5 +53,21 @@ func (g *CloudTrailGenerator) InitResources() error {
 		return err
 	}
 	g.Resources = g.createResources(output.TrailList)
+
+	stores := cloudtrail.NewListEventDataStoresPaginator(svc, &cloudtrail.ListEventDataStoresInput{})
+	for stores.HasMorePages() {
+		page, err := stores.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, eds := range page.EventDataStores {
+			arn := StringValue(eds.EventDataStoreArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(eds.Name), "aws_cloudtrail_event_data_store", "aws", cloudtrailAllowEmptyValues))
+		}
+	}
 	return nil
 }

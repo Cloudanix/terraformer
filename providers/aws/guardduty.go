@@ -61,6 +61,17 @@ func (g *GuardDutyGenerator) InitResources() error {
 			return err
 		}
 	}
+
+	if plans, err := svc.ListMalwareProtectionPlans(ctx, &guardduty.ListMalwareProtectionPlansInput{}); err == nil {
+		for _, p := range plans.MalwareProtectionPlans {
+			id := StringValue(p.MalwareProtectionPlanId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_guardduty_malware_protection_plan", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
