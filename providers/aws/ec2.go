@@ -206,7 +206,18 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			return err
 		}
 		for _, x := range pg.TrafficMirrorFilters {
-			add(aws.ToString(x.TrafficMirrorFilterId), "aws_ec2_traffic_mirror_filter")
+			filterID := aws.ToString(x.TrafficMirrorFilterId)
+			add(filterID, "aws_ec2_traffic_mirror_filter")
+			rules := append([]types.TrafficMirrorFilterRule{}, x.IngressFilterRules...)
+			rules = append(rules, x.EgressFilterRules...)
+			for _, r := range rules {
+				ruleID := aws.ToString(r.TrafficMirrorFilterRuleId)
+				if ruleID == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					ruleID+":"+filterID, ruleID, "aws_ec2_traffic_mirror_filter_rule", "aws", ec2AllowEmptyValues))
+			}
 		}
 	}
 	for p := ec2.NewDescribeTrafficMirrorTargetsPaginator(svc, &ec2.DescribeTrafficMirrorTargetsInput{}); p.HasMorePages(); {

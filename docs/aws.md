@@ -485,6 +485,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ec2_fleet`
     * `aws_ec2_host`
     * `aws_ec2_traffic_mirror_filter`
+    * `aws_ec2_traffic_mirror_filter_rule`
     * `aws_ec2_traffic_mirror_target`
     * `aws_ec2_traffic_mirror_session`
     * `aws_ec2_transit_gateway_peering_attachment`
