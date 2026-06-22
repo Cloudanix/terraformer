@@ -373,7 +373,33 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			return err
 		}
 		for _, x := range pg.TransitGatewayMulticastDomains {
-			add(aws.ToString(x.TransitGatewayMulticastDomainId), "aws_ec2_transit_gateway_multicast_domain")
+			domainID := aws.ToString(x.TransitGatewayMulticastDomainId)
+			add(domainID, "aws_ec2_transit_gateway_multicast_domain")
+			if domainID == "" {
+				continue
+			}
+			for gp := ec2.NewSearchTransitGatewayMulticastGroupsPaginator(svc, &ec2.SearchTransitGatewayMulticastGroupsInput{TransitGatewayMulticastDomainId: aws.String(domainID)}); gp.HasMorePages(); {
+				gpage, err := gp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, grp := range gpage.MulticastGroups {
+					groupIP := aws.ToString(grp.GroupIpAddress)
+					eni := aws.ToString(grp.NetworkInterfaceId)
+					if groupIP == "" || eni == "" {
+						continue
+					}
+					id := domainID + "/" + groupIP + "/" + eni
+					if grp.GroupMember != nil && *grp.GroupMember {
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							id, id, "aws_ec2_transit_gateway_multicast_group_member", "aws", ec2AllowEmptyValues))
+					}
+					if grp.GroupSource != nil && *grp.GroupSource {
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							id, id, "aws_ec2_transit_gateway_multicast_group_source", "aws", ec2AllowEmptyValues))
+					}
+				}
+			}
 		}
 	}
 	for p := ec2.NewDescribeTransitGatewayPolicyTablesPaginator(svc, &ec2.DescribeTransitGatewayPolicyTablesInput{}); p.HasMorePages(); {
