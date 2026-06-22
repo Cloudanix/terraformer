@@ -494,6 +494,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ec2_network_insights_analysis`
     * `aws_ec2_transit_gateway_connect`
     * `aws_ec2_transit_gateway_multicast_domain`
+    * `aws_ec2_transit_gateway_multicast_domain_association`
     * `aws_ec2_transit_gateway_multicast_group_member`
     * `aws_ec2_transit_gateway_multicast_group_source`
     * `aws_ec2_transit_gateway_policy_table`

@@ -396,6 +396,25 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			if domainID == "" {
 				continue
 			}
+			for ap := ec2.NewGetTransitGatewayMulticastDomainAssociationsPaginator(svc, &ec2.GetTransitGatewayMulticastDomainAssociationsInput{TransitGatewayMulticastDomainId: aws.String(domainID)}); ap.HasMorePages(); {
+				apage, err := ap.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, assoc := range apage.MulticastDomainAssociations {
+					attID := aws.ToString(assoc.TransitGatewayAttachmentId)
+					if attID == "" || assoc.Subnet == nil {
+						continue
+					}
+					subnetID := aws.ToString(assoc.Subnet.SubnetId)
+					if subnetID == "" {
+						continue
+					}
+					id := domainID + "/" + attID + "/" + subnetID
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id, id, "aws_ec2_transit_gateway_multicast_domain_association", "aws", ec2AllowEmptyValues))
+				}
+			}
 			for gp := ec2.NewSearchTransitGatewayMulticastGroupsPaginator(svc, &ec2.SearchTransitGatewayMulticastGroupsInput{TransitGatewayMulticastDomainId: aws.String(domainID)}); gp.HasMorePages(); {
 				gpage, err := gp.NextPage(ctx)
 				if err != nil {
