@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/networkmanager"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,9 +33,12 @@ func (g *NetworkManagerGenerator) InitResources() error {
 		return e
 	}
 	svc := networkmanager.NewFromConfig(config)
+	ctx := context.TODO()
+
+	var globalNetworkIDs []string
 	p := networkmanager.NewDescribeGlobalNetworksPaginator(svc, &networkmanager.DescribeGlobalNetworksInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -43,8 +47,66 @@ func (g *NetworkManagerGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			globalNetworkIDs = append(globalNetworkIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				id, StringValue(item.GlobalNetworkId), "aws_networkmanager_global_network", "aws", defaultAllowEmptyValues))
+				id, id, "aws_networkmanager_global_network", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	add := func(id, tfType string) {
+		if id != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for cn := networkmanager.NewListCoreNetworksPaginator(svc, &networkmanager.ListCoreNetworksInput{}); cn.HasMorePages(); {
+		page, err := cn.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.CoreNetworks {
+			add(StringValue(c.CoreNetworkId), "aws_networkmanager_core_network")
+		}
+	}
+	for cp := networkmanager.NewListConnectPeersPaginator(svc, &networkmanager.ListConnectPeersInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.ConnectPeers {
+			add(StringValue(c.ConnectPeerId), "aws_networkmanager_connect_peer")
+		}
+	}
+
+	// Per-global-network children (imported by ARN).
+	for _, gnID := range globalNetworkIDs {
+		for sp := networkmanager.NewGetSitesPaginator(svc, &networkmanager.GetSitesInput{GlobalNetworkId: aws.String(gnID)}); sp.HasMorePages(); {
+			page, err := sp.NextPage(ctx)
+			if err != nil {
+				return err
+			}
+			for _, s := range page.Sites {
+				add(StringValue(s.SiteArn), "aws_networkmanager_site")
+			}
+		}
+		for dp := networkmanager.NewGetDevicesPaginator(svc, &networkmanager.GetDevicesInput{GlobalNetworkId: aws.String(gnID)}); dp.HasMorePages(); {
+			page, err := dp.NextPage(ctx)
+			if err != nil {
+				return err
+			}
+			for _, d := range page.Devices {
+				add(StringValue(d.DeviceArn), "aws_networkmanager_device")
+			}
+		}
+		for lp := networkmanager.NewGetLinksPaginator(svc, &networkmanager.GetLinksInput{GlobalNetworkId: aws.String(gnID)}); lp.HasMorePages(); {
+			page, err := lp.NextPage(ctx)
+			if err != nil {
+				return err
+			}
+			for _, l := range page.Links {
+				add(StringValue(l.LinkArn), "aws_networkmanager_link")
+			}
 		}
 	}
 	return nil

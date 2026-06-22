@@ -77,6 +77,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ivschat_room`
 *   `networkmanager`
     * `aws_networkmanager_global_network`
+    * `aws_networkmanager_core_network`
+    * `aws_networkmanager_connect_peer`
+    * `aws_networkmanager_site`
+    * `aws_networkmanager_device`
+    * `aws_networkmanager_link`
 *   `rekognition`
     * `aws_rekognition_collection`
     * `aws_rekognition_stream_processor`
