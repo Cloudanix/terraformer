@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockagent"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,9 +33,11 @@ func (g *BedrockAgentGenerator) InitResources() error {
 		return e
 	}
 	svc := bedrockagent.NewFromConfig(config)
+	ctx := context.TODO()
+	var agentIDs []string
 	p := bedrockagent.NewListAgentsPaginator(svc, &bedrockagent.ListAgentsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -43,8 +46,70 @@ func (g *BedrockAgentGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			agentIDs = append(agentIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(item.AgentName), "aws_bedrockagent_agent", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, agentID := range agentIDs {
+		agent := agentID
+		for ap := bedrockagent.NewListAgentAliasesPaginator(svc, &bedrockagent.ListAgentAliasesInput{AgentId: &agent}); ap.HasMorePages(); {
+			page, err := ap.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, a := range page.AgentAliasSummaries {
+				id := StringValue(a.AgentAliasId)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id+","+agent, agent+"_"+id, "aws_bedrockagent_agent_alias", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for agp := bedrockagent.NewListAgentActionGroupsPaginator(svc, &bedrockagent.ListAgentActionGroupsInput{AgentId: &agent, AgentVersion: aws.String("DRAFT")}); agp.HasMorePages(); {
+			page, err := agp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, ag := range page.ActionGroupSummaries {
+				id := StringValue(ag.ActionGroupId)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id+","+agent+",DRAFT", agent+"_"+id, "aws_bedrockagent_agent_action_group", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	for kp := bedrockagent.NewListKnowledgeBasesPaginator(svc, &bedrockagent.ListKnowledgeBasesInput{}); kp.HasMorePages(); {
+		page, err := kp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, kb := range page.KnowledgeBaseSummaries {
+			kbID := StringValue(kb.KnowledgeBaseId)
+			if kbID == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				kbID, kbID, "aws_bedrockagent_knowledge_base", "aws", defaultAllowEmptyValues))
+			for dp := bedrockagent.NewListDataSourcesPaginator(svc, &bedrockagent.ListDataSourcesInput{KnowledgeBaseId: aws.String(kbID)}); dp.HasMorePages(); {
+				dpage, err := dp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, ds := range dpage.DataSourceSummaries {
+					id := StringValue(ds.DataSourceId)
+					if id == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id+","+kbID, kbID+"_"+id, "aws_bedrockagent_data_source", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

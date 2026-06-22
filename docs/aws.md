@@ -57,6 +57,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bcmdataexports_export`
 *   `bedrockagent`
     * `aws_bedrockagent_agent`
+    * `aws_bedrockagent_agent_alias`
+    * `aws_bedrockagent_agent_action_group`
+    * `aws_bedrockagent_knowledge_base`
+    * `aws_bedrockagent_data_source`
 *   `ce`
     * `aws_ce_anomaly_monitor`
     * `aws_ce_anomaly_subscription`

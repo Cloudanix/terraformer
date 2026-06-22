@@ -99,6 +99,10 @@ aws_bcmdataexports_export
 aws_bedrock_custom_model
 aws_bedrock_guardrail
 aws_bedrockagent_agent
+aws_bedrockagent_agent_action_group
+aws_bedrockagent_agent_alias
+aws_bedrockagent_data_source
+aws_bedrockagent_knowledge_base
 aws_budgets_budget
 aws_ce_anomaly_monitor
 aws_ce_anomaly_subscription
