@@ -480,6 +480,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_network_interface`
 *   `es`
     * `aws_elasticsearch_domain`
+    * `aws_elasticsearch_domain_policy`
+    * `aws_elasticsearch_domain_saml_options`
+    * `aws_elasticsearch_vpc_endpoint`
 *   `firehose`
     * `aws_kinesis_firehose_delivery_stream`
 *   `fis`
