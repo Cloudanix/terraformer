@@ -478,6 +478,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ec2_capacity_reservation`
     * `aws_ec2_carrier_gateway`
     * `aws_ec2_client_vpn_endpoint`
+    * `aws_ec2_client_vpn_route`
+    * `aws_ec2_client_vpn_authorization_rule`
     * `aws_ec2_fleet`
     * `aws_ec2_host`
     * `aws_ec2_traffic_mirror_filter`

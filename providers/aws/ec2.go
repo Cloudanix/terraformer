@@ -141,7 +141,45 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			return err
 		}
 		for _, x := range pg.ClientVpnEndpoints {
-			add(aws.ToString(x.ClientVpnEndpointId), "aws_ec2_client_vpn_endpoint")
+			endpointID := aws.ToString(x.ClientVpnEndpointId)
+			add(endpointID, "aws_ec2_client_vpn_endpoint")
+			if endpointID == "" {
+				continue
+			}
+			for rp := ec2.NewDescribeClientVpnRoutesPaginator(svc, &ec2.DescribeClientVpnRoutesInput{ClientVpnEndpointId: aws.String(endpointID)}); rp.HasMorePages(); {
+				rpage, err := rp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, r := range rpage.Routes {
+					subnet := aws.ToString(r.TargetSubnet)
+					cidr := aws.ToString(r.DestinationCidr)
+					if subnet == "" || cidr == "" {
+						continue
+					}
+					id := endpointID + "," + subnet + "," + cidr
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id, id, "aws_ec2_client_vpn_route", "aws", ec2AllowEmptyValues))
+				}
+			}
+			for ap := ec2.NewDescribeClientVpnAuthorizationRulesPaginator(svc, &ec2.DescribeClientVpnAuthorizationRulesInput{ClientVpnEndpointId: aws.String(endpointID)}); ap.HasMorePages(); {
+				apage, err := ap.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, r := range apage.AuthorizationRules {
+					cidr := aws.ToString(r.DestinationCidr)
+					if cidr == "" {
+						continue
+					}
+					id := endpointID + "," + cidr
+					if groupID := aws.ToString(r.GroupId); groupID != "" {
+						id += "," + groupID
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id, id, "aws_ec2_client_vpn_authorization_rule", "aws", ec2AllowEmptyValues))
+				}
+			}
 		}
 	}
 	for p := ec2.NewDescribeFleetsPaginator(svc, &ec2.DescribeFleetsInput{}); p.HasMorePages(); {

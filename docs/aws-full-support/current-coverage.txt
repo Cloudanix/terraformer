@@ -332,7 +332,9 @@ aws_ebs_snapshot_block_public_access
 aws_ebs_volume
 aws_ec2_capacity_reservation
 aws_ec2_carrier_gateway
+aws_ec2_client_vpn_authorization_rule
 aws_ec2_client_vpn_endpoint
+aws_ec2_client_vpn_route
 aws_ec2_fleet
 aws_ec2_host
 aws_ec2_image_block_public_access
