@@ -219,10 +219,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/internal/configsources v1.4.29 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/endpoints/v2 v2.7.29 // indirect
 	github.com/aws/aws-sdk-go-v2/internal/v4a v1.4.30 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.10.4 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/accept-encoding v1.13.12 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.2.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.8.10 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.10.9 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.29 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.16.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.18.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.5 // indirect
@@ -429,6 +429,7 @@ require (
 	github.com/aws/aws-sdk-go v1.44.122
 	github.com/aws/aws-sdk-go-v2/service/acmpca v1.47.6
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.43.0
+	github.com/aws/aws-sdk-go-v2/service/athena v1.58.4
 	github.com/aws/aws-sdk-go-v2/service/backup v1.57.6
 	github.com/aws/aws-sdk-go-v2/service/databasemigrationservice v1.64.4
 	github.com/aws/aws-sdk-go-v2/service/datasync v1.59.7
@@ -443,15 +444,26 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/globalaccelerator v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.79.3
 	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.49.2
+	github.com/aws/aws-sdk-go-v2/service/internetmonitor v1.27.6
 	github.com/aws/aws-sdk-go-v2/service/macie2 v1.52.3
+	github.com/aws/aws-sdk-go-v2/service/memorydb v1.34.6
+	github.com/aws/aws-sdk-go-v2/service/neptune v1.46.0
+	github.com/aws/aws-sdk-go-v2/service/networkfirewall v1.61.8
+	github.com/aws/aws-sdk-go-v2/service/networkmonitor v1.14.6
+	github.com/aws/aws-sdk-go-v2/service/oam v1.24.7
+	github.com/aws/aws-sdk-go-v2/service/opensearch v1.72.0
 	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3
+	github.com/aws/aws-sdk-go-v2/service/rolesanywhere v1.23.7
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
+	github.com/aws/aws-sdk-go-v2/service/rum v1.31.8
+	github.com/aws/aws-sdk-go-v2/service/securitylake v1.26.2
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/servicequotas v1.35.7
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.62.4
 	github.com/aws/aws-sdk-go-v2/service/shield v1.35.3
 	github.com/aws/aws-sdk-go-v2/service/signer v1.33.6
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.44.3
+	github.com/aws/aws-sdk-go-v2/service/synthetics v1.44.0
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
 	github.com/gofrs/uuid/v3 v3.1.2
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.0

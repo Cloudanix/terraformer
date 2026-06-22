@@ -341,6 +341,17 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_network_acl`
 *   `nat`
     * `aws_nat_gateway`
+*   `networkmonitor`
+    * `aws_networkmonitor_monitor`
+*   `internetmonitor`
+    * `aws_internetmonitor_monitor`
+*   `oam`
+    * `aws_oam_sink`
+    * `aws_oam_link`
+*   `rum`
+    * `aws_rum_app_monitor`
+*   `synthetics`
+    * `aws_synthetics_canary`
 *   `opsworks`
     * `aws_opsworks_application`
     * `aws_opsworks_custom_layer`
