@@ -167,5 +167,97 @@ func (g *GlueGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadGlueConnections(svc, account); err != nil {
+		return err
+	}
+
+	if err := g.loadGlueWorkflows(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadGlueSecurityConfigurations(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadGlueRegistries(svc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueConnections(svc *glue.Client, account *string) error {
+	catalogID := StringValue(account)
+	p := glue.NewGetConnectionsPaginator(svc, &glue.GetConnectionsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, conn := range page.ConnectionList {
+			name := StringValue(conn.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				catalogID+":"+name, name, "aws_glue_connection", "aws", defaultAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueWorkflows(svc *glue.Client) error {
+	p := glue.NewListWorkflowsPaginator(svc, &glue.ListWorkflowsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, name := range page.Workflows {
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_glue_workflow", "aws", defaultAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueSecurityConfigurations(svc *glue.Client) error {
+	p := glue.NewGetSecurityConfigurationsPaginator(svc, &glue.GetSecurityConfigurationsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, sc := range page.SecurityConfigurations {
+			name := StringValue(sc.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_glue_security_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueRegistries(svc *glue.Client) error {
+	p := glue.NewListRegistriesPaginator(svc, &glue.ListRegistriesInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, reg := range page.Registries {
+			arn := StringValue(reg.RegistryArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(reg.RegistryName), "aws_glue_registry", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

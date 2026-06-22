@@ -240,6 +240,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_glue_catalog_table`
     * `aws_glue_job`
     * `aws_glue_trigger`
+    * `aws_glue_connection`
+    * `aws_glue_workflow`
+    * `aws_glue_security_configuration`
+    * `aws_glue_registry`
 *   `iam`
     * `aws_iam_access_key`
     * `aws_iam_account_alias`
