@@ -285,6 +285,7 @@ aws_glue_dev_endpoint
 aws_glue_job
 aws_glue_ml_transform
 aws_glue_registry
+aws_glue_schema
 aws_glue_security_configuration
 aws_glue_trigger
 aws_glue_workflow

@@ -195,6 +195,29 @@ func (g *GlueGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadGlueSchemas(svc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueSchemas(svc *glue.Client) error {
+	p := glue.NewListSchemasPaginator(svc, &glue.ListSchemasInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, sc := range page.Schemas {
+			arn := StringValue(sc.SchemaArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(sc.SchemaName), "aws_glue_schema", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
