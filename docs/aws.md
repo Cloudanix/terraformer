@@ -1034,6 +1034,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ram_resource_association`
 *   `rds`
     * `aws_db_instance`
+    * `aws_db_instance_role_association`
+    * `aws_rds_cluster_role_association`
     * `aws_db_proxy`
     * `aws_db_proxy_endpoint`
     * `aws_db_proxy_default_target_group`

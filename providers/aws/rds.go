@@ -45,6 +45,14 @@ func (g *RDSGenerator) loadDBClusters(svc *rds.Client) error {
 				"aws",
 				RDSAllowEmptyValues,
 			))
+			for _, role := range cluster.AssociatedRoles {
+				roleArn := StringValue(role.RoleArn)
+				if roleArn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					resourceName+","+roleArn, resourceName+"_role", "aws_rds_cluster_role_association", "aws", RDSAllowEmptyValues))
+			}
 		}
 	}
 	return nil
@@ -147,6 +155,14 @@ func (g *RDSGenerator) loadDBInstances(svc *rds.Client) error {
 			)
 			r.IgnoreKeys = append(r.IgnoreKeys, "^name$")
 			g.Resources = append(g.Resources, r)
+			for _, role := range db.AssociatedRoles {
+				roleArn := StringValue(role.RoleArn)
+				if roleArn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					resourceName+","+roleArn, resourceName+"_role", "aws_db_instance_role_association", "aws", RDSAllowEmptyValues))
+			}
 		}
 	}
 	return nil

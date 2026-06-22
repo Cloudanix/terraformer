@@ -287,6 +287,7 @@ aws_dax_subnet_group
 aws_db_cluster_snapshot
 aws_db_event_subscription
 aws_db_instance
+aws_db_instance_role_association
 aws_db_option_group
 aws_db_parameter_group
 aws_db_proxy
@@ -812,6 +813,7 @@ aws_rds_cluster
 aws_rds_cluster_endpoint
 aws_rds_cluster_instance
 aws_rds_cluster_parameter_group
+aws_rds_cluster_role_association
 aws_rds_export_task
 aws_rds_global_cluster
 aws_rds_integration
