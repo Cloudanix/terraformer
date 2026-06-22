@@ -34,9 +34,11 @@ func (g *DetectiveGenerator) InitResources() error {
 	}
 	svc := detective.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var graphArns []string
 	p := detective.NewListGraphsPaginator(svc, &detective.ListGraphsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +47,42 @@ func (g *DetectiveGenerator) InitResources() error {
 			if arn == "" {
 				continue
 			}
+			graphArns = append(graphArns, arn)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_detective_graph", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, graphArn := range graphArns {
+		ga := graphArn
+		for mp := detective.NewListMembersPaginator(svc, &detective.ListMembersInput{GraphArn: &ga}); mp.HasMorePages(); {
+			page, err := mp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, m := range page.MemberDetails {
+				acct := StringValue(m.AccountId)
+				if acct == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					ga+"/"+acct, acct, "aws_detective_member", "aws", defaultAllowEmptyValues))
+			}
+		}
+		if _, err := svc.DescribeOrganizationConfiguration(ctx, &detective.DescribeOrganizationConfigurationInput{GraphArn: &ga}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				ga, ga, "aws_detective_organization_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	if admins, err := svc.ListOrganizationAdminAccounts(ctx, &detective.ListOrganizationAdminAccountsInput{}); err == nil {
+		for _, a := range admins.Administrators {
+			id := StringValue(a.AccountId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_detective_organization_admin_account", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

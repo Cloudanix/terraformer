@@ -329,6 +329,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_dax_subnet_group`
 *   `detective`
     * `aws_detective_graph`
+    * `aws_detective_member`
+    * `aws_detective_organization_configuration`
+    * `aws_detective_organization_admin_account`
 *   `devicefarm`
     * `aws_devicefarm_project`
     * `aws_devicefarm_instance_profile`
