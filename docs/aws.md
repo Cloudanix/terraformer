@@ -1095,6 +1095,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `redshift`
     * `aws_redshift_cluster`
     * `aws_redshift_cluster_iam_roles`
+    * `aws_redshift_data_share_authorization`
     * `aws_redshift_partner`
     * `aws_redshift_snapshot_copy_grant`
     * `aws_redshift_logging`

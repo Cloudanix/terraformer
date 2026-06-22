@@ -195,6 +195,31 @@ func (g *RedshiftGenerator) loadSnapshotCopyGrants(svc *redshift.Client) error {
 	return nil
 }
 
+func (g *RedshiftGenerator) loadDataShareAuthorizations(svc *redshift.Client) error {
+	p := redshift.NewDescribeDataSharesPaginator(svc, &redshift.DescribeDataSharesInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, share := range page.DataShares {
+			arn := StringValue(share.DataShareArn)
+			if arn == "" {
+				continue
+			}
+			for _, assoc := range share.DataShareAssociations {
+				consumer := StringValue(assoc.ConsumerIdentifier)
+				if consumer == "" || assoc.Status != "AUTHORIZED" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn+","+consumer, consumer, "aws_redshift_data_share_authorization", "aws", RedshiftAllowEmptyValues))
+			}
+		}
+	}
+	return nil
+}
+
 // Generate TerraformResources from AWS API,
 // from each database create 1 TerraformResource.
 // Need only database name as ID for terraform resource
@@ -214,6 +239,9 @@ func (g *RedshiftGenerator) InitResources() error {
 		return err
 	}
 	if err := g.loadSnapshotCopyGrants(svc); err != nil {
+		return err
+	}
+	if err := g.loadDataShareAuthorizations(svc); err != nil {
 		return err
 	}
 	if err := g.loadParameterGroups(svc); err != nil {
