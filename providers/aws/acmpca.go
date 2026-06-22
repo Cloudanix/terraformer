@@ -58,6 +58,17 @@ func (g *ACMPCAGenerator) InitResources() error {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					arn, arn, "aws_acmpca_policy", "aws", defaultAllowEmptyValues))
 			}
+			// ACM service principal permissions delegated on the CA.
+			if perms, err := svc.ListPermissions(context.TODO(), &acmpca.ListPermissionsInput{CertificateAuthorityArn: ca.Arn}); err == nil {
+				for _, p := range perms.Permissions {
+					principal := StringValue(p.Principal)
+					if principal == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						arn+","+principal, principal, "aws_acmpca_permission", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

@@ -3,7 +3,6 @@ aws_account_primary_contact
 aws_account_region
 aws_acm_certificate_validation
 aws_acmpca_certificate
-aws_acmpca_permission
 aws_ami_copy
 aws_ami_from_instance
 aws_ami_launch_permission

@@ -3,6 +3,7 @@ aws_accessanalyzer_archive_rule
 aws_acm_certificate
 aws_acmpca_certificate_authority
 aws_acmpca_certificate_authority_certificate
+aws_acmpca_permission
 aws_acmpca_policy
 aws_ami
 aws_amplify_app
