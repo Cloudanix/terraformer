@@ -67,6 +67,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appautoscaling_scheduled_action`
 *   `appsync`
     * `aws_appsync_graphql_api`
+*   `athena`
+    * `aws_athena_workgroup`
+    * `aws_athena_data_catalog`
 *   `auto_scaling`
     * `aws_autoscaling_group`
     * `aws_launch_configuration`
@@ -325,6 +328,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_macie2_custom_data_identifier`
     * `aws_macie2_findings_filter`
     * `aws_macie2_member`
+*   `memorydb`
+    * `aws_memorydb_cluster`
+*   `neptune`
+    * `aws_neptune_cluster`
+*   `opensearch`
+    * `aws_opensearch_domain`
 *   `media_package`
     * `aws_media_package_channel`
 *   `media_store`
