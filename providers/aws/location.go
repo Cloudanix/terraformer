@@ -77,6 +77,20 @@ func (g *LocationGenerator) InitResources() error {
 			if name != "" {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					name, name, "aws_location_tracker", "aws", defaultAllowEmptyValues))
+				trackerName := name
+				for cp := location.NewListTrackerConsumersPaginator(svc, &location.ListTrackerConsumersInput{TrackerName: &trackerName}); cp.HasMorePages(); {
+					cpage, err := cp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, consumerArn := range cpage.ConsumerArns {
+						if consumerArn == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							trackerName+"|"+consumerArn, trackerName+"_consumer", "aws_location_tracker_association", "aws", defaultAllowEmptyValues))
+					}
+				}
 			}
 		}
 	}

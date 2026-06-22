@@ -803,6 +803,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_location_map`
     * `aws_location_place_index`
     * `aws_location_tracker`
+    * `aws_location_tracker_association`
     * `aws_location_geofence_collection`
     * `aws_location_route_calculator`
 *   `lightsail`
