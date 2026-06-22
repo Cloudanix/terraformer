@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/vpclattice"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,6 +37,7 @@ func (g *VPCLatticeGenerator) InitResources() error {
 	svc := vpclattice.NewFromConfig(config)
 	ctx := context.TODO()
 
+	var serviceIDs []string
 	services := vpclattice.NewListServicesPaginator(svc, &vpclattice.ListServicesInput{})
 	for services.HasMorePages() {
 		page, err := services.NextPage(ctx)
@@ -47,8 +49,56 @@ func (g *VPCLatticeGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			serviceIDs = append(serviceIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(s.Name), "aws_vpclattice_service", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, serviceID := range serviceIDs {
+		sid := serviceID
+		for lp := vpclattice.NewListAccessLogSubscriptionsPaginator(svc, &vpclattice.ListAccessLogSubscriptionsInput{ResourceIdentifier: &sid}); lp.HasMorePages(); {
+			page, err := lp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, a := range page.Items {
+				id := StringValue(a.Id)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_vpclattice_access_log_subscription", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for lp := vpclattice.NewListListenersPaginator(svc, &vpclattice.ListListenersInput{ServiceIdentifier: &sid}); lp.HasMorePages(); {
+			page, err := lp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, l := range page.Items {
+				lid := StringValue(l.Id)
+				if lid == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					sid+"/"+lid, sid+"_"+lid, "aws_vpclattice_listener", "aws", defaultAllowEmptyValues))
+
+				for rp := vpclattice.NewListRulesPaginator(svc, &vpclattice.ListRulesInput{ServiceIdentifier: &sid, ListenerIdentifier: aws.String(lid)}); rp.HasMorePages(); {
+					rpage, err := rp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, r := range rpage.Items {
+						rid := StringValue(r.Id)
+						if rid == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							sid+"/"+lid+"/"+rid, sid+"_"+lid+"_"+rid, "aws_vpclattice_listener_rule", "aws", defaultAllowEmptyValues))
+					}
+				}
+			}
 		}
 	}
 

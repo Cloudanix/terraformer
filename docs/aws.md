@@ -756,6 +756,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpclattice_service_network`
     * `aws_vpclattice_target_group`
     * `aws_vpclattice_service_network_vpc_association`
+    * `aws_vpclattice_listener`
+    * `aws_vpclattice_listener_rule`
+    * `aws_vpclattice_access_log_subscription`
 *   `wellarchitected`
     * `aws_wellarchitected_workload`
 *   `payment-cryptography`
