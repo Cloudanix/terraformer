@@ -47,6 +47,16 @@ func (g *RedshiftGenerator) loadClusters(svc *redshift.Client) error {
 				"aws",
 				RedshiftAllowEmptyValues,
 			))
+			if db.ClusterSnapshotCopyStatus != nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					resourceName, resourceName, "aws_redshift_snapshot_copy", "aws", RedshiftAllowEmptyValues))
+			}
+			if status, err := svc.DescribeLoggingStatus(context.TODO(),
+				&redshift.DescribeLoggingStatusInput{ClusterIdentifier: db.ClusterIdentifier}); err == nil &&
+				status.LoggingEnabled != nil && *status.LoggingEnabled {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					resourceName, resourceName, "aws_redshift_logging", "aws", RedshiftAllowEmptyValues))
+			}
 		}
 	}
 	return nil
