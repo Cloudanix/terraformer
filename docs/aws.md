@@ -1245,6 +1245,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_servicecatalog_provisioning_artifact`
     * `aws_servicecatalog_provisioned_product`
     * `aws_servicecatalog_portfolio_share`
+    * `aws_servicecatalog_principal_portfolio_association`
+    * `aws_servicecatalog_product_portfolio_association`
 *   `servicecatalog-appregistry`
     * `aws_servicecatalogappregistry_application`
 *   `servicediscovery`

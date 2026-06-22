@@ -73,6 +73,38 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 					id, id, "aws_servicecatalog_constraint", "aws", servicecatalogAllowEmptyValues))
 			}
 		}
+		for ppp := servicecatalog.NewListPrincipalsForPortfolioPaginator(svc, &servicecatalog.ListPrincipalsForPortfolioInput{PortfolioId: &portfolioID}); ppp.HasMorePages(); {
+			page, err := ppp.NextPage(context.TODO())
+			if err != nil {
+				break
+			}
+			for _, pr := range page.Principals {
+				arn := StringValue(pr.PrincipalARN)
+				if arn == "" {
+					continue
+				}
+				id := "en," + arn + "," + portfolioID + "," + string(pr.PrincipalType)
+				resources = append(resources, terraformutils.NewSimpleResource(
+					id, portfolioID+"_principal", "aws_servicecatalog_principal_portfolio_association", "aws", servicecatalogAllowEmptyValues))
+			}
+		}
+		for prod := servicecatalog.NewSearchProductsAsAdminPaginator(svc, &servicecatalog.SearchProductsAsAdminInput{PortfolioId: &portfolioID}); prod.HasMorePages(); {
+			page, err := prod.NextPage(context.TODO())
+			if err != nil {
+				break
+			}
+			for _, pvd := range page.ProductViewDetails {
+				if pvd.ProductViewSummary == nil {
+					continue
+				}
+				productID := StringValue(pvd.ProductViewSummary.ProductId)
+				if productID == "" {
+					continue
+				}
+				resources = append(resources, terraformutils.NewSimpleResource(
+					"en:"+productID+":"+portfolioID, portfolioID+"_"+productID, "aws_servicecatalog_product_portfolio_association", "aws", servicecatalogAllowEmptyValues))
+			}
+		}
 		if access, err := svc.ListPortfolioAccess(context.TODO(), &servicecatalog.ListPortfolioAccessInput{PortfolioId: &portfolioID}); err == nil {
 			for _, acct := range access.AccountIds {
 				if acct == "" {
