@@ -55,6 +55,26 @@ func (g *AppRunnerGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(service.ServiceName), "aws_apprunner_service", "aws", defaultAllowEmptyValues))
+
+			cdInput := &apprunner.DescribeCustomDomainsInput{ServiceArn: service.ServiceArn}
+			for {
+				cdOut, err := svc.DescribeCustomDomains(ctx, cdInput)
+				if err != nil {
+					break
+				}
+				for _, cd := range cdOut.CustomDomains {
+					domain := StringValue(cd.DomainName)
+					if domain == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						domain+","+arn, domain, "aws_apprunner_custom_domain_association", "aws", defaultAllowEmptyValues))
+				}
+				if cdOut.NextToken == nil {
+					break
+				}
+				cdInput.NextToken = cdOut.NextToken
+			}
 		}
 	}
 

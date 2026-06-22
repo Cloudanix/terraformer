@@ -201,6 +201,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appmesh_gateway_route`
 *   `apprunner`
     * `aws_apprunner_service`
+    * `aws_apprunner_custom_domain_association`
     * `aws_apprunner_connection`
     * `aws_apprunner_auto_scaling_configuration_version`
     * `aws_apprunner_default_auto_scaling_configuration_version`
