@@ -61,6 +61,10 @@ func (g *BackupGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, tfType, "aws", defaultAllowEmptyValues))
+			if v.Locked != nil && *v.Locked {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name, name, "aws_backup_vault_lock_configuration", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 

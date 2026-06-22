@@ -248,6 +248,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_backup_restore_testing_selection`
     * `aws_backup_vault_notifications`
     * `aws_backup_vault_policy`
+    * `aws_backup_vault_lock_configuration`
     * `aws_backup_global_settings`
     * `aws_backup_region_settings`
     * `aws_backup_logically_air_gapped_vault`
