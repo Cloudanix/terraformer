@@ -195,6 +195,9 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `eks`
     * `aws_eks_cluster`
     * `aws_eks_node_group`
+    * `aws_eks_addon`
+    * `aws_eks_fargate_profile`
+    * `aws_eks_identity_provider_config`
 *   `elasticache`
     * `aws_elasticache_cluster`
     * `aws_elasticache_parameter_group`

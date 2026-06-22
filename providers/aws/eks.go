@@ -50,6 +50,60 @@ func (g *EksGenerator) getNodeGroups(clusterName string, svc *eks.Client) error 
 	return nil
 }
 
+// getClusterChildren enumerates a cluster's addons, Fargate profiles, and
+// identity provider configs. Import IDs are "<cluster_name>:<child_name>".
+func (g *EksGenerator) getClusterChildren(clusterName string, svc *eks.Client) error {
+	ctx := context.TODO()
+
+	addons := eks.NewListAddonsPaginator(svc, &eks.ListAddonsInput{ClusterName: &clusterName})
+	for addons.HasMorePages() {
+		page, err := addons.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, addonName := range page.Addons {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				fmt.Sprintf("%s:%s", clusterName, addonName),
+				fmt.Sprintf("%s_%s", clusterName, addonName),
+				"aws_eks_addon", "aws", eksAllowEmptyValues))
+		}
+	}
+
+	fargate := eks.NewListFargateProfilesPaginator(svc, &eks.ListFargateProfilesInput{ClusterName: &clusterName})
+	for fargate.HasMorePages() {
+		page, err := fargate.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, profileName := range page.FargateProfileNames {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				fmt.Sprintf("%s:%s", clusterName, profileName),
+				fmt.Sprintf("%s_%s", clusterName, profileName),
+				"aws_eks_fargate_profile", "aws", eksAllowEmptyValues))
+		}
+	}
+
+	idpConfigs := eks.NewListIdentityProviderConfigsPaginator(svc, &eks.ListIdentityProviderConfigsInput{ClusterName: &clusterName})
+	for idpConfigs.HasMorePages() {
+		page, err := idpConfigs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, cfg := range page.IdentityProviderConfigs {
+			configName := StringValue(cfg.Name)
+			if configName == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				fmt.Sprintf("%s:%s", clusterName, configName),
+				fmt.Sprintf("%s_%s", clusterName, configName),
+				"aws_eks_identity_provider_config", "aws", eksAllowEmptyValues))
+		}
+	}
+
+	return nil
+}
+
 func (g *EksGenerator) InitResources() error {
 	config, e := g.generateConfig()
 	if e != nil {
@@ -65,6 +119,9 @@ func (g *EksGenerator) InitResources() error {
 		for _, clusterName := range page.Clusters {
 			err := g.getNodeGroups(clusterName, svc)
 			if err != nil {
+				return err
+			}
+			if err := g.getClusterChildren(clusterName, svc); err != nil {
 				return err
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
