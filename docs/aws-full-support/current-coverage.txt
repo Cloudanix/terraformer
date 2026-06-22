@@ -975,6 +975,7 @@ aws_scheduler_schedule
 aws_scheduler_schedule_group
 aws_schemas_discoverer
 aws_schemas_registry
+aws_schemas_registry_policy
 aws_schemas_schema
 aws_secretsmanager_secret
 aws_secretsmanager_secret_policy

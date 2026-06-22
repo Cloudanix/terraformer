@@ -70,6 +70,10 @@ func (g *SchemasGenerator) InitResources() error {
 
 	for _, registry := range registryNames {
 		reg := registry
+		if _, err := svc.GetResourcePolicy(ctx, &schemas.GetResourcePolicyInput{RegistryName: &reg}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				reg, reg, "aws_schemas_registry_policy", "aws", defaultAllowEmptyValues))
+		}
 		for sp := schemas.NewListSchemasPaginator(svc, &schemas.ListSchemasInput{RegistryName: &reg}); sp.HasMorePages(); {
 			page, err := sp.NextPage(ctx)
 			if err != nil {
