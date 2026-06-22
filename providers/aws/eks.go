@@ -101,6 +101,24 @@ func (g *EksGenerator) getClusterChildren(clusterName string, svc *eks.Client) e
 		}
 	}
 
+	podIdentities := eks.NewListPodIdentityAssociationsPaginator(svc, &eks.ListPodIdentityAssociationsInput{ClusterName: &clusterName})
+	for podIdentities.HasMorePages() {
+		page, err := podIdentities.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, a := range page.Associations {
+			assocID := StringValue(a.AssociationId)
+			if assocID == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				fmt.Sprintf("%s,%s", clusterName, assocID),
+				fmt.Sprintf("%s_%s", clusterName, assocID),
+				"aws_eks_pod_identity_association", "aws", eksAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 
