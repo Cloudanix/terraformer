@@ -1036,6 +1036,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_quicksight_namespace`
     * `aws_quicksight_group`
     * `aws_quicksight_user`
+    * `aws_quicksight_iam_policy_assignment`
 *   `redshift-serverless`
     * `aws_redshiftserverless_namespace`
     * `aws_redshiftserverless_workgroup`

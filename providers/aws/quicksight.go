@@ -209,6 +209,20 @@ func (g *QuickSightGenerator) InitResources() error {
 					accountID+"/"+namespace+"/"+name, name, "aws_quicksight_user", "aws", defaultAllowEmptyValues))
 			}
 		}
+		for ap := quicksight.NewListIAMPolicyAssignmentsPaginator(svc, &quicksight.ListIAMPolicyAssignmentsInput{AwsAccountId: aws.String(accountID), Namespace: &namespace}); ap.HasMorePages(); {
+			page, err := ap.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, a := range page.IAMPolicyAssignments {
+				name := StringValue(a.AssignmentName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID+","+namespace+","+name, namespace+"_"+name, "aws_quicksight_iam_policy_assignment", "aws", defaultAllowEmptyValues))
+			}
+		}
 	}
 	return nil
 }

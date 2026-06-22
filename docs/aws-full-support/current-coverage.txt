@@ -774,6 +774,7 @@ aws_quicksight_data_set
 aws_quicksight_data_source
 aws_quicksight_folder
 aws_quicksight_group
+aws_quicksight_iam_policy_assignment
 aws_quicksight_namespace
 aws_quicksight_refresh_schedule
 aws_quicksight_template
