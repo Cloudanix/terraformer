@@ -68,23 +68,28 @@ Every change: one focused commit + docs/aws.md + serviceScope entry where new.
 
 ## Coverage tally
 
-**192 services registered** in `GetSupportedService()` (was 90 at the start of
-this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; most of §4a
-P4 done across 5 batches (guardduty…macie2…shield…athena…sagemaker…location).
-`go build ./...` and `go test ./...` green; `serviceScope` assertion passes;
-`go mod tidy` clean.
+**203 services registered** in `GetSupportedService()` (was 90 at the start of
+this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; §4a P4 done
+across 6 batches. `go build ./...` and `go test ./...` green; `serviceScope`
+assertion passes (incl. the new `route53domains` eastOnly entry); `go mod tidy`
+clean.
 
-## Remaining / deferred
+## Remaining / deferred — special handling, not a clean list paginator
 
-### §4a remaining P4 niche services — NOT yet built (mechanical, use workaround)
-chime-sdk-voice, cloudfront-keyvaluestore, codestar-notifications,
-codeguru-profiler, controltower, deadline, devopsguru, groundstation,
-iotanalytics, iotwireless, mediaconvert (needs per-account endpoint lookup),
-quicksight, docdb-elastic, timestream-influxdb, route53domains (us-east-1 /
-needs eastOnly or fixed-region scope), route53-recovery-*, s3control,
-s3outposts, serverlessrepo, ssm-sap, appautoscaling-plans. Each: `getmod.sh`
-its module, then the §5 recipe — no longer blocked, just lower-value tail per
-plan §11 ("decide per service before building").
+These need more than the §5 single-paginator recipe, or have no
+terraform-provider-aws resource (plan §1 bound):
+- **Account-ID-parameterized:** quicksight, s3control — every List call needs
+  the account id (use `getAccountNumber`), multi-resource.
+- **Per-account endpoint:** mediaconvert (`DescribeEndpoints` first).
+- **Different list shape / multi-step:** s3outposts (ListEndpoints),
+  route53-recovery-control-config, route53-recovery-readiness.
+- **No TF resource (skip per §1):** deadline (AWS Deadline Cloud),
+  iotwireless, devopsguru, serverlessrepo, ssm-sap.
+- **Belongs on an existing generator:** cloudfront-keyvaluestore
+  (`aws_cloudfront_key_value_store` → add to cloud_front.go).
+
+Everything else from plan.md §4a is built. The module-fetch workaround above
+makes the special-handling tail straightforward when prioritized.
 
 ### §3 authoritative gap list — runnable now
 `terraform init` + `terraform providers schema -json` can run via the same
