@@ -489,6 +489,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_fis_experiment_template`
 *   `finspace`
     * `aws_finspace_kx_environment`
+    * `aws_finspace_kx_database`
+    * `aws_finspace_kx_dataview`
+    * `aws_finspace_kx_scaling_group`
+    * `aws_finspace_kx_cluster`
+    * `aws_finspace_kx_user`
+    * `aws_finspace_kx_volume`
 *   `docdb-elastic`
     * `aws_docdbelastic_cluster`
 *   `gamelift`
