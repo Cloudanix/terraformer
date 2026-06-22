@@ -154,7 +154,6 @@ aws_iot_indexing_configuration
 aws_iot_logging_options
 aws_iot_policy_attachment
 aws_iot_thing_group_membership
-aws_iot_thing_principal_attachment
 aws_kinesis_analytics_application
 aws_kinesis_resource_policy
 aws_kms_ciphertext

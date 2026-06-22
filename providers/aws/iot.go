@@ -171,17 +171,27 @@ func (g *IotGenerator) loadThings(svc *iot.Client) error {
 		return err
 	}
 	for _, thing := range output.Things {
+		thingName := StringValue(thing.ThingName)
 		g.Resources = append(g.Resources, terraformutils.NewResource(
-			*thing.ThingName,
-			*thing.ThingName,
+			thingName,
+			thingName,
 			"aws_iot_thing",
 			"aws",
 			map[string]string{
-				"name": *thing.ThingName,
+				"name": thingName,
 			},
 			iotAllowEmptyValues,
 			map[string]interface{}{},
 		))
+		if principals, err := svc.ListThingPrincipals(context.TODO(), &iot.ListThingPrincipalsInput{ThingName: thing.ThingName}); err == nil {
+			for _, principal := range principals.Principals {
+				if principal == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					thingName+"|"+principal, thingName+"_principal", "aws_iot_thing_principal_attachment", "aws", iotAllowEmptyValues))
+			}
+		}
 	}
 	return nil
 }

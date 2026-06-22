@@ -734,6 +734,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_inspector2_organization_configuration`
 *   `iot`
     * `aws_iot_thing`
+    * `aws_iot_thing_principal_attachment`
     * `aws_iot_thing_type`
     * `aws_iot_topic_rule`
     * `aws_iot_authorizer`

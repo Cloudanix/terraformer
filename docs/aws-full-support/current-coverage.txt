@@ -568,6 +568,7 @@ aws_iot_provisioning_template
 aws_iot_role_alias
 aws_iot_thing
 aws_iot_thing_group
+aws_iot_thing_principal_attachment
 aws_iot_thing_type
 aws_iot_topic_rule
 aws_iot_topic_rule_destination
