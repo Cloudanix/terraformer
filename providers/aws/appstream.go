@@ -47,6 +47,16 @@ func (g *AppStreamGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_appstream_fleet", "aws", defaultAllowEmptyValues))
+			fleetName := name
+			if assoc, err := svc.ListAssociatedStacks(context.TODO(), &appstream.ListAssociatedStacksInput{FleetName: &fleetName}); err == nil {
+				for _, stackName := range assoc.Names {
+					if stackName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						fleetName+"/"+stackName, fleetName+"_"+stackName, "aws_appstream_fleet_stack_association", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 		if out.NextToken == nil {
 			break
@@ -92,6 +102,17 @@ func (g *AppStreamGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name+"/USERPOOL", name, "aws_appstream_user", "aws", defaultAllowEmptyValues))
+		}
+	}
+	if usa, err := svc.DescribeUserStackAssociations(context.TODO(), &appstream.DescribeUserStackAssociationsInput{}); err == nil {
+		for _, a := range usa.UserStackAssociations {
+			userName, stackName := StringValue(a.UserName), StringValue(a.StackName)
+			if userName == "" || stackName == "" {
+				continue
+			}
+			id := userName + "/" + string(a.AuthenticationType) + "/" + stackName
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, userName+"_"+stackName, "aws_appstream_user_stack_association", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

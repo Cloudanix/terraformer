@@ -187,10 +187,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appflow_connector_profile`
 *   `appstream`
     * `aws_appstream_fleet`
+    * `aws_appstream_fleet_stack_association`
     * `aws_appstream_stack`
     * `aws_appstream_image_builder`
     * `aws_appstream_directory_config`
     * `aws_appstream_user`
+    * `aws_appstream_user_stack_association`
 *   `appmesh`
     * `aws_appmesh_mesh`
     * `aws_appmesh_virtual_node`
