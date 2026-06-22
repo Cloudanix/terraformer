@@ -44,7 +44,12 @@ func (g *DirectoryServiceGenerator) InitResources() error {
 			return err
 		}
 		for _, d := range page.DirectoryDescriptions {
-			directoryIDs = append(directoryIDs, StringValue(d.DirectoryId))
+			dirID := StringValue(d.DirectoryId)
+			directoryIDs = append(directoryIDs, dirID)
+			if d.RadiusSettings != nil && dirID != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					dirID, dirID, "aws_directory_service_radius_settings", "aws", defaultAllowEmptyValues))
+			}
 		}
 		g.Resources = appendSimpleResources(g.Resources, page.DirectoryDescriptions, "aws_directory_service_directory",
 			defaultAllowEmptyValues,
