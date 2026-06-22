@@ -47,5 +47,20 @@ func (g *CleanRoomsGenerator) InitResources() error {
 				id, StringValue(item.Name), "aws_cleanrooms_collaboration", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for ct := cleanrooms.NewListConfiguredTablesPaginator(svc, &cleanrooms.ListConfiguredTablesInput{}); ct.HasMorePages(); {
+		page, err := ct.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, t := range page.ConfiguredTableSummaries {
+			id := StringValue(t.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(t.Name), "aws_cleanrooms_configured_table", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

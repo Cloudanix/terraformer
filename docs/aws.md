@@ -79,6 +79,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_chatbot_teams_channel_configuration`
 *   `cleanrooms`
     * `aws_cleanrooms_collaboration`
+    * `aws_cleanrooms_configured_table`
 *   `comprehend`
     * `aws_comprehend_document_classifier`
     * `aws_comprehend_entity_recognizer`
