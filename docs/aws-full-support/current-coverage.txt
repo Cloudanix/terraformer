@@ -621,6 +621,8 @@ aws_vpc_ipam_scope
 aws_vpc_peering_connection
 aws_vpclattice_service
 aws_vpclattice_service_network
+aws_vpclattice_service_network_vpc_association
+aws_vpclattice_target_group
 aws_vpn_connection
 aws_vpn_gateway
 aws_waf_byte_match_set

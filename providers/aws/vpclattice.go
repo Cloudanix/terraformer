@@ -67,5 +67,37 @@ func (g *VPCLatticeGenerator) InitResources() error {
 				id, StringValue(n.Name), "aws_vpclattice_service_network", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	targetGroups := vpclattice.NewListTargetGroupsPaginator(svc, &vpclattice.ListTargetGroupsInput{})
+	for targetGroups.HasMorePages() {
+		page, err := targetGroups.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, t := range page.Items {
+			id := StringValue(t.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(t.Name), "aws_vpclattice_target_group", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	snVpcAssocs := vpclattice.NewListServiceNetworkVpcAssociationsPaginator(svc, &vpclattice.ListServiceNetworkVpcAssociationsInput{})
+	for snVpcAssocs.HasMorePages() {
+		page, err := snVpcAssocs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.Items {
+			id := StringValue(a.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpclattice_service_network_vpc_association", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
