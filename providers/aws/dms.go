@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	dms "github.com/aws/aws-sdk-go-v2/service/databasemigrationservice"
 	"github.com/aws/aws-sdk-go-v2/service/databasemigrationservice/types"
 )
@@ -59,10 +60,19 @@ func (g *DmsGenerator) InitResources() error {
 		if err != nil {
 			return err
 		}
-		g.Resources = appendSimpleResources(g.Resources, page.Endpoints, "aws_dms_endpoint",
-			defaultAllowEmptyValues,
-			func(en types.Endpoint) string { return StringValue(en.EndpointIdentifier) },
-			func(en types.Endpoint) string { return StringValue(en.EndpointIdentifier) })
+		for _, en := range page.Endpoints {
+			id := StringValue(en.EndpointIdentifier)
+			if id == "" {
+				continue
+			}
+			// S3 endpoints have their own dedicated TF resource type.
+			tfType := "aws_dms_endpoint"
+			if StringValue(en.EngineName) == "s3" {
+				tfType = "aws_dms_s3_endpoint"
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, tfType, "aws", defaultAllowEmptyValues))
+		}
 	}
 
 	tasks := dms.NewDescribeReplicationTasksPaginator(svc, &dms.DescribeReplicationTasksInput{})

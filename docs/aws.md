@@ -402,6 +402,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `dms`
     * `aws_dms_replication_instance`
     * `aws_dms_endpoint`
+    * `aws_dms_s3_endpoint`
     * `aws_dms_replication_task`
     * `aws_dms_replication_subnet_group`
     * `aws_dms_certificate`
