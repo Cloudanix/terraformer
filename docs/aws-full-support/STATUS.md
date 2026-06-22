@@ -76,9 +76,14 @@ account singletons). No buildable net-new *service* remains.
 
 ## Coverage tally
 
-Current coverage: 234 services / **893** `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = **578** (≈243 documented structural exclusions + the
-remaining buildable per-parent/composite sub-resource tail).
+Current coverage: 234 services / **1054** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **417** — now overwhelmingly documented exclusions:
+~215 structurally-unlistable suffixes (association/attachment/policy/accepter/
+settings), unvendored-SDK resources (evidently, lex v1, devopsguru, drs,
+eventbridge endpoints, paymentcryptography, simpledb), and data-plane/no-import
+objects — all enumerated in [no-list-api.md](no-list-api.md). The residual
+buildable items are high-cardinality per-parent leaves (e.g. glue partitions)
+and two-account handshake resources.
 
 **234 services registered** in `GetSupportedService()` (was 90 at the start of
 this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; §4a P4 done
