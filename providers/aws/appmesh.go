@@ -16,7 +16,9 @@ package aws
 
 import (
 	"context"
+	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/appmesh"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -47,7 +49,57 @@ func (g *AppMeshGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_appmesh_mesh", "aws", defaultAllowEmptyValues))
+			g.loadMeshChildren(svc, name)
 		}
 	}
 	return nil
+}
+
+// loadMeshChildren enumerates a mesh's virtual nodes/routers/services/gateways.
+// Import IDs are "<mesh-name>/<resource-name>".
+func (g *AppMeshGenerator) loadMeshChildren(svc *appmesh.Client, mesh string) {
+	ctx := context.TODO()
+	add := func(name, tfType string) {
+		if name != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				fmt.Sprintf("%s/%s", mesh, name), fmt.Sprintf("%s_%s", mesh, name),
+				tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+	for p := appmesh.NewListVirtualNodesPaginator(svc, &appmesh.ListVirtualNodesInput{MeshName: aws.String(mesh)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.VirtualNodes {
+			add(StringValue(x.VirtualNodeName), "aws_appmesh_virtual_node")
+		}
+	}
+	for p := appmesh.NewListVirtualRoutersPaginator(svc, &appmesh.ListVirtualRoutersInput{MeshName: aws.String(mesh)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.VirtualRouters {
+			add(StringValue(x.VirtualRouterName), "aws_appmesh_virtual_router")
+		}
+	}
+	for p := appmesh.NewListVirtualServicesPaginator(svc, &appmesh.ListVirtualServicesInput{MeshName: aws.String(mesh)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.VirtualServices {
+			add(StringValue(x.VirtualServiceName), "aws_appmesh_virtual_service")
+		}
+	}
+	for p := appmesh.NewListVirtualGatewaysPaginator(svc, &appmesh.ListVirtualGatewaysInput{MeshName: aws.String(mesh)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.VirtualGateways {
+			add(StringValue(x.VirtualGatewayName), "aws_appmesh_virtual_gateway")
+		}
+	}
 }

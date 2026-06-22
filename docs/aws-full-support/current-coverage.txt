@@ -39,6 +39,10 @@ aws_appflow_flow
 aws_appintegrations_application
 aws_applicationinsights_application
 aws_appmesh_mesh
+aws_appmesh_virtual_gateway
+aws_appmesh_virtual_node
+aws_appmesh_virtual_router
+aws_appmesh_virtual_service
 aws_apprunner_service
 aws_appstream_fleet
 aws_appstream_image_builder
