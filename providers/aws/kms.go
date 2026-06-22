@@ -82,10 +82,24 @@ func (g *KmsGenerator) addKeys(client *kms.Client) error {
 				continue
 			}
 			if keyDescription.KeyMetadata.KeyManager == types.KeyManagerTypeCustomer {
+				md := keyDescription.KeyMetadata
+				external := md.Origin == types.OriginTypeExternal
+				replica := md.MultiRegion != nil && *md.MultiRegion &&
+					md.MultiRegionConfiguration != nil &&
+					md.MultiRegionConfiguration.MultiRegionKeyType == types.MultiRegionKeyTypeReplica
+				tfType := "aws_kms_key"
+				switch {
+				case external && replica:
+					tfType = "aws_kms_replica_external_key"
+				case external:
+					tfType = "aws_kms_external_key"
+				case replica:
+					tfType = "aws_kms_replica_key"
+				}
 				resource := terraformutils.NewResource(
 					*key.KeyId,
 					*key.KeyId,
-					"aws_kms_key",
+					tfType,
 					"aws",
 					map[string]string{
 						"key_id": *key.KeyId,
