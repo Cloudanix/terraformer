@@ -47,6 +47,21 @@ func (g *TimestreamWriteGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_timestreamwrite_database", "aws", defaultAllowEmptyValues))
+			dbName := name
+			for tp := timestreamwrite.NewListTablesPaginator(svc, &timestreamwrite.ListTablesInput{DatabaseName: &dbName}); tp.HasMorePages(); {
+				tpage, err := tp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, t := range tpage.Tables {
+					table := StringValue(t.TableName)
+					if table == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						dbName+":"+table, dbName+"_"+table, "aws_timestreamwrite_table", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

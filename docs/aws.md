@@ -1051,6 +1051,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_timestreaminfluxdb_db_instance`
 *   `timestream-write`
     * `aws_timestreamwrite_database`
+    * `aws_timestreamwrite_table`
 *   `redshift`
     * `aws_redshift_cluster`
     * `aws_redshift_logging`
