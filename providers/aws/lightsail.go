@@ -72,7 +72,18 @@ func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
 
 	if out, err := svc.GetBuckets(ctx, &lightsail.GetBucketsInput{}); err == nil {
 		for _, x := range out.Buckets {
-			add(StringValue(x.Name), "aws_lightsail_bucket")
+			bucket := StringValue(x.Name)
+			add(bucket, "aws_lightsail_bucket")
+			if keys, err := svc.GetBucketAccessKeys(ctx, &lightsail.GetBucketAccessKeysInput{BucketName: x.Name}); err == nil {
+				for _, k := range keys.AccessKeys {
+					keyID := StringValue(k.AccessKeyId)
+					if keyID == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						bucket+","+keyID, bucket+"_"+keyID, "aws_lightsail_bucket_access_key", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	if out, err := svc.GetCertificates(ctx, &lightsail.GetCertificatesInput{}); err == nil {
@@ -112,7 +123,18 @@ func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
 	}
 	if out, err := svc.GetLoadBalancers(ctx, &lightsail.GetLoadBalancersInput{}); err == nil {
 		for _, x := range out.LoadBalancers {
-			add(StringValue(x.Name), "aws_lightsail_lb")
+			lbName := StringValue(x.Name)
+			add(lbName, "aws_lightsail_lb")
+			if certs, err := svc.GetLoadBalancerTlsCertificates(ctx, &lightsail.GetLoadBalancerTlsCertificatesInput{LoadBalancerName: x.Name}); err == nil {
+				for _, c := range certs.TlsCertificates {
+					certName := StringValue(c.Name)
+					if certName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						lbName+","+certName, lbName+"_"+certName, "aws_lightsail_lb_certificate", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	if out, err := svc.GetStaticIps(ctx, &lightsail.GetStaticIpsInput{}); err == nil {

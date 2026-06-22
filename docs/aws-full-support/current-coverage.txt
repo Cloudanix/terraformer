@@ -510,6 +510,7 @@ aws_lexv2models_slot
 aws_lexv2models_slot_type
 aws_licensemanager_license_configuration
 aws_lightsail_bucket
+aws_lightsail_bucket_access_key
 aws_lightsail_certificate
 aws_lightsail_container_service
 aws_lightsail_database
@@ -519,6 +520,7 @@ aws_lightsail_domain
 aws_lightsail_instance
 aws_lightsail_key_pair
 aws_lightsail_lb
+aws_lightsail_lb_certificate
 aws_lightsail_static_ip
 aws_location_geofence_collection
 aws_location_map

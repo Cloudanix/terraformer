@@ -668,6 +668,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lightsail_key_pair`
     * `aws_lightsail_lb`
     * `aws_lightsail_static_ip`
+    * `aws_lightsail_bucket_access_key`
+    * `aws_lightsail_lb_certificate`
 *   `m2`
     * `aws_m2_application`
 *   `keyspaces`
