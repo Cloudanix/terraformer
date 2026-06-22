@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/glue"
 )
 
@@ -199,6 +200,69 @@ func (g *GlueGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadGlueClassifiers(svc); err != nil {
+		return err
+	}
+
+	for _, DatabaseName := range DatabaseNames {
+		if err := g.loadGlueUserDefinedFunctions(svc, account, DatabaseName); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueClassifiers(svc *glue.Client) error {
+	p := glue.NewGetClassifiersPaginator(svc, &glue.GetClassifiersInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, c := range page.Classifiers {
+			var name string
+			switch {
+			case c.GrokClassifier != nil:
+				name = StringValue(c.GrokClassifier.Name)
+			case c.XMLClassifier != nil:
+				name = StringValue(c.XMLClassifier.Name)
+			case c.JsonClassifier != nil:
+				name = StringValue(c.JsonClassifier.Name)
+			case c.CsvClassifier != nil:
+				name = StringValue(c.CsvClassifier.Name)
+			}
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_glue_classifier", "aws", defaultAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueUserDefinedFunctions(svc *glue.Client, account, databaseName *string) error {
+	catalogID := StringValue(account)
+	dbName := StringValue(databaseName)
+	p := glue.NewGetUserDefinedFunctionsPaginator(svc, &glue.GetUserDefinedFunctionsInput{
+		CatalogId: account, DatabaseName: databaseName, Pattern: aws.String("*"),
+	})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, f := range page.UserDefinedFunctions {
+			name := StringValue(f.FunctionName)
+			if name == "" {
+				continue
+			}
+			id := catalogID + ":" + dbName + ":" + name
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, name, "aws_glue_user_defined_function", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

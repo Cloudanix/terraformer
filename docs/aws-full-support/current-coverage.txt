@@ -296,6 +296,7 @@ aws_globalaccelerator_endpoint_group
 aws_globalaccelerator_listener
 aws_glue_catalog_database
 aws_glue_catalog_table
+aws_glue_classifier
 aws_glue_connection
 aws_glue_crawler
 aws_glue_data_quality_ruleset
@@ -306,6 +307,7 @@ aws_glue_registry
 aws_glue_schema
 aws_glue_security_configuration
 aws_glue_trigger
+aws_glue_user_defined_function
 aws_glue_workflow
 aws_grafana_workspace
 aws_greengrassv2_component_version
