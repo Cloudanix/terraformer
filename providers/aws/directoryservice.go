@@ -89,6 +89,24 @@ func (g *DirectoryServiceGenerator) InitResources() error {
 				add(owner+"/"+shared, owner+"_"+shared, "aws_directory_service_shared_directory")
 			}
 		}
+		dir := dirID
+		for rp := directoryservice.NewDescribeRegionsPaginator(svc, &directoryservice.DescribeRegionsInput{DirectoryId: &dir}); rp.HasMorePages(); {
+			page, err := rp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, r := range page.RegionsDescription {
+				// Only additional (replicated) regions are separate TF resources.
+				if r.RegionType != "Additional" {
+					continue
+				}
+				region := StringValue(r.RegionName)
+				if region == "" {
+					continue
+				}
+				add(dir+","+region, dir+"_"+region, "aws_directory_service_region")
+			}
+		}
 	}
 	return nil
 }

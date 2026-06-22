@@ -423,6 +423,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_directory_service_log_subscription`
     * `aws_directory_service_trust`
     * `aws_directory_service_shared_directory`
+    * `aws_directory_service_region`
 *   `dx`
     * `aws_dx_connection`
     * `aws_dx_gateway`
