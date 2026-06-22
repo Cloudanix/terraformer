@@ -85,6 +85,20 @@ func (g *APIGatewayGenerator) loadClientCertificatesAndDomains(svc *apigateway.C
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_api_gateway_domain_name", "aws", apiGatewayAllowEmptyValues))
+			for bp := apigateway.NewGetBasePathMappingsPaginator(svc, &apigateway.GetBasePathMappingsInput{DomainName: d.DomainName}); bp.HasMorePages(); {
+				bpage, err := bp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, m := range bpage.Items {
+					basePath := StringValue(m.BasePath)
+					if basePath == "" {
+						basePath = "(none)"
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						name+"/"+basePath, name+"_"+basePath, "aws_api_gateway_base_path_mapping", "aws", apiGatewayAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
@@ -157,6 +171,16 @@ func (g *APIGatewayGenerator) loadDeploymentsAndValidators(svc *apigateway.Clien
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				apiID+"/"+id, apiID+"_"+id, "aws_api_gateway_request_validator", "aws", apiGatewayAllowEmptyValues))
+		}
+	}
+	if docVers, err := svc.GetDocumentationVersions(context.TODO(), &apigateway.GetDocumentationVersionsInput{RestApiId: restAPIID}); err == nil {
+		for _, v := range docVers.Items {
+			ver := StringValue(v.Version)
+			if ver == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				apiID+"/"+ver, apiID+"_"+ver, "aws_api_gateway_documentation_version", "aws", apiGatewayAllowEmptyValues))
 		}
 	}
 	return nil
@@ -485,12 +509,27 @@ func (g *APIGatewayGenerator) loadUsagePlans(svc *apigateway.Client) error {
 			return err
 		}
 		for _, usagePlan := range page.Items {
+			planID := StringValue(usagePlan.Id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				*usagePlan.Id,
+				planID,
 				*usagePlan.Name,
 				"aws_api_gateway_usage_plan",
 				"aws",
 				apiGatewayAllowEmptyValues))
+			for kp := apigateway.NewGetUsagePlanKeysPaginator(svc, &apigateway.GetUsagePlanKeysInput{UsagePlanId: usagePlan.Id}); kp.HasMorePages(); {
+				kpage, err := kp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, k := range kpage.Items {
+					keyID := StringValue(k.Id)
+					if keyID == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						planID+"/"+keyID, planID+"_"+keyID, "aws_api_gateway_usage_plan_key", "aws", apiGatewayAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
