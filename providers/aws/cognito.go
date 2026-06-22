@@ -120,7 +120,77 @@ func (g *CognitoGenerator) InitResources() error {
 	if err = g.loadUserPoolClients(svcCognitoIdentityProvider, userPoolIds); err != nil {
 		return err
 	}
+	if err = g.loadUserPoolChildren(svcCognitoIdentityProvider, userPoolIds); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// loadUserPoolChildren enumerates per-user-pool groups, resource servers, and
+// identity providers. Import IDs:
+//   - aws_cognito_user_group         → "<user_pool_id>/<group_name>"
+//   - aws_cognito_resource_server    → "<user_pool_id>|<identifier>"
+//   - aws_cognito_identity_provider  → "<user_pool_id>:<provider_name>"
+func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Client, userPoolIds []string) error {
+	for _, userPoolID := range userPoolIds {
+		groups := cognitoidentityprovider.NewListGroupsPaginator(svc, &cognitoidentityprovider.ListGroupsInput{
+			UserPoolId: aws.String(userPoolID), Limit: aws.Int32(CognitoMaxResults),
+		})
+		for groups.HasMorePages() {
+			page, err := groups.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, group := range page.Groups {
+				name := StringValue(group.GroupName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					userPoolID+"/"+name, userPoolID+"_"+name, "aws_cognito_user_group", "aws",
+					map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+			}
+		}
+
+		servers := cognitoidentityprovider.NewListResourceServersPaginator(svc, &cognitoidentityprovider.ListResourceServersInput{
+			UserPoolId: aws.String(userPoolID), MaxResults: aws.Int32(CognitoMaxResults),
+		})
+		for servers.HasMorePages() {
+			page, err := servers.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, server := range page.ResourceServers {
+				identifier := StringValue(server.Identifier)
+				if identifier == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					userPoolID+"|"+identifier, userPoolID+"_"+identifier, "aws_cognito_resource_server", "aws",
+					map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+			}
+		}
+
+		providers := cognitoidentityprovider.NewListIdentityProvidersPaginator(svc, &cognitoidentityprovider.ListIdentityProvidersInput{
+			UserPoolId: aws.String(userPoolID), MaxResults: aws.Int32(CognitoMaxResults),
+		})
+		for providers.HasMorePages() {
+			page, err := providers.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, provider := range page.Providers {
+				name := StringValue(provider.ProviderName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					userPoolID+":"+name, userPoolID+"_"+name, "aws_cognito_identity_provider", "aws",
+					map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+			}
+		}
+	}
 	return nil
 }
 

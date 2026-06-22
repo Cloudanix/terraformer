@@ -125,6 +125,10 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `cognito`
     * `aws_cognito_identity_pool`
     * `aws_cognito_user_pool`
+    * `aws_cognito_user_pool_client`
+    * `aws_cognito_user_group`
+    * `aws_cognito_resource_server`
+    * `aws_cognito_identity_provider`
 *   `config`
     * `aws_config_config_rule`
     * `aws_config_configuration_recorder`
