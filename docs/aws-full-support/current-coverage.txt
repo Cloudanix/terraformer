@@ -1080,6 +1080,7 @@ aws_vpclattice_service_network
 aws_vpclattice_service_network_vpc_association
 aws_vpclattice_target_group
 aws_vpn_connection
+aws_vpn_connection_route
 aws_vpn_gateway
 aws_waf_byte_match_set
 aws_waf_geo_match_set

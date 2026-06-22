@@ -31,13 +31,22 @@ type VpnConnectionGenerator struct {
 func (VpnConnectionGenerator) createResources(vpncs *ec2.DescribeVpnConnectionsOutput) []terraformutils.Resource {
 	var resources []terraformutils.Resource
 	for _, vpnc := range vpncs.VpnConnections {
+		vpnID := StringValue(vpnc.VpnConnectionId)
 		resources = append(resources, terraformutils.NewSimpleResource(
-			StringValue(vpnc.VpnConnectionId),
-			StringValue(vpnc.VpnConnectionId),
+			vpnID,
+			vpnID,
 			"aws_vpn_connection",
 			"aws",
 			VpnConnectionAllowEmptyValues,
 		))
+		for _, r := range vpnc.Routes {
+			cidr := StringValue(r.DestinationCidrBlock)
+			if cidr == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				cidr+":"+vpnID, vpnID+"_"+cidr, "aws_vpn_connection_route", "aws", VpnConnectionAllowEmptyValues))
+		}
 	}
 	return resources
 }

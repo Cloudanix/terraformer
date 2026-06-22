@@ -1339,6 +1339,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpc_peering_connection_options`
 *   `vpn_connection`
     * `aws_vpn_connection`
+    * `aws_vpn_connection_route`
 *   `vpn_gateway`
     * `aws_vpn_gateway`
 *   `waf`
