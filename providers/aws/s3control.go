@@ -17,36 +17,43 @@ package aws
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/service/iotanalytics"
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/s3control"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
 
-type IoTAnalyticsGenerator struct {
+type S3ControlGenerator struct {
 	AWSService
 }
 
-// InitResources enumerates IoT Analytics channels. Import ID is the channel name.
-func (g *IoTAnalyticsGenerator) InitResources() error {
+// InitResources enumerates S3 Control storage lens configurations for the
+// account. Import ID is "<account-id>:<config-id>".
+func (g *S3ControlGenerator) InitResources() error {
 	config, e := g.generateConfig()
 	if e != nil {
 		return e
 	}
-	svc := iotanalytics.NewFromConfig(config)
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	accountID := StringValue(account)
+	svc := s3control.NewFromConfig(config)
 
-	p := iotanalytics.NewListChannelsPaginator(svc, &iotanalytics.ListChannelsInput{})
+	p := s3control.NewListStorageLensConfigurationsPaginator(svc, &s3control.ListStorageLensConfigurationsInput{AccountId: aws.String(accountID)})
 	for p.HasMorePages() {
 		page, err := p.NextPage(context.TODO())
 		if err != nil {
 			return err
 		}
-		for _, ch := range page.ChannelSummaries {
-			name := StringValue(ch.ChannelName)
-			if name == "" {
+		for _, cfg := range page.StorageLensConfigurationList {
+			id := StringValue(cfg.Id)
+			if id == "" {
 				continue
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				name, name, "aws_iotanalytics_channel", "aws", defaultAllowEmptyValues))
+				accountID+":"+id, id, "aws_s3control_storage_lens_configuration", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

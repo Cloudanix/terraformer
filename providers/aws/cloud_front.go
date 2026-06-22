@@ -66,7 +66,31 @@ func (g *CloudFrontGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadKeyValueStores(svc); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (g *CloudFrontGenerator) loadKeyValueStores(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListKeyValueStores(context.TODO(), &cloudfront.ListKeyValueStoresInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.KeyValueStoreList != nil {
+			for _, kvs := range out.KeyValueStoreList.Items {
+				name := StringValue(kvs.Name)
+				g.addSimple(name, name, "aws_cloudfront_key_value_store")
+			}
+			marker = out.KeyValueStoreList.NextMarker
+		}
+		if marker == nil {
+			return nil
+		}
+	}
 }
 
 func (g *CloudFrontGenerator) addSimple(id, name, tfType string) {

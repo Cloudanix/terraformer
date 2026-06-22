@@ -114,6 +114,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudfront_origin_access_identity`
     * `aws_cloudfront_origin_request_policy`
     * `aws_cloudfront_response_headers_policy`
+    * `aws_cloudfront_key_value_store`
 *   `cloudhsm`
     * `aws_cloudhsm_v2_cluster`
     * `aws_cloudhsm_v2_hsm`
@@ -289,8 +290,6 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_gamelift_build`
 *   `groundstation`
     * `aws_groundstation_mission_profile`
-*   `iotanalytics`
-    * `aws_iotanalytics_channel`
 *   `greengrassv2`
     * `aws_greengrassv2_component_version`
 *   `fms`
@@ -468,6 +467,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_media_store_container`
 *   `mediapackagev2`
     * `aws_media_packagev2_channel_group`
+*   `mediaconvert`
+    * `aws_media_convert_queue`
 *   `medialive`
     * `aws_medialive_channel`
     * `aws_medialive_input`
@@ -532,6 +533,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_db_option_group`
     * `aws_db_event_subscription`
     * `aws_rds_global_cluster`
+*   `quicksight`
+    * `aws_quicksight_data_set`
+    * `aws_quicksight_data_source`
 *   `redshift-serverless`
     * `aws_redshiftserverless_namespace`
     * `aws_redshiftserverless_workgroup`
@@ -603,6 +607,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3_bucket_replication_configuration`
     * `aws_s3_bucket_accelerate_configuration`
     * `aws_s3_bucket_notification`
+*   `s3control`
+    * `aws_s3control_storage_lens_configuration`
+*   `s3outposts`
+    * `aws_s3outposts_endpoint`
 *   `s3tables`
     * `aws_s3tables_table_bucket`
 *   `secretsmanager`

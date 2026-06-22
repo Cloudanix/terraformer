@@ -223,7 +223,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/internal/checksum v1.2.9 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.29 // indirect
-	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.16.9 // indirect
+	github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.29 // indirect
 	github.com/aws/aws-sdk-go-v2/service/sso v1.18.5 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ssooidc v1.21.5 // indirect
 	github.com/aws/smithy-go v1.27.1
@@ -474,7 +474,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/imagebuilder v1.55.6
 	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.49.2
 	github.com/aws/aws-sdk-go-v2/service/internetmonitor v1.27.6
-	github.com/aws/aws-sdk-go-v2/service/iotanalytics v1.32.0
 	github.com/aws/aws-sdk-go-v2/service/iotevents v1.34.2
 	github.com/aws/aws-sdk-go-v2/service/iotsitewise v1.53.0
 	github.com/aws/aws-sdk-go-v2/service/iottwinmaker v1.30.5
@@ -491,6 +490,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/location v1.52.8
 	github.com/aws/aws-sdk-go-v2/service/m2 v1.27.6
 	github.com/aws/aws-sdk-go-v2/service/macie2 v1.52.3
+	github.com/aws/aws-sdk-go-v2/service/mediaconvert v1.93.1
 	github.com/aws/aws-sdk-go-v2/service/mediapackagev2 v1.40.0
 	github.com/aws/aws-sdk-go-v2/service/memorydb v1.34.6
 	github.com/aws/aws-sdk-go-v2/service/mwaa v1.41.5
@@ -509,6 +509,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/pipes v1.24.6
 	github.com/aws/aws-sdk-go-v2/service/proton v1.40.4
 	github.com/aws/aws-sdk-go-v2/service/qbusiness v1.35.5
+	github.com/aws/aws-sdk-go-v2/service/quicksight v1.114.1
 	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/rbin v1.28.7
 	github.com/aws/aws-sdk-go-v2/service/redshiftserverless v1.35.8
@@ -518,6 +519,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/route53profiles v1.10.3
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/rum v1.31.8
+	github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5
+	github.com/aws/aws-sdk-go-v2/service/s3outposts v1.35.2
 	github.com/aws/aws-sdk-go-v2/service/s3tables v1.16.6
 	github.com/aws/aws-sdk-go-v2/service/sagemaker v1.256.0
 	github.com/aws/aws-sdk-go-v2/service/scheduler v1.18.7

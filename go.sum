@@ -592,14 +592,12 @@ github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.6 h1:Bs2O
 github.com/aws/aws-sdk-go-v2/service/internal/endpoint-discovery v1.12.6/go.mod h1:OTctu4cW8t7/TRlTKPLT6akzyOkfceMWhtEHqtYDIQQ=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.29 h1:DRebniUGZ2MqiiIVmQJ04vIXr918hubdHMnarSLEWyU=
 github.com/aws/aws-sdk-go-v2/service/internal/presigned-url v1.13.29/go.mod h1:LfRkPCD8YHDM2E5eTkos2UpwYeZnBcVarTa8L59bJHA=
-github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.16.9 h1:iEAeF6YC3l4FzlJPP9H3Ko1TXpdjdqWffxXjp8SY6uk=
-github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.16.9/go.mod h1:kjsXoK23q9Z/tLBrckZLLyvjhZoS+AGrzqzUfEClvMM=
+github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.29 h1:hiME6pBzC7OTl9LMtlyTWBuEl1f4QBcUmFDKC7MLXtc=
+github.com/aws/aws-sdk-go-v2/service/internal/s3shared v1.19.29/go.mod h1:G7RP+uhagpKtKhd1BM9N6JQqjCcGEU47K5lBVZQyRQw=
 github.com/aws/aws-sdk-go-v2/service/internetmonitor v1.27.6 h1:Y9XZWBeffqRiydStiB5M36IOtLpgs8Uj6tIxwPelNVE=
 github.com/aws/aws-sdk-go-v2/service/internetmonitor v1.27.6/go.mod h1:M8+1g+ZE4i0HgLoJLE/kn+d140olYtZ5PCK9QP7L3QI=
 github.com/aws/aws-sdk-go-v2/service/iot v1.46.5 h1:IAA0Wq9xs17crvcblb//YPc+5PL24ufWLFyiftTMmSc=
 github.com/aws/aws-sdk-go-v2/service/iot v1.46.5/go.mod h1:ElzivGpQ+aPNIVhQ0ebZUMX2SnJApaCXrR6HI0zaYAM=
-github.com/aws/aws-sdk-go-v2/service/iotanalytics v1.32.0 h1:QHeG0bWIqSZ/Utkd7BoDjpcmR5NnBQhErZl9JNlG+Xs=
-github.com/aws/aws-sdk-go-v2/service/iotanalytics v1.32.0/go.mod h1:uqgp8z4czp3R86cSNls22vvFFjCkfHT2eR6EOZ+QgVU=
 github.com/aws/aws-sdk-go-v2/service/iotevents v1.34.2 h1:RTD07yMhtjQbmGeCLHa4PRxO6wCWSDxXeDRp+/AWEfI=
 github.com/aws/aws-sdk-go-v2/service/iotevents v1.34.2/go.mod h1:97p7ZiSFDTxs36xui7EiS1SfQqa7IOFGK0F3cEquL/E=
 github.com/aws/aws-sdk-go-v2/service/iotsitewise v1.53.0 h1:O3bpb1dO0+nh6fiSWGMUjMpIJCH5wRrLJtWSxBAyOTc=
@@ -640,6 +638,8 @@ github.com/aws/aws-sdk-go-v2/service/m2 v1.27.6 h1:++8Rh4fzNL+glu8Ges3G7gRt1mRC3
 github.com/aws/aws-sdk-go-v2/service/m2 v1.27.6/go.mod h1:aXTODE+fAlTcSoZ6IsPAdljBrQAP30YItro5sm8U4tY=
 github.com/aws/aws-sdk-go-v2/service/macie2 v1.52.3 h1:EdX6gif3V9IakGFi2sveCRrA7933ho2mDDCmFgwLBAA=
 github.com/aws/aws-sdk-go-v2/service/macie2 v1.52.3/go.mod h1:0pANWqStki1+mgfggK45P1AEE5Uwr/IL6pLmpqRU+yk=
+github.com/aws/aws-sdk-go-v2/service/mediaconvert v1.93.1 h1:Vr/Y7db3L2mqFeIgblSrEznejWhDUeGEDSio28/GlRU=
+github.com/aws/aws-sdk-go-v2/service/mediaconvert v1.93.1/go.mod h1:X3r5ZRNtxMrvvoE2nJSN+Je09vM15PJxj1AQ27zcNI4=
 github.com/aws/aws-sdk-go-v2/service/medialive v1.43.3 h1:/Ub7sD+eD7K6FWQeuALyVApqyec5Ngk893X3VrVPN6c=
 github.com/aws/aws-sdk-go-v2/service/medialive v1.43.3/go.mod h1:fH6Wz0q9JXupxmSgCFPwxymnpiX6PitFx2f/AqjuayM=
 github.com/aws/aws-sdk-go-v2/service/mediapackage v1.28.5 h1:z+b1lClMC3rSxlUQqRbpGh/uMmUHWC96uQ+AzzZpens=
@@ -690,6 +690,8 @@ github.com/aws/aws-sdk-go-v2/service/qbusiness v1.35.5 h1:AsS0SiRXWHRK6MPKUE3DED
 github.com/aws/aws-sdk-go-v2/service/qbusiness v1.35.5/go.mod h1:Q5eXdnpxAQ/JWMkhRu9mboglb/rcYPIF53pXm3frA+c=
 github.com/aws/aws-sdk-go-v2/service/qldb v1.19.5 h1:dzxL7EqY37jp4AGBbMXyZT+koN8WMCEO0XCPuLp17pw=
 github.com/aws/aws-sdk-go-v2/service/qldb v1.19.5/go.mod h1:tN5rVxOznGnV6y5gXixoL83vMOAuPTFAnqafo813M8A=
+github.com/aws/aws-sdk-go-v2/service/quicksight v1.114.1 h1:dQJja/VpH/v1RbH1HSzeJAhDNyy2FyK+jFgZ2e5Itkk=
+github.com/aws/aws-sdk-go-v2/service/quicksight v1.114.1/go.mod h1:5lLhyi3JRJ0RZbP6uWBKSeG2OWRNpNafHrG/p/oCqZY=
 github.com/aws/aws-sdk-go-v2/service/ram v1.37.3 h1:asPUlaexJMaBQs1ve14UjWLSw+Y3T5o9WAqBEoZji+w=
 github.com/aws/aws-sdk-go-v2/service/ram v1.37.3/go.mod h1:QoMRYQzsk/3utnGKsXWkW59cAGlZn/KiMzVon6D0AyU=
 github.com/aws/aws-sdk-go-v2/service/rbin v1.28.7 h1:O260jg2f1VNyI7WE8AZiAT9BoREj/TImema+2ARIUaw=
@@ -718,6 +720,10 @@ github.com/aws/aws-sdk-go-v2/service/rum v1.31.8 h1:hW68uTn9VLN5MxAZjnXUQkKXUMVR
 github.com/aws/aws-sdk-go-v2/service/rum v1.31.8/go.mod h1:NLWYu0ydTBSraHDdTuOpZppcEqPlhVS0Q4Bt14FWeSg=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.47.5 h1:Keso8lIOS+IzI2MkPZyK6G0LYcK3My2LQ+T5bxghEAY=
 github.com/aws/aws-sdk-go-v2/service/s3 v1.47.5/go.mod h1:vADO6Jn+Rq4nDtfwNjhgR84qkZwiC6FqCaXdw/kYwjA=
+github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5 h1:sS08pq42o+zTTacHH2bILnVX+56jIDsAmlSRKYwsB/0=
+github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5/go.mod h1:dCGIfoT6n2eToJDHoP380259fiV2AuqujN+YYZHemxo=
+github.com/aws/aws-sdk-go-v2/service/s3outposts v1.35.2 h1:k8pb8onAQF3VsGNH1Am+3yEqMuIArxxXL0YAck7AXpE=
+github.com/aws/aws-sdk-go-v2/service/s3outposts v1.35.2/go.mod h1:OIZ3IxQ71VxFu8pGdPziP3HU/leYLrIboL33F+YJ9DI=
 github.com/aws/aws-sdk-go-v2/service/s3tables v1.16.6 h1:6Uu+pbOv0X6mrVZEolavZECblE9ZpZrmiYU72gG+Tgg=
 github.com/aws/aws-sdk-go-v2/service/s3tables v1.16.6/go.mod h1:n/QIB6WlsDUWejQR6XXbUB6+5z/NNuLh9nuwC68oFLk=
 github.com/aws/aws-sdk-go-v2/service/sagemaker v1.256.0 h1:tunqU6XaIXMB/qozmjxOyRzW28GeUkbyTwVeWuyNvkQ=
