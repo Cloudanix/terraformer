@@ -524,6 +524,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpc_ipam_resource_discovery`
     * `aws_vpc_ipam_resource_discovery_association`
     * `aws_ec2_local_gateway_route_table_vpc_association`
+    * `aws_ec2_local_gateway_route`
 *   `ecr`
     * `aws_ecr_lifecycle_policy`
     * `aws_ecr_repository`

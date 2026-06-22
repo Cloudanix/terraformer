@@ -358,6 +358,33 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			add(aws.ToString(x.LocalGatewayRouteTableVpcAssociationId), "aws_ec2_local_gateway_route_table_vpc_association")
 		}
 	}
+	for p := ec2.NewDescribeLocalGatewayRouteTablesPaginator(svc, &ec2.DescribeLocalGatewayRouteTablesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, rt := range pg.LocalGatewayRouteTables {
+			rtID := aws.ToString(rt.LocalGatewayRouteTableId)
+			if rtID == "" {
+				continue
+			}
+			routes, err := svc.SearchLocalGatewayRoutes(ctx, &ec2.SearchLocalGatewayRoutesInput{LocalGatewayRouteTableId: aws.String(rtID)})
+			if err != nil {
+				continue
+			}
+			for _, r := range routes.Routes {
+				if r.Type != "static" {
+					continue
+				}
+				cidr := aws.ToString(r.DestinationCidrBlock)
+				if cidr == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					rtID+"_"+cidr, rtID+"_"+cidr, "aws_ec2_local_gateway_route", "aws", ec2AllowEmptyValues))
+			}
+		}
+	}
 	for p := ec2.NewDescribeNetworkInsightsPathsPaginator(svc, &ec2.DescribeNetworkInsightsPathsInput{}); p.HasMorePages(); {
 		pg, err := p.NextPage(ctx)
 		if err != nil {
