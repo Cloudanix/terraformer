@@ -71,6 +71,34 @@ func (g *LogsGenerator) InitResources() error {
 		}
 		g.Resources = append(g.Resources, g.createResources(page)...)
 	}
+
+	ctx := context.TODO()
+	dests := cloudwatchlogs.NewDescribeDestinationsPaginator(svc, &cloudwatchlogs.DescribeDestinationsInput{})
+	for dests.HasMorePages() {
+		page, err := dests.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, d := range page.Destinations {
+			name := StringValue(d.DestinationName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_log_destination", "aws", logsAllowEmptyValues))
+		}
+	}
+
+	if qd, err := svc.DescribeQueryDefinitions(ctx, &cloudwatchlogs.DescribeQueryDefinitionsInput{}); err == nil {
+		for _, q := range qd.QueryDefinitions {
+			id := StringValue(q.QueryDefinitionId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(q.Name), "aws_cloudwatch_query_definition", "aws", logsAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

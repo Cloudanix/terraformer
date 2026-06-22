@@ -82,6 +82,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_networkmanager_site`
     * `aws_networkmanager_device`
     * `aws_networkmanager_link`
+    * `aws_networkmanager_connection`
 *   `rekognition`
     * `aws_rekognition_collection`
     * `aws_rekognition_stream_processor`
@@ -199,6 +200,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudwatch_event_bus`
     * `aws_cloudwatch_event_connection`
     * `aws_cloudwatch_event_api_destination`
+    * `aws_cloudwatch_event_archive`
     * `aws_cloudwatch_metric_stream`
 *   `codebuild`
     * `aws_codebuild_project`
@@ -565,6 +567,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lambda_permission`
 *   `logs`
     * `aws_cloudwatch_log_group`
+    * `aws_cloudwatch_log_destination`
+    * `aws_cloudwatch_query_definition`
 *   `macie2`
     * `aws_macie2_classification_job`
     * `aws_macie2_custom_data_identifier`

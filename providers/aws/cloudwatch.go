@@ -61,6 +61,16 @@ func (g *CloudWatchGenerator) InitResources() error {
 	if err := g.createEventAPIDestinations(cloudwatcheventsSvc); err != nil {
 		return err
 	}
+	if archives, err := cloudwatcheventsSvc.ListArchives(context.TODO(), &cloudwatchevents.ListArchivesInput{}); err == nil {
+		for _, a := range archives.Archives {
+			name := StringValue(a.ArchiveName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_event_archive", "aws", cloudwatchAllowEmptyValues))
+		}
+	}
 
 	return nil
 }

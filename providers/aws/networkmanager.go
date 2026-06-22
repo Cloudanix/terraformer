@@ -108,6 +108,15 @@ func (g *NetworkManagerGenerator) InitResources() error {
 				add(StringValue(l.LinkArn), "aws_networkmanager_link")
 			}
 		}
+		for cp := networkmanager.NewGetConnectionsPaginator(svc, &networkmanager.GetConnectionsInput{GlobalNetworkId: aws.String(gnID)}); cp.HasMorePages(); {
+			page, err := cp.NextPage(ctx)
+			if err != nil {
+				return err
+			}
+			for _, c := range page.Connections {
+				add(StringValue(c.ConnectionArn), "aws_networkmanager_connection")
+			}
+		}
 	}
 	return nil
 }
