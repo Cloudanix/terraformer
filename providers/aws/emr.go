@@ -59,6 +59,21 @@ func (g *EmrGenerator) addStudios(client *emr.Client) error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(s.Name), "aws_emr_studio", "aws", emrAllowEmptyValues))
+			for mp := emr.NewListStudioSessionMappingsPaginator(client, &emr.ListStudioSessionMappingsInput{StudioId: s.StudioId}); mp.HasMorePages(); {
+				mpage, err := mp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, m := range mpage.SessionMappings {
+					identity := StringValue(m.IdentityId)
+					if identity == "" {
+						continue
+					}
+					mapID := id + ":" + string(m.IdentityType) + ":" + identity
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						mapID, mapID, "aws_emr_studio_session_mapping", "aws", emrAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
