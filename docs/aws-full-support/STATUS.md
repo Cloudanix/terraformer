@@ -74,10 +74,44 @@ already-registered services (deepening work) or (2) documented exclusions in
 `no-list-api.md` (no independent list API, data-plane, deprecated, aliases, or
 account singletons). No buildable net-new *service* remains.
 
+### Plan §4 completeness audit (verified 2026-06-22)
+Mechanical check of every service/resource named in plan.md §4a + §4b against
+the live registry (`aws_provider.go`) and `current-coverage.txt`:
+
+- **§4a P1/P2/P3 services (56)** — all registered: application-autoscaling,
+  backup, datasync, dlm, dms, ds, servicediscovery, sesv2, route53resolver,
+  globalaccelerator, servicequotas, transfer, fsx, storagegateway, glacier, dax,
+  guardduty, inspector2, macie2, fms, shield, securitylake, detective,
+  network-firewall, ram, sso-admin, acm-pca, signer, rolesanywhere, oam,
+  synthetics, rum, internetmonitor, networkmonitor, athena, lakeformation,
+  neptune, memorydb, timestream-write, timestream-influxdb, keyspaces,
+  kinesisanalyticsv2, kinesisvideo, emr-serverless, emr-containers, mwaa,
+  kafkaconnect, opensearch, opensearchserverless, redshift-serverless,
+  docdb-elastic, sagemaker, quicksight, pipes, scheduler, schemas. **0 missing.**
+- **§4a P4 long-tail services (55)** — all registered: amplify, apprunner,
+  appconfig, appflow, appmesh, appstream, chime-sdk-voice, codeartifact, connect,
+  controltower, dataexchange, datazone, finspace, fis, gamelift, grafana,
+  greengrassv2, groundstation, healthlake, imagebuilder, iotevents, iotsitewise,
+  iottwinmaker, ivs, kendra, lexv2-models, license-manager, lightsail, location,
+  m2, mediaconvert, mediapackagev2, neptune-graph, osis, pca-connector-ad, pcs,
+  pinpoint, proton, qbusiness, rbin, resiliencehub, resource-explorer-2,
+  route53domains, route53profiles, s3control, s3outposts, s3tables,
+  servicecatalog-appregistry, ssm-contacts, ssm-incidents, verifiedpermissions,
+  vpc-lattice, wellarchitected, workspaces-web, xray. **0 missing.**
+- **§4b partial-service gaps** — all 100 named gap resource types
+  (codedeploy/servicecatalog/ssm/cloudwatch+events/ec2/route53/s3/cognito/iam/
+  elasticache/dynamodb/kinesis/sns/lambda/cloudfront/kms/apigatewayv2/securityhub/
+  eks/ecs/redshift/glue …) present in `current-coverage.txt`. **0 missing.**
+
+Both §4 work streams are therefore complete; coverage 250→1232 was reached
+cumulatively across the rollout (§7 phases 0–5). What this last session added is
+the §9 deepening tail — per-parent associations/policies enumerable via List/Get
+on already-registered services — not net-new services, which were already done.
+
 ## Coverage tally
 
-Current coverage: 234 services / **1231** `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = **240** — the clean-import buildable tail is now empty;
+Current coverage: 234 services / **1232** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **239** — the clean-import buildable tail is now empty;
 every remaining entry maps to a documented exclusion class in
 [no-list-api.md](no-list-api.md) (structural attachment/policy/accepter/tag/
 exclusive suffixes, unvendored SDKs, data-plane/no-import objects, and
