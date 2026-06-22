@@ -705,6 +705,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_imagebuilder_image_recipe`
     * `aws_imagebuilder_infrastructure_configuration`
     * `aws_imagebuilder_workflow`
+    * `aws_imagebuilder_lifecycle_policy`
 *   `ivs`
     * `aws_ivs_channel`
     * `aws_ivs_playback_key_pair`

@@ -121,5 +121,14 @@ func (g *ImageBuilderGenerator) InitResources() error {
 			add(StringValue(x.Arn), "aws_imagebuilder_workflow")
 		}
 	}
+	for c := imagebuilder.NewListLifecyclePoliciesPaginator(svc, &imagebuilder.ListLifecyclePoliciesInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.LifecyclePolicySummaryList {
+			add(StringValue(x.Arn), "aws_imagebuilder_lifecycle_policy")
+		}
+	}
 	return nil
 }
