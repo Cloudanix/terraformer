@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/directoryservice"
 	"github.com/aws/aws-sdk-go-v2/service/directoryservice/types"
 )
@@ -34,16 +35,60 @@ func (g *DirectoryServiceGenerator) InitResources() error {
 	}
 	svc := directoryservice.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var directoryIDs []string
 	p := directoryservice.NewDescribeDirectoriesPaginator(svc, &directoryservice.DescribeDirectoriesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
+		}
+		for _, d := range page.DirectoryDescriptions {
+			directoryIDs = append(directoryIDs, StringValue(d.DirectoryId))
 		}
 		g.Resources = appendSimpleResources(g.Resources, page.DirectoryDescriptions, "aws_directory_service_directory",
 			defaultAllowEmptyValues,
 			func(d types.DirectoryDescription) string { return StringValue(d.DirectoryId) },
 			func(d types.DirectoryDescription) string { return StringValue(d.DirectoryId) })
+	}
+
+	add := func(id, name, tfType string) {
+		if id != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, name, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+	for _, dirID := range directoryIDs {
+		if dirID == "" {
+			continue
+		}
+		if out, err := svc.DescribeConditionalForwarders(ctx, &directoryservice.DescribeConditionalForwardersInput{DirectoryId: &dirID}); err == nil {
+			for _, cf := range out.ConditionalForwarders {
+				domain := StringValue(cf.RemoteDomainName)
+				if domain == "" {
+					continue
+				}
+				add(dirID+":"+domain, dirID+"_"+domain, "aws_directory_service_conditional_forwarder")
+			}
+		}
+		if out, err := svc.ListLogSubscriptions(ctx, &directoryservice.ListLogSubscriptionsInput{DirectoryId: &dirID}); err == nil && len(out.LogSubscriptions) > 0 {
+			add(dirID, dirID, "aws_directory_service_log_subscription")
+		}
+		if out, err := svc.DescribeTrusts(ctx, &directoryservice.DescribeTrustsInput{DirectoryId: &dirID}); err == nil {
+			for _, t := range out.Trusts {
+				add(StringValue(t.TrustId), StringValue(t.TrustId), "aws_directory_service_trust")
+			}
+		}
+		if out, err := svc.DescribeSharedDirectories(ctx, &directoryservice.DescribeSharedDirectoriesInput{OwnerDirectoryId: &dirID}); err == nil {
+			for _, sd := range out.SharedDirectories {
+				owner := StringValue(sd.OwnerDirectoryId)
+				shared := StringValue(sd.SharedDirectoryId)
+				if owner == "" || shared == "" {
+					continue
+				}
+				add(owner+"/"+shared, owner+"_"+shared, "aws_directory_service_shared_directory")
+			}
+		}
 	}
 	return nil
 }
