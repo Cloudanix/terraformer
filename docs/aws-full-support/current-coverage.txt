@@ -209,6 +209,10 @@ aws_datasync_location_s3
 aws_datasync_location_smb
 aws_datasync_task
 aws_datazone_domain
+aws_datazone_environment
+aws_datazone_environment_blueprint_configuration
+aws_datazone_environment_profile
+aws_datazone_project
 aws_dax_cluster
 aws_dax_parameter_group
 aws_dax_subnet_group

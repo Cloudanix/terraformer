@@ -33,10 +33,12 @@ func (g *DataZoneGenerator) InitResources() error {
 		return e
 	}
 	svc := datazone.NewFromConfig(config)
+	ctx := context.TODO()
 
+	var domainIDs []string
 	p := datazone.NewListDomainsPaginator(svc, &datazone.ListDomainsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +47,74 @@ func (g *DataZoneGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			domainIDs = append(domainIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(domain.Name), "aws_datazone_domain", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, domainID := range domainIDs {
+		dom := domainID
+		var projectIDs []string
+		for pp := datazone.NewListProjectsPaginator(svc, &datazone.ListProjectsInput{DomainIdentifier: &dom}); pp.HasMorePages(); {
+			page, err := pp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, proj := range page.Items {
+				pid := StringValue(proj.Id)
+				if pid == "" {
+					continue
+				}
+				projectIDs = append(projectIDs, pid)
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					dom+":"+pid, dom+"_"+pid, "aws_datazone_project", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for _, projectID := range projectIDs {
+			pid := projectID
+			for ep := datazone.NewListEnvironmentsPaginator(svc, &datazone.ListEnvironmentsInput{DomainIdentifier: &dom, ProjectIdentifier: &pid}); ep.HasMorePages(); {
+				page, err := ep.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, env := range page.Items {
+					eid := StringValue(env.Id)
+					if eid == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						dom+":"+eid, dom+"_"+eid, "aws_datazone_environment", "aws", defaultAllowEmptyValues))
+				}
+			}
+		}
+		for ep := datazone.NewListEnvironmentProfilesPaginator(svc, &datazone.ListEnvironmentProfilesInput{DomainIdentifier: &dom}); ep.HasMorePages(); {
+			page, err := ep.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, prof := range page.Items {
+				pfid := StringValue(prof.Id)
+				if pfid == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					dom+":"+pfid, dom+"_"+pfid, "aws_datazone_environment_profile", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for bp := datazone.NewListEnvironmentBlueprintConfigurationsPaginator(svc, &datazone.ListEnvironmentBlueprintConfigurationsInput{DomainIdentifier: &dom}); bp.HasMorePages(); {
+			page, err := bp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, bc := range page.Items {
+				bid := StringValue(bc.EnvironmentBlueprintId)
+				if bid == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					dom+"/"+bid, dom+"_"+bid, "aws_datazone_environment_blueprint_configuration", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil
