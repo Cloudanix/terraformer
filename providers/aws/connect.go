@@ -60,6 +60,21 @@ func (g *ConnectGenerator) InitResources() error {
 	for _, instanceID := range instanceIDs {
 		g.loadConnectChildren(svc, instanceID)
 	}
+
+	for pn := connect.NewListPhoneNumbersV2Paginator(svc, &connect.ListPhoneNumbersV2Input{}); pn.HasMorePages(); {
+		page, err := pn.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, p := range page.ListPhoneNumbersSummaryList {
+			id := StringValue(p.PhoneNumberId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_connect_phone_number", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
@@ -153,5 +168,11 @@ func (g *ConnectGenerator) loadConnectChildren(svc *connect.Client, instanceID s
 		for _, x := range page.UserHierarchyGroupSummaryList {
 			add(StringValue(x.Id), "aws_connect_user_hierarchy_group")
 		}
+	}
+	// The hierarchy structure is a singleton per instance; import ID is the instance ID.
+	if out, err := svc.DescribeUserHierarchyStructure(ctx, &connect.DescribeUserHierarchyStructureInput{InstanceId: aws.String(instanceID)}); err == nil &&
+		out.HierarchyStructure != nil && out.HierarchyStructure.LevelOne != nil {
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			instanceID, instanceID, "aws_connect_user_hierarchy_structure", "aws", defaultAllowEmptyValues))
 	}
 }
