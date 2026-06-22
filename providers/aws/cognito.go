@@ -134,6 +134,14 @@ func (g *CognitoGenerator) InitResources() error {
 //   - aws_cognito_identity_provider  → "<user_pool_id>:<provider_name>"
 func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Client, userPoolIds []string) error {
 	for _, userPoolID := range userPoolIds {
+		if desc, err := svc.DescribeUserPool(context.TODO(), &cognitoidentityprovider.DescribeUserPoolInput{UserPoolId: aws.String(userPoolID)}); err == nil && desc.UserPool != nil {
+			domain := StringValue(desc.UserPool.Domain)
+			if domain != "" {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					domain, domain, "aws_cognito_user_pool_domain", "aws",
+					map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+			}
+		}
 		groups := cognitoidentityprovider.NewListGroupsPaginator(svc, &cognitoidentityprovider.ListGroupsInput{
 			UserPoolId: aws.String(userPoolID), Limit: aws.Int32(CognitoMaxResults),
 		})
