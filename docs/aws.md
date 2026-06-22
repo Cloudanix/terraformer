@@ -168,6 +168,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_volume_attachment`
 *   `ec2_instance`
     * `aws_instance`
+    * `aws_ami`
+    * `aws_key_pair`
+    * `aws_placement_group`
+    * `aws_flow_log`
+    * `aws_ec2_managed_prefix_list`
+    * `aws_vpc_dhcp_options`
+    * `aws_egress_only_internet_gateway`
 *   `ecr`
     * `aws_ecr_lifecycle_policy`
     * `aws_ecr_repository`

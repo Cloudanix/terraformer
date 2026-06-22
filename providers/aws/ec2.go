@@ -86,6 +86,137 @@ func (g *Ec2Generator) InitResources() error {
 			}
 		}
 	}
+
+	if err := g.loadEc2Extras(svc); err != nil {
+		return err
+	}
+	return nil
+}
+
+// loadEc2Extras enumerates standalone EC2 resources that live alongside
+// instances: self-owned AMIs, key pairs, placement groups, flow logs,
+// self-owned managed prefix lists, DHCP option sets, and egress-only internet
+// gateways. AMIs and prefix lists are scoped to "self" so AWS-owned public
+// resources aren't dumped.
+func (g *Ec2Generator) loadEc2Extras(svc *ec2.Client) error {
+	ctx := context.TODO()
+
+	images := ec2.NewDescribeImagesPaginator(svc, &ec2.DescribeImagesInput{Owners: []string{"self"}})
+	for images.HasMorePages() {
+		page, err := images.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, img := range page.Images {
+			id := aws.ToString(img.ImageId)
+			if id == "" {
+				continue
+			}
+			name := aws.ToString(img.Name)
+			if name == "" {
+				name = id
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, name, "aws_ami", "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	keyPairs, err := svc.DescribeKeyPairs(ctx, &ec2.DescribeKeyPairsInput{})
+	if err != nil {
+		return err
+	}
+	for _, kp := range keyPairs.KeyPairs {
+		name := aws.ToString(kp.KeyName)
+		if name == "" {
+			continue
+		}
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			name, name, "aws_key_pair", "aws", ec2AllowEmptyValues))
+	}
+
+	placementGroups, err := svc.DescribePlacementGroups(ctx, &ec2.DescribePlacementGroupsInput{})
+	if err != nil {
+		return err
+	}
+	for _, pg := range placementGroups.PlacementGroups {
+		name := aws.ToString(pg.GroupName)
+		if name == "" {
+			continue
+		}
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			name, name, "aws_placement_group", "aws", ec2AllowEmptyValues))
+	}
+
+	flowLogs := ec2.NewDescribeFlowLogsPaginator(svc, &ec2.DescribeFlowLogsInput{})
+	for flowLogs.HasMorePages() {
+		page, err := flowLogs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, fl := range page.FlowLogs {
+			id := aws.ToString(fl.FlowLogId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_flow_log", "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	prefixLists := ec2.NewDescribeManagedPrefixListsPaginator(svc, &ec2.DescribeManagedPrefixListsInput{
+		Filters: []types.Filter{{Name: aws.String("owner-id"), Values: []string{"self"}}},
+	})
+	for prefixLists.HasMorePages() {
+		page, err := prefixLists.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, pl := range page.PrefixLists {
+			id := aws.ToString(pl.PrefixListId)
+			if id == "" {
+				continue
+			}
+			name := aws.ToString(pl.PrefixListName)
+			if name == "" {
+				name = id
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, name, "aws_ec2_managed_prefix_list", "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	dhcpOptions := ec2.NewDescribeDhcpOptionsPaginator(svc, &ec2.DescribeDhcpOptionsInput{})
+	for dhcpOptions.HasMorePages() {
+		page, err := dhcpOptions.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, d := range page.DhcpOptions {
+			id := aws.ToString(d.DhcpOptionsId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpc_dhcp_options", "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	egressGateways := ec2.NewDescribeEgressOnlyInternetGatewaysPaginator(svc, &ec2.DescribeEgressOnlyInternetGatewaysInput{})
+	for egressGateways.HasMorePages() {
+		page, err := egressGateways.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, eig := range page.EgressOnlyInternetGateways {
+			id := aws.ToString(eig.EgressOnlyInternetGatewayId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_egress_only_internet_gateway", "aws", ec2AllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 
