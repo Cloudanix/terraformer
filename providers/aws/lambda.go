@@ -57,7 +57,10 @@ func (g *LambdaGenerator) InitResources() error {
 		return err
 	}
 	err = g.addLayerVersions(svc)
-	return err
+	if err != nil {
+		return err
+	}
+	return g.addCodeSigningConfigs(svc)
 }
 
 func (g *LambdaGenerator) PostConvertHook() error {
@@ -159,6 +162,66 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 					))
 				}
 			}
+
+			functionName := StringValue(function.FunctionName)
+
+			pa := lambda.NewListAliasesPaginator(svc, &lambda.ListAliasesInput{FunctionName: function.FunctionName})
+			for pa.HasMorePages() {
+				apage, err := pa.NextPage(context.TODO())
+				if err != nil {
+					return err
+				}
+				for _, alias := range apage.Aliases {
+					aliasName := StringValue(alias.Name)
+					if aliasName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						functionName+"/"+aliasName,
+						functionName+"_"+aliasName,
+						"aws_lambda_alias",
+						"aws",
+						lambdaAllowEmptyValues,
+					))
+				}
+			}
+
+			pu := lambda.NewListFunctionUrlConfigsPaginator(svc, &lambda.ListFunctionUrlConfigsInput{FunctionName: function.FunctionName})
+			for pu.HasMorePages() {
+				upage, err := pu.NextPage(context.TODO())
+				if err != nil {
+					return err
+				}
+				for range upage.FunctionUrlConfigs {
+					// One URL config per function qualifier; import ID is the function name.
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						functionName,
+						functionName,
+						"aws_lambda_function_url",
+						"aws",
+						lambdaAllowEmptyValues,
+					))
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (g *LambdaGenerator) addCodeSigningConfigs(svc *lambda.Client) error {
+	p := lambda.NewListCodeSigningConfigsPaginator(svc, &lambda.ListCodeSigningConfigsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, csc := range page.CodeSigningConfigs {
+			arn := StringValue(csc.CodeSigningConfigArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_lambda_code_signing_config", "aws", lambdaAllowEmptyValues))
 		}
 	}
 	return nil
