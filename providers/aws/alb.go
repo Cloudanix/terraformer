@@ -18,6 +18,7 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"strconv"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -207,6 +208,38 @@ func (g *AlbGenerator) InitResources() error {
 	}
 	if err := g.loadLBTargetGroup(svc); err != nil {
 		return err
+	}
+	if err := g.loadTrustStores(svc); err != nil {
+		return err
+	}
+	return nil
+}
+
+func (g *AlbGenerator) loadTrustStores(svc *elasticloadbalancingv2.Client) error {
+	out, err := svc.DescribeTrustStores(context.TODO(), &elasticloadbalancingv2.DescribeTrustStoresInput{})
+	if err != nil {
+		return err
+	}
+	for _, ts := range out.TrustStores {
+		arn := StringValue(ts.TrustStoreArn)
+		if arn == "" {
+			continue
+		}
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			arn, StringValue(ts.Name), "aws_lb_trust_store", "aws", AlbAllowEmptyValues))
+
+		revs, err := svc.DescribeTrustStoreRevocations(context.TODO(), &elasticloadbalancingv2.DescribeTrustStoreRevocationsInput{TrustStoreArn: ts.TrustStoreArn})
+		if err != nil {
+			continue
+		}
+		for _, r := range revs.TrustStoreRevocations {
+			if r.RevocationId == nil {
+				continue
+			}
+			revID := strconv.FormatInt(*r.RevocationId, 10)
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn+","+revID, arn+"_"+revID, "aws_lb_trust_store_revocation", "aws", AlbAllowEmptyValues))
+		}
 	}
 	return nil
 }

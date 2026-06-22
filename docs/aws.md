@@ -120,6 +120,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lb_listener_certificate`
     * `aws_lb_target_group`
     * `aws_lb_target_group_attachment`
+    * `aws_lb_trust_store`
+    * `aws_lb_trust_store_revocation`
 *   `api_gateway`
     * `aws_api_gateway_authorizer`
     * `aws_api_gateway_api_key`
