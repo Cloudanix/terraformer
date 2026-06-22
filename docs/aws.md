@@ -446,6 +446,10 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `gamelift`
     * `aws_gamelift_fleet`
     * `aws_gamelift_build`
+    * `aws_gamelift_alias`
+    * `aws_gamelift_game_server_group`
+    * `aws_gamelift_game_session_queue`
+    * `aws_gamelift_script`
 *   `groundstation`
     * `aws_groundstation_mission_profile`
 *   `greengrassv2`

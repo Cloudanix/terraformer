@@ -65,5 +65,65 @@ func (g *GameLiftGenerator) InitResources() error {
 				id, StringValue(build.Name), "aws_gamelift_build", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for aliases := gamelift.NewListAliasesPaginator(svc, &gamelift.ListAliasesInput{}); aliases.HasMorePages(); {
+		page, err := aliases.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.Aliases {
+			id := StringValue(a.AliasId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(a.Name), "aws_gamelift_alias", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for groups := gamelift.NewListGameServerGroupsPaginator(svc, &gamelift.ListGameServerGroupsInput{}); groups.HasMorePages(); {
+		page, err := groups.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, grp := range page.GameServerGroups {
+			name := StringValue(grp.GameServerGroupName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_gamelift_game_server_group", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for queues := gamelift.NewDescribeGameSessionQueuesPaginator(svc, &gamelift.DescribeGameSessionQueuesInput{}); queues.HasMorePages(); {
+		page, err := queues.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, q := range page.GameSessionQueues {
+			name := StringValue(q.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_gamelift_game_session_queue", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for scripts := gamelift.NewListScriptsPaginator(svc, &gamelift.ListScriptsInput{}); scripts.HasMorePages(); {
+		page, err := scripts.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, s := range page.Scripts {
+			id := StringValue(s.ScriptId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(s.Name), "aws_gamelift_script", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
