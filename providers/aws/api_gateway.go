@@ -125,6 +125,38 @@ func (g *APIGatewayGenerator) loadRestApis(svc *apigateway.Client) error {
 			if err := g.loadAuthorizers(svc, restAPI.Id); err != nil {
 				return err
 			}
+			if err := g.loadDeploymentsAndValidators(svc, restAPI.Id); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (g *APIGatewayGenerator) loadDeploymentsAndValidators(svc *apigateway.Client, restAPIID *string) error {
+	apiID := StringValue(restAPIID)
+	for p := apigateway.NewGetDeploymentsPaginator(svc, &apigateway.GetDeploymentsInput{RestApiId: restAPIID}); p.HasMorePages(); {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, d := range page.Items {
+			id := StringValue(d.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				apiID+"/"+id, apiID+"_"+id, "aws_api_gateway_deployment", "aws", apiGatewayAllowEmptyValues))
+		}
+	}
+	if validators, err := svc.GetRequestValidators(context.TODO(), &apigateway.GetRequestValidatorsInput{RestApiId: restAPIID}); err == nil {
+		for _, v := range validators.Items {
+			id := StringValue(v.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				apiID+"/"+id, apiID+"_"+id, "aws_api_gateway_request_validator", "aws", apiGatewayAllowEmptyValues))
 		}
 	}
 	return nil

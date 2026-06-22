@@ -6,6 +6,7 @@ aws_amplify_app
 aws_api_gateway_api_key
 aws_api_gateway_authorizer
 aws_api_gateway_client_certificate
+aws_api_gateway_deployment
 aws_api_gateway_documentation_part
 aws_api_gateway_domain_name
 aws_api_gateway_gateway_response
@@ -14,6 +15,7 @@ aws_api_gateway_integration_response
 aws_api_gateway_method
 aws_api_gateway_method_response
 aws_api_gateway_model
+aws_api_gateway_request_validator
 aws_api_gateway_resource
 aws_api_gateway_rest_api
 aws_api_gateway_stage

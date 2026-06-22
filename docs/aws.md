@@ -114,6 +114,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_api_gateway_vpc_link`
     * `aws_api_gateway_client_certificate`
     * `aws_api_gateway_domain_name`
+    * `aws_api_gateway_deployment`
+    * `aws_api_gateway_request_validator`
 *   `api_gatewayv2`
     * `aws_apigatewayv2_api`
     * `aws_apigatewayv2_authorizer`
