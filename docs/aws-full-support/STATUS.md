@@ -68,28 +68,34 @@ Every change: one focused commit + docs/aws.md + serviceScope entry where new.
 
 ## Coverage tally
 
-**203 services registered** in `GetSupportedService()` (was 90 at the start of
+**206 services registered** in `GetSupportedService()` (was 90 at the start of
 this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; §4a P4 done
 across 6 batches. `go build ./...` and `go test ./...` green; `serviceScope`
 assertion passes (incl. the new `route53domains` eastOnly entry); `go mod tidy`
 clean.
 
-## Remaining / deferred — special handling, not a clean list paginator
+## Remaining / deferred
 
-These need more than the §5 single-paginator recipe, or have no
-terraform-provider-aws resource (plan §1 bound):
-- **Account-ID-parameterized:** quicksight, s3control — every List call needs
-  the account id (use `getAccountNumber`), multi-resource.
-- **Per-account endpoint:** mediaconvert (`DescribeEndpoints` first).
-- **Different list shape / multi-step:** s3outposts (ListEndpoints),
-  route53-recovery-control-config, route53-recovery-readiness.
-- **No TF resource (skip per §1):** deadline (AWS Deadline Cloud),
-  iotwireless, devopsguru, serverlessrepo, ssm-sap.
-- **Belongs on an existing generator:** cloudfront-keyvaluestore
-  (`aws_cloudfront_key_value_store` → add to cloud_front.go).
+Special-handling services now BUILT: quicksight, s3control (account-id scoped),
+mediaconvert (DescribeEndpoints), s3outposts, cloudfront key_value_store.
 
-Everything else from plan.md §4a is built. The module-fetch workaround above
-makes the special-handling tail straightforward when prioritized.
+Genuinely excluded (no TF resource / deprecated / multi-step control plane) are
+catalogued in [no-list-api.md](no-list-api.md): deadline, iotwireless,
+devopsguru, serverlessrepo, ssm-sap, iotanalytics (AWS-deprecated, removed), and
+route53-recovery-* (revisit on demand).
+
+Also still open (own follow-ups, unchanged): apigatewayv2 gaps (file is
+aws-sdk-go v1, plan §11 forbids reintroducing v1 — needs a v2 rewrite first);
+sqs/sns `*_policy` (conflict with parent inline policy); §3's terraform-schema
+gap list (runnable via curl now, not yet executed).
+
+## Tests
+- `TestServiceScope` — every registered service has a consistent region scope.
+- `TestEveryServiceDocumented` — every registered service appears in docs/aws.md.
+- `TestQuotasFromChangeHistory` — servicequotas dedup/filter pure function.
+Per the codebase convention (no SDK mocking; `sg_test.go` tests a pure
+transform), trivial list→resource generators rely on the two cross-cutting
+assertions above plus the integration round-trip (import → `terraform plan`).
 
 ### §3 authoritative gap list — runnable now
 `terraform init` + `terraform providers schema -json` can run via the same
