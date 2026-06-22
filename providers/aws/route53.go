@@ -60,6 +60,18 @@ func (g *Route53Generator) createZonesResources(svc *route53.Client) []terraform
 			records := g.createRecordsResources(svc, zoneID)
 			resources = append(resources, records...)
 
+			// Additional VPC associations on a private hosted zone.
+			if detail, err := svc.GetHostedZone(context.TODO(), &route53.GetHostedZoneInput{Id: aws.String(zoneID)}); err == nil {
+				for _, vpc := range detail.VPCs {
+					vpcID := StringValue(vpc.VPCId)
+					if vpcID == "" {
+						continue
+					}
+					resources = append(resources, terraformutils.NewSimpleResource(
+						zoneID+":"+vpcID, zoneID+"_"+vpcID, "aws_route53_zone_association", "aws", route53AllowEmptyValues))
+				}
+			}
+
 			// VPC association authorizations pending acceptance on this zone.
 			if auths, err := svc.ListVPCAssociationAuthorizations(context.TODO(),
 				&route53.ListVPCAssociationAuthorizationsInput{HostedZoneId: aws.String(zoneID)}); err == nil {
