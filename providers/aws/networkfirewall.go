@@ -86,6 +86,11 @@ func (g *NetworkFirewallGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_networkfirewall_firewall_policy", "aws", defaultAllowEmptyValues))
+			arnCopy := arn
+			if rp, err := svc.DescribeResourcePolicy(ctx, &networkfirewall.DescribeResourcePolicyInput{ResourceArn: &arnCopy}); err == nil && StringValue(rp.Policy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, arn, "aws_networkfirewall_resource_policy", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 
@@ -102,6 +107,11 @@ func (g *NetworkFirewallGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_networkfirewall_rule_group", "aws", defaultAllowEmptyValues))
+			arnCopy := arn
+			if rp, err := svc.DescribeResourcePolicy(ctx, &networkfirewall.DescribeResourcePolicyInput{ResourceArn: &arnCopy}); err == nil && StringValue(rp.Policy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, arn, "aws_networkfirewall_resource_policy", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil
