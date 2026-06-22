@@ -267,6 +267,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"datapipeline":            &AwsFacade{service: &DataPipelineGenerator{}},
 		"datasync":                &AwsFacade{service: &DataSyncGenerator{}},
 		"dax":                     &AwsFacade{service: &DaxGenerator{}},
+		"detective":               &AwsFacade{service: &DetectiveGenerator{}},
 		"devicefarm":              &AwsFacade{service: &DeviceFarmGenerator{}},
 		"dlm":                     &AwsFacade{service: &DlmGenerator{}},
 		"dms":                     &AwsFacade{service: &DmsGenerator{}},

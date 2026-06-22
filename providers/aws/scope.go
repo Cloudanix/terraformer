@@ -77,6 +77,7 @@ var serviceScope = map[string]regionScope{
 	"datapipeline":            scopeRegional,
 	"datasync":                scopeRegional,
 	"dax":                     scopeRegional,
+	"detective":               scopeRegional,
 	"devicefarm":              scopeRegional,
 	"dlm":                     scopeRegional,
 	"dms":                     scopeRegional,
