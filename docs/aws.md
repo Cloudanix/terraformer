@@ -592,6 +592,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudwatch_log_group`
     * `aws_cloudwatch_log_destination`
     * `aws_cloudwatch_query_definition`
+    * `aws_cloudwatch_log_metric_filter`
+    * `aws_cloudwatch_log_subscription_filter`
 *   `macie2`
     * `aws_macie2_classification_job`
     * `aws_macie2_custom_data_identifier`

@@ -63,16 +63,55 @@ func (g *LogsGenerator) InitResources() error {
 	}
 	svc := cloudwatchlogs.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var logGroupNames []string
 	p := cloudwatchlogs.NewDescribeLogGroupsPaginator(svc, &cloudwatchlogs.DescribeLogGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
+		}
+		for _, lg := range page.LogGroups {
+			logGroupNames = append(logGroupNames, StringValue(lg.LogGroupName))
 		}
 		g.Resources = append(g.Resources, g.createResources(page)...)
 	}
 
-	ctx := context.TODO()
+	mf := cloudwatchlogs.NewDescribeMetricFiltersPaginator(svc, &cloudwatchlogs.DescribeMetricFiltersInput{})
+	for mf.HasMorePages() {
+		page, err := mf.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, f := range page.MetricFilters {
+			group := StringValue(f.LogGroupName)
+			name := StringValue(f.FilterName)
+			if group == "" || name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				group+":"+name, group+"_"+name, "aws_cloudwatch_log_metric_filter", "aws", logsAllowEmptyValues))
+		}
+	}
+
+	for _, group := range logGroupNames {
+		if group == "" {
+			continue
+		}
+		out, err := svc.DescribeSubscriptionFilters(ctx, &cloudwatchlogs.DescribeSubscriptionFiltersInput{LogGroupName: &group})
+		if err != nil {
+			continue
+		}
+		for _, f := range out.SubscriptionFilters {
+			name := StringValue(f.FilterName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				group+"|"+name, group+"_"+name, "aws_cloudwatch_log_subscription_filter", "aws", logsAllowEmptyValues))
+		}
+	}
+
 	dests := cloudwatchlogs.NewDescribeDestinationsPaginator(svc, &cloudwatchlogs.DescribeDestinationsInput{})
 	for dests.HasMorePages() {
 		page, err := dests.NextPage(ctx)
