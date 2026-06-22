@@ -428,18 +428,26 @@ require (
 require (
 	github.com/IBM/continuous-delivery-go-sdk/v2 v2.0.2
 	github.com/aws/aws-sdk-go-v2/service/acmpca v1.47.6
+	github.com/aws/aws-sdk-go-v2/service/amp v1.44.0
 	github.com/aws/aws-sdk-go-v2/service/amplify v1.39.4
 	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.35.6
 	github.com/aws/aws-sdk-go-v2/service/appconfig v1.44.6
+	github.com/aws/aws-sdk-go-v2/service/appfabric v1.17.3
 	github.com/aws/aws-sdk-go-v2/service/appflow v1.52.1
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.43.0
+	github.com/aws/aws-sdk-go-v2/service/applicationinsights v1.35.6
 	github.com/aws/aws-sdk-go-v2/service/appmesh v1.36.4
 	github.com/aws/aws-sdk-go-v2/service/apprunner v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/appstream v1.61.0
 	github.com/aws/aws-sdk-go-v2/service/athena v1.58.4
+	github.com/aws/aws-sdk-go-v2/service/auditmanager v1.47.1
 	github.com/aws/aws-sdk-go-v2/service/autoscalingplans v1.31.5
 	github.com/aws/aws-sdk-go-v2/service/backup v1.57.6
+	github.com/aws/aws-sdk-go-v2/service/bedrock v1.64.0
+	github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/chimesdkvoice v1.29.2
+	github.com/aws/aws-sdk-go-v2/service/cleanrooms v1.45.6
+	github.com/aws/aws-sdk-go-v2/service/cloudsearch v1.33.4
 	github.com/aws/aws-sdk-go-v2/service/codeartifact v1.39.7
 	github.com/aws/aws-sdk-go-v2/service/codeguruprofiler v1.30.6
 	github.com/aws/aws-sdk-go-v2/service/codegurureviewer v1.35.5
@@ -458,8 +466,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/directoryservice v1.39.4
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
 	github.com/aws/aws-sdk-go-v2/service/docdbelastic v1.21.7
+	github.com/aws/aws-sdk-go-v2/service/elastictranscoder v1.33.0
 	github.com/aws/aws-sdk-go-v2/service/emrcontainers v1.41.6
 	github.com/aws/aws-sdk-go-v2/service/emrserverless v1.42.2
+	github.com/aws/aws-sdk-go-v2/service/evidently v1.30.0
 	github.com/aws/aws-sdk-go-v2/service/finspace v1.34.8
 	github.com/aws/aws-sdk-go-v2/service/fis v1.38.6
 	github.com/aws/aws-sdk-go-v2/service/fms v1.45.6
@@ -479,6 +489,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/iotsitewise v1.53.0
 	github.com/aws/aws-sdk-go-v2/service/iottwinmaker v1.30.5
 	github.com/aws/aws-sdk-go-v2/service/ivs v1.52.1
+	github.com/aws/aws-sdk-go-v2/service/ivschat v1.22.7
 	github.com/aws/aws-sdk-go-v2/service/kafkaconnect v1.31.8
 	github.com/aws/aws-sdk-go-v2/service/kendra v1.61.3
 	github.com/aws/aws-sdk-go-v2/service/keyspaces v1.26.5
@@ -498,6 +509,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/neptune v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/neptunegraph v1.22.5
 	github.com/aws/aws-sdk-go-v2/service/networkfirewall v1.61.8
+	github.com/aws/aws-sdk-go-v2/service/networkmanager v1.42.6
 	github.com/aws/aws-sdk-go-v2/service/networkmonitor v1.14.6
 	github.com/aws/aws-sdk-go-v2/service/oam v1.24.7
 	github.com/aws/aws-sdk-go-v2/service/opensearch v1.72.0
@@ -514,6 +526,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/rbin v1.28.7
 	github.com/aws/aws-sdk-go-v2/service/redshiftserverless v1.35.8
+	github.com/aws/aws-sdk-go-v2/service/resiliencehub v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/resourceexplorer2 v1.24.6
 	github.com/aws/aws-sdk-go-v2/service/rolesanywhere v1.23.7
 	github.com/aws/aws-sdk-go-v2/service/route53domains v1.36.3

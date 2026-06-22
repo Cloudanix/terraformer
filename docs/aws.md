@@ -39,6 +39,33 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_acm_certificate`
 *   `acm-pca`
     * `aws_acmpca_certificate_authority`
+*   `amp`
+    * `aws_prometheus_workspace`
+*   `appfabric`
+    * `aws_appfabric_app_bundle`
+*   `applicationinsights`
+    * `aws_applicationinsights_application`
+*   `auditmanager`
+    * `aws_auditmanager_assessment`
+*   `bedrock`
+    * `aws_bedrock_custom_model`
+    * `aws_bedrock_guardrail`
+*   `bedrockagent`
+    * `aws_bedrockagent_agent`
+*   `cleanrooms`
+    * `aws_cleanrooms_collaboration`
+*   `cloudsearch`
+    * `aws_cloudsearch_domain`
+*   `elastictranscoder`
+    * `aws_elastictranscoder_pipeline`
+*   `evidently`
+    * `aws_evidently_project`
+*   `ivschat`
+    * `aws_ivschat_room`
+*   `networkmanager`
+    * `aws_networkmanager_global_network`
+*   `resiliencehub`
+    * `aws_resiliencehub_app`
 *   `amplify`
     * `aws_amplify_app`
 *   `alb` (supports ALB and NLB)

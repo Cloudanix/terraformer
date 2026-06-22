@@ -32,13 +32,16 @@ aws_appautoscaling_policy
 aws_appautoscaling_scheduled_action
 aws_appautoscaling_target
 aws_appconfig_application
+aws_appfabric_app_bundle
 aws_appflow_flow
+aws_applicationinsights_application
 aws_appmesh_mesh
 aws_apprunner_service
 aws_appstream_fleet
 aws_appsync_graphql_api
 aws_athena_data_catalog
 aws_athena_workgroup
+aws_auditmanager_assessment
 aws_autoscaling_group
 aws_autoscalingplans_scaling_plan
 aws_backup_framework
@@ -50,8 +53,12 @@ aws_backup_vault
 aws_batch_compute_environment
 aws_batch_job_definition
 aws_batch_job_queue
+aws_bedrock_custom_model
+aws_bedrock_guardrail
+aws_bedrockagent_agent
 aws_budgets_budget
 aws_chimesdkvoice_voice_connector
+aws_cleanrooms_collaboration
 aws_cloud9_environment_ec2
 aws_cloudformation_stack
 aws_cloudformation_stack_set
@@ -67,6 +74,7 @@ aws_cloudfront_origin_request_policy
 aws_cloudfront_response_headers_policy
 aws_cloudhsm_v2_cluster
 aws_cloudhsm_v2_hsm
+aws_cloudsearch_domain
 aws_cloudtrail
 aws_cloudwatch_composite_alarm
 aws_cloudwatch_dashboard
@@ -183,11 +191,13 @@ aws_elasticache_subnet_group
 aws_elasticache_user
 aws_elasticache_user_group
 aws_elasticsearch_domain
+aws_elastictranscoder_pipeline
 aws_elb
 aws_emr_cluster
 aws_emr_security_configuration
 aws_emrcontainers_virtual_cluster
 aws_emrserverless_application
+aws_evidently_project
 aws_finspace_kx_environment
 aws_fis_experiment_template
 aws_flow_log
@@ -263,6 +273,7 @@ aws_iotevents_detector_model
 aws_iotsitewise_asset_model
 aws_iottwinmaker_workspace
 aws_ivs_channel
+aws_ivschat_room
 aws_kendra_index
 aws_key_pair
 aws_keyspaces_keyspace
@@ -326,6 +337,7 @@ aws_network_interface
 aws_networkfirewall_firewall
 aws_networkfirewall_firewall_policy
 aws_networkfirewall_rule_group
+aws_networkmanager_global_network
 aws_networkmonitor_monitor
 aws_oam_link
 aws_oam_sink
@@ -351,6 +363,7 @@ aws_pcs_cluster
 aws_pinpoint_app
 aws_pipes_pipe
 aws_placement_group
+aws_prometheus_workspace
 aws_proton_environment
 aws_qbusiness_application
 aws_qldb_ledger
@@ -372,6 +385,7 @@ aws_redshift_subnet_group
 aws_redshift_usage_limit
 aws_redshiftserverless_namespace
 aws_redshiftserverless_workgroup
+aws_resiliencehub_app
 aws_resourceexplorer2_index
 aws_resourcegroups_group
 aws_rolesanywhere_profile
