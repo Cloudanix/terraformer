@@ -42,7 +42,168 @@ func (g *CloudFrontGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadFunctions(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadOriginAccessControls(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadOriginAccessIdentities(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadResponseHeadersPolicies(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadOriginRequestPolicies(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadKeyGroups(svc); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (g *CloudFrontGenerator) addSimple(id, name, tfType string) {
+	if id == "" {
+		return
+	}
+	g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+		id, name, tfType, "aws", cloudFrontAllowEmptyValues))
+}
+
+func (g *CloudFrontGenerator) loadFunctions(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListFunctions(context.TODO(), &cloudfront.ListFunctionsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.FunctionList != nil {
+			for _, fn := range out.FunctionList.Items {
+				name := StringValue(fn.Name)
+				g.addSimple(name, name, "aws_cloudfront_function")
+			}
+			marker = out.FunctionList.NextMarker
+		}
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadOriginAccessControls(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListOriginAccessControls(context.TODO(), &cloudfront.ListOriginAccessControlsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.OriginAccessControlList != nil {
+			for _, oac := range out.OriginAccessControlList.Items {
+				id := StringValue(oac.Id)
+				g.addSimple(id, id, "aws_cloudfront_origin_access_control")
+			}
+			marker = out.OriginAccessControlList.NextMarker
+		}
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadOriginAccessIdentities(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListCloudFrontOriginAccessIdentities(context.TODO(), &cloudfront.ListCloudFrontOriginAccessIdentitiesInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.CloudFrontOriginAccessIdentityList != nil {
+			for _, oai := range out.CloudFrontOriginAccessIdentityList.Items {
+				id := StringValue(oai.Id)
+				g.addSimple(id, id, "aws_cloudfront_origin_access_identity")
+			}
+			marker = out.CloudFrontOriginAccessIdentityList.NextMarker
+		}
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadResponseHeadersPolicies(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListResponseHeadersPolicies(context.TODO(), &cloudfront.ListResponseHeadersPoliciesInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.ResponseHeadersPolicyList != nil {
+			for _, p := range out.ResponseHeadersPolicyList.Items {
+				if p.ResponseHeadersPolicy == nil {
+					continue
+				}
+				id := StringValue(p.ResponseHeadersPolicy.Id)
+				g.addSimple(id, id, "aws_cloudfront_response_headers_policy")
+			}
+			marker = out.ResponseHeadersPolicyList.NextMarker
+		}
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadOriginRequestPolicies(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListOriginRequestPolicies(context.TODO(), &cloudfront.ListOriginRequestPoliciesInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.OriginRequestPolicyList != nil {
+			for _, p := range out.OriginRequestPolicyList.Items {
+				if p.OriginRequestPolicy == nil {
+					continue
+				}
+				id := StringValue(p.OriginRequestPolicy.Id)
+				g.addSimple(id, id, "aws_cloudfront_origin_request_policy")
+			}
+			marker = out.OriginRequestPolicyList.NextMarker
+		}
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadKeyGroups(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListKeyGroups(context.TODO(), &cloudfront.ListKeyGroupsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.KeyGroupList != nil {
+			for _, kg := range out.KeyGroupList.Items {
+				if kg.KeyGroup == nil {
+					continue
+				}
+				id := StringValue(kg.KeyGroup.Id)
+				g.addSimple(id, id, "aws_cloudfront_key_group")
+			}
+			marker = out.KeyGroupList.NextMarker
+		}
+		if marker == nil {
+			return nil
+		}
+	}
 }
 
 func (g *CloudFrontGenerator) loadDistribution(svc *cloudfront.Client) error {
