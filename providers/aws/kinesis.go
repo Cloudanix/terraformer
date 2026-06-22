@@ -61,10 +61,39 @@ func (g *KinesisGenerator) InitResources() error {
 
 		g.Resources = append(g.Resources, g.createResources(results.StreamNames)...)
 
+		// StreamSummaries carry the ARN needed to enumerate registered consumers.
+		for _, summary := range results.StreamSummaries {
+			if err := g.addStreamConsumers(svc, StringValue(summary.StreamARN)); err != nil {
+				return err
+			}
+		}
+
 		if len(results.StreamNames) > 0 {
 			request = kinesis.ListStreamsInput{
 				ExclusiveStartStreamName: &results.StreamNames[len(results.StreamNames)-1],
 			}
+		}
+	}
+	return nil
+}
+
+func (g *KinesisGenerator) addStreamConsumers(svc *kinesis.Client, streamARN string) error {
+	if streamARN == "" {
+		return nil
+	}
+	p := kinesis.NewListStreamConsumersPaginator(svc, &kinesis.ListStreamConsumersInput{StreamARN: &streamARN})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, consumer := range page.Consumers {
+			arn := StringValue(consumer.ConsumerARN)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(consumer.ConsumerName), "aws_kinesis_stream_consumer", "aws", kinesisAllowEmptyValues))
 		}
 	}
 	return nil
