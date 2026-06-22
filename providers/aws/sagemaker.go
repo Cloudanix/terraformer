@@ -285,4 +285,13 @@ func (g *SageMakerGenerator) addMoreSageMaker(ctx context.Context, svc *sagemake
 			add(StringValue(x.WorkteamName), "aws_sagemaker_workteam")
 		}
 	}
+	for p := sagemaker.NewListDataQualityJobDefinitionsPaginator(svc, &sagemaker.ListDataQualityJobDefinitionsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.JobDefinitionSummaries {
+			add(StringValue(x.MonitoringJobDefinitionName), "aws_sagemaker_data_quality_job_definition")
+		}
+	}
 }

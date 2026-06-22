@@ -616,7 +616,6 @@ aws_s3tables_table
 aws_s3tables_table_bucket_policy
 aws_s3tables_table_policy
 aws_sagemaker_app
-aws_sagemaker_data_quality_job_definition
 aws_sagemaker_device
 aws_sagemaker_hub
 aws_sagemaker_image_version

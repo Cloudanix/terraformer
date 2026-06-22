@@ -548,6 +548,7 @@ aws_s3outposts_endpoint
 aws_s3tables_table_bucket
 aws_sagemaker_app_image_config
 aws_sagemaker_code_repository
+aws_sagemaker_data_quality_job_definition
 aws_sagemaker_device_fleet
 aws_sagemaker_domain
 aws_sagemaker_endpoint

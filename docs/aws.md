@@ -741,6 +741,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sagemaker_studio_lifecycle_config`
     * `aws_sagemaker_workforce`
     * `aws_sagemaker_workteam`
+    * `aws_sagemaker_data_quality_job_definition`
 *   `scheduler`
     * `aws_scheduler_schedule_group`
     * `aws_scheduler_schedule`
