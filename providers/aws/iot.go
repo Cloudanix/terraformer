@@ -115,6 +115,33 @@ func (g *IotGenerator) loadIotExtras(svc *iot.Client) {
 			add(StringValue(x.DomainConfigurationName), "aws_iot_domain_configuration")
 		}
 	}
+	for p := iot.NewListCertificatesPaginator(svc, &iot.ListCertificatesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.Certificates {
+			add(StringValue(x.CertificateId), "aws_iot_certificate")
+		}
+	}
+	for p := iot.NewListCACertificatesPaginator(svc, &iot.ListCACertificatesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.Certificates {
+			add(StringValue(x.CertificateId), "aws_iot_ca_certificate")
+		}
+	}
+	for p := iot.NewListTopicRuleDestinationsPaginator(svc, &iot.ListTopicRuleDestinationsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.DestinationSummaries {
+			add(StringValue(x.Arn), "aws_iot_topic_rule_destination")
+		}
+	}
 }
 
 func (g *IotGenerator) loadThingTypes(svc *iot.Client) error {

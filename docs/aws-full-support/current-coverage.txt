@@ -437,6 +437,8 @@ aws_internet_gateway
 aws_internetmonitor_monitor
 aws_iot_authorizer
 aws_iot_billing_group
+aws_iot_ca_certificate
+aws_iot_certificate
 aws_iot_domain_configuration
 aws_iot_policy
 aws_iot_provisioning_template
@@ -445,6 +447,7 @@ aws_iot_thing
 aws_iot_thing_group
 aws_iot_thing_type
 aws_iot_topic_rule
+aws_iot_topic_rule_destination
 aws_iotevents_detector_model
 aws_iotsitewise_asset_model
 aws_iottwinmaker_workspace

@@ -613,6 +613,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iot_thing_group`
     * `aws_iot_provisioning_template`
     * `aws_iot_domain_configuration`
+    * `aws_iot_certificate`
+    * `aws_iot_ca_certificate`
+    * `aws_iot_topic_rule_destination`
     * `aws_iot_role_alias`
 *   `kafkaconnect`
     * `aws_mskconnect_connector`
