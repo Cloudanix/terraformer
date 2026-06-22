@@ -551,6 +551,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_guardduty_organization_admin_account`
 *   `imagebuilder`
     * `aws_imagebuilder_image_pipeline`
+    * `aws_imagebuilder_component`
+    * `aws_imagebuilder_container_recipe`
+    * `aws_imagebuilder_distribution_configuration`
+    * `aws_imagebuilder_image`
+    * `aws_imagebuilder_image_recipe`
+    * `aws_imagebuilder_infrastructure_configuration`
+    * `aws_imagebuilder_workflow`
 *   `ivs`
     * `aws_ivs_channel`
 *   `iam`

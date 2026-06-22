@@ -34,9 +34,17 @@ func (g *ImageBuilderGenerator) InitResources() error {
 	}
 	svc := imagebuilder.NewFromConfig(config)
 
+	ctx := context.TODO()
+	add := func(arn, tfType string) {
+		if arn != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	p := imagebuilder.NewListImagePipelinesPaginator(svc, &imagebuilder.ListImagePipelinesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -47,6 +55,70 @@ func (g *ImageBuilderGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(pipeline.Name), "aws_imagebuilder_image_pipeline", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for c := imagebuilder.NewListComponentsPaginator(svc, &imagebuilder.ListComponentsInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ComponentVersionList {
+			add(StringValue(x.Arn), "aws_imagebuilder_component")
+		}
+	}
+	for c := imagebuilder.NewListContainerRecipesPaginator(svc, &imagebuilder.ListContainerRecipesInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ContainerRecipeSummaryList {
+			add(StringValue(x.Arn), "aws_imagebuilder_container_recipe")
+		}
+	}
+	for c := imagebuilder.NewListDistributionConfigurationsPaginator(svc, &imagebuilder.ListDistributionConfigurationsInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.DistributionConfigurationSummaryList {
+			add(StringValue(x.Arn), "aws_imagebuilder_distribution_configuration")
+		}
+	}
+	for c := imagebuilder.NewListImagesPaginator(svc, &imagebuilder.ListImagesInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ImageVersionList {
+			add(StringValue(x.Arn), "aws_imagebuilder_image")
+		}
+	}
+	for c := imagebuilder.NewListImageRecipesPaginator(svc, &imagebuilder.ListImageRecipesInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ImageRecipeSummaryList {
+			add(StringValue(x.Arn), "aws_imagebuilder_image_recipe")
+		}
+	}
+	for c := imagebuilder.NewListInfrastructureConfigurationsPaginator(svc, &imagebuilder.ListInfrastructureConfigurationsInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.InfrastructureConfigurationSummaryList {
+			add(StringValue(x.Arn), "aws_imagebuilder_infrastructure_configuration")
+		}
+	}
+	for c := imagebuilder.NewListWorkflowsPaginator(svc, &imagebuilder.ListWorkflowsInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.WorkflowVersionList {
+			add(StringValue(x.Arn), "aws_imagebuilder_workflow")
 		}
 	}
 	return nil
