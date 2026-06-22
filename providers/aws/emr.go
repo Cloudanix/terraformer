@@ -96,6 +96,10 @@ func (g *EmrGenerator) addClusters(client *emr.Client) error {
 				emrAllowEmptyValues,
 			))
 			g.addInstanceGroupsAndFleets(client, clusterID)
+			if msp, err := client.GetManagedScalingPolicy(context.TODO(), &emr.GetManagedScalingPolicyInput{ClusterId: cluster.Id}); err == nil && msp.ManagedScalingPolicy != nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					clusterID, clusterID, "aws_emr_managed_scaling_policy", "aws", emrAllowEmptyValues))
+			}
 		}
 	}
 	return nil

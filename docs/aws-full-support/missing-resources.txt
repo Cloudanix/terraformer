@@ -108,7 +108,6 @@ aws_eks_access_policy_association
 aws_elastictranscoder_preset
 aws_elb_attachment
 aws_emr_block_public_access_configuration
-aws_emr_managed_scaling_policy
 aws_evidently_feature
 aws_evidently_launch
 aws_evidently_segment

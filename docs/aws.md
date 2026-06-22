@@ -592,6 +592,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_emr_studio_session_mapping`
     * `aws_emr_instance_fleet`
     * `aws_emr_instance_group`
+    * `aws_emr_managed_scaling_policy`
 *   `emr-containers`
     * `aws_emrcontainers_virtual_cluster`
     * `aws_emrcontainers_job_template`
