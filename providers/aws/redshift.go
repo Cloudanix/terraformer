@@ -176,7 +176,92 @@ func (g *RedshiftGenerator) InitResources() error {
 	if err := g.loadSnapshotSchedules(svc); err != nil {
 		return err
 	}
+	if err := g.loadScheduledActions(svc); err != nil {
+		return err
+	}
+	if err := g.loadUsageLimits(svc); err != nil {
+		return err
+	}
+	if err := g.loadAuthenticationProfiles(svc); err != nil {
+		return err
+	}
+	if err := g.loadEndpointAccess(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *RedshiftGenerator) loadScheduledActions(svc *redshift.Client) error {
+	p := redshift.NewDescribeScheduledActionsPaginator(svc, &redshift.DescribeScheduledActionsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, sa := range page.ScheduledActions {
+			name := StringValue(sa.ScheduledActionName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_redshift_scheduled_action", "aws", RedshiftAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *RedshiftGenerator) loadUsageLimits(svc *redshift.Client) error {
+	p := redshift.NewDescribeUsageLimitsPaginator(svc, &redshift.DescribeUsageLimitsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, ul := range page.UsageLimits {
+			id := StringValue(ul.UsageLimitId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_redshift_usage_limit", "aws", RedshiftAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *RedshiftGenerator) loadAuthenticationProfiles(svc *redshift.Client) error {
+	out, err := svc.DescribeAuthenticationProfiles(context.TODO(), &redshift.DescribeAuthenticationProfilesInput{})
+	if err != nil {
+		return err
+	}
+	for _, ap := range out.AuthenticationProfiles {
+		name := StringValue(ap.AuthenticationProfileName)
+		if name == "" {
+			continue
+		}
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			name, name, "aws_redshift_authentication_profile", "aws", RedshiftAllowEmptyValues))
+	}
+	return nil
+}
+
+func (g *RedshiftGenerator) loadEndpointAccess(svc *redshift.Client) error {
+	p := redshift.NewDescribeEndpointAccessPaginator(svc, &redshift.DescribeEndpointAccessInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, ea := range page.EndpointAccessList {
+			name := StringValue(ea.EndpointName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_redshift_endpoint_access", "aws", RedshiftAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

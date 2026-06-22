@@ -345,6 +345,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshift_snapshot_schedule`
     * `aws_redshift_snapshot_schedule_association`
     * `aws_redshift_subnet_group`
+    * `aws_redshift_scheduled_action`
+    * `aws_redshift_usage_limit`
+    * `aws_redshift_authentication_profile`
+    * `aws_redshift_endpoint_access`
 *   `resourcegroups`
     * `aws_resourcegroups_group`
 *   `route53`
