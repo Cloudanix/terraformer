@@ -294,4 +294,66 @@ func (g *SageMakerGenerator) addMoreSageMaker(ctx context.Context, svc *sagemake
 			add(StringValue(x.MonitoringJobDefinitionName), "aws_sagemaker_data_quality_job_definition")
 		}
 	}
+	var hubToken *string
+	for {
+		pg, e := svc.ListHubs(ctx, &sagemaker.ListHubsInput{NextToken: hubToken})
+		if e != nil {
+			break
+		}
+		for _, x := range pg.HubSummaries {
+			add(StringValue(x.HubName), "aws_sagemaker_hub")
+		}
+		if pg.NextToken == nil {
+			break
+		}
+		hubToken = pg.NextToken
+	}
+	for p := sagemaker.NewListUserProfilesPaginator(svc, &sagemaker.ListUserProfilesInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.UserProfiles {
+			domainID := StringValue(x.DomainId)
+			name := StringValue(x.UserProfileName)
+			if domainID == "" || name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				domainID+"/"+name, domainID+"_"+name, "aws_sagemaker_user_profile", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for p := sagemaker.NewListSpacesPaginator(svc, &sagemaker.ListSpacesInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.Spaces {
+			domainID := StringValue(x.DomainId)
+			name := StringValue(x.SpaceName)
+			if domainID == "" || name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				domainID+"/"+name, domainID+"_"+name, "aws_sagemaker_space", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for p := sagemaker.NewListAppsPaginator(svc, &sagemaker.ListAppsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.Apps {
+			domainID := StringValue(x.DomainId)
+			appName := StringValue(x.AppName)
+			user := StringValue(x.UserProfileName)
+			if domainID == "" || appName == "" || user == "" {
+				continue
+			}
+			// import: <domain>/<user-profile>/<app-type>/<app-name>
+			id := domainID + "/" + user + "/" + string(x.AppType) + "/" + appName
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, domainID+"_"+user+"_"+appName, "aws_sagemaker_app", "aws", defaultAllowEmptyValues))
+		}
+	}
 }

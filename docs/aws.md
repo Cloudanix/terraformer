@@ -812,6 +812,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshiftserverless_workgroup`
 *   `sagemaker`
     * `aws_sagemaker_domain`
+    * `aws_sagemaker_user_profile`
+    * `aws_sagemaker_space`
+    * `aws_sagemaker_app`
+    * `aws_sagemaker_hub`
     * `aws_sagemaker_notebook_instance`
     * `aws_sagemaker_model`
     * `aws_sagemaker_endpoint`
