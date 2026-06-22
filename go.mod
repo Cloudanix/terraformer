@@ -436,11 +436,16 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/apprunner v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/appstream v1.61.0
 	github.com/aws/aws-sdk-go-v2/service/athena v1.58.4
+	github.com/aws/aws-sdk-go-v2/service/autoscalingplans v1.31.5
 	github.com/aws/aws-sdk-go-v2/service/backup v1.57.6
+	github.com/aws/aws-sdk-go-v2/service/chimesdkvoice v1.29.2
 	github.com/aws/aws-sdk-go-v2/service/codeartifact v1.39.7
+	github.com/aws/aws-sdk-go-v2/service/codeguruprofiler v1.30.6
 	github.com/aws/aws-sdk-go-v2/service/codegurureviewer v1.35.5
 	github.com/aws/aws-sdk-go-v2/service/codestarconnections v1.36.5
+	github.com/aws/aws-sdk-go-v2/service/codestarnotifications v1.32.6
 	github.com/aws/aws-sdk-go-v2/service/connect v1.177.0
+	github.com/aws/aws-sdk-go-v2/service/controltower v1.29.6
 	github.com/aws/aws-sdk-go-v2/service/customerprofiles v1.62.5
 	github.com/aws/aws-sdk-go-v2/service/databasemigrationservice v1.64.4
 	github.com/aws/aws-sdk-go-v2/service/dataexchange v1.42.6
@@ -451,6 +456,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/directconnect v1.30.1
 	github.com/aws/aws-sdk-go-v2/service/directoryservice v1.39.4
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
+	github.com/aws/aws-sdk-go-v2/service/docdbelastic v1.21.7
 	github.com/aws/aws-sdk-go-v2/service/emrcontainers v1.41.6
 	github.com/aws/aws-sdk-go-v2/service/emrserverless v1.42.2
 	github.com/aws/aws-sdk-go-v2/service/finspace v1.34.8
@@ -462,11 +468,13 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/globalaccelerator v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/grafana v1.36.4
 	github.com/aws/aws-sdk-go-v2/service/greengrassv2 v1.43.8
+	github.com/aws/aws-sdk-go-v2/service/groundstation v1.43.4
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.79.3
 	github.com/aws/aws-sdk-go-v2/service/healthlake v1.39.0
 	github.com/aws/aws-sdk-go-v2/service/imagebuilder v1.55.6
 	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.49.2
 	github.com/aws/aws-sdk-go-v2/service/internetmonitor v1.27.6
+	github.com/aws/aws-sdk-go-v2/service/iotanalytics v1.32.0
 	github.com/aws/aws-sdk-go-v2/service/iotevents v1.34.2
 	github.com/aws/aws-sdk-go-v2/service/iotsitewise v1.53.0
 	github.com/aws/aws-sdk-go-v2/service/iottwinmaker v1.30.5
@@ -506,6 +514,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/redshiftserverless v1.35.8
 	github.com/aws/aws-sdk-go-v2/service/resourceexplorer2 v1.24.6
 	github.com/aws/aws-sdk-go-v2/service/rolesanywhere v1.23.7
+	github.com/aws/aws-sdk-go-v2/service/route53domains v1.36.3
 	github.com/aws/aws-sdk-go-v2/service/route53profiles v1.10.3
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/rum v1.31.8
@@ -524,6 +533,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ssmincidents v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/synthetics v1.44.0
+	github.com/aws/aws-sdk-go-v2/service/timestreaminfluxdb v1.20.6
 	github.com/aws/aws-sdk-go-v2/service/timestreamwrite v1.36.0
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
 	github.com/aws/aws-sdk-go-v2/service/verifiedpermissions v1.34.6

@@ -49,6 +49,7 @@ var SupportedGlobalResources = []string{
 
 // SupportedEastOnlyResources should be bound to us-east-1 region only, and does not work in any other region.
 var SupportedEastOnlyResources = []string{
+	"route53domains",
 	"wafv2_cloudfront",
 }
 
@@ -268,7 +269,12 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"codebuild":                  &AwsFacade{service: &CodeBuildGenerator{}},
 		"codecommit":                 &AwsFacade{service: &CodeCommitGenerator{}},
 		"codeartifact":               &AwsFacade{service: &CodeArtifactGenerator{}},
+		"codeguru-profiler":          &AwsFacade{service: &CodeGuruProfilerGenerator{}},
 		"codeguru-reviewer":          &AwsFacade{service: &CodeGuruReviewerGenerator{}},
+		"codestar-notifications":     &AwsFacade{service: &CodeStarNotificationsGenerator{}},
+		"controltower":               &AwsFacade{service: &ControlTowerGenerator{}},
+		"chime-sdk-voice":            &AwsFacade{service: &ChimeSDKVoiceGenerator{}},
+		"autoscaling-plans":          &AwsFacade{service: &AutoScalingPlansGenerator{}},
 		"codedeploy":                 &AwsFacade{service: &CodeDeployGenerator{}},
 		"codepipeline":               &AwsFacade{service: &CodePipelineGenerator{}},
 		"codestar-connections":       &AwsFacade{service: &CodeStarConnectionsGenerator{}},
@@ -287,6 +293,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"dlm":                        &AwsFacade{service: &DlmGenerator{}},
 		"dms":                        &AwsFacade{service: &DmsGenerator{}},
 		"docdb":                      &AwsFacade{service: &DocDBGenerator{}},
+		"docdb-elastic":              &AwsFacade{service: &DocDBElasticGenerator{}},
 		"ds":                         &AwsFacade{service: &DirectoryServiceGenerator{}},
 		"dx":                         &AwsFacade{service: &DirectConnectGenerator{}},
 		"dynamodb":                   &AwsFacade{service: &DynamoDbGenerator{}},
@@ -316,6 +323,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"grafana":                    &AwsFacade{service: &GrafanaGenerator{}},
 		"gamelift":                   &AwsFacade{service: &GameLiftGenerator{}},
 		"greengrassv2":               &AwsFacade{service: &GreengrassV2Generator{}},
+		"groundstation":              &AwsFacade{service: &GroundStationGenerator{}},
 		"glue":                       &AwsFacade{service: &GlueGenerator{}},
 		"guardduty":                  &AwsFacade{service: &GuardDutyGenerator{}},
 		"healthlake":                 &AwsFacade{service: &HealthLakeGenerator{}},
@@ -326,6 +334,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"igw":                        &AwsFacade{service: &IgwGenerator{}},
 		"inspector2":                 &AwsFacade{service: &Inspector2Generator{}},
 		"iot":                        &AwsFacade{service: &IotGenerator{}},
+		"iotanalytics":               &AwsFacade{service: &IoTAnalyticsGenerator{}},
 		"iotevents":                  &AwsFacade{service: &IoTEventsGenerator{}},
 		"iotsitewise":                &AwsFacade{service: &IoTSiteWiseGenerator{}},
 		"iottwinmaker":               &AwsFacade{service: &IoTTwinMakerGenerator{}},
@@ -390,6 +399,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"resourcegroups":             &AwsFacade{service: &ResourceGroupsGenerator{}},
 		"route53":                    &AwsFacade{service: &Route53Generator{}},
 		"route53profiles":            &AwsFacade{service: &Route53ProfilesGenerator{}},
+		"route53domains":             &AwsFacade{service: &Route53DomainsGenerator{}},
 		"route53resolver":            &AwsFacade{service: &Route53ResolverGenerator{}},
 		"route_table":                &AwsFacade{service: &RouteTableGenerator{}},
 		"s3":                         &AwsFacade{service: &S3Generator{}},
@@ -415,6 +425,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"storagegateway":             &AwsFacade{service: &StorageGatewayGenerator{}},
 		"subnet":                     &AwsFacade{service: &SubnetGenerator{}},
 		"swf":                        &AwsFacade{service: &SWFGenerator{}},
+		"timestream-influxdb":        &AwsFacade{service: &TimestreamInfluxDBGenerator{}},
 		"timestream-write":           &AwsFacade{service: &TimestreamWriteGenerator{}},
 		"transfer":                   &AwsFacade{service: &TransferGenerator{}},
 		"transit_gateway":            &AwsFacade{service: &TransitGatewayGenerator{}},

@@ -49,6 +49,7 @@ var serviceScope = map[string]regionScope{
 	"waf":               scopeGlobal,
 
 	// us-east-1 only
+	"route53domains":   scopeEastOnly,
 	"wafv2_cloudfront": scopeEastOnly,
 
 	// regional (default)
@@ -64,6 +65,15 @@ var serviceScope = map[string]regionScope{
 	"dataexchange":               scopeRegional,
 	"datazone":                   scopeRegional,
 	"codeguru-reviewer":          scopeRegional,
+	"codeguru-profiler":          scopeRegional,
+	"codestar-notifications":     scopeRegional,
+	"controltower":               scopeRegional,
+	"chime-sdk-voice":            scopeRegional,
+	"autoscaling-plans":          scopeRegional,
+	"docdb-elastic":              scopeRegional,
+	"groundstation":              scopeRegional,
+	"iotanalytics":               scopeRegional,
+	"timestream-influxdb":        scopeRegional,
 	"finspace":                   scopeRegional,
 	"gamelift":                   scopeRegional,
 	"greengrassv2":               scopeRegional,

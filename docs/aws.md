@@ -138,8 +138,18 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codedeploy_deployment_config`
 *   `codeartifact`
     * `aws_codeartifact_domain`
+*   `codeguru-profiler`
+    * `aws_codeguruprofiler_profiling_group`
 *   `codeguru-reviewer`
     * `aws_codegurureviewer_repository_association`
+*   `codestar-notifications`
+    * `aws_codestarnotifications_notification_rule`
+*   `controltower`
+    * `aws_controltower_landing_zone`
+*   `chime-sdk-voice`
+    * `aws_chimesdkvoice_voice_connector`
+*   `autoscaling-plans`
+    * `aws_autoscalingplans_scaling_plan`
 *   `codestar-connections`
     * `aws_codestarconnections_connection`
 *   `codepipeline`
@@ -272,9 +282,15 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_fis_experiment_template`
 *   `finspace`
     * `aws_finspace_kx_environment`
+*   `docdb-elastic`
+    * `aws_docdbelastic_cluster`
 *   `gamelift`
     * `aws_gamelift_fleet`
     * `aws_gamelift_build`
+*   `groundstation`
+    * `aws_groundstation_mission_profile`
+*   `iotanalytics`
+    * `aws_iotanalytics_channel`
 *   `greengrassv2`
     * `aws_greengrassv2_component_version`
 *   `fms`
@@ -531,6 +547,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_scheduler_schedule`
 *   `schemas`
     * `aws_schemas_registry`
+*   `timestream-influxdb`
+    * `aws_timestreaminfluxdb_db_instance`
 *   `timestream-write`
     * `aws_timestreamwrite_database`
 *   `redshift`
@@ -552,6 +570,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_health_check`
     * `aws_route53_delegation_set`
     * `aws_route53_query_log`
+*   `route53domains`
+    * `aws_route53domains_registered_domain`
 *   `route53profiles`
     * `aws_route53profiles_profile`
 *   `route53resolver`
