@@ -51,6 +51,24 @@ func (g *MskGenerator) InitResources() error {
 	}
 
 	ctx := context.TODO()
+	for v2 := kafka.NewListClustersV2Paginator(svc, &kafka.ListClustersV2Input{}); v2.HasMorePages(); {
+		page, err := v2.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, c := range page.ClusterInfoList {
+			if c.ClusterType != "SERVERLESS" {
+				continue
+			}
+			arn := StringValue(c.ClusterArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(c.ClusterName), "aws_msk_serverless_cluster", "aws", mskAllowEmptyValues))
+		}
+	}
+
 	for cp := kafka.NewListConfigurationsPaginator(svc, &kafka.ListConfigurationsInput{}); cp.HasMorePages(); {
 		page, err := cp.NextPage(ctx)
 		if err != nil {

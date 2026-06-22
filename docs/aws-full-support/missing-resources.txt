@@ -321,7 +321,6 @@ aws_media_store_container_policy
 aws_medialive_multiplex_program
 aws_msk_cluster_policy
 aws_msk_scram_secret_association
-aws_msk_serverless_cluster
 aws_mskconnect_custom_plugin
 aws_mskconnect_worker_configuration
 aws_network_acl_association

@@ -807,6 +807,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_mq_configuration`
 *   `msk`
     * `aws_msk_cluster`
+    * `aws_msk_serverless_cluster`
     * `aws_msk_configuration`
     * `aws_msk_replicator`
     * `aws_msk_vpc_connection`
