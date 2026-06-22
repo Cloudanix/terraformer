@@ -1020,6 +1020,7 @@ aws_ssmcontacts_contact
 aws_ssmcontacts_contact_channel
 aws_ssmcontacts_plan
 aws_ssmcontacts_rotation
+aws_ssmincidents_replication_set
 aws_ssmincidents_response_plan
 aws_ssmquicksetup_configuration_manager
 aws_ssoadmin_application

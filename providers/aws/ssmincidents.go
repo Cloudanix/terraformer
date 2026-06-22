@@ -34,6 +34,18 @@ func (g *SSMIncidentsGenerator) InitResources() error {
 	}
 	svc := ssmincidents.NewFromConfig(config)
 
+	// The replication set is an account singleton; ListReplicationSets returns
+	// at most one ARN. aws_ssmincidents_replication_set imports by ARN.
+	if rs, err := svc.ListReplicationSets(context.TODO(), &ssmincidents.ListReplicationSetsInput{}); err == nil {
+		for _, arn := range rs.ReplicationSetArns {
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, "replication_set", "aws_ssmincidents_replication_set", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	p := ssmincidents.NewListResponsePlansPaginator(svc, &ssmincidents.ListResponsePlansInput{})
 	for p.HasMorePages() {
 		page, err := p.NextPage(context.TODO())

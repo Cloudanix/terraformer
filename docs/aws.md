@@ -1306,6 +1306,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssmcontacts_rotation`
 *   `ssm-incidents`
     * `aws_ssmincidents_response_plan`
+    * `aws_ssmincidents_replication_set`
 *   `storagegateway`
     * `aws_storagegateway_gateway`
     * `aws_storagegateway_tape_pool`
