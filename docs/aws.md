@@ -817,6 +817,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `kinesis`
     * `aws_kinesis_stream`
     * `aws_kinesis_stream_consumer`
+    * `aws_kinesis_resource_policy`
 *   `kinesisanalyticsv2`
     * `aws_kinesisanalyticsv2_application`
     * `aws_kinesisanalyticsv2_application_snapshot`

@@ -63,8 +63,16 @@ func (g *KinesisGenerator) InitResources() error {
 
 		// StreamSummaries carry the ARN needed to enumerate registered consumers.
 		for _, summary := range results.StreamSummaries {
-			if err := g.addStreamConsumers(svc, StringValue(summary.StreamARN)); err != nil {
+			streamARN := StringValue(summary.StreamARN)
+			if err := g.addStreamConsumers(svc, streamARN); err != nil {
 				return err
+			}
+			if streamARN == "" {
+				continue
+			}
+			if rp, err := svc.GetResourcePolicy(context.TODO(), &kinesis.GetResourcePolicyInput{ResourceARN: &streamARN}); err == nil && StringValue(rp.Policy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					streamARN, streamARN, "aws_kinesis_resource_policy", "aws", []string{}))
 			}
 		}
 
