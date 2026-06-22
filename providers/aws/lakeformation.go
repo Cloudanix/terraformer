@@ -68,6 +68,25 @@ func (g *LakeFormationGenerator) InitResources() error {
 		}
 	}
 
+	for fp := lakeformation.NewListDataCellsFilterPaginator(svc, &lakeformation.ListDataCellsFilterInput{}); fp.HasMorePages(); {
+		page, err := fp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, f := range page.DataCellsFilters {
+			name := StringValue(f.Name)
+			db := StringValue(f.DatabaseName)
+			table := StringValue(f.TableName)
+			catalog := StringValue(f.TableCatalogId)
+			if name == "" || db == "" || table == "" {
+				continue
+			}
+			id := db + "," + name + "," + catalog + "," + table
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, name, "aws_lakeformation_data_cells_filter", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	account, err := g.getAccountNumber(config)
 	if err != nil {
 		return err
