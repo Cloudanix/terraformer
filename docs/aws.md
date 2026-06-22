@@ -297,6 +297,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_datasync_location_fsx_ontap_file_system`
 *   `dax`
     * `aws_dax_cluster`
+    * `aws_dax_parameter_group`
+    * `aws_dax_subnet_group`
 *   `detective`
     * `aws_detective_graph`
 *   `devicefarm`

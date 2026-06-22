@@ -171,8 +171,6 @@ aws_datazone_glossary
 aws_datazone_glossary_term
 aws_datazone_project
 aws_datazone_user_profile
-aws_dax_parameter_group
-aws_dax_subnet_group
 aws_db_instance_automated_backups_replication
 aws_db_instance_role_association
 aws_db_proxy_default_target_group

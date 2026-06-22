@@ -179,6 +179,8 @@ aws_datasync_location_smb
 aws_datasync_task
 aws_datazone_domain
 aws_dax_cluster
+aws_dax_parameter_group
+aws_dax_subnet_group
 aws_db_cluster_snapshot
 aws_db_event_subscription
 aws_db_instance

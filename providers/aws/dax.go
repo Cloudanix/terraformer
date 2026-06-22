@@ -50,5 +50,37 @@ func (g *DaxGenerator) InitResources() error {
 			break
 		}
 	}
+
+	nextToken = nil
+	for {
+		out, err := svc.DescribeParameterGroups(context.TODO(), &dax.DescribeParameterGroupsInput{NextToken: nextToken})
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, out.ParameterGroups, "aws_dax_parameter_group",
+			defaultAllowEmptyValues,
+			func(p types.ParameterGroup) string { return StringValue(p.ParameterGroupName) },
+			func(p types.ParameterGroup) string { return StringValue(p.ParameterGroupName) })
+		nextToken = out.NextToken
+		if nextToken == nil {
+			break
+		}
+	}
+
+	nextToken = nil
+	for {
+		out, err := svc.DescribeSubnetGroups(context.TODO(), &dax.DescribeSubnetGroupsInput{NextToken: nextToken})
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, out.SubnetGroups, "aws_dax_subnet_group",
+			defaultAllowEmptyValues,
+			func(s types.SubnetGroup) string { return StringValue(s.SubnetGroupName) },
+			func(s types.SubnetGroup) string { return StringValue(s.SubnetGroupName) })
+		nextToken = out.NextToken
+		if nextToken == nil {
+			break
+		}
+	}
 	return nil
 }
