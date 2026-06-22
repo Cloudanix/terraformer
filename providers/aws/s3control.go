@@ -92,5 +92,35 @@ func (g *S3ControlGenerator) InitResources() error {
 				accountID+":"+id, id, "aws_s3control_access_grant", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for p := s3control.NewListMultiRegionAccessPointsPaginator(svc, &s3control.ListMultiRegionAccessPointsInput{AccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, ap := range page.AccessPoints {
+			name := StringValue(ap.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID+":"+name, name, "aws_s3control_multi_region_access_point", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for p := s3control.NewListAccessPointsForObjectLambdaPaginator(svc, &s3control.ListAccessPointsForObjectLambdaInput{AccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, ap := range page.ObjectLambdaAccessPointList {
+			name := StringValue(ap.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID+":"+name, name, "aws_s3control_object_lambda_access_point", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
