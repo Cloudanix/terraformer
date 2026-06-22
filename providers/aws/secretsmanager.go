@@ -54,6 +54,10 @@ func (g *SecretsManagerGenerator) InitResources() error {
 				resources = append(resources, terraformutils.NewSimpleResource(
 					secretArn, secretName, "aws_secretsmanager_secret_rotation", "aws", secretsmanagerAllowEmptyValues))
 			}
+			if rp, err := svc.GetResourcePolicy(context.TODO(), &secretsmanager.GetResourcePolicyInput{SecretId: secret.ARN}); err == nil && StringValue(rp.ResourcePolicy) != "" {
+				resources = append(resources, terraformutils.NewSimpleResource(
+					secretArn, secretName, "aws_secretsmanager_secret_policy", "aws", secretsmanagerAllowEmptyValues))
+			}
 		}
 	}
 	g.Resources = resources
