@@ -62,6 +62,20 @@ func (g *SyntheticsGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_synthetics_group", "aws", defaultAllowEmptyValues))
+			groupName := name
+			for rp := synthetics.NewListGroupResourcesPaginator(svc, &synthetics.ListGroupResourcesInput{GroupIdentifier: &groupName}); rp.HasMorePages(); {
+				rpage, err := rp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, canaryArn := range rpage.Resources {
+					if canaryArn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						canaryArn+","+groupName, groupName+"_assoc", "aws_synthetics_group_association", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

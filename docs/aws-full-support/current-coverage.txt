@@ -1118,6 +1118,7 @@ aws_subnet
 aws_swf_domain
 aws_synthetics_canary
 aws_synthetics_group
+aws_synthetics_group_association
 aws_timestreaminfluxdb_db_instance
 aws_timestreamwrite_database
 aws_timestreamwrite_table

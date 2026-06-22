@@ -1032,6 +1032,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `synthetics`
     * `aws_synthetics_canary`
     * `aws_synthetics_group`
+    * `aws_synthetics_group_association`
 *   `opsworks`
     * `aws_opsworks_application`
     * `aws_opsworks_custom_layer`
