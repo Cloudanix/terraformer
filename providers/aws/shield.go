@@ -69,5 +69,20 @@ func (g *ShieldGenerator) InitResources() error {
 		}
 	}
 
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	if accountID := StringValue(account); accountID != "" {
+		if sub, err := svc.DescribeSubscription(ctx, &shield.DescribeSubscriptionInput{}); err == nil && sub.Subscription != nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_shield_subscription", "aws", defaultAllowEmptyValues))
+			if sub.Subscription.ProactiveEngagementStatus == "ENABLED" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID, accountID, "aws_shield_proactive_engagement", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
 	return nil
 }
