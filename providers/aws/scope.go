@@ -45,6 +45,7 @@ var serviceScope = map[string]regionScope{
 	"iam":               scopeGlobal,
 	"organization":      scopeGlobal,
 	"route53":           scopeGlobal,
+	"shield":            scopeGlobal,
 	"waf":               scopeGlobal,
 
 	// us-east-1 only

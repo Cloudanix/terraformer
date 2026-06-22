@@ -379,7 +379,6 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/fms v1.45.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.49.2 // indirect
 	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/shield v1.35.3 // indirect
 	github.com/aws/aws-sdk-go-v2/service/signer v1.33.6 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
@@ -451,6 +450,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/servicequotas v1.35.7
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.62.4
+	github.com/aws/aws-sdk-go-v2/service/shield v1.35.3
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
 	github.com/gofrs/uuid/v3 v3.1.2

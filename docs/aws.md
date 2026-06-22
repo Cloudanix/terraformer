@@ -440,6 +440,9 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `sfn`
     * `aws_sfn_activity`
     * `aws_sfn_state_machine`
+*   `shield`
+    * `aws_shield_protection`
+    * `aws_shield_protection_group`
 *   `sg`
     * `aws_security_group`
     * `aws_security_group_rule` (if a rule cannot be inlined)

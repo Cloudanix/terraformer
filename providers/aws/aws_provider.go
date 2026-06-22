@@ -43,6 +43,7 @@ var SupportedGlobalResources = []string{
 	"iam",
 	"organization",
 	"route53",
+	"shield",
 	"waf",
 }
 
@@ -324,6 +325,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"servicecatalog":          &AwsFacade{service: &ServiceCatalogGenerator{}},
 		"servicediscovery":        &AwsFacade{service: &ServiceDiscoveryGenerator{}},
 		"servicequotas":           &AwsFacade{service: &ServiceQuotasGenerator{}},
+		"shield":                  &AwsFacade{service: &ShieldGenerator{}},
 		"ses":                     &AwsFacade{service: &SesGenerator{}},
 		"sesv2":                   &AwsFacade{service: &SESv2Generator{}},
 		"sfn":                     &AwsFacade{service: &SfnGenerator{}},
