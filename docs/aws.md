@@ -368,6 +368,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_customer_gateway`
 *   `datapipeline`
     * `aws_datapipeline_pipeline`
+    * `aws_datapipeline_pipeline_definition`
 *   `datasync`
     * `aws_datasync_task`
     * `aws_datasync_agent`

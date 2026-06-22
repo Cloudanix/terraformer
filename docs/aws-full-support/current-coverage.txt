@@ -244,6 +244,7 @@ aws_customer_gateway
 aws_customerprofiles_domain
 aws_dataexchange_data_set
 aws_datapipeline_pipeline
+aws_datapipeline_pipeline_definition
 aws_datasync_agent
 aws_datasync_location_azure_blob
 aws_datasync_location_efs

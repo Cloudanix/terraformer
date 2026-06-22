@@ -49,6 +49,11 @@ func (g *DataPipelineGenerator) InitResources() error {
 				"aws_datapipeline_pipeline",
 				"aws",
 				datapipelineAllowEmptyValues))
+			// The pipeline definition is a singleton imported by the pipeline ID.
+			if def, err := svc.GetPipelineDefinition(context.TODO(), &datapipeline.GetPipelineDefinitionInput{PipelineId: pipeline.Id}); err == nil && len(def.PipelineObjects) > 0 {
+				resources = append(resources, terraformutils.NewSimpleResource(
+					pipelineID, pipelineName, "aws_datapipeline_pipeline_definition", "aws", datapipelineAllowEmptyValues))
+			}
 		}
 	}
 	g.Resources = resources
