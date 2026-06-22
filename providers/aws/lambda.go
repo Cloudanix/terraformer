@@ -18,6 +18,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"strconv"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -311,6 +312,13 @@ func (g *LambdaGenerator) addLayerVersions(svc *lambda.Client) error {
 						"aws",
 						lambdaAllowEmptyValues,
 					))
+					if _, err := svc.GetLayerVersionPolicy(context.TODO(), &lambda.GetLayerVersionPolicyInput{
+						LayerName: layer.LayerName, VersionNumber: &layerVersion.Version}); err == nil {
+						layerName := StringValue(layer.LayerName)
+						ver := strconv.FormatInt(layerVersion.Version, 10)
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							layerName+","+ver, layerName+"_"+ver, "aws_lambda_layer_version_permission", "aws", lambdaAllowEmptyValues))
+					}
 				}
 			}
 		}
