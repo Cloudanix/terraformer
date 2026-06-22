@@ -380,6 +380,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_config_organization_custom_policy_rule`
     * `aws_config_organization_custom_rule`
     * `aws_config_organization_managed_rule`
+    * `aws_config_configuration_recorder_status`
 *   `customer_gateway`
     * `aws_customer_gateway`
 *   `datapipeline`

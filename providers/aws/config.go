@@ -168,6 +168,9 @@ func (g *ConfigGenerator) addConfigurationRecorders(svc *configservice.Client) (
 			"aws",
 			configAllowEmptyValues,
 		))
+		// Recorder status is a singleton imported by the recorder name.
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			name, name, "aws_config_configuration_recorder_status", "aws", configAllowEmptyValues))
 		configurationRecorderRefs = append(configurationRecorderRefs,
 			"aws_config_configuration_recorder.tfer--"+name)
 	}
