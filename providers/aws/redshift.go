@@ -213,6 +213,23 @@ func (g *RedshiftGenerator) loadRedshiftExtras(svc *redshift.Client) error {
 				name, name, tfType, "aws", RedshiftAllowEmptyValues))
 		}
 	}
+	for p := redshift.NewDescribeEndpointAuthorizationPaginator(svc, &redshift.DescribeEndpointAuthorizationInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, ea := range pg.EndpointAuthorizationList {
+			grantor := StringValue(ea.Grantor)
+			grantee := StringValue(ea.Grantee)
+			cluster := StringValue(ea.ClusterIdentifier)
+			if grantor == "" || grantee == "" || cluster == "" {
+				continue
+			}
+			id := grantor + ":" + grantee + ":" + cluster
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_redshift_endpoint_authorization", "aws", RedshiftAllowEmptyValues))
+		}
+	}
 	for p := redshift.NewDescribeClusterSnapshotsPaginator(svc, &redshift.DescribeClusterSnapshotsInput{}); p.HasMorePages(); {
 		pg, err := p.NextPage(ctx)
 		if err != nil {

@@ -1084,6 +1084,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshift_endpoint_access`
     * `aws_redshift_cluster_snapshot`
     * `aws_redshift_snapshot_copy_grant`
+    * `aws_redshift_endpoint_authorization`
     * `aws_redshift_hsm_client_certificate`
     * `aws_redshift_hsm_configuration`
 *   `resourcegroups`
