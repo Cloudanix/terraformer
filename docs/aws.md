@@ -772,6 +772,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iottwinmaker_workspace`
 *   `license-manager`
     * `aws_licensemanager_license_configuration`
+    * `aws_licensemanager_grant`
 *   `location`
     * `aws_location_map`
     * `aws_location_place_index`

@@ -50,8 +50,30 @@ func (g *LicenseManagerGenerator) InitResources() error {
 				arn, StringValue(lc.Name), "aws_licensemanager_license_configuration", "aws", defaultAllowEmptyValues))
 		}
 		if out.NextToken == nil {
-			return nil
+			break
 		}
 		token = out.NextToken
 	}
+
+	// Distributed (granted-out) and received grants.
+	var gToken *string
+	for {
+		out, err := svc.ListDistributedGrants(context.TODO(), &licensemanager.ListDistributedGrantsInput{NextToken: gToken})
+		if err != nil {
+			break
+		}
+		for _, grant := range out.Grants {
+			arn := StringValue(grant.GrantArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_licensemanager_grant", "aws", defaultAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		gToken = out.NextToken
+	}
+	return nil
 }

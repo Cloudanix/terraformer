@@ -632,6 +632,7 @@ aws_lexv2models_bot_version
 aws_lexv2models_intent
 aws_lexv2models_slot
 aws_lexv2models_slot_type
+aws_licensemanager_grant
 aws_licensemanager_license_configuration
 aws_lightsail_bucket
 aws_lightsail_bucket_access_key

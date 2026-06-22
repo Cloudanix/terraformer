@@ -171,7 +171,6 @@ aws_lex_bot_alias
 aws_lex_intent
 aws_lex_slot_type
 aws_licensemanager_association
-aws_licensemanager_grant
 aws_licensemanager_grant_accepter
 aws_lightsail_disk_attachment
 aws_lightsail_lb_attachment
