@@ -49,5 +49,60 @@ func (g *MemoryDBGenerator) InitResources() error {
 				name, name, "aws_memorydb_cluster", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	ctx := context.TODO()
+	for acls := memorydb.NewDescribeACLsPaginator(svc, &memorydb.DescribeACLsInput{}); acls.HasMorePages(); {
+		page, err := acls.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.ACLs {
+			g.addNamed(StringValue(a.Name), "aws_memorydb_acl")
+		}
+	}
+	for pg := memorydb.NewDescribeParameterGroupsPaginator(svc, &memorydb.DescribeParameterGroupsInput{}); pg.HasMorePages(); {
+		page, err := pg.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, p := range page.ParameterGroups {
+			g.addNamed(StringValue(p.Name), "aws_memorydb_parameter_group")
+		}
+	}
+	for sn := memorydb.NewDescribeSnapshotsPaginator(svc, &memorydb.DescribeSnapshotsInput{}); sn.HasMorePages(); {
+		page, err := sn.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, s := range page.Snapshots {
+			g.addNamed(StringValue(s.Name), "aws_memorydb_snapshot")
+		}
+	}
+	for sg := memorydb.NewDescribeSubnetGroupsPaginator(svc, &memorydb.DescribeSubnetGroupsInput{}); sg.HasMorePages(); {
+		page, err := sg.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, s := range page.SubnetGroups {
+			g.addNamed(StringValue(s.Name), "aws_memorydb_subnet_group")
+		}
+	}
+	for us := memorydb.NewDescribeUsersPaginator(svc, &memorydb.DescribeUsersInput{}); us.HasMorePages(); {
+		page, err := us.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, u := range page.Users {
+			g.addNamed(StringValue(u.Name), "aws_memorydb_user")
+		}
+	}
 	return nil
+}
+
+func (g *MemoryDBGenerator) addNamed(name, tfType string) {
+	if name == "" {
+		return
+	}
+	g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+		name, name, tfType, "aws", defaultAllowEmptyValues))
 }

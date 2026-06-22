@@ -436,7 +436,12 @@ aws_medialive_channel
 aws_medialive_input
 aws_medialive_input_security_group
 aws_medialive_multiplex
+aws_memorydb_acl
 aws_memorydb_cluster
+aws_memorydb_parameter_group
+aws_memorydb_snapshot
+aws_memorydb_subnet_group
+aws_memorydb_user
 aws_mq_broker
 aws_mq_configuration
 aws_msk_cluster

@@ -609,6 +609,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_macie2_member`
 *   `memorydb`
     * `aws_memorydb_cluster`
+    * `aws_memorydb_acl`
+    * `aws_memorydb_parameter_group`
+    * `aws_memorydb_snapshot`
+    * `aws_memorydb_subnet_group`
+    * `aws_memorydb_user`
 *   `neptune`
     * `aws_neptune_cluster`
     * `aws_neptune_cluster_parameter_group`
