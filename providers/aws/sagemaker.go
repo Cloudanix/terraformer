@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/sagemaker"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -201,7 +202,15 @@ func (g *SageMakerGenerator) addMoreSageMaker(ctx context.Context, svc *sagemake
 			break
 		}
 		for _, x := range pg.Images {
-			add(StringValue(x.ImageName), "aws_sagemaker_image")
+			imageName := StringValue(x.ImageName)
+			add(imageName, "aws_sagemaker_image")
+			if imageName == "" {
+				continue
+			}
+			// aws_sagemaker_image_version imports by image name; emit once if any version exists.
+			if vers, err := svc.ListImageVersions(ctx, &sagemaker.ListImageVersionsInput{ImageName: aws.String(imageName)}); err == nil && len(vers.ImageVersions) > 0 {
+				add(imageName, "aws_sagemaker_image_version")
+			}
 		}
 	}
 	for p := sagemaker.NewListMlflowTrackingServersPaginator(svc, &sagemaker.ListMlflowTrackingServersInput{}); p.HasMorePages(); {
