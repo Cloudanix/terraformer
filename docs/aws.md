@@ -58,6 +58,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_auditmanager_control`
     * `aws_auditmanager_framework`
     * `aws_auditmanager_assessment_report`
+    * `aws_auditmanager_account_registration`
+    * `aws_auditmanager_organization_admin_account_registration`
 *   `bedrock`
     * `aws_bedrock_custom_model`
     * `aws_bedrock_guardrail`

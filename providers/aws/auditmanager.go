@@ -78,6 +78,22 @@ func (g *AuditManagerGenerator) InitResources() error {
 				id, StringValue(f.Name), "aws_auditmanager_framework", "aws", defaultAllowEmptyValues))
 		}
 	}
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	if accountID := StringValue(account); accountID != "" {
+		if st, err := svc.GetAccountStatus(ctx, &auditmanager.GetAccountStatusInput{}); err == nil && st.Status == types.AccountStatusActive {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_auditmanager_account_registration", "aws", defaultAllowEmptyValues))
+		}
+		if oa, err := svc.GetOrganizationAdminAccount(ctx, &auditmanager.GetOrganizationAdminAccountInput{}); err == nil && StringValue(oa.AdminAccountId) != "" {
+			adminID := StringValue(oa.AdminAccountId)
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				adminID, adminID, "aws_auditmanager_organization_admin_account_registration", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	for rp := auditmanager.NewListAssessmentReportsPaginator(svc, &auditmanager.ListAssessmentReportsInput{}); rp.HasMorePages(); {
 		page, err := rp.NextPage(ctx)
 		if err != nil {
