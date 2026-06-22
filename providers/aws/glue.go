@@ -183,6 +183,52 @@ func (g *GlueGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadGlueDevEndpoints(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadGlueDataQualityRulesets(svc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueDevEndpoints(svc *glue.Client) error {
+	p := glue.NewGetDevEndpointsPaginator(svc, &glue.GetDevEndpointsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, ep := range page.DevEndpoints {
+			name := StringValue(ep.EndpointName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_glue_dev_endpoint", "aws", defaultAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueDataQualityRulesets(svc *glue.Client) error {
+	p := glue.NewListDataQualityRulesetsPaginator(svc, &glue.ListDataQualityRulesetsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, rs := range page.Rulesets {
+			name := StringValue(rs.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_glue_data_quality_ruleset", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

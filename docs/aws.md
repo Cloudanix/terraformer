@@ -186,6 +186,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudwatch_event_bus`
     * `aws_cloudwatch_event_connection`
     * `aws_cloudwatch_event_api_destination`
+    * `aws_cloudwatch_metric_stream`
 *   `codebuild`
     * `aws_codebuild_project`
 *   `codecommit`
@@ -279,6 +280,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_dx_gateway`
     * `aws_dx_private_virtual_interface`
     * `aws_dx_public_virtual_interface`
+    * `aws_dx_lag`
 *   `dynamodb`
     * `aws_dynamodb_table`
     * `aws_dynamodb_global_table`
@@ -388,6 +390,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_glue_workflow`
     * `aws_glue_security_configuration`
     * `aws_glue_registry`
+    * `aws_glue_dev_endpoint`
+    * `aws_glue_data_quality_ruleset`
 *   `guardduty`
     * `aws_guardduty_detector`
     * `aws_guardduty_filter`
@@ -606,6 +610,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_db_option_group`
     * `aws_db_event_subscription`
     * `aws_rds_global_cluster`
+    * `aws_rds_cluster_parameter_group`
+    * `aws_rds_cluster_endpoint`
 *   `quicksight`
     * `aws_quicksight_data_set`
     * `aws_quicksight_data_source`
@@ -662,6 +668,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_health_check`
     * `aws_route53_delegation_set`
     * `aws_route53_query_log`
+    * `aws_route53_traffic_policy`
+    * `aws_route53_cidr_collection`
 *   `route53domains`
     * `aws_route53domains_registered_domain`
 *   `route53recoveryreadiness`
@@ -778,6 +786,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_transcribe_vocabulary`
 *   `transfer`
     * `aws_transfer_server`
+    * `aws_transfer_connector`
+    * `aws_transfer_profile`
+    * `aws_transfer_workflow`
 *   `transit_gateway`
     * `aws_ec2_transit_gateway_route_table`
     * `aws_ec2_transit_gateway_vpc_attachment`

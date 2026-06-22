@@ -147,8 +147,49 @@ func (g *Route53Generator) InitResources() error {
 	g.Resources = append(g.Resources, healthCheckResources...)
 	g.Resources = append(g.Resources, g.createDelegationSetResources(svc)...)
 	g.Resources = append(g.Resources, g.createQueryLogResources(svc)...)
+	g.Resources = append(g.Resources, g.createTrafficPolicyResources(svc)...)
+	g.Resources = append(g.Resources, g.createCidrCollectionResources(svc)...)
 
 	return nil
+}
+
+func (Route53Generator) createTrafficPolicyResources(svc *route53.Client) []terraformutils.Resource {
+	var resources []terraformutils.Resource
+	out, err := svc.ListTrafficPolicies(context.TODO(), &route53.ListTrafficPoliciesInput{})
+	if err != nil {
+		log.Println(err)
+		return resources
+	}
+	for _, tp := range out.TrafficPolicySummaries {
+		id := StringValue(tp.Id)
+		if id == "" {
+			continue
+		}
+		resources = append(resources, terraformutils.NewSimpleResource(
+			id, StringValue(tp.Name), "aws_route53_traffic_policy", "aws", route53AllowEmptyValues))
+	}
+	return resources
+}
+
+func (Route53Generator) createCidrCollectionResources(svc *route53.Client) []terraformutils.Resource {
+	var resources []terraformutils.Resource
+	p := route53.NewListCidrCollectionsPaginator(svc, &route53.ListCidrCollectionsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			log.Println(err)
+			return resources
+		}
+		for _, c := range page.CidrCollections {
+			id := StringValue(c.Id)
+			if id == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, StringValue(c.Name), "aws_route53_cidr_collection", "aws", route53AllowEmptyValues))
+		}
+	}
+	return resources
 }
 
 func (Route53Generator) createDelegationSetResources(svc *route53.Client) []terraformutils.Resource {

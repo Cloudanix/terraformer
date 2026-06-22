@@ -45,5 +45,41 @@ func (g *TransferGenerator) InitResources() error {
 			func(s types.ListedServer) string { return StringValue(s.ServerId) },
 			func(s types.ListedServer) string { return StringValue(s.ServerId) })
 	}
+
+	conns := transfer.NewListConnectorsPaginator(svc, &transfer.ListConnectorsInput{})
+	for conns.HasMorePages() {
+		page, err := conns.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.Connectors, "aws_transfer_connector",
+			defaultAllowEmptyValues,
+			func(c types.ListedConnector) string { return StringValue(c.ConnectorId) },
+			func(c types.ListedConnector) string { return StringValue(c.ConnectorId) })
+	}
+
+	profiles := transfer.NewListProfilesPaginator(svc, &transfer.ListProfilesInput{})
+	for profiles.HasMorePages() {
+		page, err := profiles.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.Profiles, "aws_transfer_profile",
+			defaultAllowEmptyValues,
+			func(p types.ListedProfile) string { return StringValue(p.ProfileId) },
+			func(p types.ListedProfile) string { return StringValue(p.ProfileId) })
+	}
+
+	workflows := transfer.NewListWorkflowsPaginator(svc, &transfer.ListWorkflowsInput{})
+	for workflows.HasMorePages() {
+		page, err := workflows.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.Workflows, "aws_transfer_workflow",
+			defaultAllowEmptyValues,
+			func(w types.ListedWorkflow) string { return StringValue(w.WorkflowId) },
+			func(w types.ListedWorkflow) string { return StringValue(w.WorkflowId) })
+	}
 	return nil
 }

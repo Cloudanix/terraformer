@@ -43,6 +43,9 @@ func (g *CloudWatchGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	if err := g.createMetricStreams(cloudwatchSvc); err != nil {
+		return err
+	}
 
 	cloudwatcheventsSvc := cloudwatchevents.NewFromConfig(config)
 	err = g.createRules(cloudwatcheventsSvc)
@@ -59,6 +62,25 @@ func (g *CloudWatchGenerator) InitResources() error {
 		return err
 	}
 
+	return nil
+}
+
+func (g *CloudWatchGenerator) createMetricStreams(svc *cloudwatch.Client) error {
+	p := cloudwatch.NewListMetricStreamsPaginator(svc, &cloudwatch.ListMetricStreamsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, ms := range page.Entries {
+			name := StringValue(ms.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_metric_stream", "aws", cloudwatchAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

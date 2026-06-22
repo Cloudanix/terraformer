@@ -291,6 +291,53 @@ func (g *RDSGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadDBClusterParameterGroups(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadDBClusterEndpoints(svc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *RDSGenerator) loadDBClusterParameterGroups(svc *rds.Client) error {
+	p := rds.NewDescribeDBClusterParameterGroupsPaginator(svc, &rds.DescribeDBClusterParameterGroupsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, pg := range page.DBClusterParameterGroups {
+			name := StringValue(pg.DBClusterParameterGroupName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_rds_cluster_parameter_group", "aws", RDSAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *RDSGenerator) loadDBClusterEndpoints(svc *rds.Client) error {
+	p := rds.NewDescribeDBClusterEndpointsPaginator(svc, &rds.DescribeDBClusterEndpointsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, ep := range page.DBClusterEndpoints {
+			// Skip the auto-managed reader/writer endpoints (no custom identifier).
+			id := StringValue(ep.DBClusterEndpointIdentifier)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_rds_cluster_endpoint", "aws", RDSAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

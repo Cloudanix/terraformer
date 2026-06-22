@@ -92,6 +92,7 @@ aws_cloudwatch_event_rule
 aws_cloudwatch_event_target
 aws_cloudwatch_log_group
 aws_cloudwatch_metric_alarm
+aws_cloudwatch_metric_stream
 aws_codeartifact_domain
 aws_codebuild_project
 aws_codecommit_approval_rule_template
@@ -164,6 +165,7 @@ aws_docdb_subnet_group
 aws_docdbelastic_cluster
 aws_dx_connection
 aws_dx_gateway
+aws_dx_lag
 aws_dx_private_virtual_interface
 aws_dx_public_virtual_interface
 aws_dynamodb_global_table
@@ -231,6 +233,8 @@ aws_glue_catalog_database
 aws_glue_catalog_table
 aws_glue_connection
 aws_glue_crawler
+aws_glue_data_quality_ruleset
+aws_glue_dev_endpoint
 aws_glue_job
 aws_glue_registry
 aws_glue_security_configuration
@@ -383,6 +387,8 @@ aws_quicksight_data_source
 aws_ram_resource_share
 aws_rbin_rule
 aws_rds_cluster
+aws_rds_cluster_endpoint
+aws_rds_cluster_parameter_group
 aws_rds_global_cluster
 aws_redshift_authentication_profile
 aws_redshift_cluster
@@ -405,6 +411,7 @@ aws_rolesanywhere_profile
 aws_rolesanywhere_trust_anchor
 aws_route_table
 aws_route_table_association
+aws_route53_cidr_collection
 aws_route53_delegation_set
 aws_route53_health_check
 aws_route53_query_log
@@ -418,6 +425,7 @@ aws_route53_resolver_query_log_config
 aws_route53_resolver_query_log_config_association
 aws_route53_resolver_rule
 aws_route53_resolver_rule_association
+aws_route53_traffic_policy
 aws_route53_zone
 aws_route53domains_registered_domain
 aws_route53profiles_profile
@@ -518,7 +526,10 @@ aws_synthetics_canary
 aws_timestreaminfluxdb_db_instance
 aws_timestreamwrite_database
 aws_transcribe_vocabulary
+aws_transfer_connector
+aws_transfer_profile
 aws_transfer_server
+aws_transfer_workflow
 aws_verifiedaccess_instance
 aws_verifiedaccess_trust_provider
 aws_verifiedpermissions_policy_store

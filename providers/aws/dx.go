@@ -132,5 +132,25 @@ func (g *DirectConnectGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	if err := g.getDirectConnectLags(svc); err != nil {
+		log.Println(err)
+	}
+
+	return nil
+}
+
+func (g *DirectConnectGenerator) getDirectConnectLags(svc *directconnect.Client) error {
+	output, err := svc.DescribeLags(context.TODO(), &directconnect.DescribeLagsInput{})
+	if err != nil {
+		return err
+	}
+	for _, lag := range output.Lags {
+		id := StringValue(lag.LagId)
+		if id == "" {
+			continue
+		}
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			id, StringValue(lag.LagName), "aws_dx_lag", "aws", dxAllowEmptyValues))
+	}
 	return nil
 }
