@@ -31,7 +31,7 @@ type RedshiftGenerator struct {
 	AWSService
 }
 
-func (g *RedshiftGenerator) loadClusters(svc *redshift.Client) error {
+func (g *RedshiftGenerator) loadClusters(svc *redshift.Client, accountID string) error {
 	p := redshift.NewDescribeClustersPaginator(svc, &redshift.DescribeClustersInput{})
 	for p.HasMorePages() {
 		page, err := p.NextPage(context.TODO())
@@ -47,6 +47,22 @@ func (g *RedshiftGenerator) loadClusters(svc *redshift.Client) error {
 				"aws",
 				RedshiftAllowEmptyValues,
 			))
+			if len(db.IamRoles) > 0 {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					resourceName, resourceName, "aws_redshift_cluster_iam_roles", "aws", RedshiftAllowEmptyValues))
+			}
+			if partners, err := svc.DescribePartners(context.TODO(), &redshift.DescribePartnersInput{
+				AccountId: &accountID, ClusterIdentifier: db.ClusterIdentifier}); err == nil {
+				for _, pt := range partners.PartnerIntegrationInfoList {
+					dbName, partnerName := StringValue(pt.DatabaseName), StringValue(pt.PartnerName)
+					if dbName == "" || partnerName == "" {
+						continue
+					}
+					id := accountID + ":" + resourceName + ":" + dbName + ":" + partnerName
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id, resourceName+"_"+partnerName, "aws_redshift_partner", "aws", RedshiftAllowEmptyValues))
+				}
+			}
 			if db.ClusterSnapshotCopyStatus != nil {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					resourceName, resourceName, "aws_redshift_snapshot_copy", "aws", RedshiftAllowEmptyValues))
@@ -160,6 +176,25 @@ func (g *RedshiftGenerator) loadSnapshotSchedules(svc *redshift.Client) error {
 	return nil
 }
 
+func (g *RedshiftGenerator) loadSnapshotCopyGrants(svc *redshift.Client) error {
+	p := redshift.NewDescribeSnapshotCopyGrantsPaginator(svc, &redshift.DescribeSnapshotCopyGrantsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, grant := range page.SnapshotCopyGrants {
+			name := StringValue(grant.SnapshotCopyGrantName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_redshift_snapshot_copy_grant", "aws", RedshiftAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
 // Generate TerraformResources from AWS API,
 // from each database create 1 TerraformResource.
 // Need only database name as ID for terraform resource
@@ -169,9 +204,16 @@ func (g *RedshiftGenerator) InitResources() error {
 	if e != nil {
 		return e
 	}
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
 	svc := redshift.NewFromConfig(config)
 
-	if err := g.loadClusters(svc); err != nil {
+	if err := g.loadClusters(svc, StringValue(account)); err != nil {
+		return err
+	}
+	if err := g.loadSnapshotCopyGrants(svc); err != nil {
 		return err
 	}
 	if err := g.loadParameterGroups(svc); err != nil {

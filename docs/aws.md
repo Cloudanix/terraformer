@@ -1086,6 +1086,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_timestreamwrite_table`
 *   `redshift`
     * `aws_redshift_cluster`
+    * `aws_redshift_cluster_iam_roles`
+    * `aws_redshift_partner`
+    * `aws_redshift_snapshot_copy_grant`
     * `aws_redshift_logging`
     * `aws_redshift_snapshot_copy`
     * `aws_redshift_event_subscription`
