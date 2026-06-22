@@ -93,9 +93,26 @@ Still open: sqs/sns `*_policy` (conflict with parent inline policy).
 filesystem mirror so `terraform init` works without registry TLS). `current-
 coverage.txt` (523 resource types) is committed. `tf-aws-all-resources.txt` /
 `missing-resources.txt` need `terraform providers schema`, which launches the
-provider plugin over a local go-plugin gRPC socket — blocked in this sandbox
-(same limitation as the integration round-trip; "Unrecognized remote plugin
-message"). Run the script in a normal environment to produce the diff.
+provider plugin over go-plugin. Proven blocked at the syscall level in this
+sandbox — the plugin logs:
+
+    plugin init error: listen unix /tmp/.../plugin…: bind: operation not permitted
+
+i.e. the sandbox denies the unix-socket `bind` go-plugin requires (terraform
+offers no server-side TCP-transport override). This is the SAME wall as the
+integration `terraform plan` round-trip and any real `terraformer import`. Run
+`gen-gap-list.sh` in a normal environment to produce the diff.
+
+## Tests (cover every service + the logic-bearing/foundation code)
+- `TestAllServicesInstantiable` — every registered service's facade+generator is
+  non-nil and accepts the cmd/import.go wiring (per-service smoke test, all 206).
+- `TestServiceScopeMatchesRegistry` — every service region-classified+consistent.
+- `TestEveryServiceDocumented` — every service present in docs/aws.md.
+- `TestQuotasFromChangeHistory` + §0 helper tests (`TestAppendSimpleResources*`,
+  `TestWrapPolicyAttribute*`, `TestGenerateConfigCache*`) + `sg_test`.
+The live List/Describe path of each generator is not unit-tested: the codebase
+deliberately does not mock the AWS SDK, and the provider-plugin alternative is
+the bind-blocked round-trip above.
 
 ## Tests
 - `TestServiceScope` — every registered service has a consistent region scope.
