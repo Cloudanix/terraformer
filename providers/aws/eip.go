@@ -46,6 +46,10 @@ func (g *ElasticIPGenerator) createElasticIpsResources(svc *ec2.Client) []terraf
 			"aws",
 			eipAllowEmptyValues,
 		))
+		if assocID := StringValue(eip.AssociationId); assocID != "" {
+			resources = append(resources, terraformutils.NewSimpleResource(
+				assocID, assocID, "aws_eip_association", "aws", eipAllowEmptyValues))
+		}
 	}
 
 	return resources
