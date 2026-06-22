@@ -822,6 +822,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_osis_pipeline`
 *   `pinpointsmsvoicev2`
     * `aws_pinpointsmsvoicev2_phone_number`
+    * `aws_pinpointsmsvoicev2_configuration_set`
+    * `aws_pinpointsmsvoicev2_opt_out_list`
 *   `pinpoint`
     * `aws_pinpoint_app`
     * `aws_pinpoint_adm_channel`

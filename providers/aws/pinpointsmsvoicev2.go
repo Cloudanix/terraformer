@@ -49,5 +49,34 @@ func (g *PinpointSMSVoiceV2Generator) InitResources() error {
 				id, id, "aws_pinpointsmsvoicev2_phone_number", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for cp := pinpointsmsvoicev2.NewDescribeConfigurationSetsPaginator(svc, &pinpointsmsvoicev2.DescribeConfigurationSetsInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, c := range page.ConfigurationSets {
+			name := StringValue(c.ConfigurationSetName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_pinpointsmsvoicev2_configuration_set", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for op := pinpointsmsvoicev2.NewDescribeOptOutListsPaginator(svc, &pinpointsmsvoicev2.DescribeOptOutListsInput{}); op.HasMorePages(); {
+		page, err := op.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, o := range page.OptOutLists {
+			name := StringValue(o.OptOutListName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_pinpointsmsvoicev2_opt_out_list", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
