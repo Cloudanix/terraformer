@@ -1098,6 +1098,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ses_active_receipt_rule_set`
 *   `sesv2`
     * `aws_sesv2_email_identity`
+    * `aws_sesv2_email_identity_feedback_attributes`
+    * `aws_sesv2_email_identity_mail_from_attributes`
     * `aws_sesv2_configuration_set`
     * `aws_sesv2_contact_list`
     * `aws_sesv2_dedicated_ip_pool`

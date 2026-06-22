@@ -47,6 +47,17 @@ func (g *SESv2Generator) InitResources() error {
 			defaultAllowEmptyValues,
 			func(i types.IdentityInfo) string { return StringValue(i.IdentityName) },
 			func(i types.IdentityInfo) string { return StringValue(i.IdentityName) })
+		for _, i := range page.EmailIdentities {
+			name := StringValue(i.IdentityName)
+			if name == "" {
+				continue
+			}
+			// Both attribute sets are singletons on the identity, imported by name.
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sesv2_email_identity_feedback_attributes", "aws", defaultAllowEmptyValues))
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sesv2_email_identity_mail_from_attributes", "aws", defaultAllowEmptyValues))
+		}
 	}
 
 	configSets := sesv2.NewListConfigurationSetsPaginator(svc, &sesv2.ListConfigurationSetsInput{})
