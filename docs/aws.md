@@ -1082,6 +1082,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3control_access_grant`
     * `aws_s3control_multi_region_access_point`
     * `aws_s3control_object_lambda_access_point`
+    * `aws_s3_access_point`
+    * `aws_s3_account_public_access_block`
 *   `s3outposts`
     * `aws_s3outposts_endpoint`
 *   `s3tables`
