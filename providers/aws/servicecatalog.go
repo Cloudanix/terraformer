@@ -178,6 +178,21 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 			}
 			resources = append(resources, terraformutils.NewSimpleResource(
 				id, id, "aws_servicecatalog_tag_option", "aws", servicecatalogAllowEmptyValues))
+			tagOptionID := id
+			for rp := servicecatalog.NewListResourcesForTagOptionPaginator(svc, &servicecatalog.ListResourcesForTagOptionInput{TagOptionId: &tagOptionID}); rp.HasMorePages(); {
+				rpage, err := rp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, r := range rpage.ResourceDetails {
+					resourceID := StringValue(r.Id)
+					if resourceID == "" {
+						continue
+					}
+					resources = append(resources, terraformutils.NewSimpleResource(
+						tagOptionID+":"+resourceID, tagOptionID+"_"+resourceID, "aws_servicecatalog_tag_option_resource_association", "aws", servicecatalogAllowEmptyValues))
+				}
+			}
 		}
 	}
 

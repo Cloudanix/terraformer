@@ -1255,6 +1255,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_servicecatalog_portfolio`
     * `aws_servicecatalog_product`
     * `aws_servicecatalog_tag_option`
+    * `aws_servicecatalog_tag_option_resource_association`
     * `aws_servicecatalog_service_action`
     * `aws_servicecatalog_constraint`
     * `aws_servicecatalog_provisioning_artifact`
