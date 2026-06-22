@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/service/opensearchserverless"
+	"github.com/aws/aws-sdk-go-v2/service/opensearchserverless/types"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -48,6 +49,39 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(c.Name), "aws_opensearchserverless_collection", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	ctx := context.TODO()
+	for _, scType := range types.SecurityConfigType("").Values() {
+		t := scType
+		for sp := opensearchserverless.NewListSecurityConfigsPaginator(svc, &opensearchserverless.ListSecurityConfigsInput{Type: t}); sp.HasMorePages(); {
+			page, err := sp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, s := range page.SecurityConfigSummaries {
+				id := StringValue(s.Id)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_opensearchserverless_security_config", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+	for vp := opensearchserverless.NewListVpcEndpointsPaginator(svc, &opensearchserverless.ListVpcEndpointsInput{}); vp.HasMorePages(); {
+		page, err := vp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, v := range page.VpcEndpointSummaries {
+			id := StringValue(v.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(v.Name), "aws_opensearchserverless_vpc_endpoint", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

@@ -816,6 +816,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_opensearch_package`
 *   `opensearchserverless`
     * `aws_opensearchserverless_collection`
+    * `aws_opensearchserverless_security_config`
+    * `aws_opensearchserverless_vpc_endpoint`
 *   `osis`
     * `aws_osis_pipeline`
 *   `pinpointsmsvoicev2`
