@@ -1,4 +1,5 @@
 aws_accessanalyzer_analyzer
+aws_accessanalyzer_archive_rule
 aws_acm_certificate
 aws_acmpca_certificate_authority
 aws_ami

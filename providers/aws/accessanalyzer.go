@@ -48,6 +48,20 @@ func (g *AccessAnalyzerGenerator) InitResources() error {
 				"aws_accessanalyzer_analyzer",
 				"aws",
 				accessanalyzerAllowEmptyValues))
+			for rp := accessanalyzer.NewListArchiveRulesPaginator(svc, &accessanalyzer.ListArchiveRulesInput{AnalyzerName: analyzer.Name}); rp.HasMorePages(); {
+				rpage, err := rp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, r := range rpage.ArchiveRules {
+					ruleName := StringValue(r.RuleName)
+					if ruleName == "" {
+						continue
+					}
+					resources = append(resources, terraformutils.NewSimpleResource(
+						resourceName+"/"+ruleName, resourceName+"_"+ruleName, "aws_accessanalyzer_archive_rule", "aws", accessanalyzerAllowEmptyValues))
+				}
+			}
 		}
 	}
 	g.Resources = resources
