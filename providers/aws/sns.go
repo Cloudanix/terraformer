@@ -85,6 +85,22 @@ func (g *SnsGenerator) InitResources() error {
 			}
 		}
 	}
+
+	platformApps := sns.NewListPlatformApplicationsPaginator(svc, &sns.ListPlatformApplicationsInput{})
+	for platformApps.HasMorePages() {
+		page, err := platformApps.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, app := range page.PlatformApplications {
+			arn := StringValue(app.PlatformApplicationArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_sns_platform_application", "aws", snsAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

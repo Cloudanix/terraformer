@@ -415,6 +415,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `sns`
     * `aws_sns_topic`
     * `aws_sns_topic_subscription`
+    * `aws_sns_platform_application`
 *   `sqs`
     * `aws_sqs_queue`
 *   `sso-admin`
