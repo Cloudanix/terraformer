@@ -148,6 +148,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appmesh_virtual_gateway`
 *   `apprunner`
     * `aws_apprunner_service`
+    * `aws_apprunner_connection`
+    * `aws_apprunner_auto_scaling_configuration_version`
+    * `aws_apprunner_vpc_connector`
+    * `aws_apprunner_observability_configuration`
+    * `aws_apprunner_vpc_ingress_connection`
 *   `appintegrations`
     * `aws_appintegrations_application`
 *   `appsync`

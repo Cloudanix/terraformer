@@ -34,9 +34,17 @@ func (g *AppRunnerGenerator) InitResources() error {
 	}
 	svc := apprunner.NewFromConfig(config)
 
+	ctx := context.TODO()
+	add := func(arn, tfType string) {
+		if arn != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	p := apprunner.NewListServicesPaginator(svc, &apprunner.ListServicesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -47,6 +55,52 @@ func (g *AppRunnerGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(service.ServiceName), "aws_apprunner_service", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for c := apprunner.NewListConnectionsPaginator(svc, &apprunner.ListConnectionsInput{}); c.HasMorePages(); {
+		page, err := c.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ConnectionSummaryList {
+			add(StringValue(x.ConnectionArn), "aws_apprunner_connection")
+		}
+	}
+	for a := apprunner.NewListAutoScalingConfigurationsPaginator(svc, &apprunner.ListAutoScalingConfigurationsInput{}); a.HasMorePages(); {
+		page, err := a.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.AutoScalingConfigurationSummaryList {
+			add(StringValue(x.AutoScalingConfigurationArn), "aws_apprunner_auto_scaling_configuration_version")
+		}
+	}
+	for v := apprunner.NewListVpcConnectorsPaginator(svc, &apprunner.ListVpcConnectorsInput{}); v.HasMorePages(); {
+		page, err := v.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.VpcConnectors {
+			add(StringValue(x.VpcConnectorArn), "aws_apprunner_vpc_connector")
+		}
+	}
+	for o := apprunner.NewListObservabilityConfigurationsPaginator(svc, &apprunner.ListObservabilityConfigurationsInput{}); o.HasMorePages(); {
+		page, err := o.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ObservabilityConfigurationSummaryList {
+			add(StringValue(x.ObservabilityConfigurationArn), "aws_apprunner_observability_configuration")
+		}
+	}
+	for i := apprunner.NewListVpcIngressConnectionsPaginator(svc, &apprunner.ListVpcIngressConnectionsInput{}); i.HasMorePages(); {
+		page, err := i.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.VpcIngressConnectionSummaryList {
+			add(StringValue(x.VpcIngressConnectionArn), "aws_apprunner_vpc_ingress_connection")
 		}
 	}
 	return nil
