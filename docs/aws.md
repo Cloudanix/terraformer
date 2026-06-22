@@ -257,6 +257,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_glue_workflow`
     * `aws_glue_security_configuration`
     * `aws_glue_registry`
+*   `guardduty`
+    * `aws_guardduty_detector`
+    * `aws_guardduty_filter`
+    * `aws_guardduty_ipset`
+    * `aws_guardduty_threatintelset`
+    * `aws_guardduty_member`
+    * `aws_guardduty_publishing_destination`
 *   `iam`
     * `aws_iam_access_key`
     * `aws_iam_account_alias`
