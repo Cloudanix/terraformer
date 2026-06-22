@@ -340,6 +340,24 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			add(aws.ToString(x.IpamResourceDiscoveryId), "aws_vpc_ipam_resource_discovery")
 		}
 	}
+	for p := ec2.NewDescribeIpamResourceDiscoveryAssociationsPaginator(svc, &ec2.DescribeIpamResourceDiscoveryAssociationsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.IpamResourceDiscoveryAssociations {
+			add(aws.ToString(x.IpamResourceDiscoveryAssociationId), "aws_vpc_ipam_resource_discovery_association")
+		}
+	}
+	for p := ec2.NewDescribeLocalGatewayRouteTableVpcAssociationsPaginator(svc, &ec2.DescribeLocalGatewayRouteTableVpcAssociationsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.LocalGatewayRouteTableVpcAssociations {
+			add(aws.ToString(x.LocalGatewayRouteTableVpcAssociationId), "aws_ec2_local_gateway_route_table_vpc_association")
+		}
+	}
 	for p := ec2.NewDescribeNetworkInsightsPathsPaginator(svc, &ec2.DescribeNetworkInsightsPathsInput{}); p.HasMorePages(); {
 		pg, err := p.NextPage(ctx)
 		if err != nil {
