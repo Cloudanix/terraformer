@@ -39,6 +39,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_acm_certificate`
 *   `acm-pca`
     * `aws_acmpca_certificate_authority`
+*   `amplify`
+    * `aws_amplify_app`
 *   `alb` (supports ALB and NLB)
     * `aws_lb`
     * `aws_lb_listener`
@@ -67,6 +69,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appautoscaling_scheduled_action`
 *   `appconfig`
     * `aws_appconfig_application`
+*   `appflow`
+    * `aws_appflow_flow`
 *   `appmesh`
     * `aws_appmesh_mesh`
 *   `apprunner`
@@ -130,6 +134,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codedeploy_app`
     * `aws_codedeploy_deployment_group`
     * `aws_codedeploy_deployment_config`
+*   `codeartifact`
+    * `aws_codeartifact_domain`
+*   `codestar-connections`
+    * `aws_codestarconnections_connection`
 *   `codepipeline`
     * `aws_codepipeline`
     * `aws_codepipeline_webhook`
@@ -248,6 +256,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_elasticsearch_domain`
 *   `firehose`
     * `aws_kinesis_firehose_delivery_stream`
+*   `fis`
+    * `aws_fis_experiment_template`
 *   `fms`
     * `aws_fms_policy`
 *   `fsx`
@@ -266,6 +276,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_globalaccelerator_listener`
     * `aws_globalaccelerator_endpoint_group`
     * `aws_globalaccelerator_custom_routing_accelerator`
+*   `grafana`
+    * `aws_grafana_workspace`
+*   `healthlake`
+    * `aws_healthlake_fhir_datastore`
 *   `glue`
     * `aws_glue_crawler`
     * `aws_glue_catalog_database`
@@ -316,6 +330,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iot_role_alias`
 *   `kafkaconnect`
     * `aws_mskconnect_connector`
+*   `kendra`
+    * `aws_kendra_index`
 *   `keyspaces`
     * `aws_keyspaces_keyspace`
 *   `kinesis`
@@ -352,10 +368,31 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_memorydb_cluster`
 *   `neptune`
     * `aws_neptune_cluster`
+*   `neptune-graph`
+    * `aws_neptunegraph_graph`
 *   `opensearch`
     * `aws_opensearch_domain`
 *   `opensearchserverless`
     * `aws_opensearchserverless_collection`
+*   `osis`
+    * `aws_osis_pipeline`
+*   `pinpoint`
+    * `aws_pinpoint_app`
+*   `proton`
+    * `aws_proton_environment`
+*   `qbusiness`
+    * `aws_qbusiness_application`
+*   `rbin`
+    * `aws_rbin_rule`
+*   `resource-explorer-2`
+    * `aws_resourceexplorer2_index`
+*   `verifiedpermissions`
+    * `aws_verifiedpermissions_policy_store`
+*   `vpc-lattice`
+    * `aws_vpclattice_service`
+    * `aws_vpclattice_service_network`
+*   `wellarchitected`
+    * `aws_wellarchitected_workload`
 *   `pipes`
     * `aws_pipes_pipe`
 *   `mwaa`
