@@ -616,6 +616,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_grafana_workspace`
     * `aws_grafana_workspace_saml_configuration`
     * `aws_grafana_workspace_service_account`
+    * `aws_grafana_workspace_service_account_token`
 *   `healthlake`
     * `aws_healthlake_fhir_datastore`
 *   `glue`

@@ -73,6 +73,20 @@ func (g *GrafanaGenerator) loadWorkspaceChildren(svc *grafana.Client, workspaceI
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				workspaceID+"/"+said, workspaceID+"_"+said, "aws_grafana_workspace_service_account", "aws", defaultAllowEmptyValues))
+			for tp := grafana.NewListWorkspaceServiceAccountTokensPaginator(svc, &grafana.ListWorkspaceServiceAccountTokensInput{WorkspaceId: &workspaceID, ServiceAccountId: sa.Id}); tp.HasMorePages(); {
+				tpage, err := tp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, t := range tpage.ServiceAccountTokens {
+					tid := StringValue(t.Id)
+					if tid == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						workspaceID+"/"+said+"/"+tid, workspaceID+"_"+said+"_"+tid, "aws_grafana_workspace_service_account_token", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 }
