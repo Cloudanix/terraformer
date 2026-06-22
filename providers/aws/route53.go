@@ -150,8 +150,44 @@ func (g *Route53Generator) InitResources() error {
 	g.Resources = append(g.Resources, g.createTrafficPolicyResources(svc)...)
 	g.Resources = append(g.Resources, g.createCidrCollectionResources(svc)...)
 	g.Resources = append(g.Resources, g.createTrafficPolicyInstanceResources(svc)...)
+	g.Resources = append(g.Resources, g.createDNSSECResources(svc)...)
 
 	return nil
+}
+
+// createDNSSECResources emits per-hosted-zone DNSSEC config + key signing keys.
+// Import IDs: hosted zone id for dnssec; "<zone-id>,<ksk-name>" for the KSK.
+func (Route53Generator) createDNSSECResources(svc *route53.Client) []terraformutils.Resource {
+	var resources []terraformutils.Resource
+	zones := route53.NewListHostedZonesPaginator(svc, &route53.ListHostedZonesInput{})
+	for zones.HasMorePages() {
+		page, err := zones.NextPage(context.TODO())
+		if err != nil {
+			log.Println(err)
+			return resources
+		}
+		for _, zone := range page.HostedZones {
+			zoneID := cleanZoneID(StringValue(zone.Id))
+			if zoneID == "" {
+				continue
+			}
+			out, err := svc.GetDNSSEC(context.TODO(), &route53.GetDNSSECInput{HostedZoneId: &zoneID})
+			if err != nil || len(out.KeySigningKeys) == 0 {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				zoneID, zoneID, "aws_route53_hosted_zone_dnssec", "aws", route53AllowEmptyValues))
+			for _, ksk := range out.KeySigningKeys {
+				name := StringValue(ksk.Name)
+				if name == "" {
+					continue
+				}
+				resources = append(resources, terraformutils.NewSimpleResource(
+					zoneID+","+name, zoneID+"_"+name, "aws_route53_key_signing_key", "aws", route53AllowEmptyValues))
+			}
+		}
+	}
+	return resources
 }
 
 func (Route53Generator) createTrafficPolicyInstanceResources(svc *route53.Client) []terraformutils.Resource {
