@@ -41,6 +41,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_acmpca_certificate_authority`
 *   `amp`
     * `aws_prometheus_workspace`
+    * `aws_prometheus_alert_manager_definition`
+    * `aws_prometheus_rule_group_namespace`
+    * `aws_prometheus_scraper`
 *   `appfabric`
     * `aws_appfabric_app_bundle`
     * `aws_appfabric_app_authorization`

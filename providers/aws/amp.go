@@ -32,9 +32,11 @@ func (g *PrometheusGenerator) InitResources() error {
 		return e
 	}
 	svc := amp.NewFromConfig(config)
+	ctx := context.TODO()
+	var workspaceIDs []string
 	p := amp.NewListWorkspacesPaginator(svc, &amp.ListWorkspacesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -43,8 +45,46 @@ func (g *PrometheusGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			workspaceIDs = append(workspaceIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				id, StringValue(item.WorkspaceId), "aws_prometheus_workspace", "aws", defaultAllowEmptyValues))
+				id, id, "aws_prometheus_workspace", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, wsID := range workspaceIDs {
+		ws := wsID
+		if _, err := svc.DescribeAlertManagerDefinition(ctx, &amp.DescribeAlertManagerDefinitionInput{WorkspaceId: &ws}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				ws, ws, "aws_prometheus_alert_manager_definition", "aws", defaultAllowEmptyValues))
+		}
+		for rp := amp.NewListRuleGroupsNamespacesPaginator(svc, &amp.ListRuleGroupsNamespacesInput{WorkspaceId: &ws}); rp.HasMorePages(); {
+			page, err := rp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, ns := range page.RuleGroupsNamespaces {
+				arn := StringValue(ns.Arn)
+				if arn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, StringValue(ns.Name), "aws_prometheus_rule_group_namespace", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	for sp := amp.NewListScrapersPaginator(svc, &amp.ListScrapersInput{}); sp.HasMorePages(); {
+		page, err := sp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, s := range page.Scrapers {
+			id := StringValue(s.ScraperId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_prometheus_scraper", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
