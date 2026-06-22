@@ -172,6 +172,13 @@ func (g *IamGenerator) getRoles(svc *iam.Client) error {
 		}
 		for _, role := range page.Roles {
 			roleName := StringValue(role.RoleName)
+			// Service-linked roles can't be managed as aws_iam_role; they map
+			// to aws_iam_service_linked_role (import by ARN).
+			if strings.HasPrefix(StringValue(role.Path), "/aws-service-role/") {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					StringValue(role.Arn), roleName, "aws_iam_service_linked_role", "aws", IamAllowEmptyValues))
+				continue
+			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				roleName,
 				roleName,

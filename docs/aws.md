@@ -696,6 +696,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iam_role_policy_attachment`
     * `aws_iam_saml_provider`
     * `aws_iam_server_certificate`
+    * `aws_iam_service_linked_role`
     * `aws_iam_user`
     * `aws_iam_user_group_membership`
     * `aws_iam_user_policy`
