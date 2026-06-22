@@ -74,6 +74,14 @@ func (g *BedrockGenerator) InitResources() error {
 		}
 	}
 
+	// Account/region-level model invocation logging config; import ID is the region.
+	if region := config.Region; region != "" {
+		if out, err := svc.GetModelInvocationLoggingConfiguration(ctx, &bedrock.GetModelInvocationLoggingConfigurationInput{}); err == nil && out.LoggingConfig != nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				region, region, "aws_bedrock_model_invocation_logging_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	for pmt := bedrock.NewListProvisionedModelThroughputsPaginator(svc, &bedrock.ListProvisionedModelThroughputsInput{}); pmt.HasMorePages(); {
 		page, err := pmt.NextPage(ctx)
 		if err != nil {
