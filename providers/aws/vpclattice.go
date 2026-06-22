@@ -16,6 +16,7 @@ package aws
 
 import (
 	"context"
+	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/vpclattice"
@@ -37,6 +38,28 @@ func (g *VPCLatticeGenerator) InitResources() error {
 	svc := vpclattice.NewFromConfig(config)
 	ctx := context.TODO()
 
+	// authPolicy emits aws_vpclattice_auth_policy (import resource id) and
+	// resourcePolicy emits aws_vpclattice_resource_policy (import resource ARN)
+	// when the resource carries one.
+	authPolicy := func(id string) {
+		if id == "" {
+			return
+		}
+		if out, err := svc.GetAuthPolicy(ctx, &vpclattice.GetAuthPolicyInput{ResourceIdentifier: &id}); err == nil && StringValue(out.Policy) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpclattice_auth_policy", "aws", defaultAllowEmptyValues))
+		}
+	}
+	resourcePolicy := func(arn string) {
+		if arn == "" {
+			return
+		}
+		if out, err := svc.GetResourcePolicy(ctx, &vpclattice.GetResourcePolicyInput{ResourceArn: &arn}); err == nil && StringValue(out.Policy) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_vpclattice_resource_policy", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	var serviceIDs []string
 	services := vpclattice.NewListServicesPaginator(svc, &vpclattice.ListServicesInput{})
 	for services.HasMorePages() {
@@ -52,6 +75,8 @@ func (g *VPCLatticeGenerator) InitResources() error {
 			serviceIDs = append(serviceIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(s.Name), "aws_vpclattice_service", "aws", defaultAllowEmptyValues))
+			authPolicy(id)
+			resourcePolicy(StringValue(s.Arn))
 		}
 	}
 
@@ -115,6 +140,24 @@ func (g *VPCLatticeGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(n.Name), "aws_vpclattice_service_network", "aws", defaultAllowEmptyValues))
+			authPolicy(id)
+			resourcePolicy(StringValue(n.Arn))
+		}
+	}
+
+	snServiceAssocs := vpclattice.NewListServiceNetworkServiceAssociationsPaginator(svc, &vpclattice.ListServiceNetworkServiceAssociationsInput{})
+	for snServiceAssocs.HasMorePages() {
+		page, err := snServiceAssocs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.Items {
+			id := StringValue(a.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpclattice_service_network_service_association", "aws", defaultAllowEmptyValues))
 		}
 	}
 
@@ -131,6 +174,25 @@ func (g *VPCLatticeGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(t.Name), "aws_vpclattice_target_group", "aws", defaultAllowEmptyValues))
+			tgID := id
+			for tp := vpclattice.NewListTargetsPaginator(svc, &vpclattice.ListTargetsInput{TargetGroupIdentifier: &tgID}); tp.HasMorePages(); {
+				tpage, err := tp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, tgt := range tpage.Items {
+					targetID := StringValue(tgt.Id)
+					if targetID == "" {
+						continue
+					}
+					attID := tgID + "/" + targetID
+					if tgt.Port != nil {
+						attID = tgID + "/" + targetID + "/" + strconv.Itoa(int(*tgt.Port))
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						attID, attID, "aws_vpclattice_target_group_attachment", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
