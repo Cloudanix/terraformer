@@ -47,6 +47,11 @@ func (g *RumGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_rum_app_monitor", "aws", defaultAllowEmptyValues))
+
+			if dest, err := svc.ListRumMetricsDestinations(context.TODO(), &rum.ListRumMetricsDestinationsInput{AppMonitorName: monitor.Name}); err == nil && len(dest.Destinations) > 0 {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name, name, "aws_rum_metrics_destination", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil

@@ -843,8 +843,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_oam_link`
 *   `rum`
     * `aws_rum_app_monitor`
+    * `aws_rum_metrics_destination`
 *   `synthetics`
     * `aws_synthetics_canary`
+    * `aws_synthetics_group`
 *   `opsworks`
     * `aws_opsworks_application`
     * `aws_opsworks_custom_layer`

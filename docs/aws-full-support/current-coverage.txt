@@ -700,6 +700,7 @@ aws_route53profiles_profile
 aws_route53recoverycontrolconfig_cluster
 aws_route53recoveryreadiness_cell
 aws_rum_app_monitor
+aws_rum_metrics_destination
 aws_s3_bucket
 aws_s3_bucket_accelerate_configuration
 aws_s3_bucket_cors_configuration
@@ -837,6 +838,7 @@ aws_storagegateway_tape_pool
 aws_subnet
 aws_swf_domain
 aws_synthetics_canary
+aws_synthetics_group
 aws_timestreaminfluxdb_db_instance
 aws_timestreamwrite_database
 aws_transcribe_vocabulary
