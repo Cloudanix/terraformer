@@ -169,6 +169,29 @@ func (g *DocDBGenerator) getParameterGroups(svc *docdb.Client) error {
 		}
 	}
 
+	snapshotPaginator := docdb.NewDescribeDBClusterSnapshotsPaginator(svc, &docdb.DescribeDBClusterSnapshotsInput{})
+	for snapshotPaginator.HasMorePages() {
+		page, err := snapshotPaginator.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, snapshot := range page.DBClusterSnapshots {
+			if StringValue(snapshot.Engine) != "docdb" {
+				continue
+			}
+			resourceName := StringValue(snapshot.DBClusterSnapshotIdentifier)
+			if resourceName == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				resourceName,
+				resourceName,
+				"aws_docdb_cluster_snapshot",
+				"aws",
+				docDBAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 

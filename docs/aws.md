@@ -319,6 +319,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_docdb_cluster`
     * `aws_docdb_cluster_instance`
     * `aws_docdb_cluster_parameter_group`
+    * `aws_docdb_cluster_snapshot`
     * `aws_docdb_global_cluster`
     * `aws_docdb_event_subscription`
     * `aws_docdb_subnet_group`
