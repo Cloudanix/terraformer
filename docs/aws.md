@@ -467,6 +467,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `dx`
     * `aws_dx_connection`
     * `aws_dx_connection_association`
+    * `aws_dx_macsec_key_association`
     * `aws_dx_gateway`
     * `aws_dx_gateway_association`
     * `aws_dx_gateway_association_proposal`

@@ -95,6 +95,14 @@ func (g *DirectConnectGenerator) getDirectConnectConnections(svc *directconnect.
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				connID+"/"+lagID, connID+"_"+lagID, "aws_dx_connection_association", "aws", dxAllowEmptyValues))
 		}
+		for _, key := range dx.MacSecKeys {
+			secretArn := StringValue(key.SecretARN)
+			if secretArn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				connID+","+secretArn, connID+"_macsec", "aws_dx_macsec_key_association", "aws", dxAllowEmptyValues))
+		}
 	}
 	return nil
 }
