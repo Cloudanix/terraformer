@@ -60,5 +60,25 @@ func (g *SignerGenerator) InitResources() error {
 			}
 		}
 	}
+
+	jobInput := &signer.ListSigningJobsInput{}
+	for {
+		out, err := svc.ListSigningJobs(context.TODO(), jobInput)
+		if err != nil {
+			break
+		}
+		for _, job := range out.Jobs {
+			jobID := StringValue(job.JobId)
+			if jobID == "" || job.Status != "Succeeded" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				jobID, jobID, "aws_signer_signing_job", "aws", defaultAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		jobInput.NextToken = out.NextToken
+	}
 	return nil
 }

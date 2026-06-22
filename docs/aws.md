@@ -1269,6 +1269,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `signer`
     * `aws_signer_signing_profile`
     * `aws_signer_signing_profile_permission`
+    * `aws_signer_signing_job`
 *   `sg`
     * `aws_security_group`
     * `aws_security_group_rule` (if a rule cannot be inlined)

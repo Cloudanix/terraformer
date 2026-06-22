@@ -999,6 +999,7 @@ aws_shield_proactive_engagement
 aws_shield_protection
 aws_shield_protection_group
 aws_shield_subscription
+aws_signer_signing_job
 aws_signer_signing_profile
 aws_signer_signing_profile_permission
 aws_sns_platform_application
