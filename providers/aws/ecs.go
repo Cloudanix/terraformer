@@ -55,6 +55,14 @@ func (g *EcsGenerator) InitResources() error {
 				ecsAllowEmptyValues,
 			))
 
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				clusterName,
+				clusterName,
+				"aws_ecs_cluster_capacity_providers",
+				"aws",
+				ecsAllowEmptyValues,
+			))
+
 			servicePage := ecs.NewListServicesPaginator(svc, &ecs.ListServicesInput{
 				Cluster: &clusterArn,
 			})
@@ -94,6 +102,27 @@ func (g *EcsGenerator) InitResources() error {
 						ecsAllowEmptyValues,
 						map[string]interface{}{},
 					))
+
+					taskSets, err := svc.DescribeTaskSets(context.TODO(), &ecs.DescribeTaskSetsInput{
+						Cluster: &clusterArn,
+						Service: &serviceArn,
+					})
+					if err != nil {
+						continue
+					}
+					for _, ts := range taskSets.TaskSets {
+						id := StringValue(ts.Id)
+						if id == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							id+","+serviceName+","+clusterName,
+							clusterName+"_"+serviceName+"_"+id,
+							"aws_ecs_task_set",
+							"aws",
+							ecsAllowEmptyValues,
+						))
+					}
 				}
 			}
 		}
