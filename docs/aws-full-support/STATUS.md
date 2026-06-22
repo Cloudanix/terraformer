@@ -9,11 +9,34 @@ Shared helpers (`appendSimpleResources`, `wrapPolicyAttribute`,
 `defaultAllowEmptyValues`), SDK retryer, per-region config cache, and the
 `serviceScope` map + assertion test all landed earlier.
 
-### New services (§4a P1/P2 — the offline-buildable subset)
-application-autoscaling, backup, datasync, dax, directory-service (ds), dlm,
-dms, fsx, glacier, **globalaccelerator** (partition-global), route53resolver,
-servicediscovery, **servicequotas** (T5, change-history filter), sesv2,
-**sso-admin**, storagegateway, transfer.
+### New services (§4a)
+**P1:** application-autoscaling, backup, datasync, dax, directory-service (ds),
+dlm, dms, fsx, glacier, **globalaccelerator** (partition-global),
+route53resolver, servicediscovery, **servicequotas** (T5, change-history
+filter), sesv2, **sso-admin**, storagegateway, transfer.
+
+**P2/P3 (added via the module-fetch workaround, see below):** guardduty,
+macie2, **shield** (partition-global), fms, detective, ram, acm-pca, signer,
+inspector2, synthetics, rum, oam, networkmonitor, internetmonitor,
+network-firewall, rolesanywhere, securitylake, athena, opensearch, memorydb,
+neptune.
+
+### Network workaround (the original blocker is solved)
+Go's own module download fails in the sandbox (TLS), **but `curl` reaches
+`proxy.golang.org` fine.** So new SDK modules are fetched via curl into a local
+file-GOPROXY and built with a relocated, writable module cache:
+
+```sh
+# fetch a module:  $TMPDIR/getmod.sh <module-path>   (resolves @latest + curls .info/.mod/.zip)
+export GOMODCACHE="$TMPDIR/gomodcache" GOCACHE="$TMPDIR/gocache"
+export GOPROXY="file://$TMPDIR/goproxy,file:///Users/puru/go/pkg/mod/cache/download"
+export GOSUMDB=off GOFLAGS=-mod=mod
+go get <module>@<version>   # version must be explicit (file proxy has no @latest)
+```
+
+The existing on-disk download cache (`.../pkg/mod/cache/download`) is chained as
+a second file-proxy so all already-cached deps resolve. This unblocks every
+remaining §4a service — fetch its module, then follow the §5 recipe.
 
 ### Partial-service gaps (§4b) — complete except as noted
 | Service | Added |
@@ -43,24 +66,20 @@ servicediscovery, **servicequotas** (T5, change-history filter), sesv2,
 Every change: one focused commit + docs/aws.md + serviceScope entry where new.
 `go build ./...` and `go test ./...` green.
 
-## Blocked / deferred
+## Remaining / deferred
 
-### §4a remaining new services — BLOCKED (no network)
-guardduty, inspector2, macie2, fms, shield, securitylake, detective,
-network-firewall, ram, acm-pca, signer, athena, lakeformation, neptune,
-memorydb, timestream*, opensearch(+serverless), sagemaker, quicksight, pipes,
-scheduler, mwaa, and the rest of P2/P3/P4.
+### §4a remaining services — NOW BUILDABLE (use the workaround above)
+P3/P4 long tail not yet built: lakeformation, timestream-write,
+timestream-influxdb, keyspaces, opensearchserverless, redshift-serverless,
+docdb-elastic, sagemaker, quicksight, pipes, scheduler, schemas, mwaa,
+emr-serverless, emr-containers, mskconnect, kinesisanalyticsv2, kinesisvideo,
++ the P4 list in plan.md §4a. Each: `getmod.sh` its module, then §5 recipe.
+No longer blocked — just not yet done.
 
-**Why:** the sandbox blocks Go module downloads (proxy TLS failure + the module
-VCS cache dir is read-only). Every one of these needs an
-`aws-sdk-go-v2/service/<svc>` module that is **not** in the local cache, so it
-cannot be added to `go.mod` offline. All 98 cached SDK modules already map to
-registered services. **Unblock:** run `go get` for the needed service modules
-once network is available, then follow the §5 recipe per service.
-
-### §3 authoritative gap list — BLOCKED (no network)
-Generating `tf-aws-all-resources.txt` needs `terraform init` + provider schema
-download. Run §3 once network is available to produce the exact remaining diff.
+### §3 authoritative gap list — runnable now
+`terraform init` + `terraform providers schema -json` can run via the same
+network (curl works). Not yet executed; run §3 to produce the exact remaining
+per-resource diff.
 
 ### Intentionally not built
 - **apigatewayv2** gaps (integration, stage, deployment, domain_name,
