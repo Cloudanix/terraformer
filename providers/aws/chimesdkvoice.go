@@ -81,5 +81,34 @@ func (g *ChimeSDKVoiceGenerator) InitResources() error {
 			add(StringValue(grp.VoiceConnectorGroupId), StringValue(grp.Name), "aws_chime_voice_connector_group")
 		}
 	}
+
+	for sp := chimesdkvoice.NewListSipMediaApplicationsPaginator(svc, &chimesdkvoice.ListSipMediaApplicationsInput{}); sp.HasMorePages(); {
+		page, err := sp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, s := range page.SipMediaApplications {
+			add(StringValue(s.SipMediaApplicationId), StringValue(s.Name), "aws_chimesdkvoice_sip_media_application")
+		}
+	}
+	for sp := chimesdkvoice.NewListSipRulesPaginator(svc, &chimesdkvoice.ListSipRulesInput{}); sp.HasMorePages(); {
+		page, err := sp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, s := range page.SipRules {
+			add(StringValue(s.SipRuleId), StringValue(s.Name), "aws_chimesdkvoice_sip_rule")
+		}
+	}
+	for vp := chimesdkvoice.NewListVoiceProfileDomainsPaginator(svc, &chimesdkvoice.ListVoiceProfileDomainsInput{}); vp.HasMorePages(); {
+		page, err := vp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, d := range page.VoiceProfileDomains {
+			id := StringValue(d.VoiceProfileDomainId)
+			add(id, id, "aws_chimesdkvoice_voice_profile_domain")
+		}
+	}
 	return nil
 }
