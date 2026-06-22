@@ -49,8 +49,75 @@ func (g *LightsailGenerator) InitResources() error {
 				name, name, "aws_lightsail_instance", "aws", defaultAllowEmptyValues))
 		}
 		if out.NextPageToken == nil {
-			return nil
+			break
 		}
 		token = out.NextPageToken
+	}
+
+	g.addLightsailExtras(svc)
+	return nil
+}
+
+// addLightsailExtras enumerates the other top-level Lightsail resources, each a
+// Get* returning a named list. Import ID is the resource name. Errors are
+// logged via a skip so one missing permission doesn't abort the whole import.
+func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
+	ctx := context.TODO()
+	add := func(name, tfType string) {
+		if name != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	if out, err := svc.GetBuckets(ctx, &lightsail.GetBucketsInput{}); err == nil {
+		for _, x := range out.Buckets {
+			add(StringValue(x.Name), "aws_lightsail_bucket")
+		}
+	}
+	if out, err := svc.GetCertificates(ctx, &lightsail.GetCertificatesInput{}); err == nil {
+		for _, x := range out.Certificates {
+			add(StringValue(x.CertificateName), "aws_lightsail_certificate")
+		}
+	}
+	if out, err := svc.GetContainerServices(ctx, &lightsail.GetContainerServicesInput{}); err == nil {
+		for _, x := range out.ContainerServices {
+			add(StringValue(x.ContainerServiceName), "aws_lightsail_container_service")
+		}
+	}
+	if out, err := svc.GetRelationalDatabases(ctx, &lightsail.GetRelationalDatabasesInput{}); err == nil {
+		for _, x := range out.RelationalDatabases {
+			add(StringValue(x.Name), "aws_lightsail_database")
+		}
+	}
+	if out, err := svc.GetDisks(ctx, &lightsail.GetDisksInput{}); err == nil {
+		for _, x := range out.Disks {
+			add(StringValue(x.Name), "aws_lightsail_disk")
+		}
+	}
+	if out, err := svc.GetDistributions(ctx, &lightsail.GetDistributionsInput{}); err == nil {
+		for _, x := range out.Distributions {
+			add(StringValue(x.Name), "aws_lightsail_distribution")
+		}
+	}
+	if out, err := svc.GetDomains(ctx, &lightsail.GetDomainsInput{}); err == nil {
+		for _, x := range out.Domains {
+			add(StringValue(x.Name), "aws_lightsail_domain")
+		}
+	}
+	if out, err := svc.GetKeyPairs(ctx, &lightsail.GetKeyPairsInput{}); err == nil {
+		for _, x := range out.KeyPairs {
+			add(StringValue(x.Name), "aws_lightsail_key_pair")
+		}
+	}
+	if out, err := svc.GetLoadBalancers(ctx, &lightsail.GetLoadBalancersInput{}); err == nil {
+		for _, x := range out.LoadBalancers {
+			add(StringValue(x.Name), "aws_lightsail_lb")
+		}
+	}
+	if out, err := svc.GetStaticIps(ctx, &lightsail.GetStaticIpsInput{}); err == nil {
+		for _, x := range out.StaticIps {
+			add(StringValue(x.Name), "aws_lightsail_static_ip")
+		}
 	}
 }

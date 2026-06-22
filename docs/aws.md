@@ -476,6 +476,16 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_location_route_calculator`
 *   `lightsail`
     * `aws_lightsail_instance`
+    * `aws_lightsail_bucket`
+    * `aws_lightsail_certificate`
+    * `aws_lightsail_container_service`
+    * `aws_lightsail_database`
+    * `aws_lightsail_disk`
+    * `aws_lightsail_distribution`
+    * `aws_lightsail_domain`
+    * `aws_lightsail_key_pair`
+    * `aws_lightsail_lb`
+    * `aws_lightsail_static_ip`
 *   `m2`
     * `aws_m2_application`
 *   `keyspaces`
@@ -760,6 +770,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ses_template`
 *   `sesv2`
     * `aws_sesv2_email_identity`
+    * `aws_sesv2_configuration_set`
+    * `aws_sesv2_contact_list`
+    * `aws_sesv2_dedicated_ip_pool`
 *   `sfn`
     * `aws_sfn_activity`
     * `aws_sfn_state_machine`

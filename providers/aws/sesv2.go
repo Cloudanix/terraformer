@@ -19,6 +19,8 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/service/sesv2"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2/types"
+
+	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
 
 type SESv2Generator struct {
@@ -45,6 +47,52 @@ func (g *SESv2Generator) InitResources() error {
 			defaultAllowEmptyValues,
 			func(i types.IdentityInfo) string { return StringValue(i.IdentityName) },
 			func(i types.IdentityInfo) string { return StringValue(i.IdentityName) })
+	}
+
+	configSets := sesv2.NewListConfigurationSetsPaginator(svc, &sesv2.ListConfigurationSetsInput{})
+	for configSets.HasMorePages() {
+		page, err := configSets.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, name := range page.ConfigurationSets {
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sesv2_configuration_set", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	contactLists := sesv2.NewListContactListsPaginator(svc, &sesv2.ListContactListsInput{})
+	for contactLists.HasMorePages() {
+		page, err := contactLists.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, cl := range page.ContactLists {
+			name := StringValue(cl.ContactListName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sesv2_contact_list", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	ipPools := sesv2.NewListDedicatedIpPoolsPaginator(svc, &sesv2.ListDedicatedIpPoolsInput{})
+	for ipPools.HasMorePages() {
+		page, err := ipPools.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, name := range page.DedicatedIpPools {
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sesv2_dedicated_ip_pool", "aws", defaultAllowEmptyValues))
+		}
 	}
 	return nil
 }
