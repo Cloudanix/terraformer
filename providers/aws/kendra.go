@@ -34,9 +34,11 @@ func (g *KendraGenerator) InitResources() error {
 	}
 	svc := kendra.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var indexIDs []string
 	p := kendra.NewListIndicesPaginator(svc, &kendra.ListIndicesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +47,64 @@ func (g *KendraGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			indexIDs = append(indexIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(idx.Name), "aws_kendra_index", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, indexID := range indexIDs {
+		idx := indexID
+		add := func(childID, tfType string) {
+			if childID != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					childID+"/"+idx, childID+"_"+idx, tfType, "aws", defaultAllowEmptyValues))
+			}
+		}
+		for c := kendra.NewListDataSourcesPaginator(svc, &kendra.ListDataSourcesInput{IndexId: &idx}); c.HasMorePages(); {
+			page, err := c.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, x := range page.SummaryItems {
+				add(StringValue(x.Id), "aws_kendra_data_source")
+			}
+		}
+		for c := kendra.NewListExperiencesPaginator(svc, &kendra.ListExperiencesInput{IndexId: &idx}); c.HasMorePages(); {
+			page, err := c.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, x := range page.SummaryItems {
+				add(StringValue(x.Id), "aws_kendra_experience")
+			}
+		}
+		for c := kendra.NewListFaqsPaginator(svc, &kendra.ListFaqsInput{IndexId: &idx}); c.HasMorePages(); {
+			page, err := c.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, x := range page.FaqSummaryItems {
+				add(StringValue(x.Id), "aws_kendra_faq")
+			}
+		}
+		for c := kendra.NewListQuerySuggestionsBlockListsPaginator(svc, &kendra.ListQuerySuggestionsBlockListsInput{IndexId: &idx}); c.HasMorePages(); {
+			page, err := c.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, x := range page.BlockListSummaryItems {
+				add(StringValue(x.Id), "aws_kendra_query_suggestions_block_list")
+			}
+		}
+		for c := kendra.NewListThesauriPaginator(svc, &kendra.ListThesauriInput{IndexId: &idx}); c.HasMorePages(); {
+			page, err := c.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, x := range page.ThesaurusSummaryItems {
+				add(StringValue(x.Id), "aws_kendra_thesaurus")
+			}
 		}
 	}
 	return nil

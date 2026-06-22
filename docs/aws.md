@@ -613,6 +613,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_mskconnect_connector`
 *   `kendra`
     * `aws_kendra_index`
+    * `aws_kendra_data_source`
+    * `aws_kendra_experience`
+    * `aws_kendra_faq`
+    * `aws_kendra_query_suggestions_block_list`
+    * `aws_kendra_thesaurus`
 *   `lexv2-models`
     * `aws_lexv2models_bot`
 *   `iotevents`

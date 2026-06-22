@@ -447,7 +447,12 @@ aws_iotsitewise_asset_model
 aws_iottwinmaker_workspace
 aws_ivs_channel
 aws_ivschat_room
+aws_kendra_data_source
+aws_kendra_experience
+aws_kendra_faq
 aws_kendra_index
+aws_kendra_query_suggestions_block_list
+aws_kendra_thesaurus
 aws_key_pair
 aws_keyspaces_keyspace
 aws_kinesis_firehose_delivery_stream
