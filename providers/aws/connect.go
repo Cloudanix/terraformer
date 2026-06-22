@@ -89,6 +89,19 @@ func (g *ConnectGenerator) loadConnectChildren(svc *connect.Client, instanceID s
 				tfType, "aws", defaultAllowEmptyValues))
 		}
 	}
+	for lf := connect.NewListLambdaFunctionsPaginator(svc, &connect.ListLambdaFunctionsInput{InstanceId: aws.String(instanceID)}); lf.HasMorePages(); {
+		page, err := lf.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, fnArn := range page.LambdaFunctions {
+			if fnArn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				instanceID+","+fnArn, instanceID+"_lambda", "aws_connect_lambda_function_association", "aws", defaultAllowEmptyValues))
+		}
+	}
 	for q := connect.NewListQueuesPaginator(svc, &connect.ListQueuesInput{InstanceId: aws.String(instanceID)}); q.HasMorePages(); {
 		page, err := q.NextPage(ctx)
 		if err != nil {

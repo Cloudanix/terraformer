@@ -364,6 +364,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cognito_user_in_group`
 *   `connect`
     * `aws_connect_instance`
+    * `aws_connect_lambda_function_association`
     * `aws_connect_queue`
     * `aws_connect_routing_profile`
     * `aws_connect_contact_flow`
