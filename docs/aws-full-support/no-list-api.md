@@ -99,9 +99,12 @@ cannot reverse them: `aws_s3_object`, `aws_s3_bucket_object`, `aws_s3_object_cop
 and the dx hosted-VIF / accepter / confirmation / proposal handshake resources
 (the *accepting*/*requesting* side of a two-account flow, with no list API).
 
-Also intentionally skipped: `aws_elastictranscoder_preset` (ListPresets returns
-the hundreds of AWS-managed *system* presets, not user infrastructure — emitting
-them is noise, not coverage).
+Also intentionally skipped: `aws_elastictranscoder_preset` — Elastic Transcoder's
+SDK is AWS-deprecated ("no longer available for use"); adding new generator code
+against the deprecated package trips staticcheck SA1019. (ListPresets also returns
+the hundreds of AWS-managed *system* presets, which would be noise, not coverage.)
+The pre-existing `aws_elastictranscoder_pipeline` generator predates the
+deprecation and is left as-is.
 
 ## Data-plane / report-only (plan §1 exclusion list)
 `sts`, `pricing`, `compute-optimizer`, `health`, `support`, `trustedadvisor`,
