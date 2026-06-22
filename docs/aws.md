@@ -894,6 +894,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_rbin_rule`
 *   `resource-explorer-2`
     * `aws_resourceexplorer2_index`
+    * `aws_resourceexplorer2_view`
 *   `verifiedaccess`
     * `aws_verifiedaccess_instance`
     * `aws_verifiedaccess_trust_provider`

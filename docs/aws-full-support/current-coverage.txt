@@ -827,6 +827,7 @@ aws_rekognition_project
 aws_rekognition_stream_processor
 aws_resiliencehub_app
 aws_resourceexplorer2_index
+aws_resourceexplorer2_view
 aws_resourcegroups_group
 aws_rolesanywhere_profile
 aws_rolesanywhere_trust_anchor

@@ -49,5 +49,20 @@ func (g *ResourceExplorer2Generator) InitResources() error {
 				arn, arn, "aws_resourceexplorer2_index", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	vp := resourceexplorer2.NewListViewsPaginator(svc, &resourceexplorer2.ListViewsInput{})
+	for vp.HasMorePages() {
+		page, err := vp.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, viewArn := range page.Views {
+			if viewArn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				viewArn, viewArn, "aws_resourceexplorer2_view", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
