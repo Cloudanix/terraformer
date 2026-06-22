@@ -370,6 +370,10 @@ func (g *CloudFrontGenerator) loadDistribution(svc *cloudfront.Client) error {
 			r.IgnoreKeys = append(r.IgnoreKeys, "^active_trusted_signers.(.*)")
 			g.Resources = append(g.Resources, r)
 
+			// Realtime metrics subscription is a singleton per distribution.
+			if _, err := svc.GetMonitoringSubscription(context.TODO(), &cloudfront.GetMonitoringSubscriptionInput{DistributionId: distribution.Id}); err == nil {
+				g.addSimple(StringValue(distribution.Id), StringValue(distribution.Id), "aws_cloudfront_monitoring_subscription")
+			}
 		}
 	}
 	return nil

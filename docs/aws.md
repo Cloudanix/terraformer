@@ -261,6 +261,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudfront_field_level_encryption_profile`
     * `aws_cloudfront_continuous_deployment_policy`
     * `aws_cloudfront_realtime_log_config`
+    * `aws_cloudfront_monitoring_subscription`
 *   `cloudhsm`
     * `aws_cloudhsm_v2_cluster`
     * `aws_cloudhsm_v2_hsm`
