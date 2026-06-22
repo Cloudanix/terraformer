@@ -87,5 +87,23 @@ func (g *ServiceQuotasGenerator) InitResources() error {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			ref.id, ref.name, "aws_servicequotas_service_quota", "aws", defaultAllowEmptyValues))
 	}
+
+	for tp := servicequotas.NewListServiceQuotaIncreaseRequestsInTemplatePaginator(svc, &servicequotas.ListServiceQuotaIncreaseRequestsInTemplateInput{}); tp.HasMorePages(); {
+		page, err := tp.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, t := range page.ServiceQuotaIncreaseRequestInTemplateList {
+			quota := StringValue(t.QuotaCode)
+			service := StringValue(t.ServiceCode)
+			region := StringValue(t.AwsRegion)
+			if quota == "" || service == "" || region == "" {
+				continue
+			}
+			id := quota + "/" + service + "/" + region
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_servicequotas_template", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
