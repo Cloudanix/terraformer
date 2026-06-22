@@ -70,7 +70,125 @@ func (g *CloudFrontGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadPublicKeys(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadFieldLevelEncryption(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadContinuousDeploymentPolicies(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadRealtimeLogConfigs(svc); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (g *CloudFrontGenerator) loadPublicKeys(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListPublicKeys(context.TODO(), &cloudfront.ListPublicKeysInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.PublicKeyList == nil {
+			return nil
+		}
+		for _, k := range out.PublicKeyList.Items {
+			g.addSimple(StringValue(k.Id), StringValue(k.Name), "aws_cloudfront_public_key")
+		}
+		marker = out.PublicKeyList.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadFieldLevelEncryption(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListFieldLevelEncryptionConfigs(context.TODO(), &cloudfront.ListFieldLevelEncryptionConfigsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.FieldLevelEncryptionList == nil {
+			break
+		}
+		for _, c := range out.FieldLevelEncryptionList.Items {
+			id := StringValue(c.Id)
+			g.addSimple(id, id, "aws_cloudfront_field_level_encryption_config")
+		}
+		marker = out.FieldLevelEncryptionList.NextMarker
+		if marker == nil {
+			break
+		}
+	}
+	marker = nil
+	for {
+		out, err := svc.ListFieldLevelEncryptionProfiles(context.TODO(), &cloudfront.ListFieldLevelEncryptionProfilesInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.FieldLevelEncryptionProfileList == nil {
+			return nil
+		}
+		for _, p := range out.FieldLevelEncryptionProfileList.Items {
+			g.addSimple(StringValue(p.Id), StringValue(p.Name), "aws_cloudfront_field_level_encryption_profile")
+		}
+		marker = out.FieldLevelEncryptionProfileList.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadContinuousDeploymentPolicies(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListContinuousDeploymentPolicies(context.TODO(), &cloudfront.ListContinuousDeploymentPoliciesInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.ContinuousDeploymentPolicyList == nil {
+			return nil
+		}
+		for _, p := range out.ContinuousDeploymentPolicyList.Items {
+			if p.ContinuousDeploymentPolicy == nil {
+				continue
+			}
+			id := StringValue(p.ContinuousDeploymentPolicy.Id)
+			g.addSimple(id, id, "aws_cloudfront_continuous_deployment_policy")
+		}
+		marker = out.ContinuousDeploymentPolicyList.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadRealtimeLogConfigs(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListRealtimeLogConfigs(context.TODO(), &cloudfront.ListRealtimeLogConfigsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.RealtimeLogConfigs == nil {
+			return nil
+		}
+		for _, c := range out.RealtimeLogConfigs.Items {
+			g.addSimple(StringValue(c.ARN), StringValue(c.Name), "aws_cloudfront_realtime_log_config")
+		}
+		marker = out.RealtimeLogConfigs.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
 }
 
 func (g *CloudFrontGenerator) loadKeyValueStores(svc *cloudfront.Client) error {
