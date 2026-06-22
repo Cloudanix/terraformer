@@ -79,8 +79,34 @@ func (g *NetworkManagerGenerator) InitResources() error {
 		}
 	}
 
+	for pp := networkmanager.NewListPeeringsPaginator(svc, &networkmanager.ListPeeringsInput{}); pp.HasMorePages(); {
+		page, err := pp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, peering := range page.Peerings {
+			if peering.PeeringType == "TRANSIT_GATEWAY" {
+				add(StringValue(peering.PeeringId), "aws_networkmanager_transit_gateway_peering")
+			}
+		}
+	}
+
 	// Per-global-network children (imported by ARN).
 	for _, gnID := range globalNetworkIDs {
+		for tp := networkmanager.NewGetTransitGatewayRegistrationsPaginator(svc, &networkmanager.GetTransitGatewayRegistrationsInput{GlobalNetworkId: aws.String(gnID)}); tp.HasMorePages(); {
+			page, err := tp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, r := range page.TransitGatewayRegistrations {
+				tgwArn := StringValue(r.TransitGatewayArn)
+				if tgwArn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					gnID+","+tgwArn, gnID+"_"+tgwArn, "aws_networkmanager_transit_gateway_registration", "aws", defaultAllowEmptyValues))
+			}
+		}
 		for sp := networkmanager.NewGetSitesPaginator(svc, &networkmanager.GetSitesInput{GlobalNetworkId: aws.String(gnID)}); sp.HasMorePages(); {
 			page, err := sp.NextPage(ctx)
 			if err != nil {

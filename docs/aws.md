@@ -103,6 +103,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_networkmanager_device`
     * `aws_networkmanager_link`
     * `aws_networkmanager_connection`
+    * `aws_networkmanager_transit_gateway_peering`
+    * `aws_networkmanager_transit_gateway_registration`
 *   `rekognition`
     * `aws_rekognition_collection`
     * `aws_rekognition_stream_processor`
