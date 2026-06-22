@@ -48,6 +48,21 @@ func (g *OpenSearchGenerator) InitResources() error {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			name, name, "aws_opensearch_domain", "aws", defaultAllowEmptyValues))
 
+		for pp := opensearch.NewListPackagesForDomainPaginator(svc, &opensearch.ListPackagesForDomainInput{DomainName: domain.DomainName}); pp.HasMorePages(); {
+			ppage, err := pp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, pkg := range ppage.DomainPackageDetailsList {
+				pkgID := StringValue(pkg.PackageID)
+				if pkgID == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					pkgID+"-"+name, pkgID+"_"+name, "aws_opensearch_package_association", "aws", defaultAllowEmptyValues))
+			}
+		}
+
 		cfg, err := svc.DescribeDomainConfig(ctx, &opensearch.DescribeDomainConfigInput{DomainName: domain.DomainName})
 		if err != nil || cfg.DomainConfig == nil {
 			continue
