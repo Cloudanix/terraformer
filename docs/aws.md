@@ -384,6 +384,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_securityhub_finding_aggregator`
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
+    * `aws_servicecatalog_product`
 *   `servicediscovery`
     * `aws_service_discovery_http_namespace`
     * `aws_service_discovery_public_dns_namespace`

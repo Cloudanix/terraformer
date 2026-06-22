@@ -51,6 +51,30 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 				servicecatalogAllowEmptyValues))
 		}
 	}
+
+	pp := servicecatalog.NewSearchProductsAsAdminPaginator(svc, &servicecatalog.SearchProductsAsAdminInput{})
+	for pp.HasMorePages() {
+		page, err := pp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, pvd := range page.ProductViewDetails {
+			if pvd.ProductViewSummary == nil {
+				continue
+			}
+			productID := StringValue(pvd.ProductViewSummary.ProductId)
+			if productID == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				productID,
+				StringValue(pvd.ProductViewSummary.Name),
+				"aws_servicecatalog_product",
+				"aws",
+				servicecatalogAllowEmptyValues))
+		}
+	}
+
 	g.Resources = resources
 	return nil
 }
