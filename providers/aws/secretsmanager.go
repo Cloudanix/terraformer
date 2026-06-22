@@ -49,6 +49,11 @@ func (g *SecretsManagerGenerator) InitResources() error {
 				"aws_secretsmanager_secret",
 				"aws",
 				secretsmanagerAllowEmptyValues))
+			// Rotation config is a singleton on the secret, imported by the secret ARN.
+			if secret.RotationEnabled != nil && *secret.RotationEnabled {
+				resources = append(resources, terraformutils.NewSimpleResource(
+					secretArn, secretName, "aws_secretsmanager_secret_rotation", "aws", secretsmanagerAllowEmptyValues))
+			}
 		}
 	}
 	g.Resources = resources
