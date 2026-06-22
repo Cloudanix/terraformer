@@ -76,15 +76,20 @@ account singletons). No buildable net-new *service* remains.
 
 ## Coverage tally
 
-Current coverage: 234 services / 706 `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = 765 (≈243 documented structural exclusions + ≈522
-buildable per-parent/composite sub-resources, the plan §9 multi-session tail).
+Current coverage: 234 services / **893** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **578** (≈243 documented structural exclusions + the
+remaining buildable per-parent/composite sub-resource tail).
 
 **234 services registered** in `GetSupportedService()` (was 90 at the start of
 this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; §4a P4 done
-across 6 batches. `go build ./...` and `go test ./...` green; `serviceScope`
-assertion passes (incl. the new `route53domains` eastOnly entry); `go mod tidy`
-clean.
+across 6 batches. The §4b deepening tail is being ground down service-by-service
+(coverage 706→893 this session): each batch adds the sub-resources / per-parent
+children / account singletons exposed by an already-registered service's
+SDK List/Describe/Get APIs, with `docs/aws.md` and the gap artifacts refreshed
+and a separate commit per service. `go build ./providers/aws/` and the
+cross-cutting tests (`TestScope`, `TestEveryServiceDocumented`,
+`TestAllServicesInstantiable`) stay green; `serviceScope` assertion passes;
+`gofmt`/`golangci-lint` clean on changed lines.
 
 ## Remaining / deferred
 
