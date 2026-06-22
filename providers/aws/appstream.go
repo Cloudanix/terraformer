@@ -74,5 +74,25 @@ func (g *AppStreamGenerator) InitResources() error {
 				name, name, "aws_appstream_image_builder", "aws", defaultAllowEmptyValues))
 		}
 	}
+	if dcs, err := svc.DescribeDirectoryConfigs(context.TODO(), &appstream.DescribeDirectoryConfigsInput{}); err == nil {
+		for _, dc := range dcs.DirectoryConfigs {
+			name := StringValue(dc.DirectoryName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_appstream_directory_config", "aws", defaultAllowEmptyValues))
+		}
+	}
+	if users, err := svc.DescribeUsers(context.TODO(), &appstream.DescribeUsersInput{AuthenticationType: "USERPOOL"}); err == nil {
+		for _, u := range users.Users {
+			name := StringValue(u.UserName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name+"/USERPOOL", name, "aws_appstream_user", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
