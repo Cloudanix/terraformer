@@ -337,6 +337,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cognito_user`
     * `aws_cognito_user_pool_ui_customization`
     * `aws_cognito_risk_configuration`
+    * `aws_cognito_user_in_group`
 *   `connect`
     * `aws_connect_instance`
     * `aws_connect_queue`

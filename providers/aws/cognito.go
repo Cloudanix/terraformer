@@ -158,6 +158,23 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 				g.Resources = append(g.Resources, terraformutils.NewResource(
 					userPoolID+"/"+name, userPoolID+"_"+name, "aws_cognito_user_group", "aws",
 					map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+				for ug := cognitoidentityprovider.NewListUsersInGroupPaginator(svc, &cognitoidentityprovider.ListUsersInGroupInput{
+					UserPoolId: aws.String(userPoolID), GroupName: aws.String(name),
+				}); ug.HasMorePages(); {
+					ugPage, err := ug.NextPage(context.TODO())
+					if err != nil {
+						break
+					}
+					for _, u := range ugPage.Users {
+						username := StringValue(u.Username)
+						if username == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							userPoolID+"/"+name+"/"+username, userPoolID+"_"+name+"_"+username, "aws_cognito_user_in_group", "aws",
+							map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+					}
+				}
 			}
 		}
 
