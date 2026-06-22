@@ -434,6 +434,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/appconfig v1.44.6
 	github.com/aws/aws-sdk-go-v2/service/appfabric v1.17.3
 	github.com/aws/aws-sdk-go-v2/service/appflow v1.52.1
+	github.com/aws/aws-sdk-go-v2/service/appintegrations v1.38.2
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.43.0
 	github.com/aws/aws-sdk-go-v2/service/applicationinsights v1.35.6
 	github.com/aws/aws-sdk-go-v2/service/appmesh v1.36.4
@@ -443,8 +444,10 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/auditmanager v1.47.1
 	github.com/aws/aws-sdk-go-v2/service/autoscalingplans v1.31.5
 	github.com/aws/aws-sdk-go-v2/service/backup v1.57.6
+	github.com/aws/aws-sdk-go-v2/service/bcmdataexports v1.16.7
 	github.com/aws/aws-sdk-go-v2/service/bedrock v1.64.0
 	github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.56.0
+	github.com/aws/aws-sdk-go-v2/service/chatbot v1.15.6
 	github.com/aws/aws-sdk-go-v2/service/chimesdkvoice v1.29.2
 	github.com/aws/aws-sdk-go-v2/service/cleanrooms v1.45.6
 	github.com/aws/aws-sdk-go-v2/service/cloudsearch v1.33.4
@@ -519,6 +522,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/pcaconnectorad v1.16.7
 	github.com/aws/aws-sdk-go-v2/service/pcs v1.20.6
 	github.com/aws/aws-sdk-go-v2/service/pinpoint v1.40.3
+	github.com/aws/aws-sdk-go-v2/service/pinpointsmsvoicev2 v1.29.7
 	github.com/aws/aws-sdk-go-v2/service/pipes v1.24.6
 	github.com/aws/aws-sdk-go-v2/service/proton v1.40.4
 	github.com/aws/aws-sdk-go-v2/service/qbusiness v1.35.5
@@ -531,6 +535,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/rolesanywhere v1.23.7
 	github.com/aws/aws-sdk-go-v2/service/route53domains v1.36.3
 	github.com/aws/aws-sdk-go-v2/service/route53profiles v1.10.3
+	github.com/aws/aws-sdk-go-v2/service/route53recoverycontrolconfig v1.33.6
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/rum v1.31.8
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5

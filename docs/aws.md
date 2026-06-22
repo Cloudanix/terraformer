@@ -50,8 +50,13 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `bedrock`
     * `aws_bedrock_custom_model`
     * `aws_bedrock_guardrail`
+*   `bcmdataexports`
+    * `aws_bcmdataexports_export`
 *   `bedrockagent`
     * `aws_bedrockagent_agent`
+*   `chatbot`
+    * `aws_chatbot_slack_channel_configuration`
+    * `aws_chatbot_teams_channel_configuration`
 *   `cleanrooms`
     * `aws_cleanrooms_collaboration`
 *   `cloudsearch`
@@ -116,6 +121,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appmesh_mesh`
 *   `apprunner`
     * `aws_apprunner_service`
+*   `appintegrations`
+    * `aws_appintegrations_application`
 *   `appsync`
     * `aws_appsync_graphql_api`
 *   `athena`
@@ -482,6 +489,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_opensearchserverless_collection`
 *   `osis`
     * `aws_osis_pipeline`
+*   `pinpointsmsvoicev2`
+    * `aws_pinpointsmsvoicev2_phone_number`
 *   `pinpoint`
     * `aws_pinpoint_app`
 *   `proton`
@@ -492,6 +501,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_rbin_rule`
 *   `resource-explorer-2`
     * `aws_resourceexplorer2_index`
+*   `verifiedaccess`
+    * `aws_verifiedaccess_instance`
+    * `aws_verifiedaccess_trust_provider`
 *   `verifiedpermissions`
     * `aws_verifiedpermissions_policy_store`
 *   `vpc-lattice`
@@ -624,6 +636,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_query_log`
 *   `route53domains`
     * `aws_route53domains_registered_domain`
+*   `route53recoverycontrolconfig`
+    * `aws_route53recoverycontrolconfig_cluster`
 *   `route53profiles`
     * `aws_route53profiles_profile`
 *   `route53resolver`
