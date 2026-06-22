@@ -65,7 +65,48 @@ func (g *SsmGenerator) InitResources() error {
 	if err := g.addAssociations(svc); err != nil {
 		return err
 	}
+	if err := g.addActivationsAndSyncs(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *SsmGenerator) addActivationsAndSyncs(svc *ssm.Client) error {
+	ctx := context.TODO()
+	for p := ssm.NewDescribeActivationsPaginator(svc, &ssm.DescribeActivationsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.ActivationList {
+			id := StringValue(a.ActivationId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_ssm_activation", "aws", ssmAllowEmptyValues))
+		}
+	}
+	var syncToken *string
+	for {
+		out, err := svc.ListResourceDataSync(ctx, &ssm.ListResourceDataSyncInput{NextToken: syncToken})
+		if err != nil {
+			break
+		}
+		for _, s := range out.ResourceDataSyncItems {
+			name := StringValue(s.SyncName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_ssm_resource_data_sync", "aws", ssmAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		syncToken = out.NextToken
+	}
 	return nil
 }
 
@@ -105,9 +146,43 @@ func (g *SsmGenerator) addMaintenanceWindows(svc *ssm.Client) error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(window.Name), "aws_ssm_maintenance_window", "aws", ssmAllowEmptyValues))
+			g.addMaintenanceWindowChildren(svc, id)
 		}
 	}
 	return nil
+}
+
+func (g *SsmGenerator) addMaintenanceWindowChildren(svc *ssm.Client, windowID string) {
+	ctx := context.TODO()
+	wid := windowID
+	for p := ssm.NewDescribeMaintenanceWindowTargetsPaginator(svc, &ssm.DescribeMaintenanceWindowTargetsInput{WindowId: &wid}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, t := range page.Targets {
+			tid := StringValue(t.WindowTargetId)
+			if tid == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				wid+"/"+tid, wid+"_"+tid, "aws_ssm_maintenance_window_target", "aws", ssmAllowEmptyValues))
+		}
+	}
+	for p := ssm.NewDescribeMaintenanceWindowTasksPaginator(svc, &ssm.DescribeMaintenanceWindowTasksInput{WindowId: &wid}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, t := range page.Tasks {
+			tid := StringValue(t.WindowTaskId)
+			if tid == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				wid+"/"+tid, wid+"_"+tid, "aws_ssm_maintenance_window_task", "aws", ssmAllowEmptyValues))
+		}
+	}
 }
 
 func (g *SsmGenerator) addPatchBaselines(svc *ssm.Client) error {
