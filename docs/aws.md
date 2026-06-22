@@ -339,6 +339,16 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_msk_cluster`
 *   `nacl`
     * `aws_network_acl`
+*   `network-firewall`
+    * `aws_networkfirewall_firewall`
+    * `aws_networkfirewall_firewall_policy`
+    * `aws_networkfirewall_rule_group`
+*   `rolesanywhere`
+    * `aws_rolesanywhere_trust_anchor`
+    * `aws_rolesanywhere_profile`
+*   `securitylake`
+    * `aws_securitylake_data_lake`
+    * `aws_securitylake_subscriber`
 *   `nat`
     * `aws_nat_gateway`
 *   `networkmonitor`
