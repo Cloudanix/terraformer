@@ -65,6 +65,24 @@ func (g *RedshiftServerlessGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_redshiftserverless_workgroup", "aws", defaultAllowEmptyValues))
+			arn := StringValue(wg.WorkgroupArn)
+			if arn == "" {
+				continue
+			}
+			for ul := redshiftserverless.NewListUsageLimitsPaginator(svc, &redshiftserverless.ListUsageLimitsInput{ResourceArn: &arn}); ul.HasMorePages(); {
+				ulPage, err := ul.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, l := range ulPage.UsageLimits {
+					id := StringValue(l.UsageLimitId)
+					if id == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id, id, "aws_redshiftserverless_usage_limit", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
