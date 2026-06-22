@@ -67,9 +67,14 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_apigatewayv2_api`
     * `aws_apigatewayv2_authorizer`
     * `aws_apigatewayv2_model`
+    * `aws_apigatewayv2_integration`
     * `aws_apigatewayv2_route`
     * `aws_apigatewayv2_route_response`
+    * `aws_apigatewayv2_stage`
+    * `aws_apigatewayv2_deployment`
     * `aws_apigatewayv2_vpc_link`
+    * `aws_apigatewayv2_domain_name`
+    * `aws_apigatewayv2_api_mapping`
 *   `application-autoscaling`
     * `aws_appautoscaling_target`
     * `aws_appautoscaling_policy`

@@ -1,4 +1,4 @@
-// Copyright 2020 The Terraformer Authors.
+// Copyright 2019 The Terraformer Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,376 +15,184 @@
 package aws
 
 import (
+	"context"
 	"fmt"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
+	"github.com/aws/aws-sdk-go-v2/service/apigatewayv2"
+
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/aws/aws-sdk-go/aws/session"
-	"github.com/aws/aws-sdk-go/service/apigatewayv2"
 )
 
-var apiGatewayV2AllowEmptyValues = []string{"tags.", "parent_id", "path_part"}
+var apiGatewayV2AllowEmptyValues = []string{"tags."}
 
 type APIGatewayV2Generator struct {
 	AWSService
 }
 
+// InitResources enumerates API Gateway v2 (HTTP/WebSocket) resources via the
+// aws-sdk-go-v2 client. Per-API children use composite import IDs the aws
+// provider expects, e.g. "<api-id>/<route-id>".
 func (g *APIGatewayV2Generator) InitResources() error {
+	config, e := g.generateConfig()
+	if e != nil {
+		return e
+	}
+	svc := apigatewayv2.NewFromConfig(config)
+	ctx := context.TODO()
 
-	svc := apigatewayv2.New(session.Must(session.NewSession()))
-
-	if err := g.loadRestApis(svc); err != nil {
+	apiIDs, err := g.loadAPIs(ctx, svc)
+	if err != nil {
 		return err
 	}
-	if err := g.loadVpcLinks(svc); err != nil {
+	for _, apiID := range apiIDs {
+		if err := g.loadAPIChildren(ctx, svc, apiID); err != nil {
+			return err
+		}
+	}
+	if err := g.loadVPCLinks(ctx, svc); err != nil {
 		return err
 	}
-	return nil
+	return g.loadDomainNames(ctx, svc)
 }
 
-func (g *APIGatewayV2Generator) loadRestApis(svc *apigatewayv2.ApiGatewayV2) error {
-	output, err := svc.GetApis(&apigatewayv2.GetApisInput{})
+func (g *APIGatewayV2Generator) add(id, name, tfType string) {
+	if id == "" {
+		return
+	}
+	g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+		id, name, tfType, "aws", apiGatewayV2AllowEmptyValues))
+}
+
+func (g *APIGatewayV2Generator) loadAPIs(ctx context.Context, svc *apigatewayv2.Client) ([]string, error) {
+	var ids []string
+	var token *string
+	for {
+		out, err := svc.GetApis(ctx, &apigatewayv2.GetApisInput{NextToken: token})
+		if err != nil {
+			return nil, err
+		}
+		for _, api := range out.Items {
+			id := StringValue(api.ApiId)
+			if id == "" {
+				continue
+			}
+			ids = append(ids, id)
+			g.add(id, StringValue(api.Name), "aws_apigatewayv2_api")
+		}
+		if out.NextToken == nil {
+			return ids, nil
+		}
+		token = out.NextToken
+	}
+}
+
+func (g *APIGatewayV2Generator) loadAPIChildren(ctx context.Context, svc *apigatewayv2.Client, apiID string) error {
+	authorizers, err := svc.GetAuthorizers(ctx, &apigatewayv2.GetAuthorizersInput{ApiId: aws.String(apiID)})
 	if err != nil {
-		fmt.Println("Failed to list APIs:", err)
 		return err
 	}
-
-	err = g.processRestApis(svc, output.Items)
-	if err != nil {
-		fmt.Println("Failed to list APIs:", err)
-		return err
+	for _, a := range authorizers.Items {
+		g.add(fmt.Sprintf("%s/%s", apiID, StringValue(a.AuthorizerId)), StringValue(a.Name), "aws_apigatewayv2_authorizer")
 	}
 
-	for output.NextToken != nil {
-		output, err = svc.GetApis(&apigatewayv2.GetApisInput{
-			NextToken: output.NextToken,
+	models, err := svc.GetModels(ctx, &apigatewayv2.GetModelsInput{ApiId: aws.String(apiID)})
+	if err != nil {
+		return err
+	}
+	for _, m := range models.Items {
+		g.add(fmt.Sprintf("%s/%s", apiID, StringValue(m.ModelId)), StringValue(m.Name), "aws_apigatewayv2_model")
+	}
+
+	integrations, err := svc.GetIntegrations(ctx, &apigatewayv2.GetIntegrationsInput{ApiId: aws.String(apiID)})
+	if err != nil {
+		return err
+	}
+	for _, i := range integrations.Items {
+		id := StringValue(i.IntegrationId)
+		g.add(fmt.Sprintf("%s/%s", apiID, id), fmt.Sprintf("%s_%s", apiID, id), "aws_apigatewayv2_integration")
+	}
+
+	routes, err := svc.GetRoutes(ctx, &apigatewayv2.GetRoutesInput{ApiId: aws.String(apiID)})
+	if err != nil {
+		return err
+	}
+	for _, r := range routes.Items {
+		routeID := StringValue(r.RouteId)
+		g.add(fmt.Sprintf("%s/%s", apiID, routeID), fmt.Sprintf("%s_%s", apiID, routeID), "aws_apigatewayv2_route")
+
+		responses, err := svc.GetRouteResponses(ctx, &apigatewayv2.GetRouteResponsesInput{
+			ApiId: aws.String(apiID), RouteId: aws.String(routeID),
 		})
 		if err != nil {
-			fmt.Println("Failed to list APIs:", err)
 			return err
 		}
-		if err = g.processRestApis(svc, output.Items); err != nil {
-			fmt.Println("Failed to list APIs:", err)
-			return err
+		for _, rr := range responses.Items {
+			rrID := StringValue(rr.RouteResponseId)
+			g.add(fmt.Sprintf("%s/%s/%s", apiID, routeID, rrID), fmt.Sprintf("%s_%s", routeID, rrID), "aws_apigatewayv2_route_response")
 		}
 	}
 
-	return nil
-}
-
-func (g *APIGatewayV2Generator) processRestApis(svc *apigatewayv2.ApiGatewayV2, output []*apigatewayv2.Api) error {
-	for _, restAPI := range output {
-		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-			*restAPI.ApiId,
-			*restAPI.ApiId+"_"+*restAPI.Name,
-			"aws_apigatewayv2_api",
-			"aws",
-			apiGatewayV2AllowEmptyValues,
-		))
-		if err := g.loadStages(svc, restAPI.ApiId); err != nil {
-			return err
-		}
-		if err := g.loadModels(svc, restAPI.ApiId); err != nil {
-			return err
-		}
-		if err := g.loadRoutes(svc, restAPI.ApiId); err != nil {
-			return err
-		}
-
-		if err := g.loadAuthorizers(svc, restAPI.ApiId); err != nil {
-			return err
-		}
-
-	}
-	return nil
-}
-
-func (g *APIGatewayV2Generator) loadStages(svc *apigatewayv2.ApiGatewayV2, restAPIID *string) error {
-
-	output, err := svc.GetStages(&apigatewayv2.GetStagesInput{
-		ApiId: restAPIID,
-	})
+	stages, err := svc.GetStages(ctx, &apigatewayv2.GetStagesInput{ApiId: aws.String(apiID)})
 	if err != nil {
 		return err
 	}
-	err = g.processStages(output.Items, restAPIID)
+	for _, s := range stages.Items {
+		stageName := StringValue(s.StageName)
+		g.add(fmt.Sprintf("%s/%s", apiID, stageName), fmt.Sprintf("%s_%s", apiID, stageName), "aws_apigatewayv2_stage")
+	}
+
+	deployments, err := svc.GetDeployments(ctx, &apigatewayv2.GetDeploymentsInput{ApiId: aws.String(apiID)})
 	if err != nil {
 		return err
 	}
+	for _, d := range deployments.Items {
+		depID := StringValue(d.DeploymentId)
+		g.add(fmt.Sprintf("%s/%s", apiID, depID), fmt.Sprintf("%s_%s", apiID, depID), "aws_apigatewayv2_deployment")
+	}
+	return nil
+}
 
-	for output.NextToken != nil {
-		output, err = svc.GetStages(&apigatewayv2.GetStagesInput{
-			NextToken: output.NextToken,
-		})
+func (g *APIGatewayV2Generator) loadVPCLinks(ctx context.Context, svc *apigatewayv2.Client) error {
+	var token *string
+	for {
+		out, err := svc.GetVpcLinks(ctx, &apigatewayv2.GetVpcLinksInput{NextToken: token})
 		if err != nil {
 			return err
 		}
-		err = g.processStages(output.Items, restAPIID)
+		for _, vl := range out.Items {
+			g.add(StringValue(vl.VpcLinkId), StringValue(vl.Name), "aws_apigatewayv2_vpc_link")
+		}
+		if out.NextToken == nil {
+			return nil
+		}
+		token = out.NextToken
+	}
+}
+
+func (g *APIGatewayV2Generator) loadDomainNames(ctx context.Context, svc *apigatewayv2.Client) error {
+	var token *string
+	for {
+		out, err := svc.GetDomainNames(ctx, &apigatewayv2.GetDomainNamesInput{NextToken: token})
 		if err != nil {
 			return err
 		}
-	}
+		for _, d := range out.Items {
+			domain := StringValue(d.DomainName)
+			g.add(domain, domain, "aws_apigatewayv2_domain_name")
 
-	return nil
-}
-
-func (g *APIGatewayV2Generator) processStages(output []*apigatewayv2.Stage, restAPIID *string) error {
-	for _, stage := range output {
-		stageID := *restAPIID + "/" + StringValue(stage.StageName)
-		g.Resources = append(g.Resources, terraformutils.NewResource(
-			stageID,
-			stageID,
-			"aws_api_gateway_stage",
-			"aws",
-			map[string]string{
-				"rest_api_id": *restAPIID,
-				"stage_name":  *stage.StageName,
-			},
-			apiGatewayAllowEmptyValues,
-			map[string]interface{}{},
-		))
-	}
-	return nil
-}
-
-func (g *APIGatewayV2Generator) loadModels(svc *apigatewayv2.ApiGatewayV2, restAPIID *string) error {
-
-	output, err := svc.GetModels(
-		&apigatewayv2.GetModelsInput{
-			ApiId: restAPIID,
-		})
-	if err != nil {
-		return err
-	}
-	err = g.processModels(output.Items, restAPIID)
-	if err != nil {
-		return err
-	}
-
-	for output.NextToken != nil {
-		output, err = svc.GetModels(
-			&apigatewayv2.GetModelsInput{
-				NextToken: output.NextToken,
-			})
-		if err != nil {
-			return err
+			mappings, err := svc.GetApiMappings(ctx, &apigatewayv2.GetApiMappingsInput{DomainName: aws.String(domain)})
+			if err != nil {
+				return err
+			}
+			for _, m := range mappings.Items {
+				mapID := StringValue(m.ApiMappingId)
+				g.add(fmt.Sprintf("%s/%s", mapID, domain), fmt.Sprintf("%s_%s", domain, mapID), "aws_apigatewayv2_api_mapping")
+			}
 		}
-		err = g.processModels(output.Items, restAPIID)
-		if err != nil {
-			return err
+		if out.NextToken == nil {
+			return nil
 		}
+		token = out.NextToken
 	}
-
-	return nil
-}
-
-func (g *APIGatewayV2Generator) processModels(output []*apigatewayv2.Model, restAPIID *string) error {
-	for _, model := range output {
-
-		g.Resources = append(g.Resources, terraformutils.NewResource(
-			*model.ModelId,
-			*model.ModelId,
-			"aws_apigatewayv2_model",
-			"aws",
-			map[string]string{
-				"name":         StringValue(model.Name),
-				"content_type": StringValue(model.ContentType),
-				"schema":       StringValue(model.Schema),
-				"api_id":       StringValue(restAPIID),
-			},
-			apiGatewayAllowEmptyValues,
-			map[string]interface{}{},
-		))
-	}
-	return nil
-}
-
-func (g *APIGatewayV2Generator) loadRoutes(svc *apigatewayv2.ApiGatewayV2, restAPIID *string) error {
-
-	output, err := svc.GetRoutes(
-		&apigatewayv2.GetRoutesInput{
-			ApiId: restAPIID,
-		})
-	if err != nil {
-		return err
-	}
-
-	err = g.processRoutes(svc, output.Items, restAPIID)
-	if err != nil {
-		return err
-	}
-
-	for output.NextToken != nil {
-		output, err := svc.GetRoutes(
-			&apigatewayv2.GetRoutesInput{
-				NextToken: output.NextToken,
-			})
-		if err != nil {
-			return err
-		}
-
-		err = g.processRoutes(svc, output.Items, restAPIID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (g *APIGatewayV2Generator) processRoutes(svc *apigatewayv2.ApiGatewayV2, output []*apigatewayv2.Route, restAPIID *string) error {
-	for _, route := range output {
-
-		g.Resources = append(g.Resources, terraformutils.NewResource(
-			*route.RouteId,
-			*route.RouteId,
-			"aws_apigatewayv2_route",
-			"aws",
-			map[string]string{
-				"api_id":    *restAPIID,
-				"route_key": *route.RouteKey,
-			},
-			apiGatewayAllowEmptyValues,
-			map[string]interface{}{},
-		))
-		if err := g.loadResponses(svc, restAPIID, route.RouteId); err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
-func (g *APIGatewayV2Generator) loadResponses(svc *apigatewayv2.ApiGatewayV2, restAPIID *string, routeID *string) error {
-
-	output, err := svc.GetRouteResponses(
-		&apigatewayv2.GetRouteResponsesInput{
-			ApiId:   restAPIID,
-			RouteId: routeID,
-		})
-
-	if err != nil {
-		return err
-	}
-	err = g.processResponses(output.Items, restAPIID, routeID)
-	if err != nil {
-		return err
-	}
-
-	for output.NextToken != nil {
-		output, err = svc.GetRouteResponses(
-			&apigatewayv2.GetRouteResponsesInput{
-				NextToken: output.NextToken,
-			})
-
-		if err != nil {
-			return err
-		}
-		err = g.processResponses(output.Items, restAPIID, routeID)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-func (g *APIGatewayV2Generator) processResponses(output []*apigatewayv2.RouteResponse, restAPIID *string, routeID *string) error {
-	for _, response := range output {
-
-		g.Resources = append(g.Resources, terraformutils.NewResource(
-			*response.RouteResponseId,
-			*response.RouteResponseId,
-			"aws_apigatewayv2_route_response",
-			"aws",
-			map[string]string{
-				"api_id":             *restAPIID,
-				"route_id":           *routeID,
-				"route_response_key": "$default",
-			},
-			apiGatewayAllowEmptyValues,
-			map[string]interface{}{},
-		))
-
-	}
-	return nil
-}
-
-func (g *APIGatewayV2Generator) loadAuthorizers(svc *apigatewayv2.ApiGatewayV2, restAPIID *string) error {
-
-	output, err := svc.GetAuthorizers(
-		&apigatewayv2.GetAuthorizersInput{
-			ApiId: restAPIID,
-		})
-	if err != nil {
-		return err
-	}
-	g.processAuthorizers(output.Items, restAPIID)
-
-	for output.NextToken != nil {
-		output, err = svc.GetAuthorizers(
-			&apigatewayv2.GetAuthorizersInput{
-				NextToken: output.NextToken,
-			})
-		if err != nil {
-			return err
-		}
-		g.processAuthorizers(output.Items, restAPIID)
-	}
-
-	return nil
-}
-
-func (g *APIGatewayV2Generator) processAuthorizers(output []*apigatewayv2.Authorizer, restAPIID *string) error {
-	for _, authoriser := range output {
-
-		g.Resources = append(g.Resources, terraformutils.NewResource(
-			*authoriser.AuthorizerId,
-			*authoriser.AuthorizerId,
-			"aws_apigatewayv2_authorizer",
-			"aws",
-			map[string]string{
-				"api_id":          *restAPIID,
-				"name":            StringValue(authoriser.Name),
-				"authorizer_type": *authoriser.AuthorizerType,
-			},
-			apiGatewayAllowEmptyValues,
-			map[string]interface{}{},
-		))
-
-	}
-	return nil
-}
-
-func (g *APIGatewayV2Generator) loadVpcLinks(svc *apigatewayv2.ApiGatewayV2) error {
-
-	output, err := svc.GetVpcLinks(
-		&apigatewayv2.GetVpcLinksInput{})
-	if err != nil {
-		return err
-	}
-	g.processVpcLinks(output.Items)
-
-	for output.NextToken != nil {
-		output, err := svc.GetVpcLinks(
-			&apigatewayv2.GetVpcLinksInput{
-				NextToken: output.NextToken,
-			})
-		if err != nil {
-			return err
-		}
-		g.processVpcLinks(output.Items)
-	}
-
-	return nil
-}
-
-func (g *APIGatewayV2Generator) processVpcLinks(output []*apigatewayv2.VpcLink) error {
-	for _, vpcLink := range output {
-
-		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-			*vpcLink.VpcLinkId,
-			*vpcLink.VpcLinkId,
-			"aws_apigatewayv2_vpc_link",
-			"aws",
-			apiGatewayAllowEmptyValues))
-	}
-	return nil
 }

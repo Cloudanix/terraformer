@@ -17,7 +17,6 @@ package aws
 import (
 	"context"
 
-	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/mediaconvert"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -27,10 +26,9 @@ type MediaConvertGenerator struct {
 	AWSService
 }
 
-// InitResources enumerates MediaConvert queues. MediaConvert requires resolving
-// the account-specific endpoint first (DescribeEndpoints) and re-targeting the
-// client at it. The AWS-managed "Default" queue is skipped. Import ID is the
-// queue name.
+// InitResources enumerates MediaConvert queues. The AWS-managed "Default" queue
+// is skipped. Import ID is the queue name. (Account-specific endpoints are no
+// longer required — the regional endpoint is used directly.)
 func (g *MediaConvertGenerator) InitResources() error {
 	config, e := g.generateConfig()
 	if e != nil {
@@ -38,17 +36,6 @@ func (g *MediaConvertGenerator) InitResources() error {
 	}
 	svc := mediaconvert.NewFromConfig(config)
 	ctx := context.TODO()
-
-	endpoints, err := svc.DescribeEndpoints(ctx, &mediaconvert.DescribeEndpointsInput{})
-	if err != nil {
-		return err
-	}
-	if len(endpoints.Endpoints) > 0 && endpoints.Endpoints[0].Url != nil {
-		url := StringValue(endpoints.Endpoints[0].Url)
-		svc = mediaconvert.NewFromConfig(config, func(o *mediaconvert.Options) {
-			o.BaseEndpoint = aws.String(url)
-		})
-	}
 
 	p := mediaconvert.NewListQueuesPaginator(svc, &mediaconvert.ListQueuesInput{})
 	for p.HasMorePages() {

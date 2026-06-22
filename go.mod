@@ -374,6 +374,7 @@ require (
 	github.com/Myra-Security-GmbH/signature v1.0.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/aws/aws-sdk-go v1.44.122 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/cncf/xds/go v0.0.0-20240905190251-b4127c9b8d78 // indirect
@@ -426,9 +427,9 @@ require (
 
 require (
 	github.com/IBM/continuous-delivery-go-sdk/v2 v2.0.2
-	github.com/aws/aws-sdk-go v1.44.122
 	github.com/aws/aws-sdk-go-v2/service/acmpca v1.47.6
 	github.com/aws/aws-sdk-go-v2/service/amplify v1.39.4
+	github.com/aws/aws-sdk-go-v2/service/apigatewayv2 v1.35.6
 	github.com/aws/aws-sdk-go-v2/service/appconfig v1.44.6
 	github.com/aws/aws-sdk-go-v2/service/appflow v1.52.1
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.43.0
