@@ -42,6 +42,25 @@ func (g *AppSyncGenerator) InitResources() error {
 			g.loadAppSyncChildren(svc, id)
 			g.loadAppSyncTypesAndResolvers(svc, id)
 			g.loadAppSyncAPICache(svc, id)
+			saInput := &appsync.ListSourceApiAssociationsInput{ApiId: aws.String(id)}
+			for {
+				saOut, err := svc.ListSourceApiAssociations(context.TODO(), saInput)
+				if err != nil {
+					break
+				}
+				for _, assoc := range saOut.SourceApiAssociationSummaries {
+					assocID := StringValue(assoc.AssociationId)
+					if assocID == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						assocID+","+id, assocID+"_"+id, "aws_appsync_source_api_association", "aws", defaultAllowEmptyValues))
+				}
+				if saOut.NextToken == nil {
+					break
+				}
+				saInput.NextToken = saOut.NextToken
+			}
 		}
 		nextToken = apis.NextToken
 		if nextToken == nil {
@@ -107,6 +126,11 @@ func (g *AppSyncGenerator) loadAppSyncDomainNames(svc *appsync.Client) {
 		}
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			name, name, "aws_appsync_domain_name", "aws", defaultAllowEmptyValues))
+		if assoc, err := svc.GetApiAssociation(context.TODO(), &appsync.GetApiAssociationInput{DomainName: d.DomainName}); err == nil &&
+			assoc.ApiAssociation != nil && StringValue(assoc.ApiAssociation.ApiId) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_appsync_domain_name_api_association", "aws", defaultAllowEmptyValues))
+		}
 	}
 }
 
