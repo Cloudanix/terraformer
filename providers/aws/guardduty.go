@@ -72,6 +72,24 @@ func (g *GuardDutyGenerator) InitResources() error {
 				id, id, "aws_guardduty_malware_protection_plan", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for _, detectorID := range detectorIDs {
+		if _, err := svc.DescribeOrganizationConfiguration(ctx, &guardduty.DescribeOrganizationConfigurationInput{DetectorId: aws.String(detectorID)}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				detectorID, detectorID, "aws_guardduty_organization_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	if admins, err := svc.ListOrganizationAdminAccounts(ctx, &guardduty.ListOrganizationAdminAccountsInput{}); err == nil {
+		for _, a := range admins.AdminAccounts {
+			id := StringValue(a.AdminAccountId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_guardduty_organization_admin_account", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
