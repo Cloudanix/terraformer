@@ -66,15 +66,25 @@ remaining §4a service — fetch its module, then follow the §5 recipe.
 Every change: one focused commit + docs/aws.md + serviceScope entry where new.
 `go build ./...` and `go test ./...` green.
 
+## Coverage tally
+
+**192 services registered** in `GetSupportedService()` (was 90 at the start of
+this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; most of §4a
+P4 done across 5 batches (guardduty…macie2…shield…athena…sagemaker…location).
+`go build ./...` and `go test ./...` green; `serviceScope` assertion passes;
+`go mod tidy` clean.
+
 ## Remaining / deferred
 
-### §4a remaining services — NOW BUILDABLE (use the workaround above)
-P3/P4 long tail not yet built: lakeformation, timestream-write,
-timestream-influxdb, keyspaces, opensearchserverless, redshift-serverless,
-docdb-elastic, sagemaker, quicksight, pipes, scheduler, schemas, mwaa,
-emr-serverless, emr-containers, mskconnect, kinesisanalyticsv2, kinesisvideo,
-+ the P4 list in plan.md §4a. Each: `getmod.sh` its module, then §5 recipe.
-No longer blocked — just not yet done.
+### §4a remaining P4 niche services — NOT yet built (mechanical, use workaround)
+chime-sdk-voice, cloudfront-keyvaluestore, codestar-notifications,
+codeguru-profiler, controltower, deadline, devopsguru, groundstation,
+iotanalytics, iotwireless, mediaconvert (needs per-account endpoint lookup),
+quicksight, docdb-elastic, timestream-influxdb, route53domains (us-east-1 /
+needs eastOnly or fixed-region scope), route53-recovery-*, s3control,
+s3outposts, serverlessrepo, ssm-sap, appautoscaling-plans. Each: `getmod.sh`
+its module, then the §5 recipe — no longer blocked, just lower-value tail per
+plan §11 ("decide per service before building").
 
 ### §3 authoritative gap list — runnable now
 `terraform init` + `terraform providers schema -json` can run via the same
