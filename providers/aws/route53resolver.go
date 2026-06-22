@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/route53resolver"
 	"github.com/aws/aws-sdk-go-v2/service/route53resolver/types"
 )
@@ -108,16 +109,66 @@ func (g *Route53ResolverGenerator) InitResources() error {
 			func(r types.ResolverDnssecConfig) string { return StringValue(r.Id) })
 	}
 
+	var ruleGroupIDs []string
 	firewallRuleGroups := route53resolver.NewListFirewallRuleGroupsPaginator(svc, &route53resolver.ListFirewallRuleGroupsInput{})
 	for firewallRuleGroups.HasMorePages() {
 		page, err := firewallRuleGroups.NextPage(ctx)
 		if err != nil {
 			return err
 		}
+		for _, rg := range page.FirewallRuleGroups {
+			ruleGroupIDs = append(ruleGroupIDs, StringValue(rg.Id))
+		}
 		g.Resources = appendSimpleResources(g.Resources, page.FirewallRuleGroups, "aws_route53_resolver_firewall_rule_group",
 			defaultAllowEmptyValues,
 			func(r types.FirewallRuleGroupMetadata) string { return StringValue(r.Id) },
 			func(r types.FirewallRuleGroupMetadata) string { return StringValue(r.Id) })
+	}
+
+	for _, groupID := range ruleGroupIDs {
+		if groupID == "" {
+			continue
+		}
+		rules := route53resolver.NewListFirewallRulesPaginator(svc, &route53resolver.ListFirewallRulesInput{FirewallRuleGroupId: &groupID})
+		for rules.HasMorePages() {
+			page, err := rules.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, r := range page.FirewallRules {
+				domainListID := StringValue(r.FirewallDomainListId)
+				if domainListID == "" {
+					continue
+				}
+				id := groupID + ":" + domainListID
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_route53_resolver_firewall_rule", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	firewallConfigs := route53resolver.NewListFirewallConfigsPaginator(svc, &route53resolver.ListFirewallConfigsInput{})
+	for firewallConfigs.HasMorePages() {
+		page, err := firewallConfigs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.FirewallConfigs, "aws_route53_resolver_firewall_config",
+			defaultAllowEmptyValues,
+			func(r types.FirewallConfig) string { return StringValue(r.Id) },
+			func(r types.FirewallConfig) string { return StringValue(r.Id) })
+	}
+
+	resolverConfigs := route53resolver.NewListResolverConfigsPaginator(svc, &route53resolver.ListResolverConfigsInput{})
+	for resolverConfigs.HasMorePages() {
+		page, err := resolverConfigs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.ResolverConfigs, "aws_route53_resolver_config",
+			defaultAllowEmptyValues,
+			func(r types.ResolverConfig) string { return StringValue(r.Id) },
+			func(r types.ResolverConfig) string { return StringValue(r.Id) })
 	}
 
 	firewallDomainLists := route53resolver.NewListFirewallDomainListsPaginator(svc, &route53resolver.ListFirewallDomainListsInput{})

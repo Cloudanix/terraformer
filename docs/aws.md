@@ -828,6 +828,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_resolver_firewall_rule_group`
     * `aws_route53_resolver_firewall_domain_list`
     * `aws_route53_resolver_firewall_rule_group_association`
+    * `aws_route53_resolver_firewall_rule`
+    * `aws_route53_resolver_firewall_config`
+    * `aws_route53_resolver_config`
 *   `route_table`
     * `aws_route_table`
     * `aws_main_route_table_association`
