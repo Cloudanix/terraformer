@@ -138,6 +138,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appautoscaling_scheduled_action`
 *   `appconfig`
     * `aws_appconfig_application`
+    * `aws_appconfig_environment`
+    * `aws_appconfig_configuration_profile`
+    * `aws_appconfig_hosted_configuration_version`
+    * `aws_appconfig_deployment`
+    * `aws_appconfig_deployment_strategy`
+    * `aws_appconfig_extension`
+    * `aws_appconfig_extension_association`
 *   `appflow`
     * `aws_appflow_flow`
 *   `appstream`
