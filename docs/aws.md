@@ -331,6 +331,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `dynamodb`
     * `aws_dynamodb_table`
     * `aws_dynamodb_global_table`
+    * `aws_dynamodb_kinesis_streaming_destination`
+    * `aws_dynamodb_contributor_insights`
 *   `ebs`
     * `aws_ebs_volume`
     * `aws_volume_attachment`

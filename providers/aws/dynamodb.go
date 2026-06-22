@@ -33,6 +33,7 @@ func (g *DynamoDbGenerator) InitResources() error {
 		return e
 	}
 	svc := dynamodb.NewFromConfig(config)
+	var tableNames []string
 	p := dynamodb.NewListTablesPaginator(svc, &dynamodb.ListTablesInput{})
 	for p.HasMorePages() {
 		page, e := p.NextPage(context.TODO())
@@ -40,6 +41,7 @@ func (g *DynamoDbGenerator) InitResources() error {
 			return e
 		}
 		for _, tableName := range page.TableNames {
+			tableNames = append(tableNames, tableName)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				tableName,
 				tableName,
@@ -47,6 +49,26 @@ func (g *DynamoDbGenerator) InitResources() error {
 				"aws",
 				dynamodbAllowEmptyValues,
 			))
+		}
+	}
+
+	for _, tableName := range tableNames {
+		if out, err := svc.DescribeKinesisStreamingDestination(context.TODO(),
+			&dynamodb.DescribeKinesisStreamingDestinationInput{TableName: &tableName}); err == nil {
+			for _, d := range out.KinesisDataStreamDestinations {
+				streamArn := StringValue(d.StreamArn)
+				if streamArn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					tableName+","+streamArn, tableName, "aws_dynamodb_kinesis_streaming_destination", "aws", dynamodbAllowEmptyValues))
+			}
+		}
+		if out, err := svc.DescribeContributorInsights(context.TODO(),
+			&dynamodb.DescribeContributorInsightsInput{TableName: &tableName}); err == nil &&
+			out.ContributorInsightsStatus != "" && out.ContributorInsightsStatus != "DISABLED" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				tableName, tableName, "aws_dynamodb_contributor_insights", "aws", dynamodbAllowEmptyValues))
 		}
 	}
 
