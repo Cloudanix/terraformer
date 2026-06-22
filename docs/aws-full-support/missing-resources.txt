@@ -144,10 +144,7 @@ aws_dynamodb_resource_policy
 aws_dynamodb_table_export
 aws_dynamodb_table_item
 aws_dynamodb_tag
-aws_ebs_default_kms_key
-aws_ebs_encryption_by_default
 aws_ebs_fast_snapshot_restore
-aws_ebs_snapshot_block_public_access
 aws_ebs_snapshot_copy
 aws_ebs_snapshot_import
 aws_ec2_availability_zone_group

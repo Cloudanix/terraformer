@@ -418,6 +418,9 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `ebs`
     * `aws_ebs_volume`
     * `aws_volume_attachment`
+    * `aws_ebs_encryption_by_default`
+    * `aws_ebs_default_kms_key`
+    * `aws_ebs_snapshot_block_public_access`
 *   `ec2_instance`
     * `aws_instance`
     * `aws_ami`

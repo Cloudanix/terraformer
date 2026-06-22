@@ -52,6 +52,24 @@ func (g *EbsGenerator) InitResources() error {
 			})
 		}
 	}
+	// Account/region-level EBS settings. Their Terraform import ID is the region.
+	region := config.Region
+	if region != "" {
+		if enc, err := svc.GetEbsEncryptionByDefault(context.TODO(), &ec2.GetEbsEncryptionByDefaultInput{}); err == nil && enc.EbsEncryptionByDefault != nil && *enc.EbsEncryptionByDefault {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				region, region, "aws_ebs_encryption_by_default", "aws", ebsAllowEmptyValues))
+		}
+		if kms, err := svc.GetEbsDefaultKmsKeyId(context.TODO(), &ec2.GetEbsDefaultKmsKeyIdInput{}); err == nil && StringValue(kms.KmsKeyId) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				region, region, "aws_ebs_default_kms_key", "aws", ebsAllowEmptyValues))
+		}
+		if bpa, err := svc.GetSnapshotBlockPublicAccessState(context.TODO(), &ec2.GetSnapshotBlockPublicAccessStateInput{}); err == nil &&
+			bpa.State != "" && bpa.State != types.SnapshotBlockPublicAccessStateUnblocked {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				region, region, "aws_ebs_snapshot_block_public_access", "aws", ebsAllowEmptyValues))
+		}
+	}
+
 	p := ec2.NewDescribeVolumesPaginator(svc, &ec2.DescribeVolumesInput{
 		Filters: filters,
 	})
