@@ -105,6 +105,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `rekognition`
     * `aws_rekognition_collection`
     * `aws_rekognition_stream_processor`
+    * `aws_rekognition_project`
 *   `resiliencehub`
     * `aws_resiliencehub_app`
 *   `amplify`

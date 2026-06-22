@@ -66,5 +66,20 @@ func (g *RekognitionGenerator) InitResources() error {
 				name, name, "aws_rekognition_stream_processor", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for projects := rekognition.NewDescribeProjectsPaginator(svc, &rekognition.DescribeProjectsInput{}); projects.HasMorePages(); {
+		page, err := projects.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, p := range page.ProjectDescriptions {
+			arn := StringValue(p.ProjectArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_rekognition_project", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
