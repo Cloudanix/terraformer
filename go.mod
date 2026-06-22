@@ -438,6 +438,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/athena v1.58.4
 	github.com/aws/aws-sdk-go-v2/service/backup v1.57.6
 	github.com/aws/aws-sdk-go-v2/service/codeartifact v1.39.7
+	github.com/aws/aws-sdk-go-v2/service/codegurureviewer v1.35.5
 	github.com/aws/aws-sdk-go-v2/service/codestarconnections v1.36.5
 	github.com/aws/aws-sdk-go-v2/service/connect v1.177.0
 	github.com/aws/aws-sdk-go-v2/service/customerprofiles v1.62.5
@@ -452,6 +453,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
 	github.com/aws/aws-sdk-go-v2/service/emrcontainers v1.41.6
 	github.com/aws/aws-sdk-go-v2/service/emrserverless v1.42.2
+	github.com/aws/aws-sdk-go-v2/service/finspace v1.34.8
 	github.com/aws/aws-sdk-go-v2/service/fis v1.38.6
 	github.com/aws/aws-sdk-go-v2/service/fms v1.45.6
 	github.com/aws/aws-sdk-go-v2/service/fsx v1.66.6
@@ -459,11 +461,15 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4
 	github.com/aws/aws-sdk-go-v2/service/globalaccelerator v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/grafana v1.36.4
+	github.com/aws/aws-sdk-go-v2/service/greengrassv2 v1.43.8
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.79.3
 	github.com/aws/aws-sdk-go-v2/service/healthlake v1.39.0
 	github.com/aws/aws-sdk-go-v2/service/imagebuilder v1.55.6
 	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.49.2
 	github.com/aws/aws-sdk-go-v2/service/internetmonitor v1.27.6
+	github.com/aws/aws-sdk-go-v2/service/iotevents v1.34.2
+	github.com/aws/aws-sdk-go-v2/service/iotsitewise v1.53.0
+	github.com/aws/aws-sdk-go-v2/service/iottwinmaker v1.30.5
 	github.com/aws/aws-sdk-go-v2/service/ivs v1.52.1
 	github.com/aws/aws-sdk-go-v2/service/kafkaconnect v1.31.8
 	github.com/aws/aws-sdk-go-v2/service/kendra v1.61.3
@@ -474,6 +480,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/lexmodelsv2 v1.62.4
 	github.com/aws/aws-sdk-go-v2/service/licensemanager v1.38.4
 	github.com/aws/aws-sdk-go-v2/service/lightsail v1.56.1
+	github.com/aws/aws-sdk-go-v2/service/location v1.52.8
 	github.com/aws/aws-sdk-go-v2/service/m2 v1.27.6
 	github.com/aws/aws-sdk-go-v2/service/macie2 v1.52.3
 	github.com/aws/aws-sdk-go-v2/service/mediapackagev2 v1.40.0
@@ -487,6 +494,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/opensearch v1.72.0
 	github.com/aws/aws-sdk-go-v2/service/opensearchserverless v1.32.1
 	github.com/aws/aws-sdk-go-v2/service/osis v1.22.7
+	github.com/aws/aws-sdk-go-v2/service/paymentcryptography v1.31.1
+	github.com/aws/aws-sdk-go-v2/service/pcaconnectorad v1.16.7
 	github.com/aws/aws-sdk-go-v2/service/pcs v1.20.6
 	github.com/aws/aws-sdk-go-v2/service/pinpoint v1.40.3
 	github.com/aws/aws-sdk-go-v2/service/pipes v1.24.6
@@ -505,6 +514,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/scheduler v1.18.7
 	github.com/aws/aws-sdk-go-v2/service/schemas v1.35.6
 	github.com/aws/aws-sdk-go-v2/service/securitylake v1.26.2
+	github.com/aws/aws-sdk-go-v2/service/servicecatalogappregistry v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/servicequotas v1.35.7
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.62.4

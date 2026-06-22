@@ -138,6 +138,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codedeploy_deployment_config`
 *   `codeartifact`
     * `aws_codeartifact_domain`
+*   `codeguru-reviewer`
+    * `aws_codegurureviewer_repository_association`
 *   `codestar-connections`
     * `aws_codestarconnections_connection`
 *   `codepipeline`
@@ -268,9 +270,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_kinesis_firehose_delivery_stream`
 *   `fis`
     * `aws_fis_experiment_template`
+*   `finspace`
+    * `aws_finspace_kx_environment`
 *   `gamelift`
     * `aws_gamelift_fleet`
     * `aws_gamelift_build`
+*   `greengrassv2`
+    * `aws_greengrassv2_component_version`
 *   `fms`
     * `aws_fms_policy`
 *   `fsx`
@@ -351,8 +357,20 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_kendra_index`
 *   `lexv2-models`
     * `aws_lexv2models_bot`
+*   `iotevents`
+    * `aws_iotevents_detector_model`
+*   `iotsitewise`
+    * `aws_iotsitewise_asset_model`
+*   `iottwinmaker`
+    * `aws_iottwinmaker_workspace`
 *   `license-manager`
     * `aws_licensemanager_license_configuration`
+*   `location`
+    * `aws_location_map`
+    * `aws_location_place_index`
+    * `aws_location_tracker`
+    * `aws_location_geofence_collection`
+    * `aws_location_route_calculator`
 *   `lightsail`
     * `aws_lightsail_instance`
 *   `m2`
@@ -418,6 +436,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpclattice_service_network`
 *   `wellarchitected`
     * `aws_wellarchitected_workload`
+*   `payment-cryptography`
+    * `aws_paymentcryptography_key`
+*   `pca-connector-ad`
+    * `aws_pcaconnectorad_connector`
 *   `pcs`
     * `aws_pcs_cluster`
 *   `pipes`
@@ -575,6 +597,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
     * `aws_servicecatalog_product`
+*   `servicecatalog-appregistry`
+    * `aws_servicecatalogappregistry_application`
 *   `servicediscovery`
     * `aws_service_discovery_http_namespace`
     * `aws_service_discovery_public_dns_namespace`
