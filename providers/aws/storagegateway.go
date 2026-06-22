@@ -35,16 +35,56 @@ func (g *StorageGatewayGenerator) InitResources() error {
 	}
 	svc := storagegateway.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var gatewayArns []string
 	p := storagegateway.NewListGatewaysPaginator(svc, &storagegateway.ListGatewaysInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
+		}
+		for _, gw := range page.Gateways {
+			gatewayArns = append(gatewayArns, StringValue(gw.GatewayARN))
 		}
 		g.Resources = appendSimpleResources(g.Resources, page.Gateways, "aws_storagegateway_gateway",
 			defaultAllowEmptyValues,
 			func(gw types.GatewayInfo) string { return StringValue(gw.GatewayARN) },
 			func(gw types.GatewayInfo) string { return StringValue(gw.GatewayName) })
+	}
+
+	for _, gwArn := range gatewayArns {
+		arn := gwArn
+		if arn == "" {
+			continue
+		}
+		// Per-gateway config singletons; import ID is the gateway ARN.
+		if _, err := svc.DescribeCache(ctx, &storagegateway.DescribeCacheInput{GatewayARN: &arn}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_storagegateway_cache", "aws", defaultAllowEmptyValues))
+		}
+		if _, err := svc.DescribeUploadBuffer(ctx, &storagegateway.DescribeUploadBufferInput{GatewayARN: &arn}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_storagegateway_upload_buffer", "aws", defaultAllowEmptyValues))
+		}
+		if _, err := svc.DescribeWorkingStorage(ctx, &storagegateway.DescribeWorkingStorageInput{GatewayARN: &arn}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_storagegateway_working_storage", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for fsa := storagegateway.NewListFileSystemAssociationsPaginator(svc, &storagegateway.ListFileSystemAssociationsInput{}); fsa.HasMorePages(); {
+		page, err := fsa.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, f := range page.FileSystemAssociationSummaryList {
+			arn := StringValue(f.FileSystemAssociationARN)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_storagegateway_file_system_association", "aws", defaultAllowEmptyValues))
+		}
 	}
 
 	pools := storagegateway.NewListTapePoolsPaginator(svc, &storagegateway.ListTapePoolsInput{})
