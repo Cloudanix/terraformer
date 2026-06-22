@@ -68,6 +68,21 @@ func (g *CostExplorerGenerator) InitResources() error {
 		}
 	}
 
+	for ct := costexplorer.NewListCostAllocationTagsPaginator(svc, &costexplorer.ListCostAllocationTagsInput{}); ct.HasMorePages(); {
+		page, err := ct.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, t := range page.CostAllocationTags {
+			key := StringValue(t.TagKey)
+			if key == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				key, key, "aws_ce_cost_allocation_tag", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	categories := costexplorer.NewListCostCategoryDefinitionsPaginator(svc, &costexplorer.ListCostCategoryDefinitionsInput{})
 	for categories.HasMorePages() {
 		page, err := categories.NextPage(ctx)
