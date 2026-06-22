@@ -106,6 +106,7 @@ var serviceScope = map[string]regionScope{
 	"glue":                    scopeRegional,
 	"guardduty":               scopeRegional,
 	"identitystore":           scopeRegional,
+	"inspector2":              scopeRegional,
 	"igw":                     scopeRegional,
 	"iot":                     scopeRegional,
 	"kinesis":                 scopeRegional,

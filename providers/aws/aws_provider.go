@@ -300,6 +300,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"iam":                     &AwsFacade{service: &IamGenerator{}},
 		"identitystore":           &AwsFacade{service: &IdentityStoreGenerator{}},
 		"igw":                     &AwsFacade{service: &IgwGenerator{}},
+		"inspector2":              &AwsFacade{service: &Inspector2Generator{}},
 		"iot":                     &AwsFacade{service: &IotGenerator{}},
 		"kinesis":                 &AwsFacade{service: &KinesisGenerator{}},
 		"kms":                     &AwsFacade{service: &KmsGenerator{}},
