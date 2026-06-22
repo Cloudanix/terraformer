@@ -48,6 +48,23 @@ func (g *MediaLiveGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	multiplexes := medialive.NewListMultiplexesPaginator(svc, &medialive.ListMultiplexesInput{})
+	for multiplexes.HasMorePages() {
+		page, err := multiplexes.NextPage(context.TODO())
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		for _, m := range page.Multiplexes {
+			id := StringValue(m.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_medialive_multiplex", "aws", medialiveAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 

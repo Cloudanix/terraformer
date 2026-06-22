@@ -40,7 +40,27 @@ func (g *BeanstalkGenerator) InitResources() error {
 		return err
 	}
 	err = g.addEnvironments(client)
-	return err
+	if err != nil {
+		return err
+	}
+	return g.addApplicationVersions(client)
+}
+
+func (g *BeanstalkGenerator) addApplicationVersions(client *elasticbeanstalk.Client) error {
+	response, err := client.DescribeApplicationVersions(context.TODO(), &elasticbeanstalk.DescribeApplicationVersionsInput{})
+	if err != nil {
+		return err
+	}
+	for _, v := range response.ApplicationVersions {
+		app := StringValue(v.ApplicationName)
+		label := StringValue(v.VersionLabel)
+		if app == "" || label == "" {
+			continue
+		}
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			app+"/"+label, app+"_"+label, "aws_elastic_beanstalk_application_version", "aws", beanstalkAllowEmptyValues))
+	}
+	return nil
 }
 
 func (g *BeanstalkGenerator) addApplications(client *elasticbeanstalk.Client) error {

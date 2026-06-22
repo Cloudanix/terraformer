@@ -170,7 +170,9 @@ aws_db_snapshot
 aws_db_subnet_group
 aws_default_network_acl
 aws_detective_graph
+aws_devicefarm_instance_profile
 aws_devicefarm_project
+aws_devicefarm_test_grid_project
 aws_directory_service_directory
 aws_dlm_lifecycle_policy
 aws_dms_certificate
@@ -236,6 +238,7 @@ aws_eks_fargate_profile
 aws_eks_identity_provider_config
 aws_eks_node_group
 aws_elastic_beanstalk_application
+aws_elastic_beanstalk_application_version
 aws_elastic_beanstalk_environment
 aws_elasticache_cluster
 aws_elasticache_global_replication_group
@@ -409,6 +412,7 @@ aws_media_store_container
 aws_medialive_channel
 aws_medialive_input
 aws_medialive_input_security_group
+aws_medialive_multiplex
 aws_memorydb_cluster
 aws_mq_broker
 aws_mq_configuration

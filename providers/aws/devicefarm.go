@@ -51,6 +51,31 @@ func (g *DeviceFarmGenerator) InitResources() error {
 				devicefarmAllowEmptyValues))
 		}
 	}
+	if profiles, err := svc.ListInstanceProfiles(context.TODO(), &devicefarm.ListInstanceProfilesInput{}); err == nil {
+		for _, ip := range profiles.InstanceProfiles {
+			arn := StringValue(ip.Arn)
+			if arn == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				arn, StringValue(ip.Name), "aws_devicefarm_instance_profile", "aws", devicefarmAllowEmptyValues))
+		}
+	}
+	tgp := devicefarm.NewListTestGridProjectsPaginator(svc, &devicefarm.ListTestGridProjectsInput{})
+	for tgp.HasMorePages() {
+		page, err := tgp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, t := range page.TestGridProjects {
+			arn := StringValue(t.Arn)
+			if arn == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				arn, StringValue(t.Name), "aws_devicefarm_test_grid_project", "aws", devicefarmAllowEmptyValues))
+		}
+	}
 	g.Resources = resources
 	return nil
 }

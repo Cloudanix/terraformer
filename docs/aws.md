@@ -284,6 +284,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_detective_graph`
 *   `devicefarm`
     * `aws_devicefarm_project`
+    * `aws_devicefarm_instance_profile`
+    * `aws_devicefarm_test_grid_project`
 *   `dlm`
     * `aws_dlm_lifecycle_policy`
 *   `dms`
@@ -385,6 +387,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_elasticache_global_replication_group`
 *   `elastic_beanstalk`
     * `aws_elastic_beanstalk_application`
+    * `aws_elastic_beanstalk_application_version`
     * `aws_elastic_beanstalk_environment`
 *   `elb`
     * `aws_elb`
@@ -641,6 +644,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `mediaconvert`
     * `aws_media_convert_queue`
 *   `medialive`
+    * `aws_medialive_multiplex`
     * `aws_medialive_channel`
     * `aws_medialive_input`
     * `aws_medialive_input_security_group`
