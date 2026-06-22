@@ -74,5 +74,66 @@ func (g *QuickSightGenerator) InitResources() error {
 				accountID+","+id, id, "aws_quicksight_data_source", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	add := func(id, tfType string) {
+		if id != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID+","+id, id, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+	for p := quicksight.NewListAnalysesPaginator(svc, &quicksight.ListAnalysesInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.AnalysisSummaryList {
+			add(StringValue(x.AnalysisId), "aws_quicksight_analysis")
+		}
+	}
+	for p := quicksight.NewListDashboardsPaginator(svc, &quicksight.ListDashboardsInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.DashboardSummaryList {
+			add(StringValue(x.DashboardId), "aws_quicksight_dashboard")
+		}
+	}
+	for p := quicksight.NewListTemplatesPaginator(svc, &quicksight.ListTemplatesInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.TemplateSummaryList {
+			add(StringValue(x.TemplateId), "aws_quicksight_template")
+		}
+	}
+	for p := quicksight.NewListThemesPaginator(svc, &quicksight.ListThemesInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.ThemeSummaryList {
+			add(StringValue(x.ThemeId), "aws_quicksight_theme")
+		}
+	}
+	for p := quicksight.NewListFoldersPaginator(svc, &quicksight.ListFoldersInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.FolderSummaryList {
+			add(StringValue(x.FolderId), "aws_quicksight_folder")
+		}
+	}
+	for p := quicksight.NewListVPCConnectionsPaginator(svc, &quicksight.ListVPCConnectionsInput{AwsAccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range page.VPCConnectionSummaries {
+			add(StringValue(x.VPCConnectionId), "aws_quicksight_vpc_connection")
+		}
+	}
 	return nil
 }

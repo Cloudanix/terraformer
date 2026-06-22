@@ -441,8 +441,14 @@ aws_prometheus_workspace
 aws_proton_environment
 aws_qbusiness_application
 aws_qldb_ledger
+aws_quicksight_analysis
+aws_quicksight_dashboard
 aws_quicksight_data_set
 aws_quicksight_data_source
+aws_quicksight_folder
+aws_quicksight_template
+aws_quicksight_theme
+aws_quicksight_vpc_connection
 aws_ram_resource_share
 aws_rbin_rule
 aws_rds_cluster

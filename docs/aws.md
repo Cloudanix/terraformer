@@ -681,6 +681,12 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `quicksight`
     * `aws_quicksight_data_set`
     * `aws_quicksight_data_source`
+    * `aws_quicksight_analysis`
+    * `aws_quicksight_dashboard`
+    * `aws_quicksight_template`
+    * `aws_quicksight_theme`
+    * `aws_quicksight_folder`
+    * `aws_quicksight_vpc_connection`
 *   `redshift-serverless`
     * `aws_redshiftserverless_namespace`
     * `aws_redshiftserverless_workgroup`

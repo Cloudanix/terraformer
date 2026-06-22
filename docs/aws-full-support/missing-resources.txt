@@ -555,9 +555,6 @@ aws_prometheus_scraper
 aws_proxy_protocol_policy
 aws_qldb_stream
 aws_quicksight_account_subscription
-aws_quicksight_analysis
-aws_quicksight_dashboard
-aws_quicksight_folder
 aws_quicksight_folder_membership
 aws_quicksight_group
 aws_quicksight_group_membership
@@ -565,11 +562,8 @@ aws_quicksight_iam_policy_assignment
 aws_quicksight_ingestion
 aws_quicksight_namespace
 aws_quicksight_refresh_schedule
-aws_quicksight_template
 aws_quicksight_template_alias
-aws_quicksight_theme
 aws_quicksight_user
-aws_quicksight_vpc_connection
 aws_ram_principal_association
 aws_ram_resource_association
 aws_ram_resource_share_accepter
