@@ -539,6 +539,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/verifiedpermissions v1.34.6
 	github.com/aws/aws-sdk-go-v2/service/vpclattice v1.22.2
 	github.com/aws/aws-sdk-go-v2/service/wellarchitected v1.40.6
+	github.com/aws/aws-sdk-go-v2/service/workspacesweb v1.40.7
 	github.com/gofrs/uuid/v3 v3.1.2
 	github.com/ionos-cloud/sdk-go-cert-manager v1.0.0
 	github.com/ionos-cloud/sdk-go-container-registry v1.0.0

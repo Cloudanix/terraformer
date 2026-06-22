@@ -730,6 +730,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_workspaces_directory`
     * `aws_workspaces_ip_group`
     * `aws_workspaces_workspace`
+*   `workspaces-web`
+    * `aws_workspacesweb_portal`
 *   `xray`
     * `aws_xray_sampling_rule`
 

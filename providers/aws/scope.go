@@ -112,6 +112,7 @@ var serviceScope = map[string]regionScope{
 	"verifiedpermissions":        scopeRegional,
 	"vpc-lattice":                scopeRegional,
 	"wellarchitected":            scopeRegional,
+	"workspaces-web":             scopeRegional,
 	"api_gateway":                scopeRegional,
 	"api_gatewayv2":              scopeRegional,
 	"application-autoscaling":    scopeRegional,
