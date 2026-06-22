@@ -1141,6 +1141,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssmquicksetup_configuration_manager`
 *   `ssm-contacts`
     * `aws_ssmcontacts_contact`
+    * `aws_ssmcontacts_plan`
+    * `aws_ssmcontacts_contact_channel`
+    * `aws_ssmcontacts_rotation`
 *   `ssm-incidents`
     * `aws_ssmincidents_response_plan`
 *   `storagegateway`

@@ -857,6 +857,9 @@ aws_ssm_parameter
 aws_ssm_patch_baseline
 aws_ssm_resource_data_sync
 aws_ssmcontacts_contact
+aws_ssmcontacts_contact_channel
+aws_ssmcontacts_plan
+aws_ssmcontacts_rotation
 aws_ssmincidents_response_plan
 aws_ssmquicksetup_configuration_manager
 aws_ssoadmin_application

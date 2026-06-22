@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssmcontacts"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,9 +35,11 @@ func (g *SSMContactsGenerator) InitResources() error {
 	}
 	svc := ssmcontacts.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var contactArns []string
 	p := ssmcontacts.NewListContactsPaginator(svc, &ssmcontacts.ListContactsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +48,45 @@ func (g *SSMContactsGenerator) InitResources() error {
 			if arn == "" {
 				continue
 			}
+			contactArns = append(contactArns, arn)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(contact.Alias), "aws_ssmcontacts_contact", "aws", defaultAllowEmptyValues))
+			// The escalation/engagement plan is a singleton on the contact.
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(contact.Alias), "aws_ssmcontacts_plan", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, contactArn := range contactArns {
+		ca := contactArn
+		for cp := ssmcontacts.NewListContactChannelsPaginator(svc, &ssmcontacts.ListContactChannelsInput{ContactId: aws.String(ca)}); cp.HasMorePages(); {
+			page, err := cp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, ch := range page.ContactChannels {
+				arn := StringValue(ch.ContactChannelArn)
+				if arn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, arn, "aws_ssmcontacts_contact_channel", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	for rp := ssmcontacts.NewListRotationsPaginator(svc, &ssmcontacts.ListRotationsInput{}); rp.HasMorePages(); {
+		page, err := rp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, r := range page.Rotations {
+			arn := StringValue(r.RotationArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_ssmcontacts_rotation", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
