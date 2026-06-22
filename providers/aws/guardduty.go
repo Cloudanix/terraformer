@@ -74,9 +74,17 @@ func (g *GuardDutyGenerator) InitResources() error {
 	}
 
 	for _, detectorID := range detectorIDs {
-		if _, err := svc.DescribeOrganizationConfiguration(ctx, &guardduty.DescribeOrganizationConfigurationInput{DetectorId: aws.String(detectorID)}); err == nil {
+		if out, err := svc.DescribeOrganizationConfiguration(ctx, &guardduty.DescribeOrganizationConfigurationInput{DetectorId: aws.String(detectorID)}); err == nil {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				detectorID, detectorID, "aws_guardduty_organization_configuration", "aws", defaultAllowEmptyValues))
+			for _, f := range out.Features {
+				feature := string(f.Name)
+				if feature == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					detectorID+"/"+feature, detectorID+"_"+feature, "aws_guardduty_organization_configuration_feature", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 

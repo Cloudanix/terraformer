@@ -657,6 +657,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_guardduty_organization_configuration`
     * `aws_guardduty_organization_admin_account`
     * `aws_guardduty_detector_feature`
+    * `aws_guardduty_organization_configuration_feature`
 *   `imagebuilder`
     * `aws_imagebuilder_image_pipeline`
     * `aws_imagebuilder_component`
