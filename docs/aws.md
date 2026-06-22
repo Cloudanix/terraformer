@@ -611,6 +611,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_fsx_openzfs_volume`
 *   `glacier`
     * `aws_glacier_vault`
+    * `aws_glacier_vault_lock`
 *   `globalaccelerator`
     * `aws_globalaccelerator_accelerator`
     * `aws_globalaccelerator_listener`

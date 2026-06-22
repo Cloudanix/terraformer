@@ -152,7 +152,6 @@ aws_emr_managed_scaling_policy
 aws_evidently_feature
 aws_evidently_launch
 aws_evidently_segment
-aws_glacier_vault_lock
 aws_globalaccelerator_cross_account_attachment
 aws_glue_catalog_table_optimizer
 aws_glue_partition
