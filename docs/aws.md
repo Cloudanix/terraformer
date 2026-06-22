@@ -1075,6 +1075,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_traffic_policy`
     * `aws_route53_cidr_collection`
     * `aws_route53_cidr_location`
+    * `aws_route53_vpc_association_authorization`
     * `aws_route53_traffic_policy_instance`
     * `aws_route53_hosted_zone_dnssec`
     * `aws_route53_key_signing_key`
