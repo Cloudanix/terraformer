@@ -425,6 +425,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssoadmin_managed_policy_attachment`
 *   `ssm`
     * `aws_ssm_parameter`
+    * `aws_ssm_document`
+    * `aws_ssm_maintenance_window`
+    * `aws_ssm_patch_baseline`
+    * `aws_ssm_association`
 *   `storagegateway`
     * `aws_storagegateway_gateway`
 *   `subnet`

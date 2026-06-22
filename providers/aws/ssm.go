@@ -19,7 +19,9 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssm"
+	"github.com/aws/aws-sdk-go-v2/service/ssm/types"
 )
 
 var ssmAllowEmptyValues = []string{"tags."}
@@ -51,5 +53,100 @@ func (g *SsmGenerator) InitResources() error {
 		}
 	}
 
+	if err := g.addDocuments(svc); err != nil {
+		return err
+	}
+	if err := g.addMaintenanceWindows(svc); err != nil {
+		return err
+	}
+	if err := g.addPatchBaselines(svc); err != nil {
+		return err
+	}
+	if err := g.addAssociations(svc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *SsmGenerator) addDocuments(svc *ssm.Client) error {
+	// Self-owned documents only — the account owns thousands of AWS-managed ones.
+	p := ssm.NewListDocumentsPaginator(svc, &ssm.ListDocumentsInput{
+		Filters: []types.DocumentKeyValuesFilter{{Key: aws.String("Owner"), Values: []string{"Self"}}},
+	})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, doc := range page.DocumentIdentifiers {
+			name := StringValue(doc.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_ssm_document", "aws", ssmAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *SsmGenerator) addMaintenanceWindows(svc *ssm.Client) error {
+	p := ssm.NewDescribeMaintenanceWindowsPaginator(svc, &ssm.DescribeMaintenanceWindowsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, window := range page.WindowIdentities {
+			id := StringValue(window.WindowId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(window.Name), "aws_ssm_maintenance_window", "aws", ssmAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *SsmGenerator) addPatchBaselines(svc *ssm.Client) error {
+	// Self-owned baselines only — skip the AWS-managed default baselines.
+	p := ssm.NewDescribePatchBaselinesPaginator(svc, &ssm.DescribePatchBaselinesInput{
+		Filters: []types.PatchOrchestratorFilter{{Key: aws.String("OWNER"), Values: []string{"Self"}}},
+	})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, baseline := range page.BaselineIdentities {
+			id := StringValue(baseline.BaselineId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(baseline.BaselineName), "aws_ssm_patch_baseline", "aws", ssmAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
+func (g *SsmGenerator) addAssociations(svc *ssm.Client) error {
+	p := ssm.NewListAssociationsPaginator(svc, &ssm.ListAssociationsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, association := range page.Associations {
+			id := StringValue(association.AssociationId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_ssm_association", "aws", ssmAllowEmptyValues))
+		}
+	}
 	return nil
 }
