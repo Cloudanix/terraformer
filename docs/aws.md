@@ -40,6 +40,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_acm_certificate`
 *   `acm-pca`
     * `aws_acmpca_certificate_authority`
+    * `aws_acmpca_certificate_authority_certificate`
 *   `amp`
     * `aws_prometheus_workspace`
     * `aws_prometheus_alert_manager_definition`

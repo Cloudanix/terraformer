@@ -48,6 +48,11 @@ func (g *ACMPCAGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_acmpca_certificate_authority", "aws", defaultAllowEmptyValues))
+			// The installed CA certificate is a singleton imported by the CA ARN.
+			if cert, err := svc.GetCertificateAuthorityCertificate(context.TODO(), &acmpca.GetCertificateAuthorityCertificateInput{CertificateAuthorityArn: ca.Arn}); err == nil && StringValue(cert.Certificate) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, arn, "aws_acmpca_certificate_authority_certificate", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil
