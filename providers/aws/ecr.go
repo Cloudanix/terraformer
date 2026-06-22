@@ -91,6 +91,24 @@ func (g *EcrGenerator) InitResources() error {
 				prefix, prefix, "aws_ecr_pull_through_cache_rule", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	// Account-level singletons keyed by registry (account) ID.
+	registryID, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	account := StringValue(registryID)
+	if account != "" {
+		if _, err := svc.GetRegistryScanningConfiguration(context.TODO(), &ecr.GetRegistryScanningConfigurationInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				account, account, "aws_ecr_registry_scanning_configuration", "aws", defaultAllowEmptyValues))
+		}
+		if out, err := svc.DescribeRegistry(context.TODO(), &ecr.DescribeRegistryInput{}); err == nil &&
+			out.ReplicationConfiguration != nil && len(out.ReplicationConfiguration.Rules) > 0 {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				account, account, "aws_ecr_replication_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
