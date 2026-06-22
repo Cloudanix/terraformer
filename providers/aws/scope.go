@@ -121,6 +121,7 @@ var serviceScope = map[string]regionScope{
 	"nat":                     scopeRegional,
 	"opsworks":                scopeRegional,
 	"qldb":                    scopeRegional,
+	"ram":                     scopeRegional,
 	"rds":                     scopeRegional,
 	"redshift":                scopeRegional,
 	"resourcegroups":          scopeRegional,
