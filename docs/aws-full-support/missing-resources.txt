@@ -78,8 +78,6 @@ aws_datazone_glossary_term
 aws_datazone_user_profile
 aws_db_instance_automated_backups_replication
 aws_db_instance_role_association
-aws_db_proxy_default_target_group
-aws_db_proxy_target
 aws_db_snapshot_copy
 aws_default_route_table
 aws_default_security_group

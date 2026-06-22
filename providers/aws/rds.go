@@ -87,6 +87,37 @@ func (g *RDSGenerator) loadDBProxies(svc *rds.Client) error {
 				"aws",
 				RDSAllowEmptyValues,
 			))
+			proxyName := resourceName
+			for tgp := rds.NewDescribeDBProxyTargetGroupsPaginator(svc, &rds.DescribeDBProxyTargetGroupsInput{DBProxyName: &proxyName}); tgp.HasMorePages(); {
+				tgPage, err := tgp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, tg := range tgPage.TargetGroups {
+					tgName := StringValue(tg.TargetGroupName)
+					if tgName == "" {
+						continue
+					}
+					// The single target group per proxy is the default_target_group resource.
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						proxyName, proxyName, "aws_db_proxy_default_target_group", "aws", RDSAllowEmptyValues))
+				}
+			}
+			for tp := rds.NewDescribeDBProxyTargetsPaginator(svc, &rds.DescribeDBProxyTargetsInput{DBProxyName: &proxyName}); tp.HasMorePages(); {
+				tPage, err := tp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, t := range tPage.Targets {
+					rid := StringValue(t.RdsResourceId)
+					if rid == "" {
+						continue
+					}
+					id := proxyName + "/default/" + string(t.Type) + "/" + rid
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id, proxyName+"_"+rid, "aws_db_proxy_target", "aws", RDSAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

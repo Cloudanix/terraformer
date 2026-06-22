@@ -999,6 +999,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_db_instance`
     * `aws_db_proxy`
     * `aws_db_proxy_endpoint`
+    * `aws_db_proxy_default_target_group`
+    * `aws_db_proxy_target`
     * `aws_rds_cluster_instance`
     * `aws_db_cluster`
     * `aws_db_cluster_snapshot`
