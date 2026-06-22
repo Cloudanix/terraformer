@@ -292,7 +292,6 @@ aws_ecs_cluster_capacity_providers
 aws_ecs_tag
 aws_ecs_task_set
 aws_efs_backup_policy
-aws_efs_replication_configuration
 aws_eip_association
 aws_eip_domain_name
 aws_eks_access_entry

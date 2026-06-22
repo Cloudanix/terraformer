@@ -41,6 +41,23 @@ func (g *EfsGenerator) InitResources() error {
 	if err := g.loadAccessPoint(svc); err != nil {
 		return err
 	}
+
+	// Replication configurations are keyed by the source file system id.
+	rc := efs.NewDescribeReplicationConfigurationsPaginator(svc, &efs.DescribeReplicationConfigurationsInput{})
+	for rc.HasMorePages() {
+		page, err := rc.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, r := range page.Replications {
+			id := StringValue(r.SourceFileSystemId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_efs_replication_configuration", "aws", efsAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
