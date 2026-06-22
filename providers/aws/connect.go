@@ -127,4 +127,31 @@ func (g *ConnectGenerator) loadConnectChildren(svc *connect.Client, instanceID s
 			add(StringValue(x.Id), "aws_connect_user")
 		}
 	}
+	for q := connect.NewListQuickConnectsPaginator(svc, &connect.ListQuickConnectsInput{InstanceId: aws.String(instanceID)}); q.HasMorePages(); {
+		page, err := q.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.QuickConnectSummaryList {
+			add(StringValue(x.Id), "aws_connect_quick_connect")
+		}
+	}
+	for m := connect.NewListContactFlowModulesPaginator(svc, &connect.ListContactFlowModulesInput{InstanceId: aws.String(instanceID)}); m.HasMorePages(); {
+		page, err := m.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.ContactFlowModulesSummaryList {
+			add(StringValue(x.Id), "aws_connect_contact_flow_module")
+		}
+	}
+	for h := connect.NewListUserHierarchyGroupsPaginator(svc, &connect.ListUserHierarchyGroupsInput{InstanceId: aws.String(instanceID)}); h.HasMorePages(); {
+		page, err := h.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range page.UserHierarchyGroupSummaryList {
+			add(StringValue(x.Id), "aws_connect_user_hierarchy_group")
+		}
+	}
 }

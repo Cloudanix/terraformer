@@ -292,6 +292,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_connect_hours_of_operation`
     * `aws_connect_security_profile`
     * `aws_connect_user`
+    * `aws_connect_quick_connect`
+    * `aws_connect_contact_flow_module`
+    * `aws_connect_user_hierarchy_group`
 *   `customer-profiles`
     * `aws_customerprofiles_domain`
 *   `dataexchange`
