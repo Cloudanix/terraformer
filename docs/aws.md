@@ -343,6 +343,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_zone`
     * `aws_route53_record`
     * `aws_route53_health_check`
+    * `aws_route53_delegation_set`
+    * `aws_route53_query_log`
 *   `route53resolver`
     * `aws_route53_resolver_endpoint`
     * `aws_route53_resolver_rule`

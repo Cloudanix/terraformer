@@ -145,8 +145,55 @@ func (g *Route53Generator) InitResources() error {
 	g.Resources = g.createZonesResources(svc)
 	healthCheckResources := g.createHealthChecksResources(svc)
 	g.Resources = append(g.Resources, healthCheckResources...)
+	g.Resources = append(g.Resources, g.createDelegationSetResources(svc)...)
+	g.Resources = append(g.Resources, g.createQueryLogResources(svc)...)
 
 	return nil
+}
+
+func (Route53Generator) createDelegationSetResources(svc *route53.Client) []terraformutils.Resource {
+	var resources []terraformutils.Resource
+	var marker *string
+	for {
+		out, err := svc.ListReusableDelegationSets(context.TODO(), &route53.ListReusableDelegationSetsInput{Marker: marker})
+		if err != nil {
+			log.Println(err)
+			return resources
+		}
+		for _, ds := range out.DelegationSets {
+			id := StringValue(ds.Id)
+			if id == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, id, "aws_route53_delegation_set", "aws", route53AllowEmptyValues))
+		}
+		if !out.IsTruncated || out.NextMarker == nil {
+			return resources
+		}
+		marker = out.NextMarker
+	}
+}
+
+func (Route53Generator) createQueryLogResources(svc *route53.Client) []terraformutils.Resource {
+	var resources []terraformutils.Resource
+	p := route53.NewListQueryLoggingConfigsPaginator(svc, &route53.ListQueryLoggingConfigsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			log.Println(err)
+			return resources
+		}
+		for _, qlc := range page.QueryLoggingConfigs {
+			id := StringValue(qlc.Id)
+			if id == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, id, "aws_route53_query_log", "aws", route53AllowEmptyValues))
+		}
+	}
+	return resources
 }
 
 func (g *Route53Generator) PostConvertHook() error {
