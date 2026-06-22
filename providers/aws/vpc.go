@@ -28,6 +28,13 @@ type VpcGenerator struct {
 	AWSService
 }
 
+// isSecondaryVpcCidr reports whether a CIDR-block association should be emitted
+// as a standalone aws_vpc_ipv4_cidr_block_association: it needs an association
+// ID and must not be the VPC's primary CIDR (which aws_vpc already manages).
+func isSecondaryVpcCidr(associationID, assocCidr, primaryCidr string) bool {
+	return associationID != "" && assocCidr != primaryCidr
+}
+
 func (VpcGenerator) createResources(vpcs *ec2.DescribeVpcsOutput) []terraformutils.Resource {
 	var resources []terraformutils.Resource
 	for _, vpc := range vpcs.Vpcs {
@@ -43,7 +50,7 @@ func (VpcGenerator) createResources(vpcs *ec2.DescribeVpcsOutput) []terraformuti
 		primaryCidr := StringValue(vpc.CidrBlock)
 		for _, assoc := range vpc.CidrBlockAssociationSet {
 			assocID := StringValue(assoc.AssociationId)
-			if assocID == "" || StringValue(assoc.CidrBlock) == primaryCidr {
+			if !isSecondaryVpcCidr(assocID, StringValue(assoc.CidrBlock), primaryCidr) {
 				continue
 			}
 			resources = append(resources, terraformutils.NewSimpleResource(

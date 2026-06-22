@@ -39,12 +39,19 @@ func (g *VpcEndpointGenerator) createResources(vpceps *ec2.DescribeVpcEndpointsO
 			"aws",
 			VpcAllowEmptyValues,
 		))
-		if vpcEndpoint.VpcEndpointType == "Interface" && vpcEndpoint.PrivateDnsEnabled != nil && *vpcEndpoint.PrivateDnsEnabled {
+		if shouldEmitVpcEndpointPrivateDNS(string(vpcEndpoint.VpcEndpointType), vpcEndpoint.PrivateDnsEnabled) {
 			resources = append(resources, terraformutils.NewSimpleResource(
 				id, id, "aws_vpc_endpoint_private_dns", "aws", VpcEndpointAllowEmptyValues))
 		}
 	}
 	return resources
+}
+
+// shouldEmitVpcEndpointPrivateDNS reports whether a VPC endpoint warrants a
+// separate aws_vpc_endpoint_private_dns resource: only Interface endpoints with
+// private DNS enabled carry that managed sub-resource.
+func shouldEmitVpcEndpointPrivateDNS(endpointType string, privateDNSEnabled *bool) bool {
+	return endpointType == "Interface" && privateDNSEnabled != nil && *privateDNSEnabled
 }
 
 // Generate TerraformResources from AWS API,

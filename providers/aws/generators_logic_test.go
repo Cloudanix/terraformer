@@ -107,4 +107,45 @@ func TestSecurityLakeLogSource(t *testing.T) {
 	}
 }
 
+func TestShouldEmitVpcEndpointPrivateDNS(t *testing.T) {
+	bptr := func(b bool) *bool { return &b }
+	if !shouldEmitVpcEndpointPrivateDNS("Interface", bptr(true)) {
+		t.Error("Interface + enabled should emit")
+	}
+	if shouldEmitVpcEndpointPrivateDNS("Interface", bptr(false)) {
+		t.Error("Interface + disabled should not emit")
+	}
+	if shouldEmitVpcEndpointPrivateDNS("Gateway", bptr(true)) {
+		t.Error("Gateway endpoints have no private DNS resource")
+	}
+	if shouldEmitVpcEndpointPrivateDNS("Interface", nil) {
+		t.Error("nil enabled flag should not emit")
+	}
+}
+
+func TestIsSecondaryVpcCidr(t *testing.T) {
+	if isSecondaryVpcCidr("vpc-cidr-assoc-1", "10.0.0.0/16", "10.0.0.0/16") {
+		t.Error("primary CIDR must not be a secondary association")
+	}
+	if !isSecondaryVpcCidr("vpc-cidr-assoc-2", "10.1.0.0/16", "10.0.0.0/16") {
+		t.Error("a different CIDR is a secondary association")
+	}
+	if isSecondaryVpcCidr("", "10.1.0.0/16", "10.0.0.0/16") {
+		t.Error("missing association ID must be skipped")
+	}
+}
+
+func TestLightsailDomainEntryID(t *testing.T) {
+	id, ok := lightsailDomainEntryID("www", "example.com", "A", "127.0.0.1")
+	if !ok || id != "www_example.com_A_127.0.0.1" {
+		t.Errorf("entry ID = %q (ok=%v), want www_example.com_A_127.0.0.1", id, ok)
+	}
+	if _, ok := lightsailDomainEntryID("", "example.com", "A", "127.0.0.1"); ok {
+		t.Error("empty name must be skipped")
+	}
+	if _, ok := lightsailDomainEntryID("www", "example.com", "", "127.0.0.1"); ok {
+		t.Error("empty record type must be skipped")
+	}
+}
+
 func stringPtr(s string) *string { return &s }

@@ -27,6 +27,16 @@ type LightsailGenerator struct {
 	AWSService
 }
 
+// lightsailDomainEntryID builds the aws_lightsail_domain_entry import ID
+// ("<name>_<domain>_<type>_<target>"), returning ok=false for entries missing a
+// name or record type.
+func lightsailDomainEntryID(name, domain, entryType, target string) (string, bool) {
+	if name == "" || entryType == "" {
+		return "", false
+	}
+	return name + "_" + domain + "_" + entryType + "_" + target, true
+}
+
 // InitResources enumerates Lightsail instances. Import ID is the instance name.
 func (g *LightsailGenerator) InitResources() error {
 	config, e := g.generateConfig()
@@ -143,10 +153,10 @@ func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
 			add(domain, "aws_lightsail_domain")
 			for _, e := range x.DomainEntries {
 				eName, eType, eTarget := StringValue(e.Name), StringValue(e.Type), StringValue(e.Target)
-				if eName == "" || eType == "" {
+				id, ok := lightsailDomainEntryID(eName, domain, eType, eTarget)
+				if !ok {
 					continue
 				}
-				id := eName + "_" + domain + "_" + eType + "_" + eTarget
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					id, eName+"_"+eType, "aws_lightsail_domain_entry", "aws", defaultAllowEmptyValues))
 			}
