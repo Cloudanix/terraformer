@@ -80,6 +80,30 @@ func (g *CodePipelineGenerator) InitResources() error {
 	if err := g.loadWebhooks(svc); err != nil {
 		return err
 	}
+	if err := g.loadCustomActionTypes(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// loadCustomActionTypes enumerates customer-owned action types. Import ID is
+// "<category>:<provider>:<version>".
+func (g *CodePipelineGenerator) loadCustomActionTypes(svc *codepipeline.Client) error {
+	p := codepipeline.NewListActionTypesPaginator(svc, &codepipeline.ListActionTypesInput{ActionOwnerFilter: "Custom"})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, at := range page.ActionTypes {
+			if at.Id == nil {
+				continue
+			}
+			id := string(at.Id.Category) + ":" + StringValue(at.Id.Provider) + ":" + StringValue(at.Id.Version)
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(at.Id.Provider), "aws_codepipeline_custom_action_type", "aws", codepipelineAllowEmptyValues))
+		}
+	}
 	return nil
 }

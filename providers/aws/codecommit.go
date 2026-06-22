@@ -43,6 +43,10 @@ func (g *CodeCommitGenerator) loadRepository(svc *codecommit.Client) error {
 				"aws_codecommit_repository",
 				"aws",
 				codecommitAllowEmptyValues))
+			if triggers, err := svc.GetRepositoryTriggers(context.TODO(), &codecommit.GetRepositoryTriggersInput{RepositoryName: repository.RepositoryName}); err == nil && len(triggers.Triggers) > 0 {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					resourceName, resourceName, "aws_codecommit_trigger", "aws", codecommitAllowEmptyValues))
+			}
 		}
 	}
 	return nil

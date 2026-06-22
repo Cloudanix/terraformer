@@ -240,6 +240,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codebuild_source_credential`
 *   `codecommit`
     * `aws_codecommit_repository`
+    * `aws_codecommit_trigger`
 *   `codedeploy`
     * `aws_codedeploy_app`
     * `aws_codedeploy_deployment_group`
@@ -271,6 +272,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `codepipeline`
     * `aws_codepipeline`
     * `aws_codepipeline_webhook`
+    * `aws_codepipeline_custom_action_type`
 *   `cognito`
     * `aws_cognito_identity_pool`
     * `aws_cognito_user_pool`
