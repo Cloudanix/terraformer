@@ -79,6 +79,20 @@ func (g *AutoScalingGenerator) loadAutoScalingGroups(svc *autoscaling.Client) er
 						asgName+"/"+name, asgName+"_"+name, "aws_autoscaling_schedule", "aws", AsgAllowEmptyValues))
 				}
 			}
+			for pp := autoscaling.NewDescribePoliciesPaginator(svc, &autoscaling.DescribePoliciesInput{AutoScalingGroupName: &asgName}); pp.HasMorePages(); {
+				ppage, err := pp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, p := range ppage.ScalingPolicies {
+					name := StringValue(p.PolicyName)
+					if name == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						asgName+"/"+name, asgName+"_"+name, "aws_autoscaling_policy", "aws", AsgAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
