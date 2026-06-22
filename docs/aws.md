@@ -428,6 +428,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_placement_group`
     * `aws_flow_log`
     * `aws_ec2_managed_prefix_list`
+    * `aws_ec2_managed_prefix_list_entry`
+    * `aws_ec2_instance_connect_endpoint`
+    * `aws_ec2_transit_gateway_connect_peer`
+    * `aws_ec2_serial_console_access`
+    * `aws_ec2_image_block_public_access`
     * `aws_vpc_dhcp_options`
     * `aws_egress_only_internet_gateway`
     * `aws_ec2_network_insights_path`

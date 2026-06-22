@@ -415,6 +415,20 @@ func (g *Ec2Generator) loadEc2Extras(svc *ec2.Client) error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, name, "aws_ec2_managed_prefix_list", "aws", ec2AllowEmptyValues))
+			for ep := ec2.NewGetManagedPrefixListEntriesPaginator(svc, &ec2.GetManagedPrefixListEntriesInput{PrefixListId: pl.PrefixListId}); ep.HasMorePages(); {
+				epage, err := ep.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, e := range epage.Entries {
+					cidr := aws.ToString(e.Cidr)
+					if cidr == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id+","+cidr, id+"_"+cidr, "aws_ec2_managed_prefix_list_entry", "aws", ec2AllowEmptyValues))
+				}
+			}
 		}
 	}
 
@@ -447,6 +461,52 @@ func (g *Ec2Generator) loadEc2Extras(svc *ec2.Client) error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_egress_only_internet_gateway", "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	for ice := ec2.NewDescribeInstanceConnectEndpointsPaginator(svc, &ec2.DescribeInstanceConnectEndpointsInput{}); ice.HasMorePages(); {
+		page, err := ice.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, e := range page.InstanceConnectEndpoints {
+			id := aws.ToString(e.InstanceConnectEndpointId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_ec2_instance_connect_endpoint", "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	for cp := ec2.NewDescribeTransitGatewayConnectPeersPaginator(svc, &ec2.DescribeTransitGatewayConnectPeersInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, peer := range page.TransitGatewayConnectPeers {
+			id := aws.ToString(peer.TransitGatewayConnectPeerId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_ec2_transit_gateway_connect_peer", "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	// Region-level account settings; import ID is the region.
+	region := g.GetArgs()["region"]
+	regionStr, _ := region.(string)
+	if regionStr != "" {
+		if s, err := svc.GetSerialConsoleAccessStatus(ctx, &ec2.GetSerialConsoleAccessStatusInput{}); err == nil &&
+			s.SerialConsoleAccessEnabled != nil && *s.SerialConsoleAccessEnabled {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				regionStr, regionStr, "aws_ec2_serial_console_access", "aws", ec2AllowEmptyValues))
+		}
+		if s, err := svc.GetImageBlockPublicAccessState(ctx, &ec2.GetImageBlockPublicAccessStateInput{}); err == nil &&
+			aws.ToString(s.ImageBlockPublicAccessState) == "block-new-sharing" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				regionStr, regionStr, "aws_ec2_image_block_public_access", "aws", ec2AllowEmptyValues))
 		}
 	}
 
