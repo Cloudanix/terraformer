@@ -49,6 +49,28 @@ func (g *DynamoDbGenerator) InitResources() error {
 			))
 		}
 	}
+
+	// Legacy (v2017.11.29) global tables. Newer global tables are modeled as
+	// table replicas, not returned here.
+	var startName *string
+	for {
+		out, err := svc.ListGlobalTables(context.TODO(), &dynamodb.ListGlobalTablesInput{ExclusiveStartGlobalTableName: startName})
+		if err != nil {
+			return err
+		}
+		for _, gt := range out.GlobalTables {
+			name := StringValue(gt.GlobalTableName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_dynamodb_global_table", "aws", dynamodbAllowEmptyValues))
+		}
+		if out.LastEvaluatedGlobalTableName == nil {
+			break
+		}
+		startName = out.LastEvaluatedGlobalTableName
+	}
 	return nil
 }
 
