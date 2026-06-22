@@ -155,6 +155,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appsync_datasource`
     * `aws_appsync_function`
     * `aws_appsync_api_key`
+    * `aws_appsync_type`
+    * `aws_appsync_resolver`
+    * `aws_appsync_api_cache`
+    * `aws_appsync_domain_name`
 *   `athena`
     * `aws_athena_workgroup`
     * `aws_athena_data_catalog`
