@@ -43,6 +43,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_prometheus_workspace`
 *   `appfabric`
     * `aws_appfabric_app_bundle`
+    * `aws_appfabric_app_authorization`
+    * `aws_appfabric_ingestion`
+    * `aws_appfabric_ingestion_destination`
 *   `applicationinsights`
     * `aws_applicationinsights_application`
 *   `auditmanager`

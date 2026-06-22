@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/appfabric"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,9 +33,11 @@ func (g *AppFabricGenerator) InitResources() error {
 		return e
 	}
 	svc := appfabric.NewFromConfig(config)
+	ctx := context.TODO()
+	var bundleArns []string
 	p := appfabric.NewListAppBundlesPaginator(svc, &appfabric.ListAppBundlesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -43,8 +46,55 @@ func (g *AppFabricGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			bundleArns = append(bundleArns, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				id, StringValue(item.Arn), "aws_appfabric_app_bundle", "aws", defaultAllowEmptyValues))
+				id, id, "aws_appfabric_app_bundle", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, bundleArn := range bundleArns {
+		bundle := bundleArn
+		for ap := appfabric.NewListAppAuthorizationsPaginator(svc, &appfabric.ListAppAuthorizationsInput{AppBundleIdentifier: &bundle}); ap.HasMorePages(); {
+			page, err := ap.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, a := range page.AppAuthorizationSummaryList {
+				arn := StringValue(a.AppAuthorizationArn)
+				if arn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn+","+bundle, arn, "aws_appfabric_app_authorization", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for ip := appfabric.NewListIngestionsPaginator(svc, &appfabric.ListIngestionsInput{AppBundleIdentifier: &bundle}); ip.HasMorePages(); {
+			page, err := ip.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, ing := range page.Ingestions {
+				ingArn := StringValue(ing.Arn)
+				if ingArn == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					ingArn+","+bundle, ingArn, "aws_appfabric_ingestion", "aws", defaultAllowEmptyValues))
+				for dp := appfabric.NewListIngestionDestinationsPaginator(svc, &appfabric.ListIngestionDestinationsInput{AppBundleIdentifier: &bundle, IngestionIdentifier: aws.String(ingArn)}); dp.HasMorePages(); {
+					dpage, err := dp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, d := range dpage.IngestionDestinations {
+						dArn := StringValue(d.Arn)
+						if dArn == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							dArn+","+ingArn+","+bundle, dArn, "aws_appfabric_ingestion_destination", "aws", defaultAllowEmptyValues))
+					}
+				}
+			}
 		}
 	}
 	return nil
