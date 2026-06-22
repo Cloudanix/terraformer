@@ -954,6 +954,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_organizations_organizational_unit`
     * `aws_organizations_policy`
     * `aws_organizations_policy_attachment`
+    * `aws_organizations_delegated_administrator`
 *   `qldb`
     * `aws_qldb_ledger`
     * `aws_qldb_stream`

@@ -150,5 +150,20 @@ func (g *OrganizationGenerator) InitResources() error {
 		}
 	}
 
+	for ap := organizations.NewListDelegatedAdministratorsPaginator(svc, &organizations.ListDelegatedAdministratorsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, admin := range page.DelegatedAdministrators {
+			id := StringValue(admin.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_organizations_delegated_administrator", "aws", organizationAllowEmptyValues))
+		}
+	}
+
 	return nil
 }

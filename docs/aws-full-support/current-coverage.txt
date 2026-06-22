@@ -688,6 +688,7 @@ aws_opsworks_stack
 aws_opsworks_static_web_layer
 aws_opsworks_user_profile
 aws_organizations_account
+aws_organizations_delegated_administrator
 aws_organizations_organization
 aws_organizations_organizational_unit
 aws_organizations_policy
