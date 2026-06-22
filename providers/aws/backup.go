@@ -45,16 +45,34 @@ func (g *BackupGenerator) InitResources() error {
 	svc := backup.NewFromConfig(config)
 	ctx := context.TODO()
 
+	var vaultNames []string
 	vaults := backup.NewListBackupVaultsPaginator(svc, &backup.ListBackupVaultsInput{})
 	for vaults.HasMorePages() {
 		page, err := vaults.NextPage(ctx)
 		if err != nil {
 			return err
 		}
+		for _, v := range page.BackupVaultList {
+			vaultNames = append(vaultNames, StringValue(v.BackupVaultName))
+		}
 		g.Resources = appendSimpleResources(g.Resources, page.BackupVaultList, "aws_backup_vault",
 			defaultAllowEmptyValues,
 			func(v types.BackupVaultListMember) string { return StringValue(v.BackupVaultName) },
 			func(v types.BackupVaultListMember) string { return StringValue(v.BackupVaultName) })
+	}
+
+	for _, vault := range vaultNames {
+		if vault == "" {
+			continue
+		}
+		if _, err := svc.GetBackupVaultNotifications(ctx, &backup.GetBackupVaultNotificationsInput{BackupVaultName: aws.String(vault)}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				vault, vault, "aws_backup_vault_notifications", "aws", defaultAllowEmptyValues))
+		}
+		if _, err := svc.GetBackupVaultAccessPolicy(ctx, &backup.GetBackupVaultAccessPolicyInput{BackupVaultName: aws.String(vault)}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				vault, vault, "aws_backup_vault_policy", "aws", defaultAllowEmptyValues))
+		}
 	}
 
 	// Plans, collecting IDs so selections (nested under each plan) can be listed.
@@ -120,16 +138,60 @@ func (g *BackupGenerator) InitResources() error {
 			func(r types.ReportPlan) string { return StringValue(r.ReportPlanName) })
 	}
 
+	var restoreTestingPlanNames []string
 	restoreTestingPlans := backup.NewListRestoreTestingPlansPaginator(svc, &backup.ListRestoreTestingPlansInput{})
 	for restoreTestingPlans.HasMorePages() {
 		page, err := restoreTestingPlans.NextPage(ctx)
 		if err != nil {
 			return err
 		}
+		for _, p := range page.RestoreTestingPlans {
+			restoreTestingPlanNames = append(restoreTestingPlanNames, StringValue(p.RestoreTestingPlanName))
+		}
 		g.Resources = appendSimpleResources(g.Resources, page.RestoreTestingPlans, "aws_backup_restore_testing_plan",
 			defaultAllowEmptyValues,
 			func(p types.RestoreTestingPlanForList) string { return StringValue(p.RestoreTestingPlanName) },
 			func(p types.RestoreTestingPlanForList) string { return StringValue(p.RestoreTestingPlanName) })
+	}
+
+	for _, planName := range restoreTestingPlanNames {
+		if planName == "" {
+			continue
+		}
+		selections := backup.NewListRestoreTestingSelectionsPaginator(svc, &backup.ListRestoreTestingSelectionsInput{RestoreTestingPlanName: aws.String(planName)})
+		for selections.HasMorePages() {
+			page, err := selections.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, sel := range page.RestoreTestingSelections {
+				selName := StringValue(sel.RestoreTestingSelectionName)
+				if selName == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					fmt.Sprintf("%s:%s", selName, planName),
+					fmt.Sprintf("%s_%s", planName, selName),
+					"aws_backup_restore_testing_selection", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	// Account-level singletons keyed by account ID.
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	accountID := StringValue(account)
+	if accountID != "" {
+		if _, err := svc.DescribeGlobalSettings(ctx, &backup.DescribeGlobalSettingsInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_backup_global_settings", "aws", defaultAllowEmptyValues))
+		}
+		if _, err := svc.DescribeRegionSettings(ctx, &backup.DescribeRegionSettingsInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_backup_region_settings", "aws", defaultAllowEmptyValues))
+		}
 	}
 
 	return nil
