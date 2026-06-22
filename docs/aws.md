@@ -296,6 +296,22 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ec2_managed_prefix_list`
     * `aws_vpc_dhcp_options`
     * `aws_egress_only_internet_gateway`
+    * `aws_ebs_snapshot`
+    * `aws_ec2_capacity_reservation`
+    * `aws_ec2_carrier_gateway`
+    * `aws_ec2_client_vpn_endpoint`
+    * `aws_ec2_fleet`
+    * `aws_ec2_host`
+    * `aws_ec2_traffic_mirror_filter`
+    * `aws_ec2_traffic_mirror_target`
+    * `aws_ec2_traffic_mirror_session`
+    * `aws_ec2_transit_gateway_peering_attachment`
+    * `aws_spot_instance_request`
+    * `aws_spot_fleet_request`
+    * `aws_vpc_endpoint_service`
+    * `aws_vpc_ipam`
+    * `aws_vpc_ipam_pool`
+    * `aws_vpc_ipam_scope`
 *   `ecr`
     * `aws_ecr_lifecycle_policy`
     * `aws_ecr_repository`

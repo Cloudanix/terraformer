@@ -90,6 +90,168 @@ func (g *Ec2Generator) InitResources() error {
 	if err := g.loadEc2Extras(svc); err != nil {
 		return err
 	}
+	if err := g.loadMoreEc2(svc); err != nil {
+		return err
+	}
+	return nil
+}
+
+// loadMoreEc2 enumerates additional top-level EC2 resources that each have a
+// Describe* paginator returning an id. Snapshots are scoped to "self".
+func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
+	ctx := context.TODO()
+	add := func(id, tfType string) {
+		if id != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, tfType, "aws", ec2AllowEmptyValues))
+		}
+	}
+
+	snaps := ec2.NewDescribeSnapshotsPaginator(svc, &ec2.DescribeSnapshotsInput{OwnerIds: []string{"self"}})
+	for snaps.HasMorePages() {
+		p, err := snaps.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, s := range p.Snapshots {
+			add(aws.ToString(s.SnapshotId), "aws_ebs_snapshot")
+		}
+	}
+	for p := ec2.NewDescribeCapacityReservationsPaginator(svc, &ec2.DescribeCapacityReservationsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.CapacityReservations {
+			add(aws.ToString(x.CapacityReservationId), "aws_ec2_capacity_reservation")
+		}
+	}
+	for p := ec2.NewDescribeCarrierGatewaysPaginator(svc, &ec2.DescribeCarrierGatewaysInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.CarrierGateways {
+			add(aws.ToString(x.CarrierGatewayId), "aws_ec2_carrier_gateway")
+		}
+	}
+	for p := ec2.NewDescribeClientVpnEndpointsPaginator(svc, &ec2.DescribeClientVpnEndpointsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.ClientVpnEndpoints {
+			add(aws.ToString(x.ClientVpnEndpointId), "aws_ec2_client_vpn_endpoint")
+		}
+	}
+	for p := ec2.NewDescribeFleetsPaginator(svc, &ec2.DescribeFleetsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.Fleets {
+			add(aws.ToString(x.FleetId), "aws_ec2_fleet")
+		}
+	}
+	for p := ec2.NewDescribeHostsPaginator(svc, &ec2.DescribeHostsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.Hosts {
+			add(aws.ToString(x.HostId), "aws_ec2_host")
+		}
+	}
+	for p := ec2.NewDescribeTrafficMirrorFiltersPaginator(svc, &ec2.DescribeTrafficMirrorFiltersInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.TrafficMirrorFilters {
+			add(aws.ToString(x.TrafficMirrorFilterId), "aws_ec2_traffic_mirror_filter")
+		}
+	}
+	for p := ec2.NewDescribeTrafficMirrorTargetsPaginator(svc, &ec2.DescribeTrafficMirrorTargetsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.TrafficMirrorTargets {
+			add(aws.ToString(x.TrafficMirrorTargetId), "aws_ec2_traffic_mirror_target")
+		}
+	}
+	for p := ec2.NewDescribeTrafficMirrorSessionsPaginator(svc, &ec2.DescribeTrafficMirrorSessionsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.TrafficMirrorSessions {
+			add(aws.ToString(x.TrafficMirrorSessionId), "aws_ec2_traffic_mirror_session")
+		}
+	}
+	for p := ec2.NewDescribeTransitGatewayPeeringAttachmentsPaginator(svc, &ec2.DescribeTransitGatewayPeeringAttachmentsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.TransitGatewayPeeringAttachments {
+			add(aws.ToString(x.TransitGatewayAttachmentId), "aws_ec2_transit_gateway_peering_attachment")
+		}
+	}
+	for p := ec2.NewDescribeSpotInstanceRequestsPaginator(svc, &ec2.DescribeSpotInstanceRequestsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.SpotInstanceRequests {
+			add(aws.ToString(x.SpotInstanceRequestId), "aws_spot_instance_request")
+		}
+	}
+	for p := ec2.NewDescribeSpotFleetRequestsPaginator(svc, &ec2.DescribeSpotFleetRequestsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.SpotFleetRequestConfigs {
+			add(aws.ToString(x.SpotFleetRequestId), "aws_spot_fleet_request")
+		}
+	}
+	for p := ec2.NewDescribeVpcEndpointServiceConfigurationsPaginator(svc, &ec2.DescribeVpcEndpointServiceConfigurationsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.ServiceConfigurations {
+			add(aws.ToString(x.ServiceId), "aws_vpc_endpoint_service")
+		}
+	}
+	for p := ec2.NewDescribeIpamsPaginator(svc, &ec2.DescribeIpamsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.Ipams {
+			add(aws.ToString(x.IpamId), "aws_vpc_ipam")
+		}
+	}
+	for p := ec2.NewDescribeIpamPoolsPaginator(svc, &ec2.DescribeIpamPoolsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.IpamPools {
+			add(aws.ToString(x.IpamPoolId), "aws_vpc_ipam_pool")
+		}
+	}
+	for p := ec2.NewDescribeIpamScopesPaginator(svc, &ec2.DescribeIpamScopesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.IpamScopes {
+			add(aws.ToString(x.IpamScopeId), "aws_vpc_ipam_scope")
+		}
+	}
 	return nil
 }
 
