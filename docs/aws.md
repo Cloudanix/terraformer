@@ -113,6 +113,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codecommit_repository`
 *   `codedeploy`
     * `aws_codedeploy_app`
+    * `aws_codedeploy_deployment_group`
+    * `aws_codedeploy_deployment_config`
 *   `codepipeline`
     * `aws_codepipeline`
     * `aws_codepipeline_webhook`

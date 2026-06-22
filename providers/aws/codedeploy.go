@@ -17,8 +17,10 @@ package aws
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/codedeploy"
 )
 
@@ -48,8 +50,47 @@ func (g *CodeDeployGenerator) InitResources() error {
 				"aws_codedeploy_app",
 				"aws",
 				codedeployAllowEmptyValues))
+
+			gp := codedeploy.NewListDeploymentGroupsPaginator(svc, &codedeploy.ListDeploymentGroupsInput{
+				ApplicationName: aws.String(application),
+			})
+			for gp.HasMorePages() {
+				gpage, err := gp.NextPage(context.TODO())
+				if err != nil {
+					return err
+				}
+				for _, group := range gpage.DeploymentGroups {
+					if group == "" {
+						continue
+					}
+					resources = append(resources, terraformutils.NewSimpleResource(
+						fmt.Sprintf("%s:%s", application, group),
+						fmt.Sprintf("%s_%s", application, group),
+						"aws_codedeploy_deployment_group",
+						"aws",
+						codedeployAllowEmptyValues))
+				}
+			}
 		}
 	}
+
+	// Deployment configs. Skip the built-in CodeDeployDefault.* ones — they're
+	// AWS-managed and not importable as user resources.
+	cp := codedeploy.NewListDeploymentConfigsPaginator(svc, &codedeploy.ListDeploymentConfigsInput{})
+	for cp.HasMorePages() {
+		cpage, err := cp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, configName := range cpage.DeploymentConfigsList {
+			if configName == "" || strings.HasPrefix(configName, "CodeDeployDefault.") {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				configName, configName, "aws_codedeploy_deployment_config", "aws", codedeployAllowEmptyValues))
+		}
+	}
+
 	g.Resources = resources
 	return nil
 }
