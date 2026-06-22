@@ -588,6 +588,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_greengrassv2_component_version`
 *   `fms`
     * `aws_fms_policy`
+    * `aws_fms_admin_account`
+    * `aws_fms_resource_set`
 *   `fsx`
     * `aws_fsx_windows_file_system`
     * `aws_fsx_lustre_file_system`

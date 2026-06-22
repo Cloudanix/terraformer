@@ -49,5 +49,33 @@ func (g *FmsGenerator) InitResources() error {
 				id, id, "aws_fms_policy", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	if admin, err := svc.GetAdminAccount(context.TODO(), &fms.GetAdminAccountInput{}); err == nil {
+		id := StringValue(admin.AdminAccount)
+		if id != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_fms_admin_account", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	var rsToken *string
+	for {
+		out, err := svc.ListResourceSets(context.TODO(), &fms.ListResourceSetsInput{NextToken: rsToken})
+		if err != nil {
+			break
+		}
+		for _, rs := range out.ResourceSets {
+			id := StringValue(rs.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(rs.Name), "aws_fms_resource_set", "aws", defaultAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		rsToken = out.NextToken
+	}
 	return nil
 }

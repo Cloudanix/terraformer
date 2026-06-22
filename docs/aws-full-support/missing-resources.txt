@@ -158,8 +158,6 @@ aws_emrcontainers_job_template
 aws_evidently_feature
 aws_evidently_launch
 aws_evidently_segment
-aws_fms_admin_account
-aws_fms_resource_set
 aws_glacier_vault_lock
 aws_globalaccelerator_cross_account_attachment
 aws_glue_catalog_table_optimizer

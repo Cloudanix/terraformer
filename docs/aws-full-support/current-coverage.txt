@@ -420,7 +420,9 @@ aws_finspace_kx_user
 aws_finspace_kx_volume
 aws_fis_experiment_template
 aws_flow_log
+aws_fms_admin_account
 aws_fms_policy
+aws_fms_resource_set
 aws_fsx_backup
 aws_fsx_data_repository_association
 aws_fsx_file_cache
