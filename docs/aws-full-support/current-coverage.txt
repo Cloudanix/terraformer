@@ -1054,6 +1054,7 @@ aws_transfer_certificate
 aws_transfer_connector
 aws_transfer_profile
 aws_transfer_server
+aws_transfer_ssh_key
 aws_transfer_user
 aws_transfer_workflow
 aws_verifiedaccess_endpoint

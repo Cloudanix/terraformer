@@ -69,6 +69,17 @@ func (g *TransferGenerator) InitResources() error {
 				}
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					sid+"/"+name, sid+"_"+name, "aws_transfer_user", "aws", defaultAllowEmptyValues))
+				userName := name
+				if du, err := svc.DescribeUser(ctx, &transfer.DescribeUserInput{ServerId: &sid, UserName: &userName}); err == nil && du.User != nil {
+					for _, k := range du.User.SshPublicKeys {
+						keyID := StringValue(k.SshPublicKeyId)
+						if keyID == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							sid+"/"+userName+"/"+keyID, userName+"_"+keyID, "aws_transfer_ssh_key", "aws", defaultAllowEmptyValues))
+					}
+				}
 			}
 		}
 		for ap := transfer.NewListAccessesPaginator(svc, &transfer.ListAccessesInput{ServerId: &sid}); ap.HasMorePages(); {

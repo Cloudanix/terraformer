@@ -1329,6 +1329,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_transfer_connector`
     * `aws_transfer_profile`
     * `aws_transfer_workflow`
+    * `aws_transfer_ssh_key`
     * `aws_transfer_user`
     * `aws_transfer_access`
     * `aws_transfer_agreement`
