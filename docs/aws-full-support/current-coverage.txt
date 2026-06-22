@@ -537,6 +537,7 @@ aws_kendra_query_suggestions_block_list
 aws_kendra_thesaurus
 aws_key_pair
 aws_keyspaces_keyspace
+aws_keyspaces_table
 aws_kinesis_firehose_delivery_stream
 aws_kinesis_stream
 aws_kinesis_stream_consumer

@@ -745,6 +745,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_m2_deployment`
 *   `keyspaces`
     * `aws_keyspaces_keyspace`
+    * `aws_keyspaces_table`
 *   `kinesis`
     * `aws_kinesis_stream`
     * `aws_kinesis_stream_consumer`

@@ -47,6 +47,21 @@ func (g *KeyspacesGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_keyspaces_keyspace", "aws", defaultAllowEmptyValues))
+			ksName := name
+			for tp := keyspaces.NewListTablesPaginator(svc, &keyspaces.ListTablesInput{KeyspaceName: &ksName}); tp.HasMorePages(); {
+				tpage, err := tp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, t := range tpage.Tables {
+					table := StringValue(t.TableName)
+					if table == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						ksName+"/"+table, ksName+"_"+table, "aws_keyspaces_table", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

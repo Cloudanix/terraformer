@@ -205,7 +205,6 @@ aws_iot_policy_attachment
 aws_iot_thing_group_membership
 aws_iot_thing_principal_attachment
 aws_ivschat_logging_configuration
-aws_keyspaces_table
 aws_kinesis_analytics_application
 aws_kinesis_resource_policy
 aws_kms_ciphertext
