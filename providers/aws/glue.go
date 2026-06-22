@@ -88,6 +88,24 @@ func (g *GlueGenerator) loadGlueCatalogTable(svc *glue.Client, account *string, 
 				"aws",
 				GlueCatalogTableAllowEmptyValues)
 			g.Resources = append(g.Resources, resource)
+
+			for ip := glue.NewGetPartitionIndexesPaginator(svc, &glue.GetPartitionIndexesInput{
+				CatalogId: account, DatabaseName: databaseName, TableName: catalogTable.Name,
+			}); ip.HasMorePages(); {
+				ipage, err := ip.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, idx := range ipage.PartitionIndexDescriptorList {
+					indexName := StringValue(idx.IndexName)
+					if indexName == "" {
+						continue
+					}
+					// import: catalog:db:table:index
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id+":"+indexName, databaseTable+"_"+indexName, "aws_glue_partition_index", "aws", GlueCatalogTableAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
