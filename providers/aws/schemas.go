@@ -34,9 +34,11 @@ func (g *SchemasGenerator) InitResources() error {
 	}
 	svc := schemas.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var registryNames []string
 	p := schemas.NewListRegistriesPaginator(svc, &schemas.ListRegistriesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +47,42 @@ func (g *SchemasGenerator) InitResources() error {
 			if name == "" {
 				continue
 			}
+			registryNames = append(registryNames, name)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_schemas_registry", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for d := schemas.NewListDiscoverersPaginator(svc, &schemas.ListDiscoverersInput{}); d.HasMorePages(); {
+		page, err := d.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, disc := range page.Discoverers {
+			id := StringValue(disc.DiscovererId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_schemas_discoverer", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, registry := range registryNames {
+		reg := registry
+		for sp := schemas.NewListSchemasPaginator(svc, &schemas.ListSchemasInput{RegistryName: &reg}); sp.HasMorePages(); {
+			page, err := sp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, s := range page.Schemas {
+				name := StringValue(s.SchemaName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					reg+":"+name, reg+"_"+name, "aws_schemas_schema", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil

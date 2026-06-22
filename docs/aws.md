@@ -910,6 +910,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_scheduler_schedule`
 *   `schemas`
     * `aws_schemas_registry`
+    * `aws_schemas_discoverer`
+    * `aws_schemas_schema`
 *   `timestream-influxdb`
     * `aws_timestreaminfluxdb_db_instance`
 *   `timestream-write`
