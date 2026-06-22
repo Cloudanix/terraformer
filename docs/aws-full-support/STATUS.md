@@ -84,10 +84,18 @@ catalogued in [no-list-api.md](no-list-api.md): deadline, iotwireless,
 devopsguru, serverlessrepo, ssm-sap, iotanalytics (AWS-deprecated, removed), and
 route53-recovery-* (revisit on demand).
 
-Also still open (own follow-ups, unchanged): apigatewayv2 gaps (file is
-aws-sdk-go v1, plan §11 forbids reintroducing v1 — needs a v2 rewrite first);
-sqs/sns `*_policy` (conflict with parent inline policy); §3's terraform-schema
-gap list (runnable via curl now, not yet executed).
+apigatewayv2 is now rewritten to aws-sdk-go-v2 (no more v1 in providers/aws) with
+the §4b gaps (integration, stage, deployment, domain_name, api_mapping) added.
+Still open: sqs/sns `*_policy` (conflict with parent inline policy).
+
+### §3 gap list — current-coverage.txt committed; schema dump sandbox-blocked
+`docs/aws-full-support/gen-gap-list.sh` runs the full §3 (with a curl-populated
+filesystem mirror so `terraform init` works without registry TLS). `current-
+coverage.txt` (523 resource types) is committed. `tf-aws-all-resources.txt` /
+`missing-resources.txt` need `terraform providers schema`, which launches the
+provider plugin over a local go-plugin gRPC socket — blocked in this sandbox
+(same limitation as the integration round-trip; "Unrecognized remote plugin
+message"). Run the script in a normal environment to produce the diff.
 
 ## Tests
 - `TestServiceScope` — every registered service has a consistent region scope.
