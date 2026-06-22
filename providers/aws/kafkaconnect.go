@@ -49,5 +49,34 @@ func (g *KafkaConnectGenerator) InitResources() error {
 				arn, StringValue(conn.ConnectorName), "aws_mskconnect_connector", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for cp := kafkaconnect.NewListCustomPluginsPaginator(svc, &kafkaconnect.ListCustomPluginsInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, p := range page.CustomPlugins {
+			arn := StringValue(p.CustomPluginArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(p.Name), "aws_mskconnect_custom_plugin", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for wp := kafkaconnect.NewListWorkerConfigurationsPaginator(svc, &kafkaconnect.ListWorkerConfigurationsInput{}); wp.HasMorePages(); {
+		page, err := wp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, w := range page.WorkerConfigurations {
+			arn := StringValue(w.WorkerConfigurationArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(w.Name), "aws_mskconnect_worker_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

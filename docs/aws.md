@@ -695,6 +695,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iot_role_alias`
 *   `kafkaconnect`
     * `aws_mskconnect_connector`
+    * `aws_mskconnect_custom_plugin`
+    * `aws_mskconnect_worker_configuration`
 *   `kendra`
     * `aws_kendra_index`
     * `aws_kendra_data_source`
