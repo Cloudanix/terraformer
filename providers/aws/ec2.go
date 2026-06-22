@@ -252,6 +252,68 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			add(aws.ToString(x.IpamScopeId), "aws_vpc_ipam_scope")
 		}
 	}
+	for p := ec2.NewDescribeNetworkInsightsPathsPaginator(svc, &ec2.DescribeNetworkInsightsPathsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.NetworkInsightsPaths {
+			add(aws.ToString(x.NetworkInsightsPathId), "aws_ec2_network_insights_path")
+		}
+	}
+	for p := ec2.NewDescribeNetworkInsightsAnalysesPaginator(svc, &ec2.DescribeNetworkInsightsAnalysesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.NetworkInsightsAnalyses {
+			add(aws.ToString(x.NetworkInsightsAnalysisId), "aws_ec2_network_insights_analysis")
+		}
+	}
+	for p := ec2.NewDescribeTransitGatewayConnectsPaginator(svc, &ec2.DescribeTransitGatewayConnectsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.TransitGatewayConnects {
+			add(aws.ToString(x.TransitGatewayAttachmentId), "aws_ec2_transit_gateway_connect")
+		}
+	}
+	for p := ec2.NewDescribeTransitGatewayMulticastDomainsPaginator(svc, &ec2.DescribeTransitGatewayMulticastDomainsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.TransitGatewayMulticastDomains {
+			add(aws.ToString(x.TransitGatewayMulticastDomainId), "aws_ec2_transit_gateway_multicast_domain")
+		}
+	}
+	for p := ec2.NewDescribeTransitGatewayPolicyTablesPaginator(svc, &ec2.DescribeTransitGatewayPolicyTablesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.TransitGatewayPolicyTables {
+			add(aws.ToString(x.TransitGatewayPolicyTableId), "aws_ec2_transit_gateway_policy_table")
+		}
+	}
+	for p := ec2.NewDescribeSecurityGroupRulesPaginator(svc, &ec2.DescribeSecurityGroupRulesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.SecurityGroupRules {
+			id := aws.ToString(x.SecurityGroupRuleId)
+			if id == "" {
+				continue
+			}
+			tfType := "aws_vpc_security_group_ingress_rule"
+			if aws.ToBool(x.IsEgress) {
+				tfType = "aws_vpc_security_group_egress_rule"
+			}
+			add(id, tfType)
+		}
+	}
 	return nil
 }
 

@@ -321,6 +321,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ec2_managed_prefix_list`
     * `aws_vpc_dhcp_options`
     * `aws_egress_only_internet_gateway`
+    * `aws_ec2_network_insights_path`
+    * `aws_ec2_network_insights_analysis`
+    * `aws_ec2_transit_gateway_connect`
+    * `aws_ec2_transit_gateway_multicast_domain`
+    * `aws_ec2_transit_gateway_policy_table`
+    * `aws_vpc_security_group_ingress_rule`
+    * `aws_vpc_security_group_egress_rule`
     * `aws_ebs_snapshot`
     * `aws_ec2_capacity_reservation`
     * `aws_ec2_carrier_gateway`
