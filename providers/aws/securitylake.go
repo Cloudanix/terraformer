@@ -75,26 +75,38 @@ func (g *SecurityLakeGenerator) InitResources() error {
 		}
 		for _, src := range page.Sources {
 			for _, r := range src.Sources {
-				switch v := r.(type) {
-				case *securitylaketypes.LogSourceResourceMemberAwsLogSource:
-					name := string(v.Value.SourceName)
-					if name == "" || seenLog["aws:"+name] {
-						continue
-					}
-					seenLog["aws:"+name] = true
-					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-						name, name, "aws_securitylake_aws_log_source", "aws", defaultAllowEmptyValues))
-				case *securitylaketypes.LogSourceResourceMemberCustomLogSource:
-					name := StringValue(v.Value.SourceName)
-					if name == "" || seenLog["custom:"+name] {
-						continue
-					}
-					seenLog["custom:"+name] = true
-					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-						name, name, "aws_securitylake_custom_log_source", "aws", defaultAllowEmptyValues))
+				tfType, name, ok := securityLakeLogSource(r, seenLog)
+				if !ok {
+					continue
 				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name, name, tfType, "aws", defaultAllowEmptyValues))
 			}
 		}
 	}
 	return nil
+}
+
+// securityLakeLogSource classifies one log-source union member into its TF
+// resource type + source name, deduping against seen (keyed by type+name so the
+// same source repeated across accounts/regions is emitted once). Returns
+// ok=false for empty names, already-seen sources, or unknown union members.
+func securityLakeLogSource(r securitylaketypes.LogSourceResource, seen map[string]bool) (tfType, name string, ok bool) {
+	switch v := r.(type) {
+	case *securitylaketypes.LogSourceResourceMemberAwsLogSource:
+		name, tfType = string(v.Value.SourceName), "aws_securitylake_aws_log_source"
+	case *securitylaketypes.LogSourceResourceMemberCustomLogSource:
+		name, tfType = StringValue(v.Value.SourceName), "aws_securitylake_custom_log_source"
+	default:
+		return "", "", false
+	}
+	if name == "" {
+		return "", "", false
+	}
+	key := tfType + ":" + name
+	if seen[key] {
+		return "", "", false
+	}
+	seen[key] = true
+	return tfType, name, true
 }

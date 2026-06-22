@@ -34,6 +34,13 @@ type IamGenerator struct {
 	AWSService
 }
 
+// isServiceLinkedRolePath reports whether an IAM role path identifies a
+// service-linked role (which maps to aws_iam_service_linked_role, not
+// aws_iam_role).
+func isServiceLinkedRolePath(path string) bool {
+	return strings.HasPrefix(path, "/aws-service-role/")
+}
+
 func (g *IamGenerator) InitResources() error {
 	config, e := g.generateConfig()
 	if e != nil {
@@ -174,7 +181,7 @@ func (g *IamGenerator) getRoles(svc *iam.Client) error {
 			roleName := StringValue(role.RoleName)
 			// Service-linked roles can't be managed as aws_iam_role; they map
 			// to aws_iam_service_linked_role (import by ARN).
-			if strings.HasPrefix(StringValue(role.Path), "/aws-service-role/") {
+			if isServiceLinkedRolePath(StringValue(role.Path)) {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					StringValue(role.Arn), roleName, "aws_iam_service_linked_role", "aws", IamAllowEmptyValues))
 				continue

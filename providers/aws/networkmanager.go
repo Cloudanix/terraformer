@@ -27,6 +27,24 @@ type NetworkManagerGenerator struct {
 	AWSService
 }
 
+// networkmanagerAttachmentResourceType maps a Network Manager attachment type to
+// its terraform-provider-aws resource type, or "" for types with no dedicated
+// resource (so the generator skips them).
+func networkmanagerAttachmentResourceType(attachmentType string) string {
+	switch attachmentType {
+	case "CONNECT":
+		return "aws_networkmanager_connect_attachment"
+	case "SITE_TO_SITE_VPN":
+		return "aws_networkmanager_site_to_site_vpn_attachment"
+	case "TRANSIT_GATEWAY_ROUTE_TABLE":
+		return "aws_networkmanager_transit_gateway_route_table_attachment"
+	case "VPC":
+		return "aws_networkmanager_vpc_attachment"
+	default:
+		return ""
+	}
+}
+
 func (g *NetworkManagerGenerator) InitResources() error {
 	config, e := g.generateConfig()
 	if e != nil {
@@ -79,19 +97,13 @@ func (g *NetworkManagerGenerator) InitResources() error {
 		}
 	}
 
-	attachmentTypes := map[string]string{
-		"CONNECT":                     "aws_networkmanager_connect_attachment",
-		"SITE_TO_SITE_VPN":            "aws_networkmanager_site_to_site_vpn_attachment",
-		"TRANSIT_GATEWAY_ROUTE_TABLE": "aws_networkmanager_transit_gateway_route_table_attachment",
-		"VPC":                         "aws_networkmanager_vpc_attachment",
-	}
 	for ap := networkmanager.NewListAttachmentsPaginator(svc, &networkmanager.ListAttachmentsInput{}); ap.HasMorePages(); {
 		page, err := ap.NextPage(ctx)
 		if err != nil {
 			return err
 		}
 		for _, a := range page.Attachments {
-			if tfType, ok := attachmentTypes[string(a.AttachmentType)]; ok {
+			if tfType := networkmanagerAttachmentResourceType(string(a.AttachmentType)); tfType != "" {
 				add(StringValue(a.AttachmentId), tfType)
 			}
 		}

@@ -28,6 +28,21 @@ type NaclGenerator struct {
 	AWSService
 }
 
+// naclRuleImportID builds the aws_network_acl_rule import ID
+// ("<nacl>:<rule>:<protocol>:<egress>") for one network ACL entry, returning
+// ok=false for entries that must be skipped (no rule number, or the implicit
+// 32767 default-deny rule which is not a manageable resource).
+func naclRuleImportID(naclID string, ruleNumber *int32, protocol string, egress *bool) (string, bool) {
+	if ruleNumber == nil || *ruleNumber == 32767 {
+		return "", false
+	}
+	egressStr := "false"
+	if egress != nil && *egress {
+		egressStr = "true"
+	}
+	return naclID + ":" + strconv.Itoa(int(*ruleNumber)) + ":" + protocol + ":" + egressStr, true
+}
+
 func (NaclGenerator) createResources(nacls *ec2.DescribeNetworkAclsOutput) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
 	var resourceType string
@@ -50,16 +65,10 @@ func (NaclGenerator) createResources(nacls *ec2.DescribeNetworkAclsOutput) []ter
 			continue
 		}
 		for _, entry := range nacl.Entries {
-			if entry.RuleNumber == nil || *entry.RuleNumber == 32767 {
+			id, ok := naclRuleImportID(naclID, entry.RuleNumber, StringValue(entry.Protocol), entry.Egress)
+			if !ok {
 				continue
 			}
-			ruleNum := strconv.Itoa(int(*entry.RuleNumber))
-			protocol := StringValue(entry.Protocol)
-			egress := "false"
-			if entry.Egress != nil && *entry.Egress {
-				egress = "true"
-			}
-			id := naclID + ":" + ruleNum + ":" + protocol + ":" + egress
 			resources = append(resources, terraformutils.NewSimpleResource(
 				id, id, "aws_network_acl_rule", "aws", NaclAllowEmptyValues))
 		}
