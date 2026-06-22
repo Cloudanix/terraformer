@@ -84,5 +84,21 @@ func (g *Inspector2Generator) InitResources() error {
 		}
 	}
 
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	accountID := StringValue(account)
+	if accountID != "" {
+		if status, err := svc.BatchGetAccountStatus(ctx, &inspector2.BatchGetAccountStatusInput{AccountIds: []string{accountID}}); err == nil && len(status.Accounts) > 0 {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_inspector2_enabler", "aws", defaultAllowEmptyValues))
+		}
+		if _, err := svc.DescribeOrganizationConfiguration(ctx, &inspector2.DescribeOrganizationConfigurationInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_inspector2_organization_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	return nil
 }

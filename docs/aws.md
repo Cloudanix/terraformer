@@ -561,6 +561,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_inspector2_delegated_admin_account`
     * `aws_inspector2_member_association`
     * `aws_inspector2_filter`
+    * `aws_inspector2_enabler`
+    * `aws_inspector2_organization_configuration`
 *   `iot`
     * `aws_iot_thing`
     * `aws_iot_thing_type`
