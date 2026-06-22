@@ -317,6 +317,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_autoscalingplans_scaling_plan`
 *   `codestar-connections`
     * `aws_codestarconnections_connection`
+    * `aws_codestarconnections_host`
+    * `aws_codeconnections_connection`
+    * `aws_codeconnections_host`
 *   `codepipeline`
     * `aws_codepipeline`
     * `aws_codepipeline_webhook`

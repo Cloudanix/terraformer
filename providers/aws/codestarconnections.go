@@ -46,8 +46,30 @@ func (g *CodeStarConnectionsGenerator) InitResources() error {
 			if arn == "" {
 				continue
 			}
+			name := StringValue(conn.ConnectionName)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				arn, StringValue(conn.ConnectionName), "aws_codestarconnections_connection", "aws", defaultAllowEmptyValues))
+				arn, name, "aws_codestarconnections_connection", "aws", defaultAllowEmptyValues))
+			// codeconnections is the renamed service backed by the same API.
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, name, "aws_codeconnections_connection", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for hp := codestarconnections.NewListHostsPaginator(svc, &codestarconnections.ListHostsInput{}); hp.HasMorePages(); {
+		page, err := hp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, h := range page.Hosts {
+			arn := StringValue(h.HostArn)
+			if arn == "" {
+				continue
+			}
+			name := StringValue(h.Name)
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, name, "aws_codestarconnections_host", "aws", defaultAllowEmptyValues))
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, name, "aws_codeconnections_host", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
