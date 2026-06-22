@@ -771,6 +771,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_verifiedaccess_endpoint`
 *   `verifiedpermissions`
     * `aws_verifiedpermissions_policy_store`
+    * `aws_verifiedpermissions_policy`
+    * `aws_verifiedpermissions_policy_template`
+    * `aws_verifiedpermissions_identity_source`
+    * `aws_verifiedpermissions_schema`
 *   `vpc-lattice`
     * `aws_vpclattice_service`
     * `aws_vpclattice_service_network`

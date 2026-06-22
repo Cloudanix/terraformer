@@ -35,9 +35,11 @@ func (g *VerifiedPermissionsGenerator) InitResources() error {
 	}
 	svc := verifiedpermissions.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var storeIDs []string
 	p := verifiedpermissions.NewListPolicyStoresPaginator(svc, &verifiedpermissions.ListPolicyStoresInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -46,8 +48,59 @@ func (g *VerifiedPermissionsGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			storeIDs = append(storeIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_verifiedpermissions_policy_store", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, storeID := range storeIDs {
+		store := storeID
+		for pp := verifiedpermissions.NewListPoliciesPaginator(svc, &verifiedpermissions.ListPoliciesInput{PolicyStoreId: &store}); pp.HasMorePages(); {
+			page, err := pp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, pol := range page.Policies {
+				id := StringValue(pol.PolicyId)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id+":"+store, store+"_"+id, "aws_verifiedpermissions_policy", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for tp := verifiedpermissions.NewListPolicyTemplatesPaginator(svc, &verifiedpermissions.ListPolicyTemplatesInput{PolicyStoreId: &store}); tp.HasMorePages(); {
+			page, err := tp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, t := range page.PolicyTemplates {
+				id := StringValue(t.PolicyTemplateId)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					store+":"+id, store+"_"+id, "aws_verifiedpermissions_policy_template", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for ip := verifiedpermissions.NewListIdentitySourcesPaginator(svc, &verifiedpermissions.ListIdentitySourcesInput{PolicyStoreId: &store}); ip.HasMorePages(); {
+			page, err := ip.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, is := range page.IdentitySources {
+				id := StringValue(is.IdentitySourceId)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					store+":"+id, store+"_"+id, "aws_verifiedpermissions_identity_source", "aws", defaultAllowEmptyValues))
+			}
+		}
+		if _, err := svc.GetSchema(ctx, &verifiedpermissions.GetSchemaInput{PolicyStoreId: &store}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				store, store, "aws_verifiedpermissions_schema", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
