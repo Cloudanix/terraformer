@@ -204,6 +204,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_athena_prepared_statement`
 *   `auto_scaling`
     * `aws_autoscaling_group`
+    * `aws_autoscaling_lifecycle_hook`
+    * `aws_autoscaling_schedule`
     * `aws_launch_configuration`
     * `aws_launch_template`
 *   `backup`

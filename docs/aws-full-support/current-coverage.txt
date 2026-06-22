@@ -93,6 +93,8 @@ aws_auditmanager_assessment_report
 aws_auditmanager_control
 aws_auditmanager_framework
 aws_autoscaling_group
+aws_autoscaling_lifecycle_hook
+aws_autoscaling_schedule
 aws_autoscalingplans_scaling_plan
 aws_backup_framework
 aws_backup_global_settings

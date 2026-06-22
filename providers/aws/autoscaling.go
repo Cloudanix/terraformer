@@ -53,6 +53,32 @@ func (g *AutoScalingGenerator) loadAutoScalingGroups(svc *autoscaling.Client) er
 				AsgAllowEmptyValues,
 				map[string]interface{}{},
 			))
+
+			asgName := resourceName
+			if hooks, err := svc.DescribeLifecycleHooks(context.TODO(), &autoscaling.DescribeLifecycleHooksInput{AutoScalingGroupName: &asgName}); err == nil {
+				for _, h := range hooks.LifecycleHooks {
+					name := StringValue(h.LifecycleHookName)
+					if name == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						asgName+"/"+name, asgName+"_"+name, "aws_autoscaling_lifecycle_hook", "aws", AsgAllowEmptyValues))
+				}
+			}
+			for sp := autoscaling.NewDescribeScheduledActionsPaginator(svc, &autoscaling.DescribeScheduledActionsInput{AutoScalingGroupName: &asgName}); sp.HasMorePages(); {
+				spage, err := sp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, a := range spage.ScheduledUpdateGroupActions {
+					name := StringValue(a.ScheduledActionName)
+					if name == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						asgName+"/"+name, asgName+"_"+name, "aws_autoscaling_schedule", "aws", AsgAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
