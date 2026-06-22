@@ -363,6 +363,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_datazone_environment_blueprint_configuration`
 *   `config`
     * `aws_config_config_rule`
+    * `aws_config_remediation_configuration`
     * `aws_config_configuration_recorder`
     * `aws_config_delivery_channel`
     * `aws_config_configuration_aggregator`

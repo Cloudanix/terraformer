@@ -187,8 +187,10 @@ func (g *ConfigGenerator) addConfigRules(svc *configservice.Client, configuratio
 		if err != nil {
 			return err
 		}
+		var ruleNames []string
 		for _, configRule := range configRules.ConfigRules {
 			name := *configRule.ConfigRuleName
+			ruleNames = append(ruleNames, name)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				name,
 				name,
@@ -200,6 +202,20 @@ func (g *ConfigGenerator) addConfigRules(svc *configservice.Client, configuratio
 					"depends_on": configurationRecorderRefs,
 				},
 			))
+		}
+		// Remediation configs are keyed by config rule name.
+		if len(ruleNames) > 0 {
+			if rem, err := svc.DescribeRemediationConfigurations(context.TODO(),
+				&configservice.DescribeRemediationConfigurationsInput{ConfigRuleNames: ruleNames}); err == nil {
+				for _, rc := range rem.RemediationConfigurations {
+					ruleName := StringValue(rc.ConfigRuleName)
+					if ruleName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						ruleName, ruleName, "aws_config_remediation_configuration", "aws", configAllowEmptyValues))
+				}
+			}
 		}
 		nextToken = configRules.NextToken
 		if nextToken == nil {
