@@ -177,6 +177,9 @@ func (g *ElastiCacheGenerator) InitResources() error {
 	if err := g.loadGlobalReplicationGroups(svc); err != nil {
 		return err
 	}
+	if err := g.loadReservedCacheNodes(svc); err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -252,6 +255,32 @@ func (g *ElastiCacheGenerator) loadUserGroups(svc *elasticache.Client) error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_elasticache_user_group", "aws", elastiCacheAllowEmptyValues))
+			for _, userID := range group.UserIds {
+				if userID == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id+","+userID, id+"_"+userID, "aws_elasticache_user_group_association", "aws", elastiCacheAllowEmptyValues))
+			}
+		}
+	}
+	return nil
+}
+
+func (g *ElastiCacheGenerator) loadReservedCacheNodes(svc *elasticache.Client) error {
+	p := elasticache.NewDescribeReservedCacheNodesPaginator(svc, &elasticache.DescribeReservedCacheNodesInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, node := range page.ReservedCacheNodes {
+			id := StringValue(node.ReservedCacheNodeId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_elasticache_reserved_cache_node", "aws", elastiCacheAllowEmptyValues))
 		}
 	}
 	return nil
