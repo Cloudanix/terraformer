@@ -557,6 +557,7 @@ aws_prometheus_workspace
 aws_proton_environment
 aws_qbusiness_application
 aws_qldb_ledger
+aws_qldb_stream
 aws_quicksight_analysis
 aws_quicksight_dashboard
 aws_quicksight_data_set

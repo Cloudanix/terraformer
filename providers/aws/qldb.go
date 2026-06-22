@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/qldb"
 	"github.com/aws/aws-sdk-go-v2/service/qldb/types"
 )
@@ -31,16 +32,41 @@ func (g *QLDBGenerator) InitResources() error {
 		return e
 	}
 	svc := qldb.NewFromConfig(config)
+	var ledgerNames []string
 	p := qldb.NewListLedgersPaginator(svc, &qldb.ListLedgersInput{})
 	for p.HasMorePages() {
 		page, err := p.NextPage(context.TODO())
 		if err != nil {
 			return err
 		}
+		for _, l := range page.Ledgers {
+			ledgerNames = append(ledgerNames, StringValue(l.Name))
+		}
 		g.Resources = appendSimpleResources(g.Resources, page.Ledgers, "aws_qldb_ledger",
 			defaultAllowEmptyValues,
 			func(l types.LedgerSummary) string { return StringValue(l.Name) },
 			func(l types.LedgerSummary) string { return StringValue(l.Name) })
+	}
+
+	for _, ledger := range ledgerNames {
+		if ledger == "" {
+			continue
+		}
+		sp := qldb.NewListJournalKinesisStreamsForLedgerPaginator(svc, &qldb.ListJournalKinesisStreamsForLedgerInput{LedgerName: &ledger})
+		for sp.HasMorePages() {
+			page, err := sp.NextPage(context.TODO())
+			if err != nil {
+				break
+			}
+			for _, s := range page.Streams {
+				streamID := StringValue(s.StreamId)
+				if streamID == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					ledger+","+streamID, ledger+"_"+streamID, "aws_qldb_stream", "aws", defaultAllowEmptyValues))
+			}
+		}
 	}
 	return nil
 }

@@ -437,7 +437,6 @@ aws_prometheus_alert_manager_definition
 aws_prometheus_rule_group_namespace
 aws_prometheus_scraper
 aws_proxy_protocol_policy
-aws_qldb_stream
 aws_quicksight_account_subscription
 aws_quicksight_folder_membership
 aws_quicksight_group
