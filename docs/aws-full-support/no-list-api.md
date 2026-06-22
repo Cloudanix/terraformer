@@ -16,6 +16,15 @@ resource to import into, so a generator would emit un-refreshable HCL:
 - **serverlessrepo** — only `aws_serverlessapplicationrepository_cloudformation_stack`
   (a deployment action), nothing to list/enumerate.
 
+## Would double-manage an attribute terraformer already inlines
+- **aws_sqs_queue_policy**, **aws_sns_topic_policy** — the `aws_sqs_queue` /
+  `aws_sns_topic` generators already emit the policy as an inline attribute
+  (see their `PostConvertHook`s wrapping `policy` in a heredoc). Emitting a
+  separate `_policy` resource would have two resources manage the same policy,
+  which Terraform rejects. (Contrast `s3`, which does NOT inline the bucket
+  policy and so DOES emit a separate `aws_s3_bucket_policy`.) Revisit only if the
+  parent generators stop inlining the policy.
+
 ## AWS-deprecated services
 - **iotanalytics** — AWS has deprecated the service ("no longer available for
   use"); the SDK package itself is marked deprecated. Removed from the registry.
