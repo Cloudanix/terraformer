@@ -50,7 +50,43 @@ func (g *APIGatewayGenerator) InitResources() error {
 	if err := g.loadAPIKeys(svc); err != nil {
 		return err
 	}
+	if err := g.loadClientCertificatesAndDomains(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *APIGatewayGenerator) loadClientCertificatesAndDomains(svc *apigateway.Client) error {
+	ctx := context.TODO()
+	for p := apigateway.NewGetClientCertificatesPaginator(svc, &apigateway.GetClientCertificatesInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.Items {
+			id := StringValue(c.ClientCertificateId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_api_gateway_client_certificate", "aws", apiGatewayAllowEmptyValues))
+		}
+	}
+	for p := apigateway.NewGetDomainNamesPaginator(svc, &apigateway.GetDomainNamesInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, d := range page.Items {
+			name := StringValue(d.DomainName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_api_gateway_domain_name", "aws", apiGatewayAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
