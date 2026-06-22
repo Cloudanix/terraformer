@@ -65,6 +65,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appautoscaling_target`
     * `aws_appautoscaling_policy`
     * `aws_appautoscaling_scheduled_action`
+*   `appconfig`
+    * `aws_appconfig_application`
+*   `appmesh`
+    * `aws_appmesh_mesh`
+*   `apprunner`
+    * `aws_apprunner_service`
 *   `appsync`
     * `aws_appsync_graphql_api`
 *   `athena`
@@ -232,6 +238,10 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `emr`
     * `aws_emr_cluster`
     * `aws_emr_security_configuration`
+*   `emr-containers`
+    * `aws_emrcontainers_virtual_cluster`
+*   `emr-serverless`
+    * `aws_emrserverless_application`
 *   `eni`
     * `aws_network_interface`
 *   `es`
@@ -304,9 +314,19 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iot_thing_type`
     * `aws_iot_topic_rule`
     * `aws_iot_role_alias`
+*   `kafkaconnect`
+    * `aws_mskconnect_connector`
+*   `keyspaces`
+    * `aws_keyspaces_keyspace`
 *   `kinesis`
     * `aws_kinesis_stream`
     * `aws_kinesis_stream_consumer`
+*   `kinesisanalyticsv2`
+    * `aws_kinesisanalyticsv2_application`
+*   `kinesisvideo`
+    * `aws_kinesis_video_stream`
+*   `lakeformation`
+    * `aws_lakeformation_resource`
 *   `kms`
     * `aws_kms_key`
     * `aws_kms_alias`
@@ -334,6 +354,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_neptune_cluster`
 *   `opensearch`
     * `aws_opensearch_domain`
+*   `opensearchserverless`
+    * `aws_opensearchserverless_collection`
+*   `pipes`
+    * `aws_pipes_pipe`
+*   `mwaa`
+    * `aws_mwaa_environment`
 *   `media_package`
     * `aws_media_package_channel`
 *   `media_store`
@@ -402,6 +428,23 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_db_option_group`
     * `aws_db_event_subscription`
     * `aws_rds_global_cluster`
+*   `redshift-serverless`
+    * `aws_redshiftserverless_namespace`
+    * `aws_redshiftserverless_workgroup`
+*   `sagemaker`
+    * `aws_sagemaker_domain`
+    * `aws_sagemaker_notebook_instance`
+    * `aws_sagemaker_model`
+    * `aws_sagemaker_endpoint`
+    * `aws_sagemaker_endpoint_configuration`
+    * `aws_sagemaker_code_repository`
+*   `scheduler`
+    * `aws_scheduler_schedule_group`
+    * `aws_scheduler_schedule`
+*   `schemas`
+    * `aws_schemas_registry`
+*   `timestream-write`
+    * `aws_timestreamwrite_database`
 *   `redshift`
     * `aws_redshift_cluster`
     * `aws_redshift_event_subscription`
