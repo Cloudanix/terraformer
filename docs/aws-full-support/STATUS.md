@@ -76,6 +76,10 @@ account singletons). No buildable net-new *service* remains.
 
 ## Coverage tally
 
+Current coverage: 234 services / 706 `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = 765 (≈243 documented structural exclusions + ≈522
+buildable per-parent/composite sub-resources, the plan §9 multi-session tail).
+
 **234 services registered** in `GetSupportedService()` (was 90 at the start of
 this effort). All §4b partial-service gaps done; §4a P1/P2/P3 done; §4a P4 done
 across 6 batches. `go build ./...` and `go test ./...` green; `serviceScope`
@@ -116,7 +120,7 @@ import`. Run `gen-gap-list.sh` in a normal environment to produce the diff.
 
 ## Tests (cover every service + the logic-bearing/foundation code)
 - `TestAllServicesInstantiable` — every registered service's facade+generator is
-  non-nil and accepts the cmd/import.go wiring (per-service smoke test, all 206).
+  non-nil and accepts the cmd/import.go wiring (per-service smoke test, all 234).
 - `TestServiceScopeMatchesRegistry` — every service region-classified+consistent.
 - `TestEveryServiceDocumented` — every service present in docs/aws.md.
 - `TestQuotasFromChangeHistory` + §0 helper tests (`TestAppendSimpleResources*`,
