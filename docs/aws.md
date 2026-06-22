@@ -1082,6 +1082,10 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `storagegateway`
     * `aws_storagegateway_gateway`
     * `aws_storagegateway_tape_pool`
+    * `aws_storagegateway_nfs_file_share`
+    * `aws_storagegateway_smb_file_share`
+    * `aws_storagegateway_cached_iscsi_volume`
+    * `aws_storagegateway_stored_iscsi_volume`
 *   `subnet`
     * `aws_subnet`
 *   `swf`

@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/storagegateway"
 	"github.com/aws/aws-sdk-go-v2/service/storagegateway/types"
 )
@@ -56,6 +57,54 @@ func (g *StorageGatewayGenerator) InitResources() error {
 			defaultAllowEmptyValues,
 			func(p types.PoolInfo) string { return StringValue(p.PoolARN) },
 			func(p types.PoolInfo) string { return StringValue(p.PoolName) })
+	}
+
+	for fs := storagegateway.NewListFileSharesPaginator(svc, &storagegateway.ListFileSharesInput{}); fs.HasMorePages(); {
+		page, err := fs.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, f := range page.FileShareInfoList {
+			arn := StringValue(f.FileShareARN)
+			if arn == "" {
+				continue
+			}
+			tfType := ""
+			switch f.FileShareType {
+			case "NFS":
+				tfType = "aws_storagegateway_nfs_file_share"
+			case "SMB":
+				tfType = "aws_storagegateway_smb_file_share"
+			default:
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for vol := storagegateway.NewListVolumesPaginator(svc, &storagegateway.ListVolumesInput{}); vol.HasMorePages(); {
+		page, err := vol.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, v := range page.VolumeInfos {
+			arn := StringValue(v.VolumeARN)
+			if arn == "" {
+				continue
+			}
+			tfType := ""
+			switch StringValue(v.VolumeType) {
+			case "CACHED":
+				tfType = "aws_storagegateway_cached_iscsi_volume"
+			case "STORED":
+				tfType = "aws_storagegateway_stored_iscsi_volume"
+			default:
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, tfType, "aws", defaultAllowEmptyValues))
+		}
 	}
 	return nil
 }
