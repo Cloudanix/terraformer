@@ -374,12 +374,7 @@ require (
 	github.com/Myra-Security-GmbH/signature v1.0.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
-	github.com/aws/aws-sdk-go-v2/service/acmpca v1.47.6 // indirect
-	github.com/aws/aws-sdk-go-v2/service/detective v1.39.5 // indirect
-	github.com/aws/aws-sdk-go-v2/service/fms v1.45.6 // indirect
 	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.49.2 // indirect
-	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3 // indirect
-	github.com/aws/aws-sdk-go-v2/service/signer v1.33.6 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/cncf/xds/go v0.0.0-20240905190251-b4127c9b8d78 // indirect
@@ -433,24 +428,29 @@ require (
 require (
 	github.com/IBM/continuous-delivery-go-sdk/v2 v2.0.2
 	github.com/aws/aws-sdk-go v1.44.122
+	github.com/aws/aws-sdk-go-v2/service/acmpca v1.47.6
 	github.com/aws/aws-sdk-go-v2/service/applicationautoscaling v1.43.0
 	github.com/aws/aws-sdk-go-v2/service/backup v1.57.6
 	github.com/aws/aws-sdk-go-v2/service/databasemigrationservice v1.64.4
 	github.com/aws/aws-sdk-go-v2/service/datasync v1.59.7
 	github.com/aws/aws-sdk-go-v2/service/dax v1.30.2
+	github.com/aws/aws-sdk-go-v2/service/detective v1.39.5
 	github.com/aws/aws-sdk-go-v2/service/directconnect v1.30.1
 	github.com/aws/aws-sdk-go-v2/service/directoryservice v1.39.4
 	github.com/aws/aws-sdk-go-v2/service/dlm v1.37.6
+	github.com/aws/aws-sdk-go-v2/service/fms v1.45.6
 	github.com/aws/aws-sdk-go-v2/service/fsx v1.66.6
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4
 	github.com/aws/aws-sdk-go-v2/service/globalaccelerator v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.79.3
 	github.com/aws/aws-sdk-go-v2/service/macie2 v1.52.3
+	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/servicequotas v1.35.7
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.62.4
 	github.com/aws/aws-sdk-go-v2/service/shield v1.35.3
+	github.com/aws/aws-sdk-go-v2/service/signer v1.33.6
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
 	github.com/gofrs/uuid/v3 v3.1.2

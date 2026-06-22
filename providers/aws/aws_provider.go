@@ -289,6 +289,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"eni":                     &AwsFacade{service: &EniGenerator{}},
 		"es":                      &AwsFacade{service: &EsGenerator{}},
 		"firehose":                &AwsFacade{service: &FirehoseGenerator{}},
+		"fms":                     &AwsFacade{service: &FmsGenerator{}},
 		"fsx":                     &AwsFacade{service: &FsxGenerator{}},
 		"glacier":                 &AwsFacade{service: &GlacierGenerator{}},
 		"globalaccelerator":       &AwsFacade{service: &GlobalAcceleratorGenerator{}},

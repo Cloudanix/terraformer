@@ -231,6 +231,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_elasticsearch_domain`
 *   `firehose`
     * `aws_kinesis_firehose_delivery_stream`
+*   `fms`
+    * `aws_fms_policy`
 *   `fsx`
     * `aws_fsx_windows_file_system`
     * `aws_fsx_lustre_file_system`

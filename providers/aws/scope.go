@@ -98,6 +98,7 @@ var serviceScope = map[string]regionScope{
 	"eni":                     scopeRegional,
 	"es":                      scopeRegional,
 	"firehose":                scopeRegional,
+	"fms":                     scopeRegional,
 	"fsx":                     scopeRegional,
 	"glacier":                 scopeRegional,
 	"glue":                    scopeRegional,
