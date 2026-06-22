@@ -297,6 +297,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `codebuild`
     * `aws_codebuild_project`
     * `aws_codebuild_report_group`
+    * `aws_codebuild_resource_policy`
     * `aws_codebuild_webhook`
     * `aws_codebuild_source_credential`
 *   `codecommit`

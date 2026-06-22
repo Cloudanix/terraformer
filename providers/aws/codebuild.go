@@ -63,6 +63,13 @@ func (g *CodeBuildGenerator) InitResources() error {
 			continue
 		}
 		for _, proj := range out.Projects {
+			if arn := StringValue(proj.Arn); arn != "" {
+				arnCopy := arn
+				if rp, err := svc.GetResourcePolicy(ctx, &codebuild.GetResourcePolicyInput{ResourceArn: &arnCopy}); err == nil && StringValue(rp.Policy) != "" {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						arn, arn, "aws_codebuild_resource_policy", "aws", codebuildAllowEmptyValues))
+				}
+			}
 			if proj.Webhook == nil {
 				continue
 			}

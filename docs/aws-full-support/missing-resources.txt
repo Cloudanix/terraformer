@@ -40,7 +40,6 @@ aws_cloudwatch_event_endpoint
 aws_cloudwatch_event_permission
 aws_cloudwatch_log_stream
 aws_codebuild_fleet
-aws_codebuild_resource_policy
 aws_codecatalyst_dev_environment
 aws_codecatalyst_project
 aws_codecatalyst_source_repository
