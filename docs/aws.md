@@ -107,6 +107,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudwatch_event_rule`
     * `aws_cloudwatch_event_target`
     * `aws_cloudwatch_metric_alarm`
+    * `aws_cloudwatch_composite_alarm`
+    * `aws_cloudwatch_event_bus`
+    * `aws_cloudwatch_event_connection`
+    * `aws_cloudwatch_event_api_destination`
 *   `codebuild`
     * `aws_codebuild_project`
 *   `codecommit`

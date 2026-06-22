@@ -49,8 +49,84 @@ func (g *CloudWatchGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	if err := g.createEventBuses(cloudwatcheventsSvc); err != nil {
+		return err
+	}
+	if err := g.createEventConnections(cloudwatcheventsSvc); err != nil {
+		return err
+	}
+	if err := g.createEventAPIDestinations(cloudwatcheventsSvc); err != nil {
+		return err
+	}
 
 	return nil
+}
+
+func (g *CloudWatchGenerator) createEventBuses(svc *cloudwatchevents.Client) error {
+	var nextToken *string
+	for {
+		output, err := svc.ListEventBuses(context.TODO(), &cloudwatchevents.ListEventBusesInput{NextToken: nextToken})
+		if err != nil {
+			return err
+		}
+		for _, bus := range output.EventBuses {
+			name := StringValue(bus.Name)
+			// The "default" event bus is implicit and not managed as a resource.
+			if name == "" || name == "default" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_event_bus", "aws", cloudwatchAllowEmptyValues))
+		}
+		nextToken = output.NextToken
+		if nextToken == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudWatchGenerator) createEventConnections(svc *cloudwatchevents.Client) error {
+	var nextToken *string
+	for {
+		output, err := svc.ListConnections(context.TODO(), &cloudwatchevents.ListConnectionsInput{NextToken: nextToken})
+		if err != nil {
+			return err
+		}
+		for _, conn := range output.Connections {
+			name := StringValue(conn.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_event_connection", "aws", cloudwatchAllowEmptyValues))
+		}
+		nextToken = output.NextToken
+		if nextToken == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudWatchGenerator) createEventAPIDestinations(svc *cloudwatchevents.Client) error {
+	var nextToken *string
+	for {
+		output, err := svc.ListApiDestinations(context.TODO(), &cloudwatchevents.ListApiDestinationsInput{NextToken: nextToken})
+		if err != nil {
+			return err
+		}
+		for _, dest := range output.ApiDestinations {
+			name := StringValue(dest.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_event_api_destination", "aws", cloudwatchAllowEmptyValues))
+		}
+		nextToken = output.NextToken
+		if nextToken == nil {
+			return nil
+		}
+	}
 }
 
 func (g *CloudWatchGenerator) createMetricAlarms(cloudwatchSvc *cloudwatch.Client) error {
@@ -69,6 +145,14 @@ func (g *CloudWatchGenerator) createMetricAlarms(cloudwatchSvc *cloudwatch.Clien
 				"aws_cloudwatch_metric_alarm",
 				"aws",
 				cloudwatchAllowEmptyValues))
+		}
+		for _, compositeAlarm := range output.CompositeAlarms {
+			name := StringValue(compositeAlarm.AlarmName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_composite_alarm", "aws", cloudwatchAllowEmptyValues))
 		}
 		nextToken = output.NextToken
 		if nextToken == nil {
