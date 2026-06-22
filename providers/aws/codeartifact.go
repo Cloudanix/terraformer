@@ -49,5 +49,20 @@ func (g *CodeArtifactGenerator) InitResources() error {
 				name, name, "aws_codeartifact_domain", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for rp := codeartifact.NewListRepositoriesPaginator(svc, &codeartifact.ListRepositoriesInput{}); rp.HasMorePages(); {
+		page, err := rp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, repo := range page.Repositories {
+			arn := StringValue(repo.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(repo.Name), "aws_codeartifact_repository", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

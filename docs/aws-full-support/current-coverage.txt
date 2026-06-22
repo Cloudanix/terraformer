@@ -177,6 +177,7 @@ aws_cloudwatch_metric_alarm
 aws_cloudwatch_metric_stream
 aws_cloudwatch_query_definition
 aws_codeartifact_domain
+aws_codeartifact_repository
 aws_codebuild_project
 aws_codebuild_report_group
 aws_codebuild_source_credential
