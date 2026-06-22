@@ -475,7 +475,10 @@ aws_rbin_rule
 aws_rds_cluster
 aws_rds_cluster_endpoint
 aws_rds_cluster_parameter_group
+aws_rds_export_task
 aws_rds_global_cluster
+aws_rds_integration
+aws_rds_reserved_instance
 aws_redshift_authentication_profile
 aws_redshift_cluster
 aws_redshift_cluster_snapshot
@@ -516,6 +519,7 @@ aws_route53_resolver_query_log_config_association
 aws_route53_resolver_rule
 aws_route53_resolver_rule_association
 aws_route53_traffic_policy
+aws_route53_traffic_policy_instance
 aws_route53_zone
 aws_route53domains_registered_domain
 aws_route53profiles_profile
@@ -645,6 +649,7 @@ aws_vpc_endpoint
 aws_vpc_endpoint_service
 aws_vpc_ipam
 aws_vpc_ipam_pool
+aws_vpc_ipam_resource_discovery
 aws_vpc_ipam_scope
 aws_vpc_peering_connection
 aws_vpc_security_group_egress_rule

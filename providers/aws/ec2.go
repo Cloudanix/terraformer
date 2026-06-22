@@ -252,6 +252,15 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 			add(aws.ToString(x.IpamScopeId), "aws_vpc_ipam_scope")
 		}
 	}
+	for p := ec2.NewDescribeIpamResourceDiscoveriesPaginator(svc, &ec2.DescribeIpamResourceDiscoveriesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.IpamResourceDiscoveries {
+			add(aws.ToString(x.IpamResourceDiscoveryId), "aws_vpc_ipam_resource_discovery")
+		}
+	}
 	for p := ec2.NewDescribeNetworkInsightsPathsPaginator(svc, &ec2.DescribeNetworkInsightsPathsInput{}); p.HasMorePages(); {
 		pg, err := p.NextPage(ctx)
 		if err != nil {

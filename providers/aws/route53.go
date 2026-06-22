@@ -149,8 +149,27 @@ func (g *Route53Generator) InitResources() error {
 	g.Resources = append(g.Resources, g.createQueryLogResources(svc)...)
 	g.Resources = append(g.Resources, g.createTrafficPolicyResources(svc)...)
 	g.Resources = append(g.Resources, g.createCidrCollectionResources(svc)...)
+	g.Resources = append(g.Resources, g.createTrafficPolicyInstanceResources(svc)...)
 
 	return nil
+}
+
+func (Route53Generator) createTrafficPolicyInstanceResources(svc *route53.Client) []terraformutils.Resource {
+	var resources []terraformutils.Resource
+	out, err := svc.ListTrafficPolicyInstances(context.TODO(), &route53.ListTrafficPolicyInstancesInput{})
+	if err != nil {
+		log.Println(err)
+		return resources
+	}
+	for _, tpi := range out.TrafficPolicyInstances {
+		id := StringValue(tpi.Id)
+		if id == "" {
+			continue
+		}
+		resources = append(resources, terraformutils.NewSimpleResource(
+			id, id, "aws_route53_traffic_policy_instance", "aws", route53AllowEmptyValues))
+	}
+	return resources
 }
 
 func (Route53Generator) createTrafficPolicyResources(svc *route53.Client) []terraformutils.Resource {

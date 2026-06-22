@@ -346,6 +346,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpc_ipam`
     * `aws_vpc_ipam_pool`
     * `aws_vpc_ipam_scope`
+    * `aws_vpc_ipam_resource_discovery`
 *   `ecr`
     * `aws_ecr_lifecycle_policy`
     * `aws_ecr_repository`
@@ -703,6 +704,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_rds_global_cluster`
     * `aws_rds_cluster_parameter_group`
     * `aws_rds_cluster_endpoint`
+    * `aws_rds_reserved_instance`
+    * `aws_rds_integration`
+    * `aws_rds_export_task`
 *   `quicksight`
     * `aws_quicksight_data_set`
     * `aws_quicksight_data_source`
@@ -771,6 +775,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_query_log`
     * `aws_route53_traffic_policy`
     * `aws_route53_cidr_collection`
+    * `aws_route53_traffic_policy_instance`
 *   `route53domains`
     * `aws_route53domains_registered_domain`
 *   `route53recoveryreadiness`

@@ -298,7 +298,57 @@ func (g *RDSGenerator) InitResources() error {
 	if err := g.loadDBClusterEndpoints(svc); err != nil {
 		return err
 	}
+	if err := g.loadRDSExtras(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *RDSGenerator) loadRDSExtras(svc *rds.Client) error {
+	ctx := context.TODO()
+	for p := rds.NewDescribeReservedDBInstancesPaginator(svc, &rds.DescribeReservedDBInstancesInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, r := range page.ReservedDBInstances {
+			id := StringValue(r.ReservedDBInstanceId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_rds_reserved_instance", "aws", RDSAllowEmptyValues))
+		}
+	}
+	for p := rds.NewDescribeIntegrationsPaginator(svc, &rds.DescribeIntegrationsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, i := range page.Integrations {
+			arn := StringValue(i.IntegrationArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_rds_integration", "aws", RDSAllowEmptyValues))
+		}
+	}
+	for p := rds.NewDescribeExportTasksPaginator(svc, &rds.DescribeExportTasksInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, t := range page.ExportTasks {
+			id := StringValue(t.ExportTaskIdentifier)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_rds_export_task", "aws", RDSAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
