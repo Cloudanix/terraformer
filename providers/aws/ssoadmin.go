@@ -80,6 +80,13 @@ func (g *SSOAdminGenerator) InitResources() error {
 					map[string]interface{}{},
 				))
 
+				if inline, err := svc.GetInlinePolicyForPermissionSet(ctx, &ssoadmin.GetInlinePolicyForPermissionSetInput{
+					InstanceArn: aws.String(instanceArn), PermissionSetArn: aws.String(psArn),
+				}); err == nil && StringValue(inline.InlinePolicy) != "" {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						psArn+","+instanceArn, psArn, "aws_ssoadmin_permission_set_inline_policy", "aws", defaultAllowEmptyValues))
+				}
+
 				policies := ssoadmin.NewListManagedPoliciesInPermissionSetPaginator(svc, &ssoadmin.ListManagedPoliciesInPermissionSetInput{
 					InstanceArn: aws.String(instanceArn), PermissionSetArn: aws.String(psArn),
 				})
@@ -120,7 +127,31 @@ func (g *SSOAdminGenerator) InitResources() error {
 				}
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					arn, StringValue(app.Name), "aws_ssoadmin_application", "aws", defaultAllowEmptyValues))
+
+				if _, err := svc.GetApplicationAssignmentConfiguration(ctx, &ssoadmin.GetApplicationAssignmentConfigurationInput{ApplicationArn: aws.String(arn)}); err == nil {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						arn, arn, "aws_ssoadmin_application_assignment_configuration", "aws", defaultAllowEmptyValues))
+				}
+				for sp := ssoadmin.NewListApplicationAccessScopesPaginator(svc, &ssoadmin.ListApplicationAccessScopesInput{ApplicationArn: aws.String(arn)}); sp.HasMorePages(); {
+					spage, err := sp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, s := range spage.Scopes {
+						scope := StringValue(s.Scope)
+						if scope == "" {
+							continue
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							scope+","+arn, scope, "aws_ssoadmin_application_access_scope", "aws", defaultAllowEmptyValues))
+					}
+				}
 			}
+		}
+
+		if _, err := svc.DescribeInstanceAccessControlAttributeConfiguration(ctx, &ssoadmin.DescribeInstanceAccessControlAttributeConfigurationInput{InstanceArn: aws.String(instanceArn)}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				instanceArn, instanceArn, "aws_ssoadmin_instance_access_control_attributes", "aws", defaultAllowEmptyValues))
 		}
 
 		issuers := ssoadmin.NewListTrustedTokenIssuersPaginator(svc, &ssoadmin.ListTrustedTokenIssuersInput{InstanceArn: aws.String(instanceArn)})

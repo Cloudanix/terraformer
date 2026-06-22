@@ -1022,6 +1022,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssoadmin_managed_policy_attachment`
     * `aws_ssoadmin_application`
     * `aws_ssoadmin_trusted_token_issuer`
+    * `aws_ssoadmin_permission_set_inline_policy`
+    * `aws_ssoadmin_application_assignment_configuration`
+    * `aws_ssoadmin_application_access_scope`
+    * `aws_ssoadmin_instance_access_control_attributes`
 *   `ssm`
     * `aws_ssm_parameter`
     * `aws_ssm_document`
