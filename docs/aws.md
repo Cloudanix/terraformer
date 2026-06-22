@@ -310,6 +310,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lambda_permission`
 *   `logs`
     * `aws_cloudwatch_log_group`
+*   `macie2`
+    * `aws_macie2_classification_job`
+    * `aws_macie2_custom_data_identifier`
+    * `aws_macie2_findings_filter`
+    * `aws_macie2_member`
 *   `media_package`
     * `aws_media_package_channel`
 *   `media_store`

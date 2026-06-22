@@ -108,6 +108,7 @@ var serviceScope = map[string]regionScope{
 	"kms":                     scopeRegional,
 	"lambda":                  scopeRegional,
 	"logs":                    scopeRegional,
+	"macie2":                  scopeRegional,
 	"media_package":           scopeRegional,
 	"media_store":             scopeRegional,
 	"medialive":               scopeRegional,

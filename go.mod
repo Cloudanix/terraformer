@@ -374,6 +374,13 @@ require (
 	github.com/Myra-Security-GmbH/signature v1.0.0 // indirect
 	github.com/PuerkitoBio/purell v1.1.1 // indirect
 	github.com/PuerkitoBio/urlesc v0.0.0-20170810143723-de5bf2ad4578 // indirect
+	github.com/aws/aws-sdk-go-v2/service/acmpca v1.47.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/detective v1.39.5 // indirect
+	github.com/aws/aws-sdk-go-v2/service/fms v1.45.6 // indirect
+	github.com/aws/aws-sdk-go-v2/service/inspector2 v1.49.2 // indirect
+	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/shield v1.35.3 // indirect
+	github.com/aws/aws-sdk-go-v2/service/signer v1.33.6 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/clbanning/mxj v1.8.4 // indirect
 	github.com/cncf/xds/go v0.0.0-20240905190251-b4127c9b8d78 // indirect
@@ -439,6 +446,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/glacier v1.33.4
 	github.com/aws/aws-sdk-go-v2/service/globalaccelerator v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/guardduty v1.79.3
+	github.com/aws/aws-sdk-go-v2/service/macie2 v1.52.3
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/servicequotas v1.35.7
