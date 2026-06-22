@@ -98,10 +98,13 @@ sandbox — the plugin logs:
 
     plugin init error: listen unix /tmp/.../plugin…: bind: operation not permitted
 
-i.e. the sandbox denies the unix-socket `bind` go-plugin requires (terraform
-offers no server-side TCP-transport override). This is the SAME wall as the
-integration `terraform plan` round-trip and any real `terraformer import`. Run
-`gen-gap-list.sh` in a normal environment to produce the diff.
+i.e. the sandbox denies the unix-socket `bind` go-plugin requires. Confirmed
+the denial is at the `bind(2)` syscall, universally (not a path/permission
+issue): binding a unix socket in the repo dir, `$TMPDIR`, and `/Users/puru/code`
+ALL fail `operation not permitted`, and TCP loopback `bind(127.0.0.1:0)` also
+fails — so there is no transport go-plugin could use here. This is the SAME wall
+as the integration `terraform plan` round-trip and any real `terraformer
+import`. Run `gen-gap-list.sh` in a normal environment to produce the diff.
 
 ## Tests (cover every service + the logic-bearing/foundation code)
 - `TestAllServicesInstantiable` — every registered service's facade+generator is
