@@ -90,6 +90,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_resiliencehub_app`
 *   `amplify`
     * `aws_amplify_app`
+    * `aws_amplify_branch`
+    * `aws_amplify_backend_environment`
+    * `aws_amplify_webhook`
 *   `alb` (supports ALB and NLB)
     * `aws_lb`
     * `aws_lb_listener`

@@ -3,6 +3,9 @@ aws_acm_certificate
 aws_acmpca_certificate_authority
 aws_ami
 aws_amplify_app
+aws_amplify_backend_environment
+aws_amplify_branch
+aws_amplify_webhook
 aws_api_gateway_api_key
 aws_api_gateway_authorizer
 aws_api_gateway_client_certificate

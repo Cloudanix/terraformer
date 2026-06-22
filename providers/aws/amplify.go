@@ -34,9 +34,11 @@ func (g *AmplifyGenerator) InitResources() error {
 	}
 	svc := amplify.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var appIDs []string
 	p := amplify.NewListAppsPaginator(svc, &amplify.ListAppsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +47,46 @@ func (g *AmplifyGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			appIDs = append(appIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(app.Name), "aws_amplify_app", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, appID := range appIDs {
+		for bp := amplify.NewListBranchesPaginator(svc, &amplify.ListBranchesInput{AppId: &appID}); bp.HasMorePages(); {
+			page, err := bp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, b := range page.Branches {
+				name := StringValue(b.BranchName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					appID+"/"+name, appID+"_"+name, "aws_amplify_branch", "aws", defaultAllowEmptyValues))
+			}
+		}
+		if be, err := svc.ListBackendEnvironments(ctx, &amplify.ListBackendEnvironmentsInput{AppId: &appID}); err == nil {
+			for _, e := range be.BackendEnvironments {
+				name := StringValue(e.EnvironmentName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					appID+"/"+name, appID+"_"+name, "aws_amplify_backend_environment", "aws", defaultAllowEmptyValues))
+			}
+		}
+		if wh, err := svc.ListWebhooks(ctx, &amplify.ListWebhooksInput{AppId: &appID}); err == nil {
+			for _, w := range wh.Webhooks {
+				id := StringValue(w.WebhookId)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_amplify_webhook", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil
