@@ -273,7 +273,6 @@ aws_ivschat_logging_configuration
 aws_keyspaces_table
 aws_kinesis_analytics_application
 aws_kinesis_resource_policy
-aws_kinesisanalyticsv2_application_snapshot
 aws_kms_ciphertext
 aws_kms_external_key
 aws_kms_key_policy

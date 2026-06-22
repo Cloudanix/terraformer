@@ -477,6 +477,7 @@ aws_kinesis_stream
 aws_kinesis_stream_consumer
 aws_kinesis_video_stream
 aws_kinesisanalyticsv2_application
+aws_kinesisanalyticsv2_application_snapshot
 aws_kms_alias
 aws_kms_custom_key_store
 aws_kms_grant

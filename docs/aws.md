@@ -679,6 +679,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_kinesis_stream_consumer`
 *   `kinesisanalyticsv2`
     * `aws_kinesisanalyticsv2_application`
+    * `aws_kinesisanalyticsv2_application_snapshot`
 *   `kinesisvideo`
     * `aws_kinesis_video_stream`
 *   `lakeformation`

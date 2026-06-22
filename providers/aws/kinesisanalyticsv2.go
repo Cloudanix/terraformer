@@ -34,9 +34,11 @@ func (g *KinesisAnalyticsV2Generator) InitResources() error {
 	}
 	svc := kinesisanalyticsv2.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var appNames []string
 	p := kinesisanalyticsv2.NewListApplicationsPaginator(svc, &kinesisanalyticsv2.ListApplicationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +47,27 @@ func (g *KinesisAnalyticsV2Generator) InitResources() error {
 			if name == "" {
 				continue
 			}
+			appNames = append(appNames, name)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_kinesisanalyticsv2_application", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for _, appName := range appNames {
+		app := appName
+		for sp := kinesisanalyticsv2.NewListApplicationSnapshotsPaginator(svc, &kinesisanalyticsv2.ListApplicationSnapshotsInput{ApplicationName: &app}); sp.HasMorePages(); {
+			page, err := sp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, snap := range page.SnapshotSummaries {
+				snapName := StringValue(snap.SnapshotName)
+				if snapName == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					app+"/"+snapName, app+"_"+snapName, "aws_kinesisanalyticsv2_application_snapshot", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil
