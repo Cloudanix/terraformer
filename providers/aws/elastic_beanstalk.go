@@ -69,13 +69,21 @@ func (g *BeanstalkGenerator) addApplications(client *elasticbeanstalk.Client) er
 		return err
 	}
 	for _, application := range response.Applications {
+		appName := StringValue(application.ApplicationName)
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-			*application.ApplicationName,
-			*application.ApplicationName,
+			appName,
+			appName,
 			"aws_elastic_beanstalk_application",
 			"aws",
 			beanstalkAllowEmptyValues,
 		))
+		for _, tmpl := range application.ConfigurationTemplates {
+			if tmpl == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				appName+"/"+tmpl, appName+"_"+tmpl, "aws_elastic_beanstalk_configuration_template", "aws", beanstalkAllowEmptyValues))
+		}
 	}
 	return nil
 }

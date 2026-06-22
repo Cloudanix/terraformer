@@ -546,6 +546,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `elastic_beanstalk`
     * `aws_elastic_beanstalk_application`
     * `aws_elastic_beanstalk_application_version`
+    * `aws_elastic_beanstalk_configuration_template`
     * `aws_elastic_beanstalk_environment`
 *   `elb`
     * `aws_elb`
