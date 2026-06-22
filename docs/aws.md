@@ -1130,6 +1130,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_key_signing_key`
 *   `route53domains`
     * `aws_route53domains_registered_domain`
+    * `aws_route53domains_delegation_signer_record`
 *   `route53recoveryreadiness`
     * `aws_route53recoveryreadiness_cell`
     * `aws_route53recoveryreadiness_readiness_check`

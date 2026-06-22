@@ -48,6 +48,17 @@ func (g *Route53DomainsGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_route53domains_registered_domain", "aws", defaultAllowEmptyValues))
+			domainName := name
+			if detail, err := svc.GetDomainDetail(context.TODO(), &route53domains.GetDomainDetailInput{DomainName: &domainName}); err == nil {
+				for _, key := range detail.DnssecKeys {
+					keyID := StringValue(key.Id)
+					if keyID == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						domainName+","+keyID, domainName+"_"+keyID, "aws_route53domains_delegation_signer_record", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
