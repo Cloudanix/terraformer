@@ -536,9 +536,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ecr_pull_through_cache_rule`
     * `aws_ecr_registry_scanning_configuration`
     * `aws_ecr_replication_configuration`
+    * `aws_ecr_registry_policy`
     * `aws_ecr_repository_policy`
 *   `ecrpublic`
     * `aws_ecrpublic_repository`
+    * `aws_ecrpublic_repository_policy`
 *   `ecs`
     * `aws_ecs_cluster`
     * `aws_ecs_service`

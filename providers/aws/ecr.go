@@ -103,6 +103,10 @@ func (g *EcrGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				account, account, "aws_ecr_registry_scanning_configuration", "aws", defaultAllowEmptyValues))
 		}
+		if _, err := svc.GetRegistryPolicy(context.TODO(), &ecr.GetRegistryPolicyInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				account, account, "aws_ecr_registry_policy", "aws", defaultAllowEmptyValues))
+		}
 		if out, err := svc.DescribeRegistry(context.TODO(), &ecr.DescribeRegistryInput{}); err == nil &&
 			out.ReplicationConfiguration != nil && len(out.ReplicationConfiguration.Rules) > 0 {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

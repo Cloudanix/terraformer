@@ -52,6 +52,13 @@ func (g *EcrPublicGenerator) InitResources() error {
 				"aws",
 				ecrPublicAllowEmptyValues)
 			g.Resources = append(g.Resources, resource)
+
+			if _, err := svc.GetRepositoryPolicy(context.TODO(), &ecrpublic.GetRepositoryPolicyInput{
+				RepositoryName: repository.RepositoryName, RegistryId: repository.RegistryId,
+			}); err == nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					*repository.RepositoryName, *repository.RepositoryName, "aws_ecrpublic_repository_policy", "aws", ecrPublicAllowEmptyValues))
+			}
 		}
 	}
 	return nil
