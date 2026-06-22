@@ -35,6 +35,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 	svc := servicecatalog.NewFromConfig(config)
 	p := servicecatalog.NewListPortfoliosPaginator(svc, &servicecatalog.ListPortfoliosInput{})
 	var resources []terraformutils.Resource
+	var portfolioIDs []string
 	for p.HasMorePages() {
 		page, err := p.NextPage(context.TODO())
 		if err != nil {
@@ -43,12 +44,44 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 		for _, portfolio := range page.PortfolioDetails {
 			portfolioID := StringValue(portfolio.Id)
 			portfolioName := StringValue(portfolio.DisplayName)
+			portfolioIDs = append(portfolioIDs, portfolioID)
 			resources = append(resources, terraformutils.NewSimpleResource(
 				portfolioID,
 				portfolioName,
 				"aws_servicecatalog_portfolio",
 				"aws",
 				servicecatalogAllowEmptyValues))
+		}
+	}
+
+	for _, portfolioID := range portfolioIDs {
+		if portfolioID == "" {
+			continue
+		}
+		cp := servicecatalog.NewListConstraintsForPortfolioPaginator(svc, &servicecatalog.ListConstraintsForPortfolioInput{PortfolioId: &portfolioID})
+		for cp.HasMorePages() {
+			page, err := cp.NextPage(context.TODO())
+			if err != nil {
+				break
+			}
+			for _, c := range page.ConstraintDetails {
+				id := StringValue(c.ConstraintId)
+				if id == "" {
+					continue
+				}
+				resources = append(resources, terraformutils.NewSimpleResource(
+					id, id, "aws_servicecatalog_constraint", "aws", servicecatalogAllowEmptyValues))
+			}
+		}
+		if access, err := svc.ListPortfolioAccess(context.TODO(), &servicecatalog.ListPortfolioAccessInput{PortfolioId: &portfolioID}); err == nil {
+			for _, acct := range access.AccountIds {
+				if acct == "" {
+					continue
+				}
+				id := portfolioID + ":ACCOUNT:" + acct
+				resources = append(resources, terraformutils.NewSimpleResource(
+					id, portfolioID+"_"+acct, "aws_servicecatalog_portfolio_share", "aws", servicecatalogAllowEmptyValues))
+			}
 		}
 	}
 
