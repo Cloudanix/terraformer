@@ -72,16 +72,56 @@ func (g *EmrGenerator) addClusters(client *emr.Client) error {
 			return err
 		}
 		for _, cluster := range page.Clusters {
+			clusterID := StringValue(cluster.Id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				*cluster.Id,
+				clusterID,
 				*cluster.Name,
 				"aws_emr_cluster",
 				"aws",
 				emrAllowEmptyValues,
 			))
+			g.addInstanceGroupsAndFleets(client, clusterID)
 		}
 	}
 	return nil
+}
+
+// addInstanceGroupsAndFleets enumerates a cluster's instance groups and fleets.
+// A cluster uses one or the other; the unused list simply returns empty.
+// Import IDs are "<cluster-id>/<id>".
+func (g *EmrGenerator) addInstanceGroupsAndFleets(client *emr.Client, clusterID string) {
+	if clusterID == "" {
+		return
+	}
+	ctx := context.TODO()
+	for fp := emr.NewListInstanceFleetsPaginator(client, &emr.ListInstanceFleetsInput{ClusterId: &clusterID}); fp.HasMorePages(); {
+		page, err := fp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, f := range page.InstanceFleets {
+			id := StringValue(f.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				clusterID+"/"+id, clusterID+"_"+id, "aws_emr_instance_fleet", "aws", emrAllowEmptyValues))
+		}
+	}
+	for gp := emr.NewListInstanceGroupsPaginator(client, &emr.ListInstanceGroupsInput{ClusterId: &clusterID}); gp.HasMorePages(); {
+		page, err := gp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, grp := range page.InstanceGroups {
+			id := StringValue(grp.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				clusterID+"/"+id, clusterID+"_"+id, "aws_emr_instance_group", "aws", emrAllowEmptyValues))
+		}
+	}
 }
 
 func (g *EmrGenerator) addSecurityConfigurations(client *emr.Client) error {

@@ -280,6 +280,8 @@ aws_elasticsearch_domain
 aws_elastictranscoder_pipeline
 aws_elb
 aws_emr_cluster
+aws_emr_instance_fleet
+aws_emr_instance_group
 aws_emr_security_configuration
 aws_emr_studio
 aws_emrcontainers_virtual_cluster
