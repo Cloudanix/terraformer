@@ -81,7 +81,26 @@ func (g *AppMeshGenerator) loadMeshChildren(svc *appmesh.Client, mesh string) {
 			break
 		}
 		for _, x := range page.VirtualRouters {
-			add(StringValue(x.VirtualRouterName), "aws_appmesh_virtual_router")
+			router := StringValue(x.VirtualRouterName)
+			add(router, "aws_appmesh_virtual_router")
+			if router == "" {
+				continue
+			}
+			for rp := appmesh.NewListRoutesPaginator(svc, &appmesh.ListRoutesInput{MeshName: aws.String(mesh), VirtualRouterName: aws.String(router)}); rp.HasMorePages(); {
+				rpage, err := rp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, r := range rpage.Routes {
+					route := StringValue(r.RouteName)
+					if route == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						fmt.Sprintf("%s/%s/%s", mesh, router, route), fmt.Sprintf("%s_%s_%s", mesh, router, route),
+						"aws_appmesh_route", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	for p := appmesh.NewListVirtualServicesPaginator(svc, &appmesh.ListVirtualServicesInput{MeshName: aws.String(mesh)}); p.HasMorePages(); {
@@ -99,7 +118,26 @@ func (g *AppMeshGenerator) loadMeshChildren(svc *appmesh.Client, mesh string) {
 			break
 		}
 		for _, x := range page.VirtualGateways {
-			add(StringValue(x.VirtualGatewayName), "aws_appmesh_virtual_gateway")
+			gateway := StringValue(x.VirtualGatewayName)
+			add(gateway, "aws_appmesh_virtual_gateway")
+			if gateway == "" {
+				continue
+			}
+			for gp := appmesh.NewListGatewayRoutesPaginator(svc, &appmesh.ListGatewayRoutesInput{MeshName: aws.String(mesh), VirtualGatewayName: aws.String(gateway)}); gp.HasMorePages(); {
+				gpage, err := gp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, r := range gpage.GatewayRoutes {
+					route := StringValue(r.GatewayRouteName)
+					if route == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						fmt.Sprintf("%s/%s/%s", mesh, gateway, route), fmt.Sprintf("%s_%s_%s", mesh, gateway, route),
+						"aws_appmesh_gateway_route", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 }

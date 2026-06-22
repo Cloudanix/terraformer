@@ -57,7 +57,9 @@ aws_appfabric_ingestion_destination
 aws_appflow_flow
 aws_appintegrations_application
 aws_applicationinsights_application
+aws_appmesh_gateway_route
 aws_appmesh_mesh
+aws_appmesh_route
 aws_appmesh_virtual_gateway
 aws_appmesh_virtual_node
 aws_appmesh_virtual_router

@@ -174,6 +174,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appmesh_virtual_router`
     * `aws_appmesh_virtual_service`
     * `aws_appmesh_virtual_gateway`
+    * `aws_appmesh_route`
+    * `aws_appmesh_gateway_route`
 *   `apprunner`
     * `aws_apprunner_service`
     * `aws_apprunner_connection`
