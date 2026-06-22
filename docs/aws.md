@@ -37,6 +37,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_accessanalyzer_analyzer`
 *   `acm`
     * `aws_acm_certificate`
+*   `acm-pca`
+    * `aws_acmpca_certificate_authority`
 *   `alb` (supports ALB and NLB)
     * `aws_lb`
     * `aws_lb_listener`

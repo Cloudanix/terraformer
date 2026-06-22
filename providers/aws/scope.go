@@ -54,6 +54,7 @@ var serviceScope = map[string]regionScope{
 	// regional (default)
 	"accessanalyzer":          scopeRegional,
 	"acm":                     scopeRegional,
+	"acm-pca":                 scopeRegional,
 	"alb":                     scopeRegional,
 	"api_gateway":             scopeRegional,
 	"api_gatewayv2":           scopeRegional,

@@ -242,6 +242,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	return map[string]terraformutils.ServiceGenerator{
 		"accessanalyzer":          &AwsFacade{service: &AccessAnalyzerGenerator{}},
 		"acm":                     &AwsFacade{service: &ACMGenerator{}},
+		"acm-pca":                 &AwsFacade{service: &ACMPCAGenerator{}},
 		"alb":                     &AwsFacade{service: &AlbGenerator{}},
 		"api_gateway":             &AwsFacade{service: &APIGatewayGenerator{}},
 		"api_gatewayv2":           &AwsFacade{service: &APIGatewayV2Generator{}},
