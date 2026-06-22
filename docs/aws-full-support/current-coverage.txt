@@ -798,6 +798,8 @@ aws_quicksight_template_alias
 aws_quicksight_theme
 aws_quicksight_user
 aws_quicksight_vpc_connection
+aws_ram_principal_association
+aws_ram_resource_association
 aws_ram_resource_share
 aws_rbin_rule
 aws_rds_cluster

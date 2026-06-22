@@ -1025,6 +1025,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_qldb_stream`
 *   `ram`
     * `aws_ram_resource_share`
+    * `aws_ram_principal_association`
+    * `aws_ram_resource_association`
 *   `rds`
     * `aws_db_instance`
     * `aws_db_proxy`

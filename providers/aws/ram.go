@@ -53,5 +53,28 @@ func (g *RamGenerator) InitResources() error {
 				arn, arn, "aws_ram_resource_share", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	// Principal and resource associations on self-owned shares.
+	assocTypes := map[types.ResourceShareAssociationType]string{
+		types.ResourceShareAssociationTypePrincipal: "aws_ram_principal_association",
+		types.ResourceShareAssociationTypeResource:  "aws_ram_resource_association",
+	}
+	for at, tfType := range assocTypes {
+		ap := ram.NewGetResourceShareAssociationsPaginator(svc, &ram.GetResourceShareAssociationsInput{AssociationType: at})
+		for ap.HasMorePages() {
+			page, err := ap.NextPage(context.TODO())
+			if err != nil {
+				break
+			}
+			for _, a := range page.ResourceShareAssociations {
+				shareArn, entity := StringValue(a.ResourceShareArn), StringValue(a.AssociatedEntity)
+				if shareArn == "" || entity == "" || a.Status != types.ResourceShareAssociationStatusAssociated {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					shareArn+","+entity, shareArn+"_"+entity, tfType, "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
 	return nil
 }
