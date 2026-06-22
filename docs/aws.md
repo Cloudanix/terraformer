@@ -1060,6 +1060,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_transfer_connector`
     * `aws_transfer_profile`
     * `aws_transfer_workflow`
+    * `aws_transfer_user`
+    * `aws_transfer_access`
+    * `aws_transfer_agreement`
+    * `aws_transfer_certificate`
 *   `transit_gateway`
     * `aws_ec2_transit_gateway_route_table`
     * `aws_ec2_transit_gateway_vpc_attachment`

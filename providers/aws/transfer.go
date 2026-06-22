@@ -17,6 +17,7 @@ package aws
 import (
 	"context"
 
+	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/transfer"
 	"github.com/aws/aws-sdk-go-v2/service/transfer/types"
 )
@@ -34,16 +35,85 @@ func (g *TransferGenerator) InitResources() error {
 	}
 	svc := transfer.NewFromConfig(config)
 
+	ctx := context.TODO()
+	var serverIDs []string
 	p := transfer.NewListServersPaginator(svc, &transfer.ListServersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
+		}
+		for _, s := range page.Servers {
+			serverIDs = append(serverIDs, StringValue(s.ServerId))
 		}
 		g.Resources = appendSimpleResources(g.Resources, page.Servers, "aws_transfer_server",
 			defaultAllowEmptyValues,
 			func(s types.ListedServer) string { return StringValue(s.ServerId) },
 			func(s types.ListedServer) string { return StringValue(s.ServerId) })
+	}
+
+	for _, serverID := range serverIDs {
+		if serverID == "" {
+			continue
+		}
+		sid := serverID
+		for up := transfer.NewListUsersPaginator(svc, &transfer.ListUsersInput{ServerId: &sid}); up.HasMorePages(); {
+			page, err := up.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, u := range page.Users {
+				name := StringValue(u.UserName)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					sid+"/"+name, sid+"_"+name, "aws_transfer_user", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for ap := transfer.NewListAccessesPaginator(svc, &transfer.ListAccessesInput{ServerId: &sid}); ap.HasMorePages(); {
+			page, err := ap.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, a := range page.Accesses {
+				ext := StringValue(a.ExternalId)
+				if ext == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					sid+"/"+ext, sid+"_"+ext, "aws_transfer_access", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for agp := transfer.NewListAgreementsPaginator(svc, &transfer.ListAgreementsInput{ServerId: &sid}); agp.HasMorePages(); {
+			page, err := agp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, ag := range page.Agreements {
+				aid := StringValue(ag.AgreementId)
+				if aid == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					sid+"/"+aid, sid+"_"+aid, "aws_transfer_agreement", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	for cp := transfer.NewListCertificatesPaginator(svc, &transfer.ListCertificatesInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.Certificates {
+			id := StringValue(c.CertificateId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_transfer_certificate", "aws", defaultAllowEmptyValues))
+		}
 	}
 
 	conns := transfer.NewListConnectorsPaginator(svc, &transfer.ListConnectorsInput{})

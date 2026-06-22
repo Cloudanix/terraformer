@@ -787,9 +787,13 @@ aws_synthetics_canary
 aws_timestreaminfluxdb_db_instance
 aws_timestreamwrite_database
 aws_transcribe_vocabulary
+aws_transfer_access
+aws_transfer_agreement
+aws_transfer_certificate
 aws_transfer_connector
 aws_transfer_profile
 aws_transfer_server
+aws_transfer_user
 aws_transfer_workflow
 aws_verifiedaccess_instance
 aws_verifiedaccess_trust_provider
