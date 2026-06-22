@@ -929,6 +929,8 @@ aws_ses_receipt_filter
 aws_ses_receipt_rule
 aws_ses_receipt_rule_set
 aws_ses_template
+aws_sesv2_account_suppression_attributes
+aws_sesv2_account_vdm_attributes
 aws_sesv2_configuration_set
 aws_sesv2_contact_list
 aws_sesv2_dedicated_ip_pool

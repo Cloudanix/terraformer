@@ -105,5 +105,23 @@ func (g *SESv2Generator) InitResources() error {
 				name, name, "aws_sesv2_dedicated_ip_pool", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	// Account-level singletons keyed by account ID.
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	if accountID := StringValue(account); accountID != "" {
+		if out, err := svc.GetAccount(context.TODO(), &sesv2.GetAccountInput{}); err == nil {
+			if out.SuppressionAttributes != nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID, accountID, "aws_sesv2_account_suppression_attributes", "aws", defaultAllowEmptyValues))
+			}
+			if out.VdmAttributes != nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID, accountID, "aws_sesv2_account_vdm_attributes", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
 	return nil
 }
