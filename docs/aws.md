@@ -799,6 +799,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3_bucket_notification`
 *   `s3control`
     * `aws_s3control_storage_lens_configuration`
+    * `aws_s3control_access_grants_instance`
+    * `aws_s3control_access_grants_location`
+    * `aws_s3control_access_grant`
 *   `s3outposts`
     * `aws_s3outposts_endpoint`
 *   `s3tables`

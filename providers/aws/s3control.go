@@ -56,5 +56,41 @@ func (g *S3ControlGenerator) InitResources() error {
 				accountID+":"+id, id, "aws_s3control_storage_lens_configuration", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	ctx := context.TODO()
+	if insts, err := svc.ListAccessGrantsInstances(ctx, &s3control.ListAccessGrantsInstancesInput{AccountId: aws.String(accountID)}); err == nil {
+		if len(insts.AccessGrantsInstancesList) > 0 {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_s3control_access_grants_instance", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for p := s3control.NewListAccessGrantsLocationsPaginator(svc, &s3control.ListAccessGrantsLocationsInput{AccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, loc := range page.AccessGrantsLocationsList {
+			id := StringValue(loc.AccessGrantsLocationId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID+":"+id, id, "aws_s3control_access_grants_location", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for p := s3control.NewListAccessGrantsPaginator(svc, &s3control.ListAccessGrantsInput{AccountId: aws.String(accountID)}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, grant := range page.AccessGrantsList {
+			id := StringValue(grant.AccessGrantId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID+":"+id, id, "aws_s3control_access_grant", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
