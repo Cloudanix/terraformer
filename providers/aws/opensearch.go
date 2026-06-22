@@ -35,7 +35,8 @@ func (g *OpenSearchGenerator) InitResources() error {
 	}
 	svc := opensearch.NewFromConfig(config)
 
-	out, err := svc.ListDomainNames(context.TODO(), &opensearch.ListDomainNamesInput{})
+	ctx := context.TODO()
+	out, err := svc.ListDomainNames(ctx, &opensearch.ListDomainNamesInput{})
 	if err != nil {
 		return err
 	}
@@ -46,6 +47,62 @@ func (g *OpenSearchGenerator) InitResources() error {
 		}
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			name, name, "aws_opensearch_domain", "aws", defaultAllowEmptyValues))
+
+		cfg, err := svc.DescribeDomainConfig(ctx, &opensearch.DescribeDomainConfigInput{DomainName: domain.DomainName})
+		if err != nil || cfg.DomainConfig == nil {
+			continue
+		}
+		if cfg.DomainConfig.AccessPolicies != nil && StringValue(cfg.DomainConfig.AccessPolicies.Options) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_opensearch_domain_policy", "aws", defaultAllowEmptyValues))
+		}
+		if cfg.DomainConfig.AdvancedSecurityOptions != nil &&
+			cfg.DomainConfig.AdvancedSecurityOptions.Options != nil &&
+			cfg.DomainConfig.AdvancedSecurityOptions.Options.SAMLOptions != nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_opensearch_domain_saml_options", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	if eps, err := svc.ListVpcEndpoints(ctx, &opensearch.ListVpcEndpointsInput{}); err == nil {
+		for _, ep := range eps.VpcEndpointSummaryList {
+			id := StringValue(ep.VpcEndpointId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_opensearch_vpc_endpoint", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for p := opensearch.NewDescribeOutboundConnectionsPaginator(svc, &opensearch.DescribeOutboundConnectionsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, c := range page.Connections {
+			id := StringValue(c.ConnectionId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_opensearch_outbound_connection", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for p := opensearch.NewDescribePackagesPaginator(svc, &opensearch.DescribePackagesInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, pkg := range page.PackageDetailsList {
+			id := StringValue(pkg.PackageID)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_opensearch_package", "aws", defaultAllowEmptyValues))
+		}
 	}
 	return nil
 }

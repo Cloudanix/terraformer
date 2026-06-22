@@ -650,6 +650,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_neptunegraph_graph`
 *   `opensearch`
     * `aws_opensearch_domain`
+    * `aws_opensearch_domain_policy`
+    * `aws_opensearch_domain_saml_options`
+    * `aws_opensearch_vpc_endpoint`
+    * `aws_opensearch_outbound_connection`
+    * `aws_opensearch_package`
 *   `opensearchserverless`
     * `aws_opensearchserverless_collection`
 *   `osis`
