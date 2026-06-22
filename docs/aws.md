@@ -1105,6 +1105,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshiftserverless_snapshot`
     * `aws_redshiftserverless_endpoint_access`
     * `aws_redshiftserverless_usage_limit`
+    * `aws_redshiftserverless_resource_policy`
 *   `sagemaker`
     * `aws_sagemaker_domain`
     * `aws_sagemaker_user_profile`

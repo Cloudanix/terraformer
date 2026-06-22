@@ -98,6 +98,12 @@ func (g *RedshiftServerlessGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_redshiftserverless_snapshot", "aws", defaultAllowEmptyValues))
+			if snapArn := StringValue(s.SnapshotArn); snapArn != "" {
+				if _, err := svc.GetResourcePolicy(ctx, &redshiftserverless.GetResourcePolicyInput{ResourceArn: &snapArn}); err == nil {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						snapArn, name, "aws_redshiftserverless_resource_policy", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	for ep := redshiftserverless.NewListEndpointAccessPaginator(svc, &redshiftserverless.ListEndpointAccessInput{}); ep.HasMorePages(); {
