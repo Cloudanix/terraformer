@@ -56,6 +56,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bedrockagent_agent`
 *   `ce`
     * `aws_ce_anomaly_monitor`
+    * `aws_ce_anomaly_subscription`
     * `aws_ce_cost_category`
 *   `chatbot`
     * `aws_chatbot_slack_channel_configuration`

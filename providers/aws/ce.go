@@ -52,6 +52,22 @@ func (g *CostExplorerGenerator) InitResources() error {
 		}
 	}
 
+	subs := costexplorer.NewGetAnomalySubscriptionsPaginator(svc, &costexplorer.GetAnomalySubscriptionsInput{})
+	for subs.HasMorePages() {
+		page, err := subs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, s := range page.AnomalySubscriptions {
+			arn := StringValue(s.SubscriptionArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(s.SubscriptionName), "aws_ce_anomaly_subscription", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	categories := costexplorer.NewListCostCategoryDefinitionsPaginator(svc, &costexplorer.ListCostCategoryDefinitionsInput{})
 	for categories.HasMorePages() {
 		page, err := categories.NextPage(ctx)
