@@ -228,7 +228,14 @@ func (g *SageMakerGenerator) addMoreSageMaker(ctx context.Context, svc *sagemake
 			break
 		}
 		for _, x := range pg.ModelPackageGroupSummaryList {
-			add(StringValue(x.ModelPackageGroupName), "aws_sagemaker_model_package_group")
+			groupName := StringValue(x.ModelPackageGroupName)
+			add(groupName, "aws_sagemaker_model_package_group")
+			if groupName == "" {
+				continue
+			}
+			if _, err := svc.GetModelPackageGroupPolicy(ctx, &sagemaker.GetModelPackageGroupPolicyInput{ModelPackageGroupName: &groupName}); err == nil {
+				add(groupName, "aws_sagemaker_model_package_group_policy")
+			}
 		}
 	}
 	for p := sagemaker.NewListMonitoringSchedulesPaginator(svc, &sagemaker.ListMonitoringSchedulesInput{}); p.HasMorePages(); {

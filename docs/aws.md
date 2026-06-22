@@ -1096,6 +1096,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sagemaker_image_version`
     * `aws_sagemaker_mlflow_tracking_server`
     * `aws_sagemaker_model_package_group`
+    * `aws_sagemaker_model_package_group_policy`
     * `aws_sagemaker_monitoring_schedule`
     * `aws_sagemaker_notebook_instance_lifecycle_configuration`
     * `aws_sagemaker_pipeline`
