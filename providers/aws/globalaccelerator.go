@@ -39,6 +39,21 @@ func (g *GlobalAcceleratorGenerator) InitResources() error {
 	svc := globalaccelerator.NewFromConfig(config)
 	ctx := context.TODO()
 
+	for ca := globalaccelerator.NewListCrossAccountAttachmentsPaginator(svc, &globalaccelerator.ListCrossAccountAttachmentsInput{}); ca.HasMorePages(); {
+		page, err := ca.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, a := range page.CrossAccountAttachments {
+			arn := StringValue(a.AttachmentArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(a.Name), "aws_globalaccelerator_cross_account_attachment", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	var acceleratorArns []string
 	accelerators := globalaccelerator.NewListAcceleratorsPaginator(svc, &globalaccelerator.ListAcceleratorsInput{})
 	for accelerators.HasMorePages() {
