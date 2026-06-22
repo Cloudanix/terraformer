@@ -40,13 +40,25 @@ func (g *MskGenerator) InitResources() error {
 			return err
 		}
 		for _, clusterInfo := range page.ClusterInfoList {
+			clusterArn := StringValue(clusterInfo.ClusterArn)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				StringValue(clusterInfo.ClusterArn),
+				clusterArn,
 				StringValue(clusterInfo.ClusterName),
 				"aws_msk_cluster",
 				"aws",
 				mskAllowEmptyValues,
 			))
+			if clusterArn == "" {
+				continue
+			}
+			if _, err := svc.GetClusterPolicy(context.TODO(), &kafka.GetClusterPolicyInput{ClusterArn: &clusterArn}); err == nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					clusterArn, StringValue(clusterInfo.ClusterName), "aws_msk_cluster_policy", "aws", mskAllowEmptyValues))
+			}
+			if secrets, err := svc.ListScramSecrets(context.TODO(), &kafka.ListScramSecretsInput{ClusterArn: &clusterArn}); err == nil && len(secrets.SecretArnList) > 0 {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					clusterArn, StringValue(clusterInfo.ClusterName), "aws_msk_scram_secret_association", "aws", mskAllowEmptyValues))
+			}
 		}
 	}
 
