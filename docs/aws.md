@@ -285,6 +285,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_config_delivery_channel`
     * `aws_config_configuration_aggregator`
     * `aws_config_conformance_pack`
+    * `aws_config_retention_configuration`
+    * `aws_config_aggregate_authorization`
+    * `aws_config_organization_conformance_pack`
+    * `aws_config_organization_custom_policy_rule`
+    * `aws_config_organization_custom_rule`
+    * `aws_config_organization_managed_rule`
 *   `customer_gateway`
     * `aws_customer_gateway`
 *   `datapipeline`

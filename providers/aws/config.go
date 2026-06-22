@@ -79,6 +79,75 @@ func (g *ConfigGenerator) addConfigExtras(svc *configservice.Client) error {
 				name, name, "aws_config_conformance_pack", "aws", configAllowEmptyValues))
 		}
 	}
+	for p := configservice.NewDescribeRetentionConfigurationsPaginator(svc, &configservice.DescribeRetentionConfigurationsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, rc := range page.RetentionConfigurations {
+			name := StringValue(rc.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_config_retention_configuration", "aws", configAllowEmptyValues))
+		}
+	}
+	for p := configservice.NewDescribeAggregationAuthorizationsPaginator(svc, &configservice.DescribeAggregationAuthorizationsInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.AggregationAuthorizations {
+			acct := StringValue(a.AuthorizedAccountId)
+			region := StringValue(a.AuthorizedAwsRegion)
+			if acct == "" || region == "" {
+				continue
+			}
+			id := acct + "/" + region
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, acct+"_"+region, "aws_config_aggregate_authorization", "aws", configAllowEmptyValues))
+		}
+	}
+	for p := configservice.NewDescribeOrganizationConformancePacksPaginator(svc, &configservice.DescribeOrganizationConformancePacksInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, ocp := range page.OrganizationConformancePacks {
+			name := StringValue(ocp.OrganizationConformancePackName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_config_organization_conformance_pack", "aws", configAllowEmptyValues))
+		}
+	}
+	for p := configservice.NewDescribeOrganizationConfigRulesPaginator(svc, &configservice.DescribeOrganizationConfigRulesInput{}); p.HasMorePages(); {
+		page, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, rule := range page.OrganizationConfigRules {
+			name := StringValue(rule.OrganizationConfigRuleName)
+			if name == "" {
+				continue
+			}
+			tfType := ""
+			switch {
+			case rule.OrganizationCustomPolicyRuleMetadata != nil:
+				tfType = "aws_config_organization_custom_policy_rule"
+			case rule.OrganizationCustomRuleMetadata != nil:
+				tfType = "aws_config_organization_custom_rule"
+			case rule.OrganizationManagedRuleMetadata != nil:
+				tfType = "aws_config_organization_managed_rule"
+			default:
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, tfType, "aws", configAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
