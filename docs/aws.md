@@ -255,6 +255,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_chimesdkmediapipelines_media_insights_pipeline_configuration`
 *   `chime-sdk-voice`
     * `aws_chimesdkvoice_voice_connector`
+    * `aws_chime_voice_connector`
+    * `aws_chime_voice_connector_group`
+    * `aws_chime_voice_connector_origination`
+    * `aws_chime_voice_connector_streaming`
+    * `aws_chime_voice_connector_termination`
+    * `aws_chime_voice_connector_termination_credentials`
 *   `autoscaling-plans`
     * `aws_autoscalingplans_scaling_plan`
 *   `codestar-connections`

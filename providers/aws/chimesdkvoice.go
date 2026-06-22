@@ -34,9 +34,17 @@ func (g *ChimeSDKVoiceGenerator) InitResources() error {
 	}
 	svc := chimesdkvoice.NewFromConfig(config)
 
+	ctx := context.TODO()
+	add := func(id, name, tfType string) {
+		if id != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, name, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	p := chimesdkvoice.NewListVoiceConnectorsPaginator(svc, &chimesdkvoice.ListVoiceConnectorsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -45,8 +53,32 @@ func (g *ChimeSDKVoiceGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
-			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				id, StringValue(vc.Name), "aws_chimesdkvoice_voice_connector", "aws", defaultAllowEmptyValues))
+			name := StringValue(vc.Name)
+			add(id, name, "aws_chimesdkvoice_voice_connector")
+			add(id, name, "aws_chime_voice_connector")
+
+			if o, err := svc.GetVoiceConnectorOrigination(ctx, &chimesdkvoice.GetVoiceConnectorOriginationInput{VoiceConnectorId: vc.VoiceConnectorId}); err == nil && o.Origination != nil {
+				add(id, name, "aws_chime_voice_connector_origination")
+			}
+			if s, err := svc.GetVoiceConnectorStreamingConfiguration(ctx, &chimesdkvoice.GetVoiceConnectorStreamingConfigurationInput{VoiceConnectorId: vc.VoiceConnectorId}); err == nil && s.StreamingConfiguration != nil {
+				add(id, name, "aws_chime_voice_connector_streaming")
+			}
+			if t, err := svc.GetVoiceConnectorTermination(ctx, &chimesdkvoice.GetVoiceConnectorTerminationInput{VoiceConnectorId: vc.VoiceConnectorId}); err == nil && t.Termination != nil {
+				add(id, name, "aws_chime_voice_connector_termination")
+			}
+			if c, err := svc.ListVoiceConnectorTerminationCredentials(ctx, &chimesdkvoice.ListVoiceConnectorTerminationCredentialsInput{VoiceConnectorId: vc.VoiceConnectorId}); err == nil && len(c.Usernames) > 0 {
+				add(id, name, "aws_chime_voice_connector_termination_credentials")
+			}
+		}
+	}
+
+	for gp := chimesdkvoice.NewListVoiceConnectorGroupsPaginator(svc, &chimesdkvoice.ListVoiceConnectorGroupsInput{}); gp.HasMorePages(); {
+		page, err := gp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, grp := range page.VoiceConnectorGroups {
+			add(StringValue(grp.VoiceConnectorGroupId), StringValue(grp.Name), "aws_chime_voice_connector_group")
 		}
 	}
 	return nil
