@@ -731,6 +731,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_macie2_custom_data_identifier`
     * `aws_macie2_findings_filter`
     * `aws_macie2_member`
+    * `aws_macie2_account`
+    * `aws_macie2_organization_admin_account`
+    * `aws_macie2_classification_export_configuration`
 *   `memorydb`
     * `aws_memorydb_cluster`
     * `aws_memorydb_acl`

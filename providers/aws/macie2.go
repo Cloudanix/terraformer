@@ -101,5 +101,35 @@ func (g *Macie2Generator) InitResources() error {
 		}
 	}
 
+	for admins := macie2.NewListOrganizationAdminAccountsPaginator(svc, &macie2.ListOrganizationAdminAccountsInput{}); admins.HasMorePages(); {
+		page, err := admins.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, a := range page.AdminAccounts {
+			id := StringValue(a.AccountId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_macie2_organization_admin_account", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	if accountID := StringValue(account); accountID != "" {
+		if _, err := svc.GetMacieSession(ctx, &macie2.GetMacieSessionInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_macie2_account", "aws", defaultAllowEmptyValues))
+			if _, err := svc.GetClassificationExportConfiguration(ctx, &macie2.GetClassificationExportConfigurationInput{}); err == nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					accountID, accountID, "aws_macie2_classification_export_configuration", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
 	return nil
 }
