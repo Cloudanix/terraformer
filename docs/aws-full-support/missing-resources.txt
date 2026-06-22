@@ -117,7 +117,6 @@ aws_datazone_user_profile
 aws_db_instance_automated_backups_replication
 aws_db_instance_role_association
 aws_db_proxy_default_target_group
-aws_db_proxy_endpoint
 aws_db_proxy_target
 aws_db_snapshot_copy
 aws_default_route_table
@@ -347,7 +346,6 @@ aws_ram_resource_share_accepter
 aws_ram_sharing_with_organization
 aws_rds_certificate
 aws_rds_cluster_activity_stream
-aws_rds_cluster_instance
 aws_rds_cluster_role_association
 aws_rds_custom_db_engine_version
 aws_rds_instance_state

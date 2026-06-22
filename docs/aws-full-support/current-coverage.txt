@@ -244,6 +244,7 @@ aws_db_instance
 aws_db_option_group
 aws_db_parameter_group
 aws_db_proxy
+aws_db_proxy_endpoint
 aws_db_snapshot
 aws_db_subnet_group
 aws_default_network_acl
@@ -676,6 +677,7 @@ aws_ram_resource_share
 aws_rbin_rule
 aws_rds_cluster
 aws_rds_cluster_endpoint
+aws_rds_cluster_instance
 aws_rds_cluster_parameter_group
 aws_rds_export_task
 aws_rds_global_cluster

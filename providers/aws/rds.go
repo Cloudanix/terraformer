@@ -101,6 +101,12 @@ func (g *RDSGenerator) loadDBInstances(svc *rds.Client) error {
 		}
 		for _, db := range page.DBInstances {
 			resourceName := StringValue(db.DBInstanceIdentifier)
+			// Members of an Aurora/RDS cluster are aws_rds_cluster_instance, not aws_db_instance.
+			if StringValue(db.DBClusterIdentifier) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					resourceName, resourceName, "aws_rds_cluster_instance", "aws", RDSAllowEmptyValues))
+				continue
+			}
 			r := terraformutils.NewSimpleResource(
 				resourceName,
 				resourceName,
@@ -110,6 +116,26 @@ func (g *RDSGenerator) loadDBInstances(svc *rds.Client) error {
 			)
 			r.IgnoreKeys = append(r.IgnoreKeys, "^name$")
 			g.Resources = append(g.Resources, r)
+		}
+	}
+	return nil
+}
+
+func (g *RDSGenerator) loadDBProxyEndpoints(svc *rds.Client) error {
+	p := rds.NewDescribeDBProxyEndpointsPaginator(svc, &rds.DescribeDBProxyEndpointsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, ep := range page.DBProxyEndpoints {
+			proxy := StringValue(ep.DBProxyName)
+			name := StringValue(ep.DBProxyEndpointName)
+			if proxy == "" || name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				proxy+"/"+name, proxy+"_"+name, "aws_db_proxy_endpoint", "aws", RDSAllowEmptyValues))
 		}
 	}
 	return nil
@@ -271,6 +297,9 @@ func (g *RDSGenerator) InitResources() error {
 		return err
 	}
 	if err := g.loadDBProxies(svc); err != nil {
+		return err
+	}
+	if err := g.loadDBProxyEndpoints(svc); err != nil {
 		return err
 	}
 	if err := g.loadDBParameterGroups(svc); err != nil {
