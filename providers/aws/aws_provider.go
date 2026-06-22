@@ -330,6 +330,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"servicediscovery":        &AwsFacade{service: &ServiceDiscoveryGenerator{}},
 		"servicequotas":           &AwsFacade{service: &ServiceQuotasGenerator{}},
 		"shield":                  &AwsFacade{service: &ShieldGenerator{}},
+		"signer":                  &AwsFacade{service: &SignerGenerator{}},
 		"ses":                     &AwsFacade{service: &SesGenerator{}},
 		"sesv2":                   &AwsFacade{service: &SESv2Generator{}},
 		"sfn":                     &AwsFacade{service: &SfnGenerator{}},

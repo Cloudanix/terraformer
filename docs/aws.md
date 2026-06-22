@@ -451,6 +451,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `shield`
     * `aws_shield_protection`
     * `aws_shield_protection_group`
+*   `signer`
+    * `aws_signer_signing_profile`
 *   `sg`
     * `aws_security_group`
     * `aws_security_group_rule` (if a rule cannot be inlined)

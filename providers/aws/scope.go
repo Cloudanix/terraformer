@@ -139,6 +139,7 @@ var serviceScope = map[string]regionScope{
 	"sfn":                     scopeRegional,
 	"sg":                      scopeRegional,
 	"sns":                     scopeRegional,
+	"signer":                  scopeRegional,
 	"sqs":                     scopeRegional,
 	"sso-admin":               scopeRegional,
 	"ssm":                     scopeRegional,
