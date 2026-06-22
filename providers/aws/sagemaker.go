@@ -133,5 +133,156 @@ func (g *SageMakerGenerator) InitResources() error {
 		}
 	}
 
+	g.addMoreSageMaker(ctx, svc)
 	return nil
+}
+
+// addMoreSageMaker enumerates the additional top-level SageMaker resources that
+// have a simple List* paginator returning a name. Import ID is the name. Errors
+// on any single list are logged and skipped so one missing permission doesn't
+// abort the whole SageMaker import.
+func (g *SageMakerGenerator) addMoreSageMaker(ctx context.Context, svc *sagemaker.Client) {
+	add := func(name, tfType string) {
+		if name != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, tfType, "aws", defaultAllowEmptyValues))
+		}
+	}
+	if p := sagemaker.NewListAppImageConfigsPaginator(svc, &sagemaker.ListAppImageConfigsInput{}); true {
+		for p.HasMorePages() {
+			pg, e := p.NextPage(ctx)
+			if e != nil {
+				break
+			}
+			for _, x := range pg.AppImageConfigs {
+				add(StringValue(x.AppImageConfigName), "aws_sagemaker_app_image_config")
+			}
+		}
+	}
+	for p := sagemaker.NewListDeviceFleetsPaginator(svc, &sagemaker.ListDeviceFleetsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.DeviceFleetSummaries {
+			add(StringValue(x.DeviceFleetName), "aws_sagemaker_device_fleet")
+		}
+	}
+	for p := sagemaker.NewListFeatureGroupsPaginator(svc, &sagemaker.ListFeatureGroupsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.FeatureGroupSummaries {
+			add(StringValue(x.FeatureGroupName), "aws_sagemaker_feature_group")
+		}
+	}
+	for p := sagemaker.NewListFlowDefinitionsPaginator(svc, &sagemaker.ListFlowDefinitionsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.FlowDefinitionSummaries {
+			add(StringValue(x.FlowDefinitionName), "aws_sagemaker_flow_definition")
+		}
+	}
+	for p := sagemaker.NewListHumanTaskUisPaginator(svc, &sagemaker.ListHumanTaskUisInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.HumanTaskUiSummaries {
+			add(StringValue(x.HumanTaskUiName), "aws_sagemaker_human_task_ui")
+		}
+	}
+	for p := sagemaker.NewListImagesPaginator(svc, &sagemaker.ListImagesInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.Images {
+			add(StringValue(x.ImageName), "aws_sagemaker_image")
+		}
+	}
+	for p := sagemaker.NewListMlflowTrackingServersPaginator(svc, &sagemaker.ListMlflowTrackingServersInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.TrackingServerSummaries {
+			add(StringValue(x.TrackingServerName), "aws_sagemaker_mlflow_tracking_server")
+		}
+	}
+	for p := sagemaker.NewListModelPackageGroupsPaginator(svc, &sagemaker.ListModelPackageGroupsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.ModelPackageGroupSummaryList {
+			add(StringValue(x.ModelPackageGroupName), "aws_sagemaker_model_package_group")
+		}
+	}
+	for p := sagemaker.NewListMonitoringSchedulesPaginator(svc, &sagemaker.ListMonitoringSchedulesInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.MonitoringScheduleSummaries {
+			add(StringValue(x.MonitoringScheduleName), "aws_sagemaker_monitoring_schedule")
+		}
+	}
+	for p := sagemaker.NewListNotebookInstanceLifecycleConfigsPaginator(svc, &sagemaker.ListNotebookInstanceLifecycleConfigsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.NotebookInstanceLifecycleConfigs {
+			add(StringValue(x.NotebookInstanceLifecycleConfigName), "aws_sagemaker_notebook_instance_lifecycle_configuration")
+		}
+	}
+	for p := sagemaker.NewListPipelinesPaginator(svc, &sagemaker.ListPipelinesInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.PipelineSummaries {
+			add(StringValue(x.PipelineName), "aws_sagemaker_pipeline")
+		}
+	}
+	for p := sagemaker.NewListProjectsPaginator(svc, &sagemaker.ListProjectsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.ProjectSummaryList {
+			add(StringValue(x.ProjectName), "aws_sagemaker_project")
+		}
+	}
+	for p := sagemaker.NewListStudioLifecycleConfigsPaginator(svc, &sagemaker.ListStudioLifecycleConfigsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.StudioLifecycleConfigs {
+			add(StringValue(x.StudioLifecycleConfigName), "aws_sagemaker_studio_lifecycle_config")
+		}
+	}
+	for p := sagemaker.NewListWorkforcesPaginator(svc, &sagemaker.ListWorkforcesInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.Workforces {
+			add(StringValue(x.WorkforceName), "aws_sagemaker_workforce")
+		}
+	}
+	for p := sagemaker.NewListWorkteamsPaginator(svc, &sagemaker.ListWorkteamsInput{}); p.HasMorePages(); {
+		pg, e := p.NextPage(ctx)
+		if e != nil {
+			break
+		}
+		for _, x := range pg.Workteams {
+			add(StringValue(x.WorkteamName), "aws_sagemaker_workteam")
+		}
+	}
 }

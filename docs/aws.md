@@ -619,6 +619,21 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sagemaker_endpoint`
     * `aws_sagemaker_endpoint_configuration`
     * `aws_sagemaker_code_repository`
+    * `aws_sagemaker_app_image_config`
+    * `aws_sagemaker_device_fleet`
+    * `aws_sagemaker_feature_group`
+    * `aws_sagemaker_flow_definition`
+    * `aws_sagemaker_human_task_ui`
+    * `aws_sagemaker_image`
+    * `aws_sagemaker_mlflow_tracking_server`
+    * `aws_sagemaker_model_package_group`
+    * `aws_sagemaker_monitoring_schedule`
+    * `aws_sagemaker_notebook_instance_lifecycle_configuration`
+    * `aws_sagemaker_pipeline`
+    * `aws_sagemaker_project`
+    * `aws_sagemaker_studio_lifecycle_config`
+    * `aws_sagemaker_workforce`
+    * `aws_sagemaker_workteam`
 *   `scheduler`
     * `aws_scheduler_schedule_group`
     * `aws_scheduler_schedule`
