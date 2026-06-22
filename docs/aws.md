@@ -63,6 +63,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_api_gateway_stage`
     * `aws_api_gateway_usage_plan`
     * `aws_api_gateway_vpc_link`
+*   `api_gatewayv2`
+    * `aws_apigatewayv2_api`
+    * `aws_apigatewayv2_authorizer`
+    * `aws_apigatewayv2_model`
+    * `aws_apigatewayv2_route`
+    * `aws_apigatewayv2_route_response`
+    * `aws_apigatewayv2_vpc_link`
 *   `application-autoscaling`
     * `aws_appautoscaling_target`
     * `aws_appautoscaling_policy`
@@ -215,6 +222,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_docdb_subnet_group`
 *   `ds`
     * `aws_directory_service_directory`
+*   `dx`
+    * `aws_dx_connection`
+    * `aws_dx_gateway`
+    * `aws_dx_private_virtual_interface`
+    * `aws_dx_public_virtual_interface`
 *   `dynamodb`
     * `aws_dynamodb_table`
     * `aws_dynamodb_global_table`
@@ -355,6 +367,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iam_user_policy`
     * `aws_iam_user_policy_attachment`
     * `aws_iam_virtual_mfa_device`
+*   `identitystore`
+    * `aws_identitystore_group`
+    * `aws_identitystore_user`
+    * `aws_identitystore_group_membership`
 *   `igw`
     * `aws_internet_gateway`
 *   `inspector2`
