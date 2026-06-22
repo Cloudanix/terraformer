@@ -67,5 +67,34 @@ func (g *RedshiftServerlessGenerator) InitResources() error {
 				name, name, "aws_redshiftserverless_workgroup", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for sp := redshiftserverless.NewListSnapshotsPaginator(svc, &redshiftserverless.ListSnapshotsInput{}); sp.HasMorePages(); {
+		page, err := sp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, s := range page.Snapshots {
+			name := StringValue(s.SnapshotName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_redshiftserverless_snapshot", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for ep := redshiftserverless.NewListEndpointAccessPaginator(svc, &redshiftserverless.ListEndpointAccessInput{}); ep.HasMorePages(); {
+		page, err := ep.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, e := range page.Endpoints {
+			name := StringValue(e.EndpointName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_redshiftserverless_endpoint_access", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

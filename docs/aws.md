@@ -928,6 +928,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `redshift-serverless`
     * `aws_redshiftserverless_namespace`
     * `aws_redshiftserverless_workgroup`
+    * `aws_redshiftserverless_snapshot`
+    * `aws_redshiftserverless_endpoint_access`
 *   `sagemaker`
     * `aws_sagemaker_domain`
     * `aws_sagemaker_user_profile`
