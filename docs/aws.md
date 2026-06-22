@@ -552,6 +552,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_emr_instance_group`
 *   `emr-containers`
     * `aws_emrcontainers_virtual_cluster`
+    * `aws_emrcontainers_job_template`
 *   `emr-serverless`
     * `aws_emrserverless_application`
 *   `eni`

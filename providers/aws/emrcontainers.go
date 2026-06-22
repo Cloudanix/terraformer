@@ -49,5 +49,20 @@ func (g *EMRContainersGenerator) InitResources() error {
 				id, StringValue(vc.Name), "aws_emrcontainers_virtual_cluster", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for jt := emrcontainers.NewListJobTemplatesPaginator(svc, &emrcontainers.ListJobTemplatesInput{}); jt.HasMorePages(); {
+		page, err := jt.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, t := range page.Templates {
+			id := StringValue(t.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(t.Name), "aws_emrcontainers_job_template", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
