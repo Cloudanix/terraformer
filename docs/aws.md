@@ -94,6 +94,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_evidently_project`
 *   `ivschat`
     * `aws_ivschat_room`
+    * `aws_ivschat_logging_configuration`
 *   `networkmanager`
     * `aws_networkmanager_global_network`
     * `aws_networkmanager_core_network`

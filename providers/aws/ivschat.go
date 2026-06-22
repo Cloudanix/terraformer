@@ -47,5 +47,20 @@ func (g *IVSChatGenerator) InitResources() error {
 				id, StringValue(item.Arn), "aws_ivschat_room", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for lc := ivschat.NewListLoggingConfigurationsPaginator(svc, &ivschat.ListLoggingConfigurationsInput{}); lc.HasMorePages(); {
+		page, err := lc.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, item := range page.LoggingConfigurations {
+			arn := StringValue(item.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(item.Name), "aws_ivschat_logging_configuration", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

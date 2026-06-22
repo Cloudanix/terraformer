@@ -528,6 +528,7 @@ aws_iottwinmaker_workspace
 aws_ivs_channel
 aws_ivs_playback_key_pair
 aws_ivs_recording_configuration
+aws_ivschat_logging_configuration
 aws_ivschat_room
 aws_kendra_data_source
 aws_kendra_experience
