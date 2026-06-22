@@ -47,6 +47,17 @@ func (g *NetworkMonitorGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_networkmonitor_monitor", "aws", defaultAllowEmptyValues))
+
+			if mon, err := svc.GetMonitor(context.TODO(), &networkmonitor.GetMonitorInput{MonitorName: monitor.MonitorName}); err == nil {
+				for _, probe := range mon.Probes {
+					probeID := StringValue(probe.ProbeId)
+					if probeID == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						name+","+probeID, name+"_"+probeID, "aws_networkmonitor_probe", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

@@ -582,6 +582,7 @@ aws_networkmanager_global_network
 aws_networkmanager_link
 aws_networkmanager_site
 aws_networkmonitor_monitor
+aws_networkmonitor_probe
 aws_oam_link
 aws_oam_sink
 aws_opensearch_domain

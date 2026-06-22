@@ -829,6 +829,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_nat_gateway`
 *   `networkmonitor`
     * `aws_networkmonitor_monitor`
+    * `aws_networkmonitor_probe`
 *   `internetmonitor`
     * `aws_internetmonitor_monitor`
 *   `oam`
