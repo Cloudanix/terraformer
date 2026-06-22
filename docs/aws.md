@@ -71,6 +71,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appconfig_application`
 *   `appflow`
     * `aws_appflow_flow`
+*   `appstream`
+    * `aws_appstream_fleet`
 *   `appmesh`
     * `aws_appmesh_mesh`
 *   `apprunner`
@@ -148,6 +150,14 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cognito_user_group`
     * `aws_cognito_resource_server`
     * `aws_cognito_identity_provider`
+*   `connect`
+    * `aws_connect_instance`
+*   `customer-profiles`
+    * `aws_customerprofiles_domain`
+*   `dataexchange`
+    * `aws_dataexchange_data_set`
+*   `datazone`
+    * `aws_datazone_domain`
 *   `config`
     * `aws_config_config_rule`
     * `aws_config_configuration_recorder`
@@ -258,6 +268,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_kinesis_firehose_delivery_stream`
 *   `fis`
     * `aws_fis_experiment_template`
+*   `gamelift`
+    * `aws_gamelift_fleet`
+    * `aws_gamelift_build`
 *   `fms`
     * `aws_fms_policy`
 *   `fsx`
@@ -297,6 +310,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_guardduty_threatintelset`
     * `aws_guardduty_member`
     * `aws_guardduty_publishing_destination`
+*   `imagebuilder`
+    * `aws_imagebuilder_image_pipeline`
+*   `ivs`
+    * `aws_ivs_channel`
 *   `iam`
     * `aws_iam_access_key`
     * `aws_iam_account_alias`
@@ -332,6 +349,14 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_mskconnect_connector`
 *   `kendra`
     * `aws_kendra_index`
+*   `lexv2-models`
+    * `aws_lexv2models_bot`
+*   `license-manager`
+    * `aws_licensemanager_license_configuration`
+*   `lightsail`
+    * `aws_lightsail_instance`
+*   `m2`
+    * `aws_m2_application`
 *   `keyspaces`
     * `aws_keyspaces_keyspace`
 *   `kinesis`
@@ -393,6 +418,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpclattice_service_network`
 *   `wellarchitected`
     * `aws_wellarchitected_workload`
+*   `pcs`
+    * `aws_pcs_cluster`
 *   `pipes`
     * `aws_pipes_pipe`
 *   `mwaa`
@@ -401,6 +428,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_media_package_channel`
 *   `media_store`
     * `aws_media_store_container`
+*   `mediapackagev2`
+    * `aws_media_packagev2_channel_group`
 *   `medialive`
     * `aws_medialive_channel`
     * `aws_medialive_input`
@@ -501,6 +530,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_health_check`
     * `aws_route53_delegation_set`
     * `aws_route53_query_log`
+*   `route53profiles`
+    * `aws_route53profiles_profile`
 *   `route53resolver`
     * `aws_route53_resolver_endpoint`
     * `aws_route53_resolver_rule`
@@ -530,6 +561,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3_bucket_replication_configuration`
     * `aws_s3_bucket_accelerate_configuration`
     * `aws_s3_bucket_notification`
+*   `s3tables`
+    * `aws_s3tables_table_bucket`
 *   `secretsmanager`
     * `aws_secretsmanager_secret`
 *   `securityhub`
@@ -585,6 +618,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssm_maintenance_window`
     * `aws_ssm_patch_baseline`
     * `aws_ssm_association`
+*   `ssm-contacts`
+    * `aws_ssmcontacts_contact`
+*   `ssm-incidents`
+    * `aws_ssmincidents_response_plan`
 *   `storagegateway`
     * `aws_storagegateway_gateway`
 *   `subnet`
