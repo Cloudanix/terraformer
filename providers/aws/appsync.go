@@ -41,7 +41,7 @@ func (g *AppSyncGenerator) InitResources() error {
 				[]string{}))
 			g.loadAppSyncChildren(svc, id)
 			g.loadAppSyncTypesAndResolvers(svc, id)
-			g.loadAppSyncApiCache(svc, id)
+			g.loadAppSyncAPICache(svc, id)
 		}
 		nextToken = apis.NextToken
 		if nextToken == nil {
@@ -86,8 +86,8 @@ func (g *AppSyncGenerator) loadAppSyncTypesAndResolvers(svc *appsync.Client, api
 	}
 }
 
-// loadAppSyncApiCache emits the per-API cache (import ID is the API ID).
-func (g *AppSyncGenerator) loadAppSyncApiCache(svc *appsync.Client, apiID string) {
+// loadAppSyncAPICache emits the per-API cache (import ID is the API ID).
+func (g *AppSyncGenerator) loadAppSyncAPICache(svc *appsync.Client, apiID string) {
 	if out, err := svc.GetApiCache(context.TODO(), &appsync.GetApiCacheInput{ApiId: aws.String(apiID)}); err == nil && out.ApiCache != nil {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			apiID, apiID, "aws_appsync_api_cache", "aws", defaultAllowEmptyValues))
