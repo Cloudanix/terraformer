@@ -47,6 +47,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_applicationinsights_application`
 *   `auditmanager`
     * `aws_auditmanager_assessment`
+    * `aws_auditmanager_control`
+    * `aws_auditmanager_framework`
+    * `aws_auditmanager_assessment_report`
 *   `bedrock`
     * `aws_bedrock_custom_model`
     * `aws_bedrock_guardrail`

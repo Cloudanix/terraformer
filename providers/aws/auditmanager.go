@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/service/auditmanager"
+	"github.com/aws/aws-sdk-go-v2/service/auditmanager/types"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -45,6 +46,50 @@ func (g *AuditManagerGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(item.Name), "aws_auditmanager_assessment", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	ctx := context.TODO()
+	for cp := auditmanager.NewListControlsPaginator(svc, &auditmanager.ListControlsInput{ControlType: types.ControlTypeCustom}); cp.HasMorePages(); {
+		page, err := cp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.ControlMetadataList {
+			id := StringValue(c.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(c.Name), "aws_auditmanager_control", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for fp := auditmanager.NewListAssessmentFrameworksPaginator(svc, &auditmanager.ListAssessmentFrameworksInput{FrameworkType: types.FrameworkTypeCustom}); fp.HasMorePages(); {
+		page, err := fp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, f := range page.FrameworkMetadataList {
+			id := StringValue(f.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(f.Name), "aws_auditmanager_framework", "aws", defaultAllowEmptyValues))
+		}
+	}
+	for rp := auditmanager.NewListAssessmentReportsPaginator(svc, &auditmanager.ListAssessmentReportsInput{}); rp.HasMorePages(); {
+		page, err := rp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, r := range page.AssessmentReports {
+			id := StringValue(r.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(r.Name), "aws_auditmanager_assessment_report", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
