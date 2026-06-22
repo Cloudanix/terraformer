@@ -53,6 +53,11 @@ func (g *ACMPCAGenerator) InitResources() error {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					arn, arn, "aws_acmpca_certificate_authority_certificate", "aws", defaultAllowEmptyValues))
 			}
+			// A resource-based policy on the CA (cross-account sharing).
+			if pol, err := svc.GetPolicy(context.TODO(), &acmpca.GetPolicyInput{ResourceArn: ca.Arn}); err == nil && StringValue(pol.Policy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, arn, "aws_acmpca_policy", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 	return nil
