@@ -964,6 +964,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `securitylake`
     * `aws_securitylake_data_lake`
     * `aws_securitylake_subscriber`
+    * `aws_securitylake_aws_log_source`
+    * `aws_securitylake_custom_log_source`
 *   `nat`
     * `aws_nat_gateway`
 *   `networkmonitor`

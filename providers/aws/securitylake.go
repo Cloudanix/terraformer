@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/service/securitylake"
+	securitylaketypes "github.com/aws/aws-sdk-go-v2/service/securitylake/types"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -62,6 +63,37 @@ func (g *SecurityLakeGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_securitylake_subscriber", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	// Log sources, deduped by source name (same source repeats per account/region).
+	seenLog := map[string]bool{}
+	for lp := securitylake.NewListLogSourcesPaginator(svc, &securitylake.ListLogSourcesInput{}); lp.HasMorePages(); {
+		page, err := lp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, src := range page.Sources {
+			for _, r := range src.Sources {
+				switch v := r.(type) {
+				case *securitylaketypes.LogSourceResourceMemberAwsLogSource:
+					name := string(v.Value.SourceName)
+					if name == "" || seenLog["aws:"+name] {
+						continue
+					}
+					seenLog["aws:"+name] = true
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						name, name, "aws_securitylake_aws_log_source", "aws", defaultAllowEmptyValues))
+				case *securitylaketypes.LogSourceResourceMemberCustomLogSource:
+					name := StringValue(v.Value.SourceName)
+					if name == "" || seenLog["custom:"+name] {
+						continue
+					}
+					seenLog["custom:"+name] = true
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						name, name, "aws_securitylake_custom_log_source", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil
