@@ -114,6 +114,17 @@ func (g *SESv2Generator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_sesv2_dedicated_ip_pool", "aws", defaultAllowEmptyValues))
+			poolName := name
+			if ips, err := svc.GetDedicatedIps(context.TODO(), &sesv2.GetDedicatedIpsInput{PoolName: &poolName}); err == nil {
+				for _, ip := range ips.DedicatedIps {
+					addr := StringValue(ip.Ip)
+					if addr == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						addr+","+poolName, addr+"_"+poolName, "aws_sesv2_dedicated_ip_assignment", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 

@@ -1254,6 +1254,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sesv2_configuration_set`
     * `aws_sesv2_contact_list`
     * `aws_sesv2_dedicated_ip_pool`
+    * `aws_sesv2_dedicated_ip_assignment`
     * `aws_sesv2_account_suppression_attributes`
     * `aws_sesv2_account_vdm_attributes`
     * `aws_sesv2_configuration_set_event_destination`
