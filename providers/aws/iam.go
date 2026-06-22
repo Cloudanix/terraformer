@@ -66,7 +66,101 @@ func (g *IamGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	g.getAccountResources(svc)
+
 	return nil
+}
+
+// getAccountResources enumerates account-level IAM resources that are simple
+// global lists (no parent): account alias, OIDC/SAML providers, server
+// certificates, virtual MFA devices, and the singleton account password policy.
+// Errors are logged, not fatal — a missing password policy (NoSuchEntity) or a
+// permission gap on one list shouldn't abort the whole IAM import.
+func (g *IamGenerator) getAccountResources(svc *iam.Client) {
+	ctx := context.TODO()
+
+	aliases := iam.NewListAccountAliasesPaginator(svc, &iam.ListAccountAliasesInput{})
+	for aliases.HasMorePages() {
+		page, err := aliases.NextPage(ctx)
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		for _, alias := range page.AccountAliases {
+			if alias == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				alias, alias, "aws_iam_account_alias", "aws", IamAllowEmptyValues))
+		}
+	}
+
+	if oidc, err := svc.ListOpenIDConnectProviders(ctx, &iam.ListOpenIDConnectProvidersInput{}); err != nil {
+		log.Println(err)
+	} else {
+		for _, p := range oidc.OpenIDConnectProviderList {
+			arn := StringValue(p.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_iam_openid_connect_provider", "aws", IamAllowEmptyValues))
+		}
+	}
+
+	if saml, err := svc.ListSAMLProviders(ctx, &iam.ListSAMLProvidersInput{}); err != nil {
+		log.Println(err)
+	} else {
+		for _, p := range saml.SAMLProviderList {
+			arn := StringValue(p.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_iam_saml_provider", "aws", IamAllowEmptyValues))
+		}
+	}
+
+	certs := iam.NewListServerCertificatesPaginator(svc, &iam.ListServerCertificatesInput{})
+	for certs.HasMorePages() {
+		page, err := certs.NextPage(ctx)
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		for _, c := range page.ServerCertificateMetadataList {
+			name := StringValue(c.ServerCertificateName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_iam_server_certificate", "aws", IamAllowEmptyValues))
+		}
+	}
+
+	mfa := iam.NewListVirtualMFADevicesPaginator(svc, &iam.ListVirtualMFADevicesInput{})
+	for mfa.HasMorePages() {
+		page, err := mfa.NextPage(ctx)
+		if err != nil {
+			log.Println(err)
+			break
+		}
+		for _, d := range page.VirtualMFADevices {
+			arn := StringValue(d.SerialNumber)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_iam_virtual_mfa_device", "aws", IamAllowEmptyValues))
+		}
+	}
+
+	// Singleton: present only if a custom password policy is set (else NoSuchEntity).
+	if _, err := svc.GetAccountPasswordPolicy(ctx, &iam.GetAccountPasswordPolicyInput{}); err == nil {
+		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+			"iam-account-password-policy", "iam-account-password-policy",
+			"aws_iam_account_password_policy", "aws", IamAllowEmptyValues))
+	}
 }
 
 func (g *IamGenerator) getRoles(svc *iam.Client) error {
