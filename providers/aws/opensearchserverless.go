@@ -70,6 +70,57 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 			}
 		}
 	}
+	for _, apType := range types.AccessPolicyType("").Values() {
+		t := apType
+		for pp := opensearchserverless.NewListAccessPoliciesPaginator(svc, &opensearchserverless.ListAccessPoliciesInput{Type: t}); pp.HasMorePages(); {
+			page, err := pp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, s := range page.AccessPolicySummaries {
+				name := StringValue(s.Name)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name+"/"+string(s.Type), name, "aws_opensearchserverless_access_policy", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+	for _, spType := range types.SecurityPolicyType("").Values() {
+		t := spType
+		for pp := opensearchserverless.NewListSecurityPoliciesPaginator(svc, &opensearchserverless.ListSecurityPoliciesInput{Type: t}); pp.HasMorePages(); {
+			page, err := pp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, s := range page.SecurityPolicySummaries {
+				name := StringValue(s.Name)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name+"/"+string(s.Type), name, "aws_opensearchserverless_security_policy", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+	for _, lpType := range types.LifecyclePolicyType("").Values() {
+		t := lpType
+		for pp := opensearchserverless.NewListLifecyclePoliciesPaginator(svc, &opensearchserverless.ListLifecyclePoliciesInput{Type: t}); pp.HasMorePages(); {
+			page, err := pp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, s := range page.LifecyclePolicySummaries {
+				name := StringValue(s.Name)
+				if name == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name+"/"+string(s.Type), name, "aws_opensearchserverless_lifecycle_policy", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
 	for vp := opensearchserverless.NewListVpcEndpointsPaginator(svc, &opensearchserverless.ListVpcEndpointsInput{}); vp.HasMorePages(); {
 		page, err := vp.NextPage(ctx)
 		if err != nil {
