@@ -87,6 +87,34 @@ func (g *SSOAdminGenerator) InitResources() error {
 						psArn+","+instanceArn, psArn, "aws_ssoadmin_permission_set_inline_policy", "aws", defaultAllowEmptyValues))
 				}
 
+				for cmp := ssoadmin.NewListCustomerManagedPolicyReferencesInPermissionSetPaginator(svc, &ssoadmin.ListCustomerManagedPolicyReferencesInPermissionSetInput{
+					InstanceArn: aws.String(instanceArn), PermissionSetArn: aws.String(psArn),
+				}); cmp.HasMorePages(); {
+					cmpPage, err := cmp.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, ref := range cmpPage.CustomerManagedPolicyReferences {
+						refName := StringValue(ref.Name)
+						if refName == "" {
+							continue
+						}
+						refPath := StringValue(ref.Path)
+						if refPath == "" {
+							refPath = "/"
+						}
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							refName+","+refPath+","+psArn+","+instanceArn, refName,
+							"aws_ssoadmin_customer_managed_policy_attachment", "aws", defaultAllowEmptyValues))
+					}
+				}
+				if _, err := svc.GetPermissionsBoundaryForPermissionSet(ctx, &ssoadmin.GetPermissionsBoundaryForPermissionSetInput{
+					InstanceArn: aws.String(instanceArn), PermissionSetArn: aws.String(psArn),
+				}); err == nil {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						psArn+","+instanceArn, psArn, "aws_ssoadmin_permissions_boundary_attachment", "aws", defaultAllowEmptyValues))
+				}
+
 				policies := ssoadmin.NewListManagedPoliciesInPermissionSetPaginator(svc, &ssoadmin.ListManagedPoliciesInPermissionSetInput{
 					InstanceArn: aws.String(instanceArn), PermissionSetArn: aws.String(psArn),
 				})
