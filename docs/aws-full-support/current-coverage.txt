@@ -848,6 +848,8 @@ aws_transfer_profile
 aws_transfer_server
 aws_transfer_user
 aws_transfer_workflow
+aws_verifiedaccess_endpoint
+aws_verifiedaccess_group
 aws_verifiedaccess_instance
 aws_verifiedaccess_trust_provider
 aws_verifiedpermissions_policy_store

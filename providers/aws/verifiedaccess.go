@@ -67,5 +67,37 @@ func (g *VerifiedAccessGenerator) InitResources() error {
 				id, id, "aws_verifiedaccess_trust_provider", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	groups := ec2.NewDescribeVerifiedAccessGroupsPaginator(svc, &ec2.DescribeVerifiedAccessGroupsInput{})
+	for groups.HasMorePages() {
+		page, err := groups.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, grp := range page.VerifiedAccessGroups {
+			id := StringValue(grp.VerifiedAccessGroupId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_verifiedaccess_group", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	endpoints := ec2.NewDescribeVerifiedAccessEndpointsPaginator(svc, &ec2.DescribeVerifiedAccessEndpointsInput{})
+	for endpoints.HasMorePages() {
+		page, err := endpoints.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, ep := range page.VerifiedAccessEndpoints {
+			id := StringValue(ep.VerifiedAccessEndpointId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_verifiedaccess_endpoint", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

@@ -767,6 +767,8 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `verifiedaccess`
     * `aws_verifiedaccess_instance`
     * `aws_verifiedaccess_trust_provider`
+    * `aws_verifiedaccess_group`
+    * `aws_verifiedaccess_endpoint`
 *   `verifiedpermissions`
     * `aws_verifiedpermissions_policy_store`
 *   `vpc-lattice`
