@@ -66,11 +66,23 @@ and (b) resources whose backing SDK is not vendored in the pinned module set
 Generators cannot be written against SDKs absent from `go.mod`'s pinned
 versions, so these provider resources are not buildable in this tree until the
 dependency is added (deliberately out of scope to avoid an unrequested dep bump):
-- **cloudwatchevidently** (`aws_evidently_*`)
+- **cloudwatchevidently** (`aws_evidently_feature`, `aws_evidently_launch`, `aws_evidently_segment`)
 - **lexmodelbuildingservice** v1 (`aws_lex_bot`, `aws_lex_intent`, `aws_lex_slot_type`, `aws_lex_bot_alias`) — note the v2 `aws_lexv2models_*` set IS built
+- **devopsguru** (`aws_devopsguru_*` — notification_channel, resource_collection, service_integration, event_sources_config)
 - **drs** (`aws_drs_replication_configuration_template`)
 - **eventbridge** `ListEndpoints` (`aws_cloudwatch_event_endpoint`)
-- **paymentcryptography** (unregistered service)
+- **paymentcryptography** (unregistered service: `aws_paymentcryptography_key`, `aws_paymentcryptography_key_alias`)
+
+## No import / data-plane object resources (not reverse-importable)
+Provider resources that either have no `terraform import` support or represent
+data-plane objects/actions rather than durable infrastructure, so terraformer
+cannot reverse them: `aws_s3_object`, `aws_s3_bucket_object`, `aws_s3_object_copy`,
+`aws_dynamodb_table_item`, `aws_dynamodb_table_export`, `aws_kms_ciphertext`,
+`aws_ec2_instance_state`, `aws_*_snapshot_copy` / `aws_*_snapshot_import`
+(create-from-source actions), `aws_iot_logging_options` /
+`aws_iot_indexing_configuration` / `aws_iot_event_configurations` (no import),
+and the dx hosted-VIF / accepter / confirmation / proposal handshake resources
+(the *accepting*/*requesting* side of a two-account flow, with no list API).
 
 Also intentionally skipped: `aws_elastictranscoder_preset` (ListPresets returns
 the hundreds of AWS-managed *system* presets, not user infrastructure — emitting
