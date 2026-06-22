@@ -49,6 +49,27 @@ func (g *NetworkFirewallGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_networkfirewall_firewall", "aws", defaultAllowEmptyValues))
+			if lc, err := svc.DescribeLoggingConfiguration(ctx, &networkfirewall.DescribeLoggingConfigurationInput{FirewallArn: fw.FirewallArn}); err == nil &&
+				lc.LoggingConfiguration != nil && len(lc.LoggingConfiguration.LogDestinationConfigs) > 0 {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, arn, "aws_networkfirewall_logging_configuration", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
+	tlsConfigs := networkfirewall.NewListTLSInspectionConfigurationsPaginator(svc, &networkfirewall.ListTLSInspectionConfigurationsInput{})
+	for tlsConfigs.HasMorePages() {
+		page, err := tlsConfigs.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, tc := range page.TLSInspectionConfigurations {
+			arn := StringValue(tc.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_networkfirewall_tls_inspection_configuration", "aws", defaultAllowEmptyValues))
 		}
 	}
 

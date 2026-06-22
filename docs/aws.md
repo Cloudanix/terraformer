@@ -741,6 +741,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_networkfirewall_firewall`
     * `aws_networkfirewall_firewall_policy`
     * `aws_networkfirewall_rule_group`
+    * `aws_networkfirewall_logging_configuration`
+    * `aws_networkfirewall_tls_inspection_configuration`
 *   `rolesanywhere`
     * `aws_rolesanywhere_trust_anchor`
     * `aws_rolesanywhere_profile`
