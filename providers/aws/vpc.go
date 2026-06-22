@@ -59,5 +59,18 @@ func (g *VpcGenerator) InitResources() error {
 		}
 		g.Resources = append(g.Resources, g.createResources(page)...)
 	}
+
+	if subs, err := svc.DescribeAwsNetworkPerformanceMetricSubscriptions(context.TODO(),
+		&ec2.DescribeAwsNetworkPerformanceMetricSubscriptionsInput{}); err == nil {
+		for _, s := range subs.Subscriptions {
+			src, dst := StringValue(s.Source), StringValue(s.Destination)
+			if src == "" || dst == "" {
+				continue
+			}
+			id := src + "/" + dst + "/" + string(s.Metric) + "/" + string(s.Statistic)
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpc_network_performance_metric_subscription", "aws", VpcAllowEmptyValues))
+		}
+	}
 	return nil
 }
