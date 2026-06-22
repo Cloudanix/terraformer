@@ -56,5 +56,21 @@ func (g *VpcEndpointGenerator) InitResources() error {
 		return err
 	}
 	g.Resources = g.createResources(vpceps)
+
+	np := ec2.NewDescribeVpcEndpointConnectionNotificationsPaginator(svc, &ec2.DescribeVpcEndpointConnectionNotificationsInput{})
+	for np.HasMorePages() {
+		page, err := np.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, n := range page.ConnectionNotificationSet {
+			id := StringValue(n.ConnectionNotificationId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_vpc_endpoint_connection_notification", "aws", VpcEndpointAllowEmptyValues))
+		}
+	}
 	return nil
 }

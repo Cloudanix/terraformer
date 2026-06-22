@@ -48,6 +48,25 @@ func (g *RouteTableGenerator) createRouteTablesResources(svc *ec2.Client) []terr
 				rtbAllowEmptyValues,
 			))
 
+			for _, vgw := range table.PropagatingVgws {
+				gwID := StringValue(vgw.GatewayId)
+				if gwID == "" {
+					continue
+				}
+				resources = append(resources, terraformutils.NewResource(
+					gwID+"_"+StringValue(table.RouteTableId),
+					gwID+"_"+StringValue(table.RouteTableId),
+					"aws_vpn_gateway_route_propagation",
+					"aws",
+					map[string]string{
+						"vpn_gateway_id": gwID,
+						"route_table_id": StringValue(table.RouteTableId),
+					},
+					rtbAllowEmptyValues,
+					map[string]interface{}{},
+				))
+			}
+
 			for _, assoc := range table.Associations {
 				if *assoc.Main {
 					// main route table association

@@ -1069,6 +1069,7 @@ aws_volume_attachment
 aws_vpc
 aws_vpc_dhcp_options
 aws_vpc_endpoint
+aws_vpc_endpoint_connection_notification
 aws_vpc_endpoint_service
 aws_vpc_ipam
 aws_vpc_ipam_pool
@@ -1090,6 +1091,7 @@ aws_vpclattice_target_group
 aws_vpn_connection
 aws_vpn_connection_route
 aws_vpn_gateway
+aws_vpn_gateway_route_propagation
 aws_waf_byte_match_set
 aws_waf_geo_match_set
 aws_waf_ipset

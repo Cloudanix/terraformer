@@ -1154,6 +1154,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_resolver_config`
 *   `route_table`
     * `aws_route_table`
+    * `aws_vpn_gateway_route_propagation`
     * `aws_main_route_table_association`
     * `aws_route_table_association`
 *   `s3`
@@ -1343,6 +1344,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpc`
 *   `vpc_endpoint`
     * `aws_vpc_endpoint`
+    * `aws_vpc_endpoint_connection_notification`
 *   `vpc_peering`
     * `aws_vpc_peering_connection`
     * `aws_vpc_peering_connection_options`
