@@ -34,7 +34,13 @@ single-service PR. Deferred from the P1 batch (2026-06-21) for this reason.
 
 ---
 
-## T5 — Implement servicequotas with a non-default filter
+## T5 — Implement servicequotas with a non-default filter — DONE
+
+> Resolved: `providers/aws/servicequotas.go` emits
+> `aws_servicequotas_service_quota` filtered via option (a) —
+> `ListRequestedServiceQuotaChangeHistory` (quotas the account requested a
+> change for), deduped. No N+1 ListServices×ListServiceQuotas explosion, no
+> default-quota noise. Pure dedup func unit-tested in `servicequotas_test.go`.
 
 **What:** Add a `servicequotas` generator emitting `aws_servicequotas_service_quota`
 — but only for quotas that have actually been changed, not the thousands of

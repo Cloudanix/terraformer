@@ -346,6 +346,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_service_discovery_private_dns_namespace`
     * `aws_service_discovery_service`
     * `aws_service_discovery_instance`
+*   `servicequotas`
+    * `aws_servicequotas_service_quota`
 *   `ses`
     * `aws_ses_configuration_set`
     * `aws_ses_domain_identity`

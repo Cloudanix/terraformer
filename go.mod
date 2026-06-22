@@ -440,6 +440,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/globalaccelerator v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/servicediscovery v1.40.6
+	github.com/aws/aws-sdk-go-v2/service/servicequotas v1.35.7
 	github.com/aws/aws-sdk-go-v2/service/sesv2 v1.62.4
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
