@@ -34,6 +34,27 @@ func (g *SfnGenerator) InitResources() error {
 				"aws",
 				sfnAllowEmptyValues,
 			))
+			var aliasToken *string
+			for {
+				aliases, err := svc.ListStateMachineAliases(context.TODO(), &sfn.ListStateMachineAliasesInput{
+					StateMachineArn: stateMachine.StateMachineArn, NextToken: aliasToken,
+				})
+				if err != nil {
+					break
+				}
+				for _, a := range aliases.StateMachineAliases {
+					arn := StringValue(a.StateMachineAliasArn)
+					if arn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						arn, arn, "aws_sfn_alias", "aws", sfnAllowEmptyValues))
+				}
+				if aliases.NextToken == nil {
+					break
+				}
+				aliasToken = aliases.NextToken
+			}
 		}
 	}
 

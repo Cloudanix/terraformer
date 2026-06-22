@@ -917,6 +917,7 @@ aws_sesv2_email_identity
 aws_sesv2_email_identity_feedback_attributes
 aws_sesv2_email_identity_mail_from_attributes
 aws_sfn_activity
+aws_sfn_alias
 aws_sfn_state_machine
 aws_shield_proactive_engagement
 aws_shield_protection

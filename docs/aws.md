@@ -1184,6 +1184,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `sfn`
     * `aws_sfn_activity`
     * `aws_sfn_state_machine`
+    * `aws_sfn_alias`
 *   `shield`
     * `aws_shield_protection`
     * `aws_shield_protection_group`
