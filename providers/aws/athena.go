@@ -98,6 +98,21 @@ func (g *AthenaGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_athena_data_catalog", "aws", defaultAllowEmptyValues))
+			catName := name
+			for dp := athena.NewListDatabasesPaginator(svc, &athena.ListDatabasesInput{CatalogName: &catName}); dp.HasMorePages(); {
+				dpage, err := dp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, db := range dpage.DatabaseList {
+					dbName := StringValue(db.Name)
+					if dbName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						catName+"/"+dbName, catName+"_"+dbName, "aws_athena_database", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	return nil

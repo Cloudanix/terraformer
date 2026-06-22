@@ -211,6 +211,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `athena`
     * `aws_athena_workgroup`
     * `aws_athena_data_catalog`
+    * `aws_athena_database`
     * `aws_athena_named_query`
     * `aws_athena_prepared_statement`
 *   `auto_scaling`
