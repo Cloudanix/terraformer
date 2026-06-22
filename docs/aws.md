@@ -54,11 +54,19 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bcmdataexports_export`
 *   `bedrockagent`
     * `aws_bedrockagent_agent`
+*   `ce`
+    * `aws_ce_anomaly_monitor`
+    * `aws_ce_cost_category`
 *   `chatbot`
     * `aws_chatbot_slack_channel_configuration`
     * `aws_chatbot_teams_channel_configuration`
 *   `cleanrooms`
     * `aws_cleanrooms_collaboration`
+*   `comprehend`
+    * `aws_comprehend_document_classifier`
+    * `aws_comprehend_entity_recognizer`
+*   `cur`
+    * `aws_cur_report_definition`
 *   `cloudsearch`
     * `aws_cloudsearch_domain`
 *   `elastictranscoder`
@@ -69,6 +77,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ivschat_room`
 *   `networkmanager`
     * `aws_networkmanager_global_network`
+*   `rekognition`
+    * `aws_rekognition_collection`
+    * `aws_rekognition_stream_processor`
 *   `resiliencehub`
     * `aws_resiliencehub_app`
 *   `amplify`
@@ -193,6 +204,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codestarnotifications_notification_rule`
 *   `controltower`
     * `aws_controltower_landing_zone`
+*   `chime-sdk-mediapipelines`
+    * `aws_chimesdkmediapipelines_media_insights_pipeline_configuration`
 *   `chime-sdk-voice`
     * `aws_chimesdkvoice_voice_connector`
 *   `autoscaling-plans`
@@ -636,6 +649,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53_query_log`
 *   `route53domains`
     * `aws_route53domains_registered_domain`
+*   `route53recoveryreadiness`
+    * `aws_route53recoveryreadiness_cell`
 *   `route53recoverycontrolconfig`
     * `aws_route53recoverycontrolconfig_cluster`
 *   `route53profiles`
@@ -732,6 +747,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssm_maintenance_window`
     * `aws_ssm_patch_baseline`
     * `aws_ssm_association`
+*   `ssmquicksetup`
+    * `aws_ssmquicksetup_configuration_manager`
 *   `ssm-contacts`
     * `aws_ssmcontacts_contact`
 *   `ssm-incidents`
@@ -742,6 +759,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_subnet`
 *   `swf`
     * `aws_swf_domain`
+*   `transcribe`
+    * `aws_transcribe_vocabulary`
 *   `transfer`
     * `aws_transfer_server`
 *   `transit_gateway`

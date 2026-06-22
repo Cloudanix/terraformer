@@ -448,6 +448,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/bedrock v1.64.0
 	github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.56.0
 	github.com/aws/aws-sdk-go-v2/service/chatbot v1.15.6
+	github.com/aws/aws-sdk-go-v2/service/chimesdkmediapipelines v1.27.8
 	github.com/aws/aws-sdk-go-v2/service/chimesdkvoice v1.29.2
 	github.com/aws/aws-sdk-go-v2/service/cleanrooms v1.45.6
 	github.com/aws/aws-sdk-go-v2/service/cloudsearch v1.33.4
@@ -456,8 +457,11 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/codegurureviewer v1.35.5
 	github.com/aws/aws-sdk-go-v2/service/codestarconnections v1.36.5
 	github.com/aws/aws-sdk-go-v2/service/codestarnotifications v1.32.6
+	github.com/aws/aws-sdk-go-v2/service/comprehend v1.41.6
 	github.com/aws/aws-sdk-go-v2/service/connect v1.177.0
 	github.com/aws/aws-sdk-go-v2/service/controltower v1.29.6
+	github.com/aws/aws-sdk-go-v2/service/costandusagereportservice v1.35.5
+	github.com/aws/aws-sdk-go-v2/service/costexplorer v1.65.1
 	github.com/aws/aws-sdk-go-v2/service/customerprofiles v1.62.5
 	github.com/aws/aws-sdk-go-v2/service/databasemigrationservice v1.64.4
 	github.com/aws/aws-sdk-go-v2/service/dataexchange v1.42.6
@@ -530,12 +534,14 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/ram v1.37.3
 	github.com/aws/aws-sdk-go-v2/service/rbin v1.28.7
 	github.com/aws/aws-sdk-go-v2/service/redshiftserverless v1.35.8
+	github.com/aws/aws-sdk-go-v2/service/rekognition v1.52.3
 	github.com/aws/aws-sdk-go-v2/service/resiliencehub v1.36.6
 	github.com/aws/aws-sdk-go-v2/service/resourceexplorer2 v1.24.6
 	github.com/aws/aws-sdk-go-v2/service/rolesanywhere v1.23.7
 	github.com/aws/aws-sdk-go-v2/service/route53domains v1.36.3
 	github.com/aws/aws-sdk-go-v2/service/route53profiles v1.10.3
 	github.com/aws/aws-sdk-go-v2/service/route53recoverycontrolconfig v1.33.6
+	github.com/aws/aws-sdk-go-v2/service/route53recoveryreadiness v1.27.2
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/rum v1.31.8
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5
@@ -553,10 +559,12 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/signer v1.33.6
 	github.com/aws/aws-sdk-go-v2/service/ssmcontacts v1.32.8
 	github.com/aws/aws-sdk-go-v2/service/ssmincidents v1.40.6
+	github.com/aws/aws-sdk-go-v2/service/ssmquicksetup v1.9.6
 	github.com/aws/aws-sdk-go-v2/service/storagegateway v1.44.3
 	github.com/aws/aws-sdk-go-v2/service/synthetics v1.44.0
 	github.com/aws/aws-sdk-go-v2/service/timestreaminfluxdb v1.20.6
 	github.com/aws/aws-sdk-go-v2/service/timestreamwrite v1.36.0
+	github.com/aws/aws-sdk-go-v2/service/transcribe v1.56.3
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
 	github.com/aws/aws-sdk-go-v2/service/verifiedpermissions v1.34.6
 	github.com/aws/aws-sdk-go-v2/service/vpclattice v1.22.2

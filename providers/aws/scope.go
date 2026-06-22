@@ -50,10 +50,18 @@ var serviceScope = map[string]regionScope{
 	"waf":               scopeGlobal,
 
 	// us-east-1 only
+	"cur":              scopeEastOnly,
 	"route53domains":   scopeEastOnly,
 	"wafv2_cloudfront": scopeEastOnly,
 
 	// regional (default)
+	"ce":                           scopeRegional,
+	"chime-sdk-mediapipelines":     scopeRegional,
+	"comprehend":                   scopeRegional,
+	"rekognition":                  scopeRegional,
+	"route53recoveryreadiness":     scopeRegional,
+	"ssmquicksetup":                scopeRegional,
+	"transcribe":                   scopeRegional,
 	"appintegrations":              scopeRegional,
 	"bcmdataexports":               scopeRegional,
 	"chatbot":                      scopeRegional,
