@@ -257,9 +257,50 @@ func (g *IamGenerator) getUsers(svc *iam.Client) error {
 			if err != nil {
 				log.Println(err)
 			}
+			g.getUserCredentials(svc, StringValue(user.UserName))
 		}
 	}
 	return nil
+}
+
+// getUserCredentials enumerates a user's SSH public keys, signing certificates,
+// and service-specific credentials. Composite import IDs per the aws provider.
+func (g *IamGenerator) getUserCredentials(svc *iam.Client, userName string) {
+	if userName == "" {
+		return
+	}
+	ctx := context.TODO()
+	if out, err := svc.ListSSHPublicKeys(ctx, &iam.ListSSHPublicKeysInput{UserName: &userName}); err == nil {
+		for _, k := range out.SSHPublicKeys {
+			id := StringValue(k.SSHPublicKeyId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				userName+":"+id+":SSH", userName+"_"+id, "aws_iam_user_ssh_key", "aws", IamAllowEmptyValues))
+		}
+	}
+	if out, err := svc.ListSigningCertificates(ctx, &iam.ListSigningCertificatesInput{UserName: &userName}); err == nil {
+		for _, c := range out.Certificates {
+			id := StringValue(c.CertificateId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id+":"+userName, userName+"_"+id, "aws_iam_signing_certificate", "aws", IamAllowEmptyValues))
+		}
+	}
+	if out, err := svc.ListServiceSpecificCredentials(ctx, &iam.ListServiceSpecificCredentialsInput{UserName: &userName}); err == nil {
+		for _, c := range out.ServiceSpecificCredentials {
+			id := StringValue(c.ServiceSpecificCredentialId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				StringValue(c.ServiceName)+":"+userName+":"+id, userName+"_"+id,
+				"aws_iam_service_specific_credential", "aws", IamAllowEmptyValues))
+		}
+	}
 }
 
 func (g *IamGenerator) getUserGroup(svc *iam.Client, userName *string) error {

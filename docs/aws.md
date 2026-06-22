@@ -483,6 +483,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iam_user_policy`
     * `aws_iam_user_policy_attachment`
     * `aws_iam_virtual_mfa_device`
+    * `aws_iam_user_ssh_key`
+    * `aws_iam_signing_certificate`
+    * `aws_iam_service_specific_credential`
 *   `identitystore`
     * `aws_identitystore_group`
     * `aws_identitystore_user`
