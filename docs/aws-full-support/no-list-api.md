@@ -29,6 +29,25 @@ resource to import into, so a generator would emit un-refreshable HCL:
 - **iotanalytics** — AWS has deprecated the service ("no longer available for
   use"); the SDK package itself is marked deprecated. Removed from the registry.
 
+## Structurally not independently listable (≈243 of missing-resources.txt)
+Per the §3 diff (`missing-resources.txt`), ~243 of the remaining gap are
+resource *classes* that have no standalone List/Describe API — they are
+attachments, associations, sub-policies, role/permission assignments, default-*
+singletons, accepters, and per-parent settings. Terraform models them as their
+own resources, but AWS only exposes them as fields of (or actions on) a parent,
+so they cannot be enumerated to import. Matched suffixes/prefixes:
+
+    *_attachment  *_association  *_policy  *_membership  *_assignment
+    aws_default_*  *_default_*  *_grant  *_binding  *_subscription
+    *_aggregator  *_delegated_admin*  *_organization_*  *_account_setting*
+    *_share_accepter  *_invitation_accepter  *_lock_configuration  *_acl
+
+These are excluded by the same provider/list-API bound as §1. The remaining
+~692 entries in `missing-resources.txt` are buildable candidates (mostly
+sub-resources of already-registered services that need a parent-scoped loop, or
+niche P4 services) — the long tail of plan §9, built incrementally; re-run
+`gen-gap-list.sh` after each batch to shrink the list.
+
 ## Data-plane / report-only (plan §1 exclusion list)
 `sts`, `pricing`, `compute-optimizer`, `health`, `support`, `trustedadvisor`,
 `resourcegroupstaggingapi`, `cloudcontrol`, `*-runtime`, `*-data`, and the CLI
