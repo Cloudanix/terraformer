@@ -198,6 +198,44 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 					map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
 			}
 		}
+
+		users := cognitoidentityprovider.NewListUsersPaginator(svc, &cognitoidentityprovider.ListUsersInput{
+			UserPoolId: aws.String(userPoolID),
+		})
+		for users.HasMorePages() {
+			page, err := users.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, user := range page.Users {
+				username := StringValue(user.Username)
+				if username == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					userPoolID+"/"+username, userPoolID+"_"+username, "aws_cognito_user", "aws",
+					map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+			}
+		}
+
+		if ui, err := svc.GetUICustomization(context.TODO(), &cognitoidentityprovider.GetUICustomizationInput{
+			UserPoolId: aws.String(userPoolID),
+		}); err == nil && ui.UICustomization != nil && StringValue(ui.UICustomization.CSS) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				userPoolID, userPoolID, "aws_cognito_user_pool_ui_customization", "aws",
+				map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+		}
+
+		if rc, err := svc.DescribeRiskConfiguration(context.TODO(), &cognitoidentityprovider.DescribeRiskConfigurationInput{
+			UserPoolId: aws.String(userPoolID),
+		}); err == nil && rc.RiskConfiguration != nil &&
+			(rc.RiskConfiguration.AccountTakeoverRiskConfiguration != nil ||
+				rc.RiskConfiguration.CompromisedCredentialsRiskConfiguration != nil ||
+				rc.RiskConfiguration.RiskExceptionConfiguration != nil) {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				userPoolID, userPoolID, "aws_cognito_risk_configuration", "aws",
+				map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
+		}
 	}
 	return nil
 }
