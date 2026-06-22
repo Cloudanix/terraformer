@@ -185,6 +185,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ecs_cluster`
     * `aws_ecs_service`
     * `aws_ecs_task_definition`
+    * `aws_ecs_capacity_provider`
 *   `efs`
     * `aws_efs_access_point`
     * `aws_efs_file_system`

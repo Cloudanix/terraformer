@@ -138,6 +138,23 @@ func (g *EcsGenerator) InitResources() error {
 		g.Resources = append(g.Resources, v)
 	}
 
+	// Capacity providers. DescribeCapacityProviders with no names returns all,
+	// including the AWS-managed FARGATE / FARGATE_SPOT which aren't importable
+	// as aws_ecs_capacity_provider — skip those.
+	capacityProviders, err := svc.DescribeCapacityProviders(context.TODO(), &ecs.DescribeCapacityProvidersInput{})
+	if err != nil {
+		fmt.Println(err.Error())
+	} else {
+		for _, cp := range capacityProviders.CapacityProviders {
+			name := StringValue(cp.Name)
+			if name == "" || name == "FARGATE" || name == "FARGATE_SPOT" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_ecs_capacity_provider", "aws", ecsAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 
