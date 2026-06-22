@@ -105,6 +105,31 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 				"aws_servicecatalog_product",
 				"aws",
 				servicecatalogAllowEmptyValues))
+			if arts, err := svc.ListProvisioningArtifacts(context.TODO(), &servicecatalog.ListProvisioningArtifactsInput{ProductId: &productID}); err == nil {
+				for _, a := range arts.ProvisioningArtifactDetails {
+					aid := StringValue(a.Id)
+					if aid == "" {
+						continue
+					}
+					resources = append(resources, terraformutils.NewSimpleResource(
+						aid+":"+productID, aid, "aws_servicecatalog_provisioning_artifact", "aws", servicecatalogAllowEmptyValues))
+				}
+			}
+		}
+	}
+
+	for sp := servicecatalog.NewSearchProvisionedProductsPaginator(svc, &servicecatalog.SearchProvisionedProductsInput{}); sp.HasMorePages(); {
+		page, err := sp.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, pp := range page.ProvisionedProducts {
+			id := StringValue(pp.Id)
+			if id == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id, StringValue(pp.Name), "aws_servicecatalog_provisioned_product", "aws", servicecatalogAllowEmptyValues))
 		}
 	}
 
