@@ -384,6 +384,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_dx_gateway`
     * `aws_dx_private_virtual_interface`
     * `aws_dx_public_virtual_interface`
+    * `aws_dx_transit_virtual_interface`
     * `aws_dx_lag`
 *   `dynamodb`
     * `aws_dynamodb_table`
