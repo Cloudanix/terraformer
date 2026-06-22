@@ -475,6 +475,8 @@ aws_kms_alias
 aws_kms_custom_key_store
 aws_kms_grant
 aws_kms_key
+aws_lakeformation_data_lake_settings
+aws_lakeformation_lf_tag
 aws_lakeformation_resource
 aws_lambda_alias
 aws_lambda_code_signing_config

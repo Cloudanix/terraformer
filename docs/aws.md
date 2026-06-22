@@ -675,6 +675,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_kinesis_video_stream`
 *   `lakeformation`
     * `aws_lakeformation_resource`
+    * `aws_lakeformation_lf_tag`
+    * `aws_lakeformation_data_lake_settings`
 *   `kms`
     * `aws_kms_key`
     * `aws_kms_alias`

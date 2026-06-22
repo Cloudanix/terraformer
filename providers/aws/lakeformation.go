@@ -35,9 +35,10 @@ func (g *LakeFormationGenerator) InitResources() error {
 	}
 	svc := lakeformation.NewFromConfig(config)
 
+	ctx := context.TODO()
 	p := lakeformation.NewListResourcesPaginator(svc, &lakeformation.ListResourcesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(ctx)
 		if err != nil {
 			return err
 		}
@@ -48,6 +49,33 @@ func (g *LakeFormationGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_lakeformation_resource", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for tp := lakeformation.NewListLFTagsPaginator(svc, &lakeformation.ListLFTagsInput{}); tp.HasMorePages(); {
+		page, err := tp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, t := range page.LFTags {
+			key := StringValue(t.TagKey)
+			if key == "" {
+				continue
+			}
+			catalog := StringValue(t.CatalogId)
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				catalog+":"+key, catalog+"_"+key, "aws_lakeformation_lf_tag", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	account, err := g.getAccountNumber(config)
+	if err != nil {
+		return err
+	}
+	if accountID := StringValue(account); accountID != "" {
+		if _, err := svc.GetDataLakeSettings(ctx, &lakeformation.GetDataLakeSettingsInput{}); err == nil {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				accountID, accountID, "aws_lakeformation_data_lake_settings", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
