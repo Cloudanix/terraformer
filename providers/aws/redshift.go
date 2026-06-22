@@ -188,7 +188,57 @@ func (g *RedshiftGenerator) InitResources() error {
 	if err := g.loadEndpointAccess(svc); err != nil {
 		return err
 	}
+	if err := g.loadRedshiftExtras(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+func (g *RedshiftGenerator) loadRedshiftExtras(svc *redshift.Client) error {
+	ctx := context.TODO()
+	add := func(name, tfType string) {
+		if name != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, tfType, "aws", RedshiftAllowEmptyValues))
+		}
+	}
+	for p := redshift.NewDescribeClusterSnapshotsPaginator(svc, &redshift.DescribeClusterSnapshotsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.Snapshots {
+			add(StringValue(x.SnapshotIdentifier), "aws_redshift_cluster_snapshot")
+		}
+	}
+	for p := redshift.NewDescribeSnapshotCopyGrantsPaginator(svc, &redshift.DescribeSnapshotCopyGrantsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.SnapshotCopyGrants {
+			add(StringValue(x.SnapshotCopyGrantName), "aws_redshift_snapshot_copy_grant")
+		}
+	}
+	for p := redshift.NewDescribeHsmClientCertificatesPaginator(svc, &redshift.DescribeHsmClientCertificatesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.HsmClientCertificates {
+			add(StringValue(x.HsmClientCertificateIdentifier), "aws_redshift_hsm_client_certificate")
+		}
+	}
+	for p := redshift.NewDescribeHsmConfigurationsPaginator(svc, &redshift.DescribeHsmConfigurationsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, x := range pg.HsmConfigurations {
+			add(StringValue(x.HsmConfigurationIdentifier), "aws_redshift_hsm_configuration")
+		}
+	}
 	return nil
 }
 

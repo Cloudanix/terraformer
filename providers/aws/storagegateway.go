@@ -45,5 +45,17 @@ func (g *StorageGatewayGenerator) InitResources() error {
 			func(gw types.GatewayInfo) string { return StringValue(gw.GatewayARN) },
 			func(gw types.GatewayInfo) string { return StringValue(gw.GatewayName) })
 	}
+
+	pools := storagegateway.NewListTapePoolsPaginator(svc, &storagegateway.ListTapePoolsInput{})
+	for pools.HasMorePages() {
+		page, err := pools.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.PoolInfos, "aws_storagegateway_tape_pool",
+			defaultAllowEmptyValues,
+			func(p types.PoolInfo) string { return StringValue(p.PoolARN) },
+			func(p types.PoolInfo) string { return StringValue(p.PoolName) })
+	}
 	return nil
 }

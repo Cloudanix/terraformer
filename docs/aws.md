@@ -357,6 +357,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `emr`
     * `aws_emr_cluster`
     * `aws_emr_security_configuration`
+    * `aws_emr_studio`
 *   `emr-containers`
     * `aws_emrcontainers_virtual_cluster`
 *   `emr-serverless`
@@ -414,6 +415,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_glue_registry`
     * `aws_glue_dev_endpoint`
     * `aws_glue_data_quality_ruleset`
+    * `aws_glue_ml_transform`
 *   `guardduty`
     * `aws_guardduty_detector`
     * `aws_guardduty_filter`
@@ -459,6 +461,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_iot_thing`
     * `aws_iot_thing_type`
     * `aws_iot_topic_rule`
+    * `aws_iot_authorizer`
+    * `aws_iot_billing_group`
+    * `aws_iot_policy`
+    * `aws_iot_thing_group`
+    * `aws_iot_provisioning_template`
+    * `aws_iot_domain_configuration`
     * `aws_iot_role_alias`
 *   `kafkaconnect`
     * `aws_mskconnect_connector`
@@ -592,6 +600,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_mq_configuration`
 *   `msk`
     * `aws_msk_cluster`
+    * `aws_msk_configuration`
+    * `aws_msk_replicator`
+    * `aws_msk_vpc_connection`
 *   `nacl`
     * `aws_network_acl`
 *   `network-firewall`
@@ -698,6 +709,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshift_usage_limit`
     * `aws_redshift_authentication_profile`
     * `aws_redshift_endpoint_access`
+    * `aws_redshift_cluster_snapshot`
+    * `aws_redshift_snapshot_copy_grant`
+    * `aws_redshift_hsm_client_certificate`
+    * `aws_redshift_hsm_configuration`
 *   `resourcegroups`
     * `aws_resourcegroups_group`
 *   `route53`
@@ -819,6 +834,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ssmincidents_response_plan`
 *   `storagegateway`
     * `aws_storagegateway_gateway`
+    * `aws_storagegateway_tape_pool`
 *   `subnet`
     * `aws_subnet`
 *   `swf`

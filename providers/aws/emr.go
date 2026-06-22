@@ -39,7 +39,29 @@ func (g *EmrGenerator) InitResources() error {
 		return err
 	}
 	err = g.addSecurityConfigurations(client)
-	return err
+	if err != nil {
+		return err
+	}
+	return g.addStudios(client)
+}
+
+func (g *EmrGenerator) addStudios(client *emr.Client) error {
+	p := emr.NewListStudiosPaginator(client, &emr.ListStudiosInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, s := range page.Studios {
+			id := StringValue(s.StudioId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(s.Name), "aws_emr_studio", "aws", emrAllowEmptyValues))
+		}
+	}
+	return nil
 }
 
 func (g *EmrGenerator) addClusters(client *emr.Client) error {

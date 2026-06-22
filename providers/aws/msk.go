@@ -50,6 +50,50 @@ func (g *MskGenerator) InitResources() error {
 		}
 	}
 
+	ctx := context.TODO()
+	for cp := kafka.NewListConfigurationsPaginator(svc, &kafka.ListConfigurationsInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.Configurations {
+			arn := StringValue(c.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(c.Name), "aws_msk_configuration", "aws", mskAllowEmptyValues))
+		}
+	}
+	for rp := kafka.NewListReplicatorsPaginator(svc, &kafka.ListReplicatorsInput{}); rp.HasMorePages(); {
+		page, err := rp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, r := range page.Replicators {
+			arn := StringValue(r.ReplicatorArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(r.ReplicatorName), "aws_msk_replicator", "aws", mskAllowEmptyValues))
+		}
+	}
+	for vp := kafka.NewListVpcConnectionsPaginator(svc, &kafka.ListVpcConnectionsInput{}); vp.HasMorePages(); {
+		page, err := vp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, v := range page.VpcConnections {
+			arn := StringValue(v.VpcConnectionArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_msk_vpc_connection", "aws", mskAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 

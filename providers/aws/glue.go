@@ -191,6 +191,29 @@ func (g *GlueGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadGlueMLTransforms(svc); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (g *GlueGenerator) loadGlueMLTransforms(svc *glue.Client) error {
+	p := glue.NewGetMLTransformsPaginator(svc, &glue.GetMLTransformsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, t := range page.Transforms {
+			id := StringValue(t.TransformId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(t.Name), "aws_glue_ml_transform", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

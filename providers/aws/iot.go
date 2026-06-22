@@ -46,8 +46,75 @@ func (g *IotGenerator) InitResources() error {
 	if err := g.loadRoleAliases(svc); err != nil {
 		return err
 	}
+	g.loadIotExtras(svc)
 
 	return nil
+}
+
+// loadIotExtras enumerates additional top-level IoT resources, each a List*
+// paginator returning a name. Import ID is the name.
+func (g *IotGenerator) loadIotExtras(svc *iot.Client) {
+	ctx := context.TODO()
+	add := func(name, tfType string) {
+		if name != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, tfType, "aws", iotAllowEmptyValues))
+		}
+	}
+	for p := iot.NewListAuthorizersPaginator(svc, &iot.ListAuthorizersInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.Authorizers {
+			add(StringValue(x.AuthorizerName), "aws_iot_authorizer")
+		}
+	}
+	for p := iot.NewListBillingGroupsPaginator(svc, &iot.ListBillingGroupsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.BillingGroups {
+			add(StringValue(x.GroupName), "aws_iot_billing_group")
+		}
+	}
+	for p := iot.NewListPoliciesPaginator(svc, &iot.ListPoliciesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.Policies {
+			add(StringValue(x.PolicyName), "aws_iot_policy")
+		}
+	}
+	for p := iot.NewListThingGroupsPaginator(svc, &iot.ListThingGroupsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.ThingGroups {
+			add(StringValue(x.GroupName), "aws_iot_thing_group")
+		}
+	}
+	for p := iot.NewListProvisioningTemplatesPaginator(svc, &iot.ListProvisioningTemplatesInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.Templates {
+			add(StringValue(x.TemplateName), "aws_iot_provisioning_template")
+		}
+	}
+	for p := iot.NewListDomainConfigurationsPaginator(svc, &iot.ListDomainConfigurationsInput{}); p.HasMorePages(); {
+		pg, err := p.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, x := range pg.DomainConfigurations {
+			add(StringValue(x.DomainConfigurationName), "aws_iot_domain_configuration")
+		}
+	}
 }
 
 func (g *IotGenerator) loadThingTypes(svc *iot.Client) error {
