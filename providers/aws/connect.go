@@ -20,6 +20,7 @@ import (
 
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/connect"
+	connecttypes "github.com/aws/aws-sdk-go-v2/service/connect/types"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -175,6 +176,25 @@ func (g *ConnectGenerator) loadConnectChildren(svc *connect.Client, instanceID s
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			instanceID, instanceID, "aws_connect_user_hierarchy_structure", "aws", defaultAllowEmptyValues))
 	}
+	for _, resType := range connecttypes.InstanceStorageResourceType("").Values() {
+		rt := resType
+		for sp := connect.NewListInstanceStorageConfigsPaginator(svc, &connect.ListInstanceStorageConfigsInput{InstanceId: aws.String(instanceID), ResourceType: rt}); sp.HasMorePages(); {
+			page, err := sp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, sc := range page.StorageConfigs {
+				assoc := StringValue(sc.AssociationId)
+				if assoc == "" {
+					continue
+				}
+				id := instanceID + ":" + assoc + ":" + string(rt)
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, instanceID+"_"+assoc, "aws_connect_instance_storage_config", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
+
 	for v := connect.NewSearchVocabulariesPaginator(svc, &connect.SearchVocabulariesInput{InstanceId: aws.String(instanceID)}); v.HasMorePages(); {
 		page, err := v.NextPage(ctx)
 		if err != nil {

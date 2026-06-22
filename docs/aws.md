@@ -358,6 +358,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_connect_phone_number`
     * `aws_connect_user_hierarchy_structure`
     * `aws_connect_vocabulary`
+    * `aws_connect_instance_storage_config`
 *   `customer-profiles`
     * `aws_customerprofiles_domain`
 *   `dataexchange`
