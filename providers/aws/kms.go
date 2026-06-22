@@ -41,7 +41,29 @@ func (g *KmsGenerator) InitResources() error {
 		return err
 	}
 	err = g.addAliases(client)
-	return err
+	if err != nil {
+		return err
+	}
+	return g.addCustomKeyStores(client)
+}
+
+func (g *KmsGenerator) addCustomKeyStores(client *kms.Client) error {
+	p := kms.NewDescribeCustomKeyStoresPaginator(client, &kms.DescribeCustomKeyStoresInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, store := range page.CustomKeyStores {
+			id := StringValue(store.CustomKeyStoreId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(store.CustomKeyStoreName), "aws_kms_custom_key_store", "aws", kmsAllowEmptyValues))
+		}
+	}
+	return nil
 }
 
 func (g *KmsGenerator) addKeys(client *kms.Client) error {

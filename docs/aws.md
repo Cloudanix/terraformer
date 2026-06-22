@@ -287,6 +287,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_kms_key`
     * `aws_kms_alias`
     * `aws_kms_grant`
+    * `aws_kms_custom_key_store`
 *   `lambda`
     * `aws_lambda_alias`
     * `aws_lambda_code_signing_config`
