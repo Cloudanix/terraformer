@@ -107,9 +107,32 @@ func (g *OpsworksGenerator) fetchLayers(stackID *string, svc *opsworks.Client) e
 				"aws",
 				[]string{"tags."},
 			))
+		case types.LayerTypeEcsCluster:
+			g.addLayer(layer.LayerId, "aws_opsworks_ecs_cluster_layer")
+		case types.LayerTypeMonitoringMaster:
+			g.addLayer(layer.LayerId, "aws_opsworks_ganglia_layer")
+		case types.LayerTypeLb:
+			g.addLayer(layer.LayerId, "aws_opsworks_haproxy_layer")
+		case types.LayerTypeMemcached:
+			g.addLayer(layer.LayerId, "aws_opsworks_memcached_layer")
+		case types.LayerTypeDbMaster:
+			g.addLayer(layer.LayerId, "aws_opsworks_mysql_layer")
+		case types.LayerTypeNodejsApp:
+			g.addLayer(layer.LayerId, "aws_opsworks_nodejs_app_layer")
+		case types.LayerTypeRailsApp:
+			g.addLayer(layer.LayerId, "aws_opsworks_rails_app_layer")
 		}
 	}
 	return nil
+}
+
+func (g *OpsworksGenerator) addLayer(layerID *string, tfType string) {
+	id := StringValue(layerID)
+	if id == "" {
+		return
+	}
+	g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+		id, id, tfType, "aws", []string{"tags."}))
 }
 
 func (g *OpsworksGenerator) fetchInstances(stackID *string, svc *opsworks.Client) error {
@@ -138,13 +161,14 @@ func (g *OpsworksGenerator) fetchRdsInstances(stackID *string, svc *opsworks.Cli
 		return err
 	}
 	for _, rdsDbInstance := range apps.RdsDbInstances {
+		arn := StringValue(rdsDbInstance.RdsDbInstanceArn)
 		g.Resources = append(g.Resources, terraformutils.NewResource(
-			StringValue(rdsDbInstance.RdsDbInstanceArn),
-			StringValue(rdsDbInstance.RdsDbInstanceArn),
-			"aws_opsworks_instance",
+			StringValue(stackID)+"/"+arn,
+			arn,
+			"aws_opsworks_rds_db_instance",
 			"aws",
 			map[string]string{
-				"rds_db_instance_arn": StringValue(rdsDbInstance.RdsDbInstanceArn),
+				"rds_db_instance_arn": arn,
 				"stack_id":            StringValue(stackID),
 			},
 			[]string{"tags."},

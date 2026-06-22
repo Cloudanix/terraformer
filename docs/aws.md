@@ -869,6 +869,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_opsworks_stack`
     * `aws_opsworks_static_web_layer`
     * `aws_opsworks_user_profile`
+    * `aws_opsworks_ecs_cluster_layer`
+    * `aws_opsworks_ganglia_layer`
+    * `aws_opsworks_haproxy_layer`
+    * `aws_opsworks_memcached_layer`
+    * `aws_opsworks_mysql_layer`
+    * `aws_opsworks_nodejs_app_layer`
+    * `aws_opsworks_rails_app_layer`
 *   `organization`
     * `aws_organizations_account`
     * `aws_organizations_organization`
