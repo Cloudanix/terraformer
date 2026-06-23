@@ -88,6 +88,7 @@ List of supported GCP services:
     * `google_bigtable_app_profile`
     * `google_bigtable_logical_view`
     * `google_bigtable_materialized_view`
+    * `google_bigtable_instance_iam_member`
 *   `cloudRun`
     * `google_cloud_run_v2_service`
     * `google_cloud_run_v2_job`

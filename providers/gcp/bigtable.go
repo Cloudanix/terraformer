@@ -102,6 +102,19 @@ func (g *BigtableGenerator) InitResources() error {
 			}
 		}
 
+		// Per-instance IAM (member form).
+		if policy, perr := bigtableService.Projects.Instances.GetIamPolicy(obj.Name, &bigtableadmin.GetIamPolicyRequest{}).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						obj.Name+" "+b.Role+" "+m, instanceName+"_"+b.Role+"_"+m,
+						"google_bigtable_instance_iam_member", g.ProviderName,
+						map[string]string{"instance": instanceName, "role": b.Role, "member": m, "project": project},
+						bigtableAllowEmptyValues, bigtableAdditionalFields))
+				}
+			}
+		}
+
 		// Walk the instance for its materialized views.
 		mvList, mverr := bigtableService.Projects.Instances.MaterializedViews.List(obj.Name).Do()
 		if mverr == nil {
