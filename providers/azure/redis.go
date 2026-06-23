@@ -19,6 +19,7 @@ import (
 	"log"
 
 	"github.com/Azure/azure-sdk-for-go/services/redis/mgmt/2018-03-01/redis"
+	"github.com/Azure/go-autorest/autorest"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/hashicorp/go-azure-helpers/authentication"
 )
@@ -48,7 +49,47 @@ func (g *RedisGenerator) listRedisServers() ([]terraformutils.Resource, error) {
 			g.ProviderName,
 			[]string{}))
 
+		id, err := ParseAzureResourceID(*redisServer.ID)
+		if err != nil {
+			return nil, err
+		}
+		firewallRules, err := g.listRedisFirewallRules(id.ResourceGroup, *redisServer.Name)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, firewallRules...)
+
 		if err := redisServersIterator.Next(); err != nil {
+			log.Println(err)
+			break
+		}
+	}
+
+	return resources, nil
+}
+
+// listRedisFirewallRules enumerates azurerm_redis_firewall_rule for one cache.
+func (g *RedisGenerator) listRedisFirewallRules(resourceGroupName string, cacheName string) ([]terraformutils.Resource, error) {
+	var resources []terraformutils.Resource
+	ctx := context.Background()
+	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
+	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
+	client := redis.NewFirewallRulesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
+
+	iterator, err := client.ListByRedisResourceComplete(ctx, resourceGroupName, cacheName)
+	if err != nil {
+		return nil, err
+	}
+	for iterator.NotDone() {
+		rule := iterator.Value()
+		resources = append(resources, terraformutils.NewSimpleResource(
+			*rule.ID,
+			*rule.Name,
+			"azurerm_redis_firewall_rule",
+			g.ProviderName,
+			[]string{}))
+		if err := iterator.NextWithContext(ctx); err != nil {
 			log.Println(err)
 			break
 		}

@@ -203,6 +203,7 @@ export ARM_USE_ADAL=true
     * `azurerm_purview_account`
 *   `redis`
     * `azurerm_redis_cache`
+    * `azurerm_redis_firewall_rule`
 *   `resource_group`
     * `azurerm_management_lock`
     * `azurerm_resource_group`
