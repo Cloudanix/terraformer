@@ -214,6 +214,7 @@ google_iam_workload_identity_pool_provider
 google_iap_brand
 google_integration_connectors_connection
 google_kms_crypto_key
+google_kms_crypto_key_iam_member
 google_kms_crypto_key_version
 google_kms_ekm_connection
 google_kms_key_handle
