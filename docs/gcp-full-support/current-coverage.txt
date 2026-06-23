@@ -122,6 +122,7 @@ google_document_ai_processor
 google_essential_contacts_contact
 google_eventarc_channel
 google_eventarc_trigger
+google_filestore_backup
 google_filestore_instance
 google_firestore_database
 google_gke_hub_membership
@@ -186,3 +187,4 @@ google_vmwareengine_private_cloud
 google_vpc_access_connector
 google_workflows_workflow
 google_workstations_workstation_cluster
+google_workstations_workstation_config
