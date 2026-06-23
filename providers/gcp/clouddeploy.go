@@ -120,6 +120,17 @@ func (g *ClouddeployGenerator) InitResources() error {
 				o.Name, name, "google_clouddeploy_custom_target_type", g.ProviderName,
 				map[string]string{"name": name, "project": proj, "location": loc},
 				clouddeployAllowEmptyValues, clouddeployAdditionalFields))
+			if policy, perr := clouddeployService.Projects.Locations.CustomTargetTypes.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_clouddeploy_custom_target_type_iam_member", g.ProviderName,
+							map[string]string{"name": name, "role": b.Role, "member": m, "project": proj, "location": loc},
+							clouddeployAllowEmptyValues, clouddeployAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
