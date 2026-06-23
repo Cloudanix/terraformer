@@ -71,8 +71,27 @@ func (g *DatacatalogGenerator) InitResources() error {
 	}
 
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	project := g.GetArgs()["project"].(string)
+	region := g.GetArgs()["region"].(compute.Region).Name
+
 	entryGroupsList := datacatalogService.Projects.Locations.EntryGroups.List(parent)
-	g.Resources = append(g.Resources, g.createResources(ctx, entryGroupsList)...)
+	entryGroupRes := g.createResources(ctx, entryGroupsList)
+	g.Resources = append(g.Resources, entryGroupRes...)
+	for _, r := range entryGroupRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := datacatalogService.Projects.Locations.EntryGroups.GetIamPolicy(res, &datacatalog.GetIamPolicyRequest{}).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_data_catalog_entry_group_iam_member", g.ProviderName,
+						map[string]string{"entry_group": short, "role": b.Role, "member": m, "project": project, "region": region},
+						datacatalogAllowEmptyValues, datacatalogAdditionalFields))
+				}
+			}
+		}
+	}
 
 	taxNames := []string{}
 	if err := datacatalogService.Projects.Locations.Taxonomies.List(parent).Pages(ctx, func(page *datacatalog.GoogleCloudDatacatalogV1ListTaxonomiesResponse) error {
