@@ -149,6 +149,8 @@ List of supported GCP services:
     * `google_compute_route`
 *   `schedulerJobs`
     * `google_cloud_scheduler_job`
+*   `secretManager`
+    * `google_secret_manager_secret`
 *   `securityPolicies`
     * `google_compute_security_policy`
 *   `sslCertificates`
