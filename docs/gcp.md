@@ -106,6 +106,7 @@ List of supported GCP services:
     * `google_cloudbuild_trigger`
 *   `cloudBuildV2`
     * `google_cloudbuildv2_connection`
+    * `google_cloudbuildv2_repository`
 *   `clouddeploy`
     * `google_clouddeploy_delivery_pipeline`
     * `google_clouddeploy_target`

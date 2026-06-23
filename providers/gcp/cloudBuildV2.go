@@ -43,10 +43,12 @@ func (g *CloudBuildV2Generator) InitResources() error {
 	location := g.GetArgs()["region"].(compute.Region).Name
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + location
 
+	connNames := []string{}
 	if err := svc.Projects.Locations.Connections.List(parent).Pages(ctx, func(page *cloudbuild.ListConnectionsResponse) error {
 		for _, obj := range page.Connections {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
+			connNames = append(connNames, obj.Name)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_cloudbuildv2_connection", g.ProviderName,
 				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
@@ -55,6 +57,22 @@ func (g *CloudBuildV2Generator) InitResources() error {
 		return nil
 	}); err != nil {
 		log.Println(err)
+	}
+	for _, conn := range connNames {
+		connID := strings.Split(conn, "/")[len(strings.Split(conn, "/"))-1]
+		if err := svc.Projects.Locations.Connections.Repositories.List(conn).Pages(ctx, func(page *cloudbuild.ListRepositoriesResponse) error {
+			for _, obj := range page.Repositories {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_cloudbuildv2_repository", g.ProviderName,
+					map[string]string{"name": name, "parent_connection": connID, "project": g.GetArgs()["project"].(string), "location": location},
+					cloudBuildV2AllowEmptyValues, cloudBuildV2AdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
