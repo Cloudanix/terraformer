@@ -238,6 +238,7 @@ List of supported GCP services:
 *   `networkConnectivity`
     * `google_network_connectivity_hub`
     * `google_network_connectivity_spoke`
+    * `google_network_connectivity_service_connection_policy`
 *   `networkSecurity`
     * `google_network_security_server_tls_policy`
     * `google_network_security_client_tls_policy`
@@ -334,6 +335,7 @@ List of supported GCP services:
 *   `vmwareengine`
     * `google_vmwareengine_private_cloud`
     * `google_vmwareengine_cluster`
+    * `google_vmwareengine_network_policy`
 *   `vpcAccess`
     * `google_vpc_access_connector`
 *   `workstations`

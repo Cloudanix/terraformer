@@ -66,6 +66,22 @@ func (g *VmwareengineGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	npList := vmwareengineService.Projects.Locations.NetworkPolicies.List("projects/" + project + "/locations/" + location)
+	if err := npList.Pages(ctx, func(page *vmwareengine.ListNetworkPoliciesResponse) error {
+		for _, obj := range page.NetworkPolicies {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_vmwareengine_network_policy", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				vmwareengineAllowEmptyValues, vmwareengineAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	for _, pc := range pcNames {
 		clustersList := vmwareengineService.Projects.Locations.PrivateClouds.Clusters.List(
 			"projects/" + project + "/locations/" + location + "/privateClouds/" + pc)

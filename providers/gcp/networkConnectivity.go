@@ -72,10 +72,34 @@ func (g *NetworkConnectivityGenerator) InitResources() error {
 		"projects/" + g.GetArgs()["project"].(string) + "/locations/global")
 	g.Resources = append(g.Resources, g.createResources(ctx, hubsList)...)
 
-	spokesList := networkConnectivityService.Projects.Locations.Spokes.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
+	regionalParent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	spokesList := networkConnectivityService.Projects.Locations.Spokes.List(regionalParent)
 	g.Resources = append(g.Resources, g.createSpokesResources(ctx, spokesList)...)
+
+	scpList := networkConnectivityService.Projects.Locations.ServiceConnectionPolicies.List(regionalParent)
+	g.Resources = append(g.Resources, g.createSCPResources(ctx, scpList)...)
 	return nil
+}
+
+// Run on serviceConnectionPoliciesList and create for each TerraformResource
+func (g NetworkConnectivityGenerator) createSCPResources(ctx context.Context, list *networkconnectivity.ProjectsLocationsServiceConnectionPoliciesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *networkconnectivity.ListServiceConnectionPoliciesResponse) error {
+		for _, obj := range page.ServiceConnectionPolicies {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_network_connectivity_service_connection_policy", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
 
 // Run on spokesList and create for each TerraformResource
