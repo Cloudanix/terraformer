@@ -145,6 +145,50 @@ func (g *VertexAIGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	if err := vertexAIService.Projects.Locations.Indexes.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListIndexesResponse) error {
+		for _, o := range p.Indexes {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_index"))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.IndexEndpoints.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListIndexEndpointsResponse) error {
+		for _, o := range p.IndexEndpoints {
+			t := strings.Split(o.Name, "/")
+			ieName := t[len(t)-1]
+			g.Resources = append(g.Resources, mk(ieName, "google_vertex_ai_index_endpoint"))
+			for _, di := range o.DeployedIndexes {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name+"/deployedIndex/"+di.Id, ieName+"_"+di.Id,
+					"google_vertex_ai_index_endpoint_deployed_index", g.ProviderName,
+					map[string]string{"index_endpoint": ieName, "deployed_index_id": di.Id, "project": proj, "region": loc},
+					vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.ReasoningEngines.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListReasoningEnginesResponse) error {
+		for _, o := range p.ReasoningEngines {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_reasoning_engine"))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.DeploymentResourcePools.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListDeploymentResourcePoolsResponse) error {
+		for _, o := range p.DeploymentResourcePools {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_deployment_resource_pool"))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
