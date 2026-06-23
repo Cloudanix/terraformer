@@ -4,6 +4,7 @@ google_alloydb_cluster
 google_alloydb_instance
 google_api_gateway_api
 google_apphub_application
+google_apphub_service_project_attachment
 google_artifact_registry_repository
 google_backup_dr_management_server
 google_biglake_catalog
@@ -125,7 +126,9 @@ google_data_fusion_instance
 google_data_loss_prevention_inspect_template
 google_data_pipeline_pipeline
 google_dataplex_aspect_type
+google_dataplex_datascan
 google_dataplex_entry_group
+google_dataplex_entry_type
 google_dataplex_lake
 google_dataplex_task
 google_dataplex_zone
