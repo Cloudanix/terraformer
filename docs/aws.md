@@ -1618,6 +1618,15 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_workspaces_workspace`
 *   `workspaces-web`
     * `aws_workspacesweb_portal`
+    * `aws_workspacesweb_identity_provider`
+    * `aws_workspacesweb_browser_settings`
+    * `aws_workspacesweb_network_settings`
+    * `aws_workspacesweb_ip_access_settings`
+    * `aws_workspacesweb_user_settings`
+    * `aws_workspacesweb_data_protection_settings`
+    * `aws_workspacesweb_user_access_logging_settings`
+    * `aws_workspacesweb_trust_store`
+    * `aws_workspacesweb_session_logger`
 *   `xray`
     * `aws_xray_sampling_rule`
     * `aws_xray_group`
