@@ -74,28 +74,35 @@ func (g *DatacatalogGenerator) InitResources() error {
 	entryGroupsList := datacatalogService.Projects.Locations.EntryGroups.List(parent)
 	g.Resources = append(g.Resources, g.createResources(ctx, entryGroupsList)...)
 
-	taxonomiesList := datacatalogService.Projects.Locations.Taxonomies.List(parent)
-	g.Resources = append(g.Resources, g.createTaxonomiesResources(ctx, taxonomiesList)...)
-	return nil
-}
-
-// Run on taxonomiesList and create for each TerraformResource
-func (g DatacatalogGenerator) createTaxonomiesResources(ctx context.Context, list *datacatalog.ProjectsLocationsTaxonomiesListCall) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
-	region := g.GetArgs()["region"].(compute.Region).Name
-	if err := list.Pages(ctx, func(page *datacatalog.GoogleCloudDatacatalogV1ListTaxonomiesResponse) error {
+	taxNames := []string{}
+	if err := datacatalogService.Projects.Locations.Taxonomies.List(parent).Pages(ctx, func(page *datacatalog.GoogleCloudDatacatalogV1ListTaxonomiesResponse) error {
 		for _, obj := range page.Taxonomies {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
-			resources = append(resources, terraformutils.NewResource(
+			taxNames = append(taxNames, obj.Name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_data_catalog_taxonomy", g.ProviderName,
-				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "region": region},
-				datacatalogAllowEmptyValues, datacatalogAdditionalFields,
-			))
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "region": g.GetArgs()["region"].(compute.Region).Name},
+				datacatalogAllowEmptyValues, datacatalogAdditionalFields))
 		}
 		return nil
 	}); err != nil {
 		log.Println(err)
 	}
-	return resources
+	for _, tax := range taxNames {
+		if err := datacatalogService.Projects.Locations.Taxonomies.PolicyTags.List(tax).Pages(ctx, func(page *datacatalog.GoogleCloudDatacatalogV1ListPolicyTagsResponse) error {
+			for _, obj := range page.PolicyTags {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_data_catalog_policy_tag", g.ProviderName,
+					map[string]string{"taxonomy": tax, "project": g.GetArgs()["project"].(string)},
+					datacatalogAllowEmptyValues, datacatalogAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
+	return nil
 }
