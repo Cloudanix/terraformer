@@ -233,6 +233,8 @@ List of supported GCP services:
 *   `project`
     * `google_project`
 *   `pubsub`
+*   `recaptchaEnterprise`
+    * `google_recaptcha_enterprise_key`
     * `google_pubsub_subscription`
     * `google_pubsub_topic`
 *   `regionAutoscalers`

@@ -186,6 +186,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["gkebackup"] = &GCPFacade{service: &GkebackupGenerator{}}
 	services["secureSourceManager"] = &GCPFacade{service: &SecureSourceManagerGenerator{}}
 	services["migrationCenter"] = &GCPFacade{service: &MigrationCenterGenerator{}}
+	services["recaptchaEnterprise"] = &GCPFacade{service: &RecaptchaEnterpriseGenerator{}}
 	return services
 }
 
