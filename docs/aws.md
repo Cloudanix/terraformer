@@ -1061,6 +1061,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_pinpointsmsvoicev2_opt_out_list`
 *   `pinpoint`
     * `aws_pinpoint_app`
+    * `aws_pinpoint_email_template`
     * `aws_pinpoint_adm_channel`
     * `aws_pinpoint_apns_channel`
     * `aws_pinpoint_apns_sandbox_channel`
