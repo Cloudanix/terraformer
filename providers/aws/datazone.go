@@ -164,6 +164,44 @@ func (g *DataZoneGenerator) InitResources() error {
 					dom+"/"+bid, dom+"_"+bid, "aws_datazone_environment_blueprint_configuration", "aws", defaultAllowEmptyValues))
 			}
 		}
+		// Glossaries (id "<domain>,<glossary>,<owning_project>") and their terms
+		// (id "<domain>,<term>,<glossary>") via the inventory Search.
+		for gp := datazone.NewSearchPaginator(svc, &datazone.SearchInput{
+			DomainIdentifier: &dom, SearchScope: datazonetypes.InventorySearchScopeGlossary,
+		}); gp.HasMorePages(); {
+			page, err := gp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, item := range page.Items {
+				if v, ok := item.(*datazonetypes.SearchInventoryResultItemMemberGlossaryItem); ok {
+					gid, proj := StringValue(v.Value.Id), StringValue(v.Value.OwningProjectId)
+					if gid == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						dom+","+gid+","+proj, dom+"_"+gid, "aws_datazone_glossary", "aws", defaultAllowEmptyValues))
+				}
+			}
+		}
+		for tp := datazone.NewSearchPaginator(svc, &datazone.SearchInput{
+			DomainIdentifier: &dom, SearchScope: datazonetypes.InventorySearchScopeGlossaryTerm,
+		}); tp.HasMorePages(); {
+			page, err := tp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, item := range page.Items {
+				if v, ok := item.(*datazonetypes.SearchInventoryResultItemMemberGlossaryTermItem); ok {
+					tid, gid := StringValue(v.Value.Id), StringValue(v.Value.GlossaryId)
+					if tid == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						dom+","+tid+","+gid, dom+"_"+tid, "aws_datazone_glossary_term", "aws", defaultAllowEmptyValues))
+				}
+			}
+		}
 	}
 	return nil
 }
