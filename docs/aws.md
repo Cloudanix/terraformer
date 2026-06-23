@@ -1452,6 +1452,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpc_endpoint`
     * `aws_vpc_endpoint_connection_notification`
     * `aws_vpc_endpoint_private_dns`
+    * `aws_vpc_endpoint_route_table_association`
+    * `aws_vpc_endpoint_subnet_association`
+    * `aws_vpc_endpoint_security_group_association`
 *   `vpc_peering`
     * `aws_vpc_peering_connection`
     * `aws_vpc_peering_connection_options`

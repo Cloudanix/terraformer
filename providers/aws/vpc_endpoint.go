@@ -43,6 +43,30 @@ func (g *VpcEndpointGenerator) createResources(vpceps *ec2.DescribeVpcEndpointsO
 			resources = append(resources, terraformutils.NewSimpleResource(
 				id, id, "aws_vpc_endpoint_private_dns", "aws", VpcEndpointAllowEmptyValues))
 		}
+		// Route-table / subnet / security-group memberships are enumerable from
+		// the endpoint itself (import "<endpoint_id>/<member_id>").
+		for _, rtb := range vpcEndpoint.RouteTableIds {
+			if rtb == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id+"/"+rtb, id+"_"+rtb, "aws_vpc_endpoint_route_table_association", "aws", VpcEndpointAllowEmptyValues))
+		}
+		for _, subnet := range vpcEndpoint.SubnetIds {
+			if subnet == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id+"/"+subnet, id+"_"+subnet, "aws_vpc_endpoint_subnet_association", "aws", VpcEndpointAllowEmptyValues))
+		}
+		for _, grp := range vpcEndpoint.Groups {
+			gid := StringValue(grp.GroupId)
+			if gid == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				id+"/"+gid, id+"_"+gid, "aws_vpc_endpoint_security_group_association", "aws", VpcEndpointAllowEmptyValues))
+		}
 	}
 	return resources
 }
