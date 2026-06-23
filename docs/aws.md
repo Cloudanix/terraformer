@@ -310,6 +310,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `appsync`
     * `aws_appsync_graphql_api`
     * `aws_appsync_api`
+    * `aws_appsync_channel_namespace`
     * `aws_appsync_datasource`
     * `aws_appsync_function`
     * `aws_appsync_api_key`

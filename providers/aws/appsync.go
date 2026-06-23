@@ -80,6 +80,20 @@ func (g *AppSyncGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(api.Name), "aws_appsync_api", "aws", defaultAllowEmptyValues))
+			for cn := appsync.NewListChannelNamespacesPaginator(svc, &appsync.ListChannelNamespacesInput{ApiId: aws.String(id)}); cn.HasMorePages(); {
+				cnPage, err := cn.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, ns := range cnPage.ChannelNamespaces {
+					name := StringValue(ns.Name)
+					if name == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id+","+name, id+"_"+name, "aws_appsync_channel_namespace", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
