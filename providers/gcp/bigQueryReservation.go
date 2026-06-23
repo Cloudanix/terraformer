@@ -40,22 +40,64 @@ func (g *BigQueryReservationGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	project := g.GetArgs()["project"].(string)
 	location := g.GetArgs()["region"].(compute.Region).Name
-	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + location
+	parent := "projects/" + project + "/locations/" + location
+	tail := func(s string) string { p := strings.Split(s, "/"); return p[len(p)-1] }
+
 	list := svc.Projects.Locations.Reservations.List(parent)
 	if err := list.Pages(ctx, func(page *bigqueryreservation.ListReservationsResponse) error {
 		for _, obj := range page.Reservations {
-			t := strings.Split(obj.Name, "/")
-			name := t[len(t)-1]
+			name := tail(obj.Name)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_bigquery_reservation", g.ProviderName,
-				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				map[string]string{"name": name, "project": project, "location": location},
 				bigQueryReservationAllowEmptyValues, bigQueryReservationAdditionalFields,
 			))
+			if ae := svc.Projects.Locations.Reservations.Assignments.List(obj.Name).Pages(ctx, func(ap *bigqueryreservation.ListAssignmentsResponse) error {
+				for _, a := range ap.Assignments {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						a.Name, name+"_"+tail(a.Name), "google_bigquery_reservation_assignment", g.ProviderName,
+						map[string]string{"reservation": name, "location": location, "project": project},
+						bigQueryReservationAllowEmptyValues, bigQueryReservationAdditionalFields))
+				}
+				return nil
+			}); ae != nil {
+				log.Println(ae)
+			}
 		}
 		return nil
 	}); err != nil {
 		log.Println(err)
+	}
+	if err := svc.Projects.Locations.CapacityCommitments.List(parent).Pages(ctx, func(p *bigqueryreservation.ListCapacityCommitmentsResponse) error {
+		for _, o := range p.CapacityCommitments {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_bigquery_capacity_commitment", g.ProviderName,
+				map[string]string{"capacity_commitment_id": tail(o.Name), "location": location, "project": project},
+				bigQueryReservationAllowEmptyValues, bigQueryReservationAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := svc.Projects.Locations.ReservationGroups.List(parent).Pages(ctx, func(p *bigqueryreservation.ListReservationGroupsResponse) error {
+		for _, o := range p.ReservationGroups {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_bigquery_reservation_group", g.ProviderName,
+				map[string]string{"reservation_group_id": tail(o.Name), "location": location, "project": project},
+				bigQueryReservationAllowEmptyValues, bigQueryReservationAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	// BI reservation is a per-location singleton.
+	if bi, e := svc.Projects.Locations.GetBiReservation(parent + "/biReservation").Do(); e == nil && bi != nil {
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			bi.Name, project+"_"+location+"_bi_reservation", "google_bigquery_bi_reservation", g.ProviderName,
+			map[string]string{"location": location, "project": project},
+			bigQueryReservationAllowEmptyValues, bigQueryReservationAdditionalFields))
 	}
 	return nil
 }
