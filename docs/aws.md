@@ -608,6 +608,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_elastic_beanstalk_environment`
 *   `elb`
     * `aws_elb`
+    * `aws_load_balancer_policy`
+    * `aws_app_cookie_stickiness_policy`
+    * `aws_lb_cookie_stickiness_policy`
+    * `aws_proxy_protocol_policy`
+    * `aws_load_balancer_listener_policy`
+    * `aws_load_balancer_backend_server_policy`
 *   `emr`
     * `aws_emr_cluster`
     * `aws_emr_security_configuration`
