@@ -176,6 +176,8 @@ List of supported GCP services:
     * `google_compute_node_template`
 *   `packetMirrorings`
     * `google_compute_packet_mirroring`
+*   `oracleDatabase`
+    * `google_oracle_database_cloud_exadata_infrastructure`
 *   `parallelstore`
     * `google_parallelstore_instance`
 *   `privateca`
