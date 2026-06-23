@@ -111,6 +111,20 @@ func (g *LogsGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				group+"|"+name, group+"_"+name, "aws_cloudwatch_log_subscription_filter", "aws", logsAllowEmptyValues))
 		}
+		for sp := cloudwatchlogs.NewDescribeLogStreamsPaginator(svc, &cloudwatchlogs.DescribeLogStreamsInput{LogGroupName: &group}); sp.HasMorePages(); {
+			spage, err := sp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, s := range spage.LogStreams {
+				stream := StringValue(s.LogStreamName)
+				if stream == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					group+":"+stream, group+"_"+stream, "aws_cloudwatch_log_stream", "aws", logsAllowEmptyValues))
+			}
+		}
 		if dp, err := svc.GetDataProtectionPolicy(ctx, &cloudwatchlogs.GetDataProtectionPolicyInput{LogGroupIdentifier: &group}); err == nil &&
 			dp.PolicyDocument != nil && StringValue(dp.PolicyDocument) != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
