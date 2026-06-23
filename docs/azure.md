@@ -205,6 +205,16 @@ export ARM_USE_ADAL=true
 *   `cdn`
     * `azurerm_cdn_endpoint`
     * `azurerm_cdn_profile`
+*   `chaos_studio`
+    * `azurerm_chaos_studio_experiment`
+*   `communication`
+    * `azurerm_communication_service`
+*   `confidential_ledger`
+    * `azurerm_confidential_ledger`
+*   `dev_center`
+    * `azurerm_dev_center`
+*   `fluid_relay`
+    * `azurerm_fluid_relay_server`
 *   `cognitive`
     * `azurerm_cognitive_account`
 *   `container_app`

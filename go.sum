@@ -236,8 +236,14 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/batch/armbatch v1.2.1 h1:I
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/batch/armbatch v1.2.1/go.mod h1:CHiiIYxbQfbFdCvAgmJ5/Ivp+s4tz+dQ9nO0Z7InRZY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn v1.1.1 h1:CtE6GCP9YEDF6DjpFxl7xQBqklqfyCC/xkBKUGa/IAc=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cdn/armcdn v1.1.1/go.mod h1:b9yk+8vyxSsBsiEjk9kzrwxgyn+7+J4HzDOYUPznES4=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/chaos/armchaos v1.1.0 h1:QcaR9YsZWrLOdlTNrJ9Vc5HSOU+NJWS/6Qw4KmpJ2CI=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/chaos/armchaos v1.1.0/go.mod h1:OWo5ayVxOK71nH7JTnXqPgtSzA0DPycVTfBad4rS5MI=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices v1.8.0 h1:ZMGAqCZov8+7iFUPWKVcTaLgNXUeTlz20sIuWkQWNfg=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices v1.8.0/go.mod h1:BElPQ/GZtrdQ2i5uDZw3OKLE1we75W0AEWyeBR1TWQA=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/communication/armcommunication v1.0.0 h1:cdWpTwgJAmPCNfDaPEKrEpdL3nN3Et1fsgHa7da25Fc=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/communication/armcommunication v1.0.0/go.mod h1:FIr7kpDk2wZgREROjbQGkKE0yVPtvOndfJ+WxBtoPQY=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/confidentialledger/armconfidentialledger v1.2.0 h1:r8gb1bUxeL/QpJbF1sAucSDu8PiguG+4mfa38lhNPEk=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/confidentialledger/armconfidentialledger v1.2.0/go.mod h1:liwaWQzkLww/+T9MYkcUnGCmxGua58RWC3wIc+VntNw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v5 v5.0.0 h1:5n7dPVqsWfVKw+ZiEKSd3Kzu7gwBkbEBkeXb8rgaE9Q=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v5 v5.0.0/go.mod h1:HcZY0PHPo/7d75p99lB6lK0qYOP4vLRJUBpiehYXtLQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v6 v6.6.0 h1:xkWEcbsnJWid3rOf/S/LOHy1I55JA+4kw/f8Tnm+Onc=
@@ -246,6 +252,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard v1.
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dashboard/armdashboard v1.2.0/go.mod h1:xYrOYxajQvXMlp6M1E3amlaqPDXspyJxmjqTsGo6Jmw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datashare/armdatashare v1.2.0 h1:5iPF3EaGy/cFiImQvKQFC8SbceEjFLYB4aLoFO1/WN8=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datashare/armdatashare v1.2.0/go.mod h1:yFddSyk5uaKMqOtoqjfdjZM1/lEnsc3btormisxwdAM=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/devcenter/armdevcenter v1.1.0 h1:50cqC6KAIkns1X1adM07hlBgTZO4GfQGrMG3fMB4OAY=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/devcenter/armdevcenter v1.1.0/go.mod h1:qJLxBR7/70APdLiiTQnUiQo2GoeUXwKkvydPM5SCFYY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/digitaltwins/armdigitaltwins v1.2.0 h1:GD96b78rv9jhShcYcJauisgqyXBFgEaTAvUMaPiFl9w=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/digitaltwins/armdigitaltwins v1.2.0/go.mod h1:ESqbgba0Fl1eop2bwoJ84Vmh+d093eDrYK2TdR9bKEM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dnsresolver/armdnsresolver v1.3.0 h1:oFR4sUr/00//HiGZNO4Y0b/yZn4GxMmBPng4GdErJiY=
@@ -254,6 +262,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/elasticsan/armelasticsan v
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/elasticsan/armelasticsan v1.2.0/go.mod h1:bXxc3uCnIUCh68pl4njcH45qUgRuR0kZfR6v06k18/A=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid v1.0.0 h1:w6b0+FygDpqM7g5cjbeyPoBzgxVHwwt2vCUvTz1oFY8=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid v1.0.0/go.mod h1:t8kRpcgm+RdImuJgHG6SfoQ0tpb9LGl7MF1E6u0yeeA=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/fluidrelay/armfluidrelay v1.2.0 h1:JpVScLhDIZF7XIYLzN5RZjNbq94hBCh/z0pwSZhkEBs=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/fluidrelay/armfluidrelay v1.2.0/go.mod h1:v/pMJi3ZTXUHU3RXj2cNQ2FUpdyEYaewLSHJIm3EbQw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/healthcareapis/armhealthcareapis v1.2.0 h1:VnMkpOO24bEB9LsSXDG6iY+7QOUlvIGowh9vzQTbitY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/healthcareapis/armhealthcareapis v1.2.0/go.mod h1:B0R/t6BYN4VdmkmCP2OtFzieuDYXzNw9cjufVKF8fc4=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal v1.1.2 h1:mLY+pNLjCUeKhgnAJWAKhEUQM+RJQo2H1fuGSw1Ky1E=
