@@ -14,7 +14,7 @@ type NicGenerator struct {
 func (g *NicGenerator) InitResources() error {
 	client := g.generateClient()
 	cloudAPIClient := client.CloudAPIClient
-	datacenters, err := helpers.GetAllDatacenters(*cloudAPIClient)
+	datacenters, err := helpers.GetAllDatacenters(runContext(), *cloudAPIClient)
 	if err != nil {
 		return err
 	}

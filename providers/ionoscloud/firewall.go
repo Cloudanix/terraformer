@@ -16,7 +16,7 @@ func (g *FirewallGenerator) InitResources() error {
 	cloudAPIClient := client.CloudAPIClient
 	resourceType := "ionoscloud_firewall"
 
-	datacenters, err := helpers.GetAllDatacenters(*cloudAPIClient)
+	datacenters, err := helpers.GetAllDatacenters(runContext(), *cloudAPIClient)
 	if err != nil {
 		return err
 	}

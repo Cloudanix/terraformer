@@ -16,7 +16,7 @@ func (g *NetworkLoadBalancerForwardingRuleGenerator) InitResources() error {
 	cloudAPIClient := client.CloudAPIClient
 	resourceType := "ionoscloud_networkloadbalancer_forwardingrule"
 
-	datacenters, err := helpers.GetAllDatacenters(*cloudAPIClient)
+	datacenters, err := helpers.GetAllDatacenters(runContext(), *cloudAPIClient)
 	if err != nil {
 		return err
 	}

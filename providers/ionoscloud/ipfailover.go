@@ -16,7 +16,7 @@ type IPFailoverGenerator struct {
 func (g *IPFailoverGenerator) InitResources() error {
 	client := g.generateClient()
 	cloudAPIClient := client.CloudAPIClient
-	datacenters, err := helpers.GetAllDatacenters(*cloudAPIClient)
+	datacenters, err := helpers.GetAllDatacenters(runContext(), *cloudAPIClient)
 	resourceType := "ionoscloud_ipfailover"
 	if err != nil {
 		return err
