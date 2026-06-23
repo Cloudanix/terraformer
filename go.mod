@@ -459,10 +459,12 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/codestarconnections v1.36.5
 	github.com/aws/aws-sdk-go-v2/service/codestarnotifications v1.32.6
 	github.com/aws/aws-sdk-go-v2/service/comprehend v1.41.6
+	github.com/aws/aws-sdk-go-v2/service/computeoptimizer v1.54.0
 	github.com/aws/aws-sdk-go-v2/service/connect v1.177.0
 	github.com/aws/aws-sdk-go-v2/service/controltower v1.29.6
 	github.com/aws/aws-sdk-go-v2/service/costandusagereportservice v1.35.5
 	github.com/aws/aws-sdk-go-v2/service/costexplorer v1.65.1
+	github.com/aws/aws-sdk-go-v2/service/costoptimizationhub v1.24.0
 	github.com/aws/aws-sdk-go-v2/service/customerprofiles v1.62.5
 	github.com/aws/aws-sdk-go-v2/service/databasemigrationservice v1.64.4
 	github.com/aws/aws-sdk-go-v2/service/dataexchange v1.42.6

@@ -336,6 +336,8 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"chatbot":                      &AwsFacade{service: &ChatbotGenerator{}},
 		"cleanrooms":                   &AwsFacade{service: &CleanRoomsGenerator{}},
 		"comprehend":                   &AwsFacade{service: &ComprehendGenerator{}},
+		"compute-optimizer":            &AwsFacade{service: &ComputeOptimizerGenerator{}},
+		"cost-optimization-hub":        &AwsFacade{service: &CostOptimizationHubGenerator{}},
 		"cur":                          &AwsFacade{service: &CURGenerator{}},
 		"devops-guru":                  &AwsFacade{service: &DevOpsGuruGenerator{}},
 		"cloudsearch":                  &AwsFacade{service: &CloudSearchGenerator{}},

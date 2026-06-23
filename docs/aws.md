@@ -37,6 +37,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_account_region`
     * `aws_account_alternate_contact`
     * `aws_account_primary_contact`
+*   `compute-optimizer`
+    * `aws_computeoptimizer_enrollment_status`
+*   `cost-optimization-hub`
+    * `aws_costoptimizationhub_enrollment_status`
+    * `aws_costoptimizationhub_preferences`
 *   `devops-guru`
     * `aws_devopsguru_notification_channel`
     * `aws_devopsguru_service_integration`
