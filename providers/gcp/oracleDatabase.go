@@ -74,13 +74,28 @@ func (g *OracleDatabaseGenerator) InitResources() error {
 	infraList := oracleDatabaseService.Projects.Locations.CloudExadataInfrastructures.List(parent)
 	g.Resources = append(g.Resources, g.createResources(ctx, infraList)...)
 
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
 	if err := oracleDatabaseService.Projects.Locations.AutonomousDatabases.List(parent).Pages(ctx, func(p *oracledatabase.ListAutonomousDatabasesResponse) error {
 		for _, o := range p.AutonomousDatabases {
 			t := strings.Split(o.Name, "/")
 			name := t[len(t)-1]
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				o.Name, name, "google_oracle_database_autonomous_database", g.ProviderName,
-				map[string]string{"autonomous_database_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				map[string]string{"autonomous_database_id": name, "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := oracleDatabaseService.Projects.Locations.CloudVmClusters.List(parent).Pages(ctx, func(p *oracledatabase.ListCloudVmClustersResponse) error {
+		for _, o := range p.CloudVmClusters {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_oracle_database_cloud_vm_cluster", g.ProviderName,
+				map[string]string{"cloud_vm_cluster_id": name, "project": proj, "location": loc},
 				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
 		}
 		return nil
