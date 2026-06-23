@@ -147,6 +147,7 @@ google_eventarc_channel
 google_eventarc_trigger
 google_filestore_backup
 google_filestore_instance
+google_filestore_snapshot
 google_firestore_database
 google_gke_backup_backup_plan
 google_gke_backup_restore_plan
@@ -159,6 +160,7 @@ google_healthcare_fhir_store
 google_healthcare_hl7_v2_store
 google_iam_workload_identity_pool
 google_iam_workload_identity_pool_provider
+google_iap_brand
 google_integration_connectors_connection
 google_kms_crypto_key
 google_kms_crypto_key_version
