@@ -169,6 +169,8 @@ export ARM_USE_ADAL=true
     * `azurerm_eventhub_consumer_group`
     * `azurerm_eventhub_namespace`
     * `azurerm_eventhub_namespace_authorization_rule`
+*   `ddos`
+    * `azurerm_network_ddos_protection_plan`
 *   `firewall`
     * `azurerm_firewall`
 *   `kubernetes`
@@ -178,6 +180,8 @@ export ARM_USE_ADAL=true
     * `azurerm_application_insights`
 *   `automation`
     * `azurerm_automation_account`
+*   `bastion`
+    * `azurerm_bastion_host`
 *   `cdn`
     * `azurerm_cdn_endpoint`
     * `azurerm_cdn_profile`
