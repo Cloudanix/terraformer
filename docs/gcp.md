@@ -184,6 +184,7 @@ List of supported GCP services:
     * `google_healthcare_fhir_store`
     * `google_healthcare_dicom_store`
     * `google_healthcare_hl7_v2_store`
+    * `google_healthcare_consent_store`
 *   `httpHealthChecks`
     * `google_compute_http_health_check`
 *   `httpsHealthChecks`

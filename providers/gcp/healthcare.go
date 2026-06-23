@@ -153,6 +153,20 @@ func (g *HealthcareGenerator) InitResources() error {
 		g.Resources = append(g.Resources, g.createFhirStoresResources(ctx, healthcareService.Projects.Locations.Datasets.FhirStores, dataset)...)
 		g.Resources = append(g.Resources, g.createDicomStoresResources(ctx, healthcareService.Projects.Locations.Datasets.DicomStores, dataset)...)
 		g.Resources = append(g.Resources, g.createHl7V2StoresResources(ctx, healthcareService.Projects.Locations.Datasets.Hl7V2Stores, dataset)...)
+		if err := healthcareService.Projects.Locations.Datasets.ConsentStores.List(dataset).Pages(ctx, func(page *healthcare.ListConsentStoresResponse) error {
+			for _, obj := range page.ConsentStores {
+				ct := strings.Split(obj.Name, "/")
+				name := ct[len(ct)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_healthcare_consent_store", g.ProviderName,
+					map[string]string{"name": name, "dataset": dataset, "project": project},
+					healthcareAllowEmptyValues, healthcareAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
