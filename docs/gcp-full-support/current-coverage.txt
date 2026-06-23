@@ -295,6 +295,7 @@ google_service_directory_service
 google_spanner_backup_schedule
 google_spanner_database
 google_spanner_instance
+google_spanner_instance_iam_member
 google_spanner_instance_partition
 google_sql_database
 google_sql_database_instance
