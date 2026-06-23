@@ -79,6 +79,20 @@ func (g *NetworkConnectivityGenerator) InitResources() error {
 	scpList := networkConnectivityService.Projects.Locations.ServiceConnectionPolicies.List(regionalParent)
 	g.Resources = append(g.Resources, g.createSCPResources(ctx, scpList)...)
 
+	if err := networkConnectivityService.Projects.Locations.RegionalEndpoints.List(regionalParent).Pages(ctx, func(p *networkconnectivity.ListRegionalEndpointsResponse) error {
+		for _, o := range p.RegionalEndpoints {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_connectivity_regional_endpoint", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	pbrList := networkConnectivityService.Projects.Locations.Global.PolicyBasedRoutes.List("projects/" + g.GetArgs()["project"].(string) + "/locations/global")
 	if err := pbrList.Pages(ctx, func(page *networkconnectivity.ListPolicyBasedRoutesResponse) error {
 		for _, obj := range page.PolicyBasedRoutes {
