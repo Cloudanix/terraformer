@@ -33,6 +33,8 @@ List of supported GCP services:
     * `google_artifact_registry_repository`
 *   `binaryAuthorization`
     * `google_binary_authorization_attestor`
+*   `backupdr`
+    * `google_backup_dr_management_server`
 *   `backendBuckets`
     * `google_compute_backend_bucket`
 *   `backendServices`
