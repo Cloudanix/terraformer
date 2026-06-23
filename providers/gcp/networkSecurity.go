@@ -188,6 +188,110 @@ func (g *NetworkSecurityGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	if err := nsService.Projects.Locations.InterceptDeploymentGroups.List(parent).Pages(ctx, func(p *networksecurity.ListInterceptDeploymentGroupsResponse) error {
+		for _, o := range p.InterceptDeploymentGroups {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_intercept_deployment_group", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.InterceptDeployments.List(parent).Pages(ctx, func(p *networksecurity.ListInterceptDeploymentsResponse) error {
+		for _, o := range p.InterceptDeployments {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_intercept_deployment", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.InterceptEndpointGroups.List(parent).Pages(ctx, func(p *networksecurity.ListInterceptEndpointGroupsResponse) error {
+		for _, o := range p.InterceptEndpointGroups {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_intercept_endpoint_group", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.InterceptEndpointGroupAssociations.List(parent).Pages(ctx, func(p *networksecurity.ListInterceptEndpointGroupAssociationsResponse) error {
+		for _, o := range p.InterceptEndpointGroupAssociations {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_intercept_endpoint_group_association", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.MirroringDeploymentGroups.List(parent).Pages(ctx, func(p *networksecurity.ListMirroringDeploymentGroupsResponse) error {
+		for _, o := range p.MirroringDeploymentGroups {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_mirroring_deployment_group", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.MirroringDeployments.List(parent).Pages(ctx, func(p *networksecurity.ListMirroringDeploymentsResponse) error {
+		for _, o := range p.MirroringDeployments {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_mirroring_deployment", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.MirroringEndpointGroups.List(parent).Pages(ctx, func(p *networksecurity.ListMirroringEndpointGroupsResponse) error {
+		for _, o := range p.MirroringEndpointGroups {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_mirroring_endpoint_group", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.MirroringEndpointGroupAssociations.List(parent).Pages(ctx, func(p *networksecurity.ListMirroringEndpointGroupAssociationsResponse) error {
+		for _, o := range p.MirroringEndpointGroupAssociations {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_mirroring_endpoint_group_association", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	if err := nsService.Projects.Locations.GatewaySecurityPolicies.List(parent).Pages(ctx, func(p *networksecurity.ListGatewaySecurityPoliciesResponse) error {
 		for _, o := range p.GatewaySecurityPolicies {
 			t := strings.Split(o.Name, "/")
