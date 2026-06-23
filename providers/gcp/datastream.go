@@ -63,6 +63,36 @@ func (g DatastreamGenerator) createResources(ctx context.Context, streamsList *d
 	return resources
 }
 
+// Run on connectionProfilesList and create for each TerraformResource
+func (g DatastreamGenerator) createConnectionProfilesResources(ctx context.Context, list *datastream.ProjectsLocationsConnectionProfilesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *datastream.ListConnectionProfilesResponse) error {
+		for _, obj := range page.ConnectionProfiles {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_datastream_connection_profile",
+				g.ProviderName,
+				map[string]string{
+					"name":                  name,
+					"connection_profile_id": name,
+					"project":               g.GetArgs()["project"].(string),
+					"location":              location,
+				},
+				datastreamAllowEmptyValues,
+				datastreamAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 func (g *DatastreamGenerator) InitResources() error {
 	ctx := context.Background()
@@ -71,8 +101,11 @@ func (g *DatastreamGenerator) InitResources() error {
 		return err
 	}
 
-	streamsList := datastreamService.Projects.Locations.Streams.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, streamsList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	streamsList := datastreamService.Projects.Locations.Streams.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, streamsList)...)
+
+	connectionProfilesList := datastreamService.Projects.Locations.ConnectionProfiles.List(parent)
+	g.Resources = append(g.Resources, g.createConnectionProfilesResources(ctx, connectionProfilesList)...)
 	return nil
 }

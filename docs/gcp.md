@@ -80,6 +80,7 @@ List of supported GCP services:
     * `google_dataproc_metastore_service`
 *   `datastream`
     * `google_datastream_stream`
+    * `google_datastream_connection_profile`
 *   `dialogflow`
     * `google_dialogflow_cx_agent`
 *   `disks`
