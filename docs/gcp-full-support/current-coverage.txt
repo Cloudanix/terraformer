@@ -217,6 +217,7 @@ google_parallelstore_instance
 google_privateca_ca_pool
 google_privateca_certificate_authority
 google_project
+google_project_iam_audit_config
 google_project_iam_custom_role
 google_project_iam_member
 google_pubsub_lite_reservation
