@@ -76,6 +76,22 @@ func (g *GkebackupGenerator) InitResources() error {
 
 	restorePlansList := gkebackupService.Projects.Locations.RestorePlans.List(parent)
 	g.Resources = append(g.Resources, g.createRestorePlansResources(ctx, restorePlansList)...)
+
+	channelsList := gkebackupService.Projects.Locations.BackupChannels.List(parent)
+	if err := channelsList.Pages(ctx, func(page *gkebackup.ListBackupChannelsResponse) error {
+		for _, obj := range page.BackupChannels {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_gke_backup_backup_channel", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				gkebackupAllowEmptyValues, gkebackupAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
