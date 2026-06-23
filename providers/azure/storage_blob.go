@@ -1,17 +1,27 @@
+// Copyright 2019 The Terraformer Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package azure
 
 import (
 	"context"
 	"fmt"
-
 	"log"
 	"net/url"
 
-	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-06-01/storage"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	"github.com/Azure/azure-storage-blob-go/azblob"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
 )
 
 const (
@@ -23,17 +33,22 @@ type StorageBlobGenerator struct {
 	AzureService
 }
 
+// getAccountPrimaryKey fetches a storage account's primary key via the Track 2
+// armstorage management SDK (the key is then used for data-plane blob listing).
 func (g StorageBlobGenerator) getAccountPrimaryKey(ctx context.Context, accountName, accountGroupName string) string {
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	storageAccountsClient := storage.NewAccountsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	storageAccountsClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	response, err := storageAccountsClient.ListKeys(ctx, accountGroupName, accountName, "kerb")
+	subscriptionID, cred, opts := g.getClientOptions()
+	client, err := armstorage.NewAccountsClient(subscriptionID, cred, opts)
+	if err != nil {
+		log.Fatalf("failed to build storage accounts client: %v", err)
+	}
+	response, err := client.ListKeys(ctx, accountGroupName, accountName, nil)
 	if err != nil {
 		log.Fatalf("failed to list keys: %v", err)
 	}
-	return *(((*response.Keys)[0]).Value)
+	if len(response.Keys) == 0 || response.Keys[0].Value == nil {
+		return ""
+	}
+	return *response.Keys[0].Value
 }
 
 func (g StorageBlobGenerator) getContainerURL(ctx context.Context, accountName, accountGroupName, containerName string) (azblob.ContainerURL, error) {
@@ -76,54 +91,39 @@ func (g StorageBlobGenerator) getBlobsFromContainer(ctx context.Context, account
 	return blobListResponse.Segment.BlobItems, nil
 }
 
-func (g StorageBlobGenerator) listStorageBlobs() ([]terraformutils.Resource, error) {
-	var storageBlobsResources []terraformutils.Resource
+func (g *StorageBlobGenerator) InitResources() error {
+	if _, cred, _ := g.getClientOptions(); cred == nil {
+		return nil
+	}
 	ctx := context.Background()
 
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	authorizer := g.Args["authorizer"].(autorest.Authorizer)
-	resourceGroup := g.Args["resource_group"].(string)
-	blobContainerGenerator := NewStorageContainerGenerator(resourceManagerEndpoint, subscriptionID, authorizer, resourceGroup)
-	blobContainersResources, err := blobContainerGenerator.ListBlobContainers()
-	if err != nil {
-		return storageBlobsResources, err
-	}
-
-	for _, blobContainerResource := range blobContainersResources {
-		containerID := blobContainerResource.InstanceState.ID
-		parsedContainerID, err := ParseAzureResourceID(containerID)
-		if err != nil {
-			return storageBlobsResources, err
-		}
-
-		storageAccountName := blobContainerResource.InstanceState.Attributes["storage_account_name"]
-		containerName := blobContainerResource.InstanceState.Attributes["name"]
-		blobsList, err := g.getBlobsFromContainer(ctx, storageAccountName, parsedContainerID.ResourceGroup, containerName)
-		if err != nil {
-			return storageBlobsResources, err
-		}
-
-		for _, blobItem := range blobsList {
-			storageBlobsResources = append(storageBlobsResources, terraformutils.NewSimpleResource(
-				fmt.Sprintf(blobIDFormat, storageAccountName, containerName, blobItem.Name),
-				blobItem.Name,
-				"azurerm_storage_blob",
-				"azurerm",
-				[]string{}))
-		}
-	}
-
-	return storageBlobsResources, err
-}
-
-func (g *StorageBlobGenerator) InitResources() error {
-	resources, err := g.listStorageBlobs()
+	// Reuse the container generator (sharing this generator's Args, incl. the
+	// Track 2 credential) to enumerate containers, then list blobs per container
+	// via the data-plane azblob client.
+	containerGen := &StorageContainerGenerator{}
+	containerGen.SetArgs(g.Args)
+	containers, err := containerGen.ListBlobContainers()
 	if err != nil {
 		return err
 	}
 
-	g.Resources = append(g.Resources, resources...)
-
+	for _, container := range containers {
+		parsedContainerID, err := ParseAzureResourceID(container.InstanceState.ID)
+		if err != nil {
+			return err
+		}
+		accountName := container.InstanceState.Attributes["storage_account_name"]
+		containerName := container.InstanceState.Attributes["name"]
+		blobs, err := g.getBlobsFromContainer(ctx, accountName, parsedContainerID.ResourceGroup, containerName)
+		if err != nil {
+			return err
+		}
+		for _, blobItem := range blobs {
+			g.AppendSimpleResource(
+				fmt.Sprintf(blobIDFormat, accountName, containerName, blobItem.Name),
+				blobItem.Name,
+				"azurerm_storage_blob")
+		}
+	}
 	return nil
 }
