@@ -79,6 +79,7 @@ var ComputeServices = map[string]terraformutils.ServiceGenerator{
 	"snapshots":                     &GCPFacade{service: &SnapshotsGenerator{}},
 	"sslCertificates":               &GCPFacade{service: &SslCertificatesGenerator{}},
 	"sslPolicies":                   &GCPFacade{service: &SslPoliciesGenerator{}},
+	"storagePools":                  &GCPFacade{service: &StoragePoolsGenerator{}},
 	"subnetworks":                   &GCPFacade{service: &SubnetworksGenerator{}},
 	"targetHttpProxies":             &GCPFacade{service: &TargetHttpProxiesGenerator{}},
 	"targetHttpsProxies":            &GCPFacade{service: &TargetHttpsProxiesGenerator{}},

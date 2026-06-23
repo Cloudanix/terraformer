@@ -234,4 +234,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionCommitments": basicGCPResource{
 		terraformName: "google_compute_region_commitment",
 	},
+	"storagePools": basicGCPResource{
+		terraformName: "google_compute_storage_pool",
+	},
 }
