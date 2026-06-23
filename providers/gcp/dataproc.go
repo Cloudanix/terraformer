@@ -87,6 +87,32 @@ func (g DataprocGenerator) createJobResources(jobList *dataproc.ProjectsRegionsJ
 }
 */
 
+// Run on autoscalingPolicyList and create for each TerraformResource
+func (g DataprocGenerator) createAutoscalingPolicyResources(ctx context.Context, policyList *dataproc.ProjectsRegionsAutoscalingPoliciesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	if err := policyList.Pages(ctx, func(page *dataproc.ListAutoscalingPoliciesResponse) error {
+		for _, policy := range page.Policies {
+			resources = append(resources, terraformutils.NewResource(
+				policy.Name,
+				policy.Id,
+				"google_dataproc_autoscaling_policy",
+				g.ProviderName,
+				map[string]string{
+					"policy_id": policy.Id,
+					"project":   g.GetArgs()["project"].(string),
+					"location":  g.GetArgs()["region"].(compute.Region).Name,
+				},
+				dataprocAllowEmptyValues,
+				dataprocAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 // from each DataprocGenerator create 1 TerraformResource
 // Need DataprocGenerator name as ID for terraform resource
@@ -97,8 +123,14 @@ func (g *DataprocGenerator) InitResources() error {
 		return err
 	}
 
-	clusterList := dataprocService.Projects.Regions.Clusters.List(g.GetArgs()["project"].(string), g.GetArgs()["region"].(compute.Region).Name)
+	project := g.GetArgs()["project"].(string)
+	region := g.GetArgs()["region"].(compute.Region).Name
+
+	clusterList := dataprocService.Projects.Regions.Clusters.List(project, region)
 	g.Resources = g.createClusterResources(ctx, clusterList)
+
+	policyList := dataprocService.Projects.Regions.AutoscalingPolicies.List("projects/" + project + "/regions/" + region)
+	g.Resources = append(g.Resources, g.createAutoscalingPolicyResources(ctx, policyList)...)
 
 	// jobList := dataprocService.Projects.Regions.Jobs.List(g.GetArgs()["project"].(string), g.GetArgs()["region"])
 	// g.Resources = append(g.Resources, g.createJobResources(jobList, ctx)...)
