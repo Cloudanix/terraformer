@@ -53,6 +53,8 @@ List of supported GCP services:
     * `google_cloudfunctions2_function`
 *   `cloudbuild`
     * `google_cloudbuild_trigger`
+*   `clouddeploy`
+    * `google_clouddeploy_delivery_pipeline`
 *   `cloudsql`
     * `google_sql_database`
     * `google_sql_database_instance`
