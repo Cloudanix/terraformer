@@ -348,6 +348,10 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/notificationhubs/armnotifi
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/notificationhubs/armnotificationhubs v1.2.0/go.mod h1:YuV5NCOq5toIonfwdVfw2j99Uuy25Df2Tb5O83ZIuV4=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights v1.2.0 h1:4FlNvfcPu7tTvOgOzXxIbZLvwvmZq1OdhQUdIa9g2N4=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/operationalinsights/armoperationalinsights v1.2.0/go.mod h1:A4nzEXwVd5pAyneR6KOvUAo72svUc5rmCzRHhAbP6lA=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/oracledatabase/armoracledatabase v1.1.0 h1:LqBbY0ajYSmAs3lUdfRPcPDllPqsX51Vjf1ScZ2KONI=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/oracledatabase/armoracledatabase v1.1.0/go.mod h1:PrqKV+/w4SwpgMUN/6PX39Va76OyRE8fD2mHd5h0ocU=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/orbital/armorbital v1.0.0 h1:tbQjdebXyGfQl+Y3dgIUQP+iTs+mqbl2OlUm7rKOsD0=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/orbital/armorbital v1.0.0/go.mod h1:Uwv4YuYrD0m07Ca0YwlOAn7uExqGgzAALMX423WEZ58=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql v1.2.0 h1:0hXKrsbh2M6CQyW0TDC9Bsyd99vQmrOxiBTUfQHZjPA=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresql v1.2.0/go.mod h1:bvZZor36Jg9q9kouuMyfJ+ay77+qK+YUfThXH1FdXjU=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers v1.1.0 h1:HzqcSJWx32XQdr8KtxAu/SZJj0PqDo9tKf2YGPdynV0=

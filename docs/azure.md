@@ -321,6 +321,13 @@ export ARM_USE_ADAL=true
     * `azurerm_relay_namespace`
 *   `web_pubsub`
     * `azurerm_web_pubsub`
+*   `oracle`
+    * `azurerm_oracle_autonomous_database`
+    * `azurerm_oracle_cloud_vm_cluster`
+    * `azurerm_oracle_exadata_infrastructure`
+*   `orbital`
+    * `azurerm_orbital_contact_profile`
+    * `azurerm_orbital_spacecraft`
 *   `policy`
     * `azurerm_policy_assignment`
     * `azurerm_policy_definition`
