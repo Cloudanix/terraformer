@@ -3,6 +3,7 @@ google_artifact_registry_repository
 google_backup_dr_management_server
 google_biglake_catalog
 google_bigquery_dataset
+google_bigquery_routine
 google_bigquery_table
 google_bigtable_instance
 google_bigtable_table
@@ -132,6 +133,7 @@ google_kms_crypto_key
 google_kms_crypto_key_version
 google_kms_key_ring
 google_logging_metric
+google_logging_project_sink
 google_looker_instance
 google_managed_kafka_cluster
 google_memcache_instance
