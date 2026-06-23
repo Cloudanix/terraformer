@@ -228,6 +228,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapp
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/applicationinsights/armapplicationinsights v1.2.0/go.mod h1:S7Ss6Rm0nlKDRHKrO9eL2Be5EnX29Z09CNPWgK7o4+I=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appplatform/armappplatform v1.2.0 h1:7qfyoCIjzoD5R8U1W9Pca0f7MCEFP4fedmffJ6Sibx4=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appplatform/armappplatform v1.2.0/go.mod h1:Pdj19nzvUdwj9wS1Ahdp/VNZyrFzV+rPSd/X4kdMq2c=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v3 v3.0.0 h1:FErSe/vQGefbSuVwBV9JlrRXgG1uOFyW6TCXERX89s4=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v3 v3.0.0/go.mod h1:3rnszxfW8gCLRhoFPgvfXhwSzLam4cHQZ50SugID/sg=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/attestation/armattestation v1.2.0 h1:s4C9R6aI6gUdbgIQgqOtyYARZj9moFp4chOZoTcp/Os=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/attestation/armattestation v1.2.0/go.mod h1:VBgqZ3ftKn5Xq95VHtl/ZO+2Nz1LEiA9Mctq67UPFYw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/authorization/armauthorization/v2 v2.2.0 h1:Hp+EScFOu9HeCbeW8WU2yQPJd4gGwhMgKxWe+G6jNzw=

@@ -1,3 +1,17 @@
+// Copyright 2019 The Terraformer Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package azure
 
 import (
@@ -7,6 +21,7 @@ import (
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/go-azure-helpers/authentication"
 
+	armappservice "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/appservice/armappservice/v3"
 	"github.com/Azure/azure-sdk-for-go/services/web/mgmt/2019-08-01/web"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -53,6 +68,24 @@ func (g AppServiceGenerator) listApps() ([]terraformutils.Resource, error) {
 	return resources, nil
 }
 
+// initServicePlans enumerates azurerm_service_plan via the Track 2 armappservice
+// SDK (the modern replacement for the legacy azurerm_app_service_plan).
+func (g *AppServiceGenerator) initServicePlans() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	client, err := armappservice.NewPlansClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	return appendFromPager(&g.AzureService, client.NewListPager(nil),
+		func(p armappservice.PlansClientListResponse) []*armappservice.Plan { return p.Value },
+		func(i *armappservice.Plan) string { return valueOrEmpty(i.ID) },
+		func(i *armappservice.Plan) string { return valueOrEmpty(i.Name) },
+		"azurerm_service_plan")
+}
+
 func (g *AppServiceGenerator) InitResources() error {
 	resources, err := g.listApps()
 	if err != nil {
@@ -60,6 +93,10 @@ func (g *AppServiceGenerator) InitResources() error {
 	}
 
 	g.Resources = append(g.Resources, resources...)
+
+	if err := g.initServicePlans(); err != nil {
+		return err
+	}
 
 	return nil
 }

@@ -64,6 +64,7 @@ export ARM_USE_ADAL=true
     * `azurerm_analysis_services_server`
 *   `app_service`
     * `azurerm_app_service`
+    * `azurerm_service_plan`
 *   `application_gateway`
     * `azurerm_application_gateway`
 *   `container`
