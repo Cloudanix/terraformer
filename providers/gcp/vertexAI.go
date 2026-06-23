@@ -108,6 +108,43 @@ func (g *VertexAIGenerator) InitResources() error {
 
 	fosList := vertexAIService.Projects.Locations.FeatureOnlineStores.List(parent)
 	g.Resources = append(g.Resources, g.createFeatureOnlineStoresResources(ctx, fosList)...)
+
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
+	mk := func(name, tfType string) terraformutils.Resource {
+		return terraformutils.NewResource(
+			"projects/"+proj+"/locations/"+loc+"/"+name, name, tfType, g.ProviderName,
+			map[string]string{"name": name, "project": proj, "region": loc},
+			vertexAIAllowEmptyValues, vertexAIAdditionalFields,
+		)
+	}
+	if err := vertexAIService.Projects.Locations.Featurestores.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListFeaturestoresResponse) error {
+		for _, o := range p.Featurestores {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_featurestore"))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.Tensorboards.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListTensorboardsResponse) error {
+		for _, o := range p.Tensorboards {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_tensorboard"))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.FeatureGroups.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListFeatureGroupsResponse) error {
+		for _, o := range p.FeatureGroups {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_feature_group"))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
