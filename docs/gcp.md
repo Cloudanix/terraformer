@@ -36,6 +36,7 @@ List of supported GCP services:
 *   `alloydb`
     * `google_alloydb_cluster`
     * `google_alloydb_instance`
+    * `google_alloydb_backup`
 *   `apphub`
     * `google_apphub_application`
 *   `artifactRegistry`

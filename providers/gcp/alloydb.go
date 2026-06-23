@@ -61,6 +61,22 @@ func (g *AlloydbGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	backupsList := alloydbService.Projects.Locations.Backups.List("projects/" + project + "/locations/" + location)
+	if err := backupsList.Pages(ctx, func(page *alloydb.ListBackupsResponse) error {
+		for _, obj := range page.Backups {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_alloydb_backup", g.ProviderName,
+				map[string]string{"backup_id": name, "project": project, "location": location},
+				alloydbAllowEmptyValues, alloydbAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	for _, cluster := range clusterNames {
 		instList := alloydbService.Projects.Locations.Clusters.Instances.List(
 			"projects/" + project + "/locations/" + location + "/clusters/" + cluster)
