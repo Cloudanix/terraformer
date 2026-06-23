@@ -991,6 +991,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_media_package_channel`
 *   `media_store`
     * `aws_media_store_container`
+    * `aws_media_store_container_policy`
 *   `mediapackagev2`
     * `aws_media_packagev2_channel_group`
 *   `mediaconvert`

@@ -48,6 +48,10 @@ func (g *MediaStoreGenerator) InitResources() error {
 				"aws_media_store_container",
 				"aws",
 				mediastoreAllowEmptyValues))
+			if _, err := svc.GetContainerPolicy(context.TODO(), &mediastore.GetContainerPolicyInput{ContainerName: container.Name}); err == nil {
+				resources = append(resources, terraformutils.NewSimpleResource(
+					containerName, containerName, "aws_media_store_container_policy", "aws", mediastoreAllowEmptyValues))
+			}
 		}
 	}
 	g.Resources = resources
