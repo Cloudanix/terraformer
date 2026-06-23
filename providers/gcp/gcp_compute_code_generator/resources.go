@@ -198,4 +198,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionSslPolicies": basicGCPResource{
 		terraformName: "google_compute_region_ssl_policy",
 	},
+	"publicAdvertisedPrefixes": basicGCPResource{
+		terraformName: "google_compute_public_advertised_prefix",
+	},
 }
