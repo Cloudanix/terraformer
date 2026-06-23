@@ -306,6 +306,8 @@ List of supported GCP services:
     * `google_compute_node_template`
 *   `packetMirrorings`
     * `google_compute_packet_mirroring`
+*   `osConfig`
+    * `google_os_config_os_policy_assignment`
 *   `oracleDatabase`
 *   `orgPolicy`
     * `google_org_policy_policy`
