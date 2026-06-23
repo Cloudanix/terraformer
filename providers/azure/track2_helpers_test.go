@@ -121,8 +121,8 @@ func TestAppendFromPagerEmpty(t *testing.T) {
 func TestAppendFromPagerSkipsNilAndEmptyID(t *testing.T) {
 	pages := []fakePage{
 		{Value: []*fakeItem{
-			nil,                                              // nil item skipped
-			{ID: strptr(""), Name: strptr("noid")},          // empty id skipped
+			nil,                                    // nil item skipped
+			{ID: strptr(""), Name: strptr("noid")}, // empty id skipped
 			{ID: strptr("/sub/x/a"), Name: strptr("alpha")}, // kept
 		}},
 		{Value: []*fakeItem{
