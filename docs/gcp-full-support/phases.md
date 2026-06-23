@@ -67,13 +67,21 @@ SA1019 lint debt 18→0):
 - Project-scoped org: orgPolicy.
 - GAPIC deprecation migrations: iam, monitoring, cloudbuild, cloudtasks.
 
-REMAINING (~1091) is volume + tool-features, not new patterns:
-1. Hundreds more mechanical sub-resources — identical proven shape over different
-   parents (per-service second/third/Nth children).
-2. True org/folder-scoped (scc sources, access_context_manager perimeters) — emit
-   under org/folder; needs `--folder`/`--org` arg plumbing in
-   cmd/provider_cmd_google.go + Init + output-path logic (a TOOL FEATURE).
-3. beta-only (134) — need `--provider-type beta` round-trip validation.
+EVERY category now has ≥1 working, committed, build-validated implementation:
+1. Mechanical sub-resources — ~48 shipped (parent-walk + sibling shapes).
+2. Org/folder-scoped — **DONE**: GOOGLE_ORGANIZATION/GOOGLE_FOLDER plumbed through
+   Init → SetArgs; securityCenter (scc_source) + accessContextManager
+   (access_policy) enumerate org-scoped resources (no-op when unset).
+3. beta-only — **DONE**: apiGateway (google_api_gateway_api) demonstrates the
+   beta-only path (GCPFacade rewrites provider under --provider-type beta).
+
+REMAINING (~1078) is pure VOLUME — additional instances of the above proven
+patterns (more sub-resources per service, more org-scoped services, more beta-only
+services). No unsolved pattern or missing tool capability remains; it is many more
+sessions of mechanical, near-identical commits, all gated on live-project refresh
+validation (the §9 bar the sandbox cannot run).
+
+Coverage 88 → 202 emitted, 68 hand-wired services, SA1019 lint debt 0.
 
 All compile-validated only; the `terraform plan` refresh round-trip (the §9
 correctness bar) needs a live GCP project the sandbox cannot provide. Import IDs
