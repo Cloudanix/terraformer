@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	armmysqlflex "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
+	armpgflex "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers"
 	"github.com/Azure/azure-sdk-for-go/services/mariadb/mgmt/2018-06-01/mariadb"
 	"github.com/Azure/azure-sdk-for-go/services/mysql/mgmt/2017-12-01/mysql"
 	"github.com/Azure/azure-sdk-for-go/services/postgresql/mgmt/2017-12-01/postgresql"
@@ -919,6 +920,10 @@ func (g *DatabasesGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.initPostgreSQLFlexibleServers(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -946,6 +951,36 @@ func (g *DatabasesGenerator) initMySQLFlexibleServers() error {
 		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
 			func(p armmysqlflex.ServersClientListByResourceGroupResponse) []*armmysqlflex.Server { return p.Value },
 			id, name, "azurerm_mysql_flexible_server"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// initPostgreSQLFlexibleServers enumerates azurerm_postgresql_flexible_server
+// via the Track 2 SDK (newer flexible tier; Track 1 postgresql module covers
+// only the legacy single-server tier). Subscription-wide unless -R is set.
+func (g *DatabasesGenerator) initPostgreSQLFlexibleServers() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	client, err := armpgflex.NewServersClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	id := func(i *armpgflex.Server) string { return valueOrEmpty(i.ID) }
+	name := func(i *armpgflex.Server) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armpgflex.ServersClientListResponse) []*armpgflex.Server { return p.Value },
+			id, name, "azurerm_postgresql_flexible_server")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armpgflex.ServersClientListByResourceGroupResponse) []*armpgflex.Server { return p.Value },
+			id, name, "azurerm_postgresql_flexible_server"); err != nil {
 			return err
 		}
 	}

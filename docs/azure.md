@@ -133,6 +133,7 @@ export ARM_USE_ADAL=true
     * `azurerm_postgresql_configuration`
     * `azurerm_postgresql_database`
     * `azurerm_postgresql_firewall_rule`
+    * `azurerm_postgresql_flexible_server`
     * `azurerm_postgresql_server`
     * `azurerm_postgresql_virtual_network_rule`
     * `azurerm_sql_active_directory_administrator`
