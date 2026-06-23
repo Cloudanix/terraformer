@@ -110,8 +110,8 @@ on already-registered services — not net-new services, which were already done
 
 ## Coverage tally
 
-Current coverage: 234 services / **1273** `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = **198** — a full per-resource buildability audit
+Current coverage: 238 services / **1282** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **189** — a full per-resource buildability audit
 ([resource-review.md](resource-review.md)) found and built ~20 more, then an
 aws-sdk-go-v2 upgrade (84 service modules to latest) vendored the previously-
 missing List/Get ops and unblocked 10 more (eks_access_entry, ecr_repository_

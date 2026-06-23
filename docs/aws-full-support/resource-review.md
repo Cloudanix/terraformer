@@ -59,9 +59,11 @@ buildable against the pinned SDKs, now implemented (one commit each):
   `aws_iam_organizations_features`, `aws_codebuild_fleet`,
   `aws_dynamodb_resource_policy`, `aws_vpc_security_group_vpc_association`,
   `aws_s3tables_table_bucket_policy`, `aws_s3tables_table_policy`.
-- **Unvendored SDK entirely:** codecatalyst, drs, evidently, lex (v1),
-  paymentcryptography, computeoptimizer, costoptimizationhub, simpledb, worklink,
-  customerprofiles, dataexchange.
+- **Unvendored SDK entirely (still):** codecatalyst, drs, lex (v1), simpledb,
+  worklink, cloudfrontkeyvaluestore, serverlessapplicationrepository. (evidently,
+  paymentcryptography, computeoptimizer, costoptimizationhub, customerprofiles,
+  dataexchange, devopsguru have since been vendored + registered — see the
+  post-upgrade service review below.)
 - **Redundant with an already-built resource:** `aws_cloudformation_stack_instances`
   (same ListStackInstances as the built `aws_cloudformation_stack_set_instance`),
   `aws_securityhub_standards_control_association` (same control state as built
@@ -101,25 +103,23 @@ could now be added. Findings:
     `aws_load_balancer_backend_server_policy` (DescribeLoadBalancerPolicies +
     listener/backend descriptions; elasticloadbalancing classic SDK).
 
-- **Blocked: SDK module not vendored** — these services would each be a clean
-  new generator, but their `aws-sdk-go-v2/service/<x>` module is absent from
-  `go.mod` (and the sandbox blocks fetching new modules). Adding any of them is a
-  deliberate `go get` + dependency-addition decision:
-  | Service (SDK module) | TF resources | List API exists |
-  |---|---|---|
-  | `account` | account_region, account_alternate_contact, account_primary_contact | ListRegions / GetAlternateContact / GetContactInformation |
-  | `codecatalyst` | project, dev_environment, source_repository | ListProjects / ListSourceRepositories |
-  | `computeoptimizer` | enrollment_status, recommendation_preferences | GetEnrollmentStatus / GetRecommendationPreferences (singletons) |
-  | `costoptimizationhub` | enrollment_status, preferences | singletons |
-  | `devopsguru` | notification_channel, resource_collection, … | ListNotificationChannels / GetResourceCollection |
-  | `lexmodelbuildingservice` (lex v1) | lex_bot, lex_intent, lex_slot_type, lex_bot_alias | GetBots / GetIntents / GetSlotTypes |
-  | `simpledb` | simpledb_domain | ListDomains (service AWS-deprecated) |
-  | `worklink` | worklink_fleet, … | ListFleets (service AWS-deprecated) |
-  | `cloudfrontkeyvaluestore` | cloudfrontkeyvaluestore_key | ListKeys (data-plane keys) |
-  | `serverlessapplicationrepository` | cloudformation_stack | deploy action, no import |
+- **New SDK fetched + service ADDED** — vendored the module (via the proxy) and
+  wrote a generator:
+  | Service (SDK module @ver) | TF resources added |
+  |---|---|
+  | `account` v1.32.4 | account_region, account_alternate_contact, account_primary_contact |
+  | `devopsguru` v1.41.7 (`devops-guru`) | notification_channel, service_integration, event_sources_config |
+  | `computeoptimizer` v1.54.0 (`compute-optimizer`) | enrollment_status |
+  | `costoptimizationhub` v1.24.0 (`cost-optimization-hub`) | enrollment_status, preferences |
 
-  Recommended to actually add (real infra, supported services): **account**,
-  **codecatalyst**, **devopsguru**. The rest are deprecated/data-plane/no-import.
+- **Still not added (deliberate)** — SDK module absent and not worth vendoring:
+  | Service | Reason |
+  |---|---|
+  | `codecatalyst` (project, dev_environment, source_repository) | uses AWS Builder ID / SSO bearer-token auth, NOT SigV4 — terraformer's `generateConfig` creds can't authenticate it; a generator would be non-functional |
+  | `lexmodelbuildingservice` (lex v1: bot/intent/slot_type/bot_alias) | AWS-deprecated v1 service (the v2 `aws_lexv2models_*` set is built) |
+  | `simpledb` (domain), `worklink` (fleet, …) | AWS-deprecated services |
+  | `cloudfrontkeyvaluestore` (key) | data-plane key items inside a kv store |
+  | `serverlessapplicationrepository` (cloudformation_stack) | deploy action, no import |
 
 - **Remain not addable regardless of SDK** (data-plane / no-import / action):
   `cloudcontrolapi_resource`, `redshiftdata_statement`,
@@ -127,8 +127,8 @@ could now be added. Findings:
 
 ## Result
 
-`missing-resources.txt` = **198**, every entry mapped to one of the verdicts
-above. Coverage **1273** `aws_*` types. After the aws-sdk-go-v2 upgrade resolved
+`missing-resources.txt` = **189**, every entry mapped to one of the verdicts
+above. Coverage **1282** `aws_*` types. After the aws-sdk-go-v2 upgrade resolved
 the "op absent" group, the buildable frontier is exhausted: remaining gains need
 an SDK module that is **entirely unvendored** (codecatalyst, drs, evidently, lex
 v1, paymentcryptography, computeoptimizer, costoptimizationhub, simpledb,
