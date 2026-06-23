@@ -59,6 +59,12 @@ func (g *RedisGenerator) listRedisServers() ([]terraformutils.Resource, error) {
 		}
 		resources = append(resources, firewallRules...)
 
+		linkedServers, err := g.listRedisLinkedServers(id.ResourceGroup, *redisServer.Name)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, linkedServers...)
+
 		if err := redisServersIterator.Next(); err != nil {
 			log.Println(err)
 			break
@@ -87,6 +93,36 @@ func (g *RedisGenerator) listRedisFirewallRules(resourceGroupName string, cacheN
 			*rule.ID,
 			*rule.Name,
 			"azurerm_redis_firewall_rule",
+			g.ProviderName,
+			[]string{}))
+		if err := iterator.NextWithContext(ctx); err != nil {
+			log.Println(err)
+			break
+		}
+	}
+
+	return resources, nil
+}
+
+// listRedisLinkedServers enumerates azurerm_redis_linked_server for one cache.
+func (g *RedisGenerator) listRedisLinkedServers(resourceGroupName string, cacheName string) ([]terraformutils.Resource, error) {
+	var resources []terraformutils.Resource
+	ctx := context.Background()
+	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
+	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
+	client := redis.NewLinkedServerClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
+
+	iterator, err := client.ListComplete(ctx, resourceGroupName, cacheName)
+	if err != nil {
+		return nil, err
+	}
+	for iterator.NotDone() {
+		linkedServer := iterator.Value()
+		resources = append(resources, terraformutils.NewSimpleResource(
+			*linkedServer.ID,
+			*linkedServer.Name,
+			"azurerm_redis_linked_server",
 			g.ProviderName,
 			[]string{}))
 		if err := iterator.NextWithContext(ctx); err != nil {

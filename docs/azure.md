@@ -204,6 +204,7 @@ export ARM_USE_ADAL=true
 *   `redis`
     * `azurerm_redis_cache`
     * `azurerm_redis_firewall_rule`
+    * `azurerm_redis_linked_server`
 *   `resource_group`
     * `azurerm_management_lock`
     * `azurerm_resource_group`
