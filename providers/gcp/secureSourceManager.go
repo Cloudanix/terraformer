@@ -100,6 +100,17 @@ func (g *SecureSourceManagerGenerator) InitResources() error {
 				o.Name, name, "google_secure_source_manager_repository", g.ProviderName,
 				map[string]string{"repository_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
 				secureSourceManagerAllowEmptyValues, secureSourceManagerAdditionalFields))
+			if policy, perr := ssmService.Projects.Locations.Repositories.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_secure_source_manager_repository_iam_member", g.ProviderName,
+							map[string]string{"repository_id": name, "role": b.Role, "member": m, "project": project, "location": location},
+							secureSourceManagerAllowEmptyValues, secureSourceManagerAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
