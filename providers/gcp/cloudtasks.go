@@ -10,6 +10,7 @@ import (
 
 	cloudtasks "cloud.google.com/go/cloudtasks/apiv2"
 	taskspb "cloud.google.com/go/cloudtasks/apiv2/cloudtaskspb"
+	iampb "cloud.google.com/go/iam/apiv1/iampb"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -55,6 +56,17 @@ func (g *CloudTaskGenerator) loadCloudTaskQueues(ctx context.Context, client *cl
 			cloudTasksAllowEmptyValues,
 			cloudTasksAdditionalFields,
 		))
+		if policy, perr := client.GetIamPolicy(ctx, &iampb.GetIamPolicyRequest{Resource: resp.Name}); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						resp.Name+" "+b.Role+" "+m, queueName+"_"+b.Role+"_"+m,
+						"google_cloud_tasks_queue_iam_member", g.ProviderName,
+						map[string]string{"name": queueName, "role": b.Role, "member": m, "project": project, "location": region},
+						cloudTasksAllowEmptyValues, cloudTasksAdditionalFields))
+				}
+			}
+		}
 	}
 	return nil
 }
