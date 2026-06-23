@@ -57,5 +57,32 @@ func (g *GkeOnPremGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	proj := g.GetArgs()["project"].(string)
+	if err := svc.Projects.Locations.BareMetalClusters.List(parent).Pages(ctx, func(page *gkeonprem.ListBareMetalClustersResponse) error {
+		for _, obj := range page.BareMetalClusters {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_gkeonprem_bare_metal_cluster", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": location},
+				gkeOnPremAllowEmptyValues, gkeOnPremAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := svc.Projects.Locations.VmwareAdminClusters.List(parent).Pages(ctx, func(page *gkeonprem.ListVmwareAdminClustersResponse) error {
+		for _, obj := range page.VmwareAdminClusters {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_gkeonprem_vmware_admin_cluster", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": location},
+				gkeOnPremAllowEmptyValues, gkeOnPremAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

@@ -197,6 +197,8 @@ List of supported GCP services:
 *   `gkeHub`
 *   `gkeOnPrem`
     * `google_gkeonprem_vmware_cluster`
+    * `google_gkeonprem_bare_metal_cluster`
+    * `google_gkeonprem_vmware_admin_cluster`
     * `google_gke_hub_membership`
     * `google_gke_hub_feature`
 *   `globalAddresses`
