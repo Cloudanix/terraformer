@@ -190,6 +190,8 @@ List of supported GCP services:
     * `google_iam_workload_identity_pool`
     * `google_iam_workload_identity_pool_provider`
 *   `images`
+*   `iap`
+    * `google_iap_brand`
     * `google_compute_image`
 *   `instanceGroupManagers`
     * `google_compute_instance_group_manager`
