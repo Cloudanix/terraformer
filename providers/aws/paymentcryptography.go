@@ -49,5 +49,20 @@ func (g *PaymentCryptographyGenerator) InitResources() error {
 				arn, arn, "aws_paymentcryptography_key", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for ap := paymentcryptography.NewListAliasesPaginator(svc, &paymentcryptography.ListAliasesInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, a := range page.Aliases {
+			name := StringValue(a.AliasName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_paymentcryptography_key_alias", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

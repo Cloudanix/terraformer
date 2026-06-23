@@ -993,6 +993,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_wellarchitected_workload`
 *   `payment-cryptography`
     * `aws_paymentcryptography_key`
+    * `aws_paymentcryptography_key_alias`
 *   `pca-connector-ad`
     * `aws_pcaconnectorad_connector`
 *   `pcs`
