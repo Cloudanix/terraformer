@@ -320,6 +320,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlfl
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/postgresql/armpostgresqlflexibleservers v1.1.0/go.mod h1:nKcJObAisSPDrO9lMuuCBoYY7Ki7ADt8p6XmBhpKNTk=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/powerbidedicated/armpowerbidedicated v1.2.0 h1:VOKNQRmuqvoU34qe0WKzOJN1dbWdoOWiW6MzFCKfgq0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/powerbidedicated/armpowerbidedicated v1.2.0/go.mod h1:zvmw6y69e/vmsnoOqhgNC27Md+sgWY92SzuCknyDny8=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/privatedns/armprivatedns v1.3.0 h1:yzrctSl9GMIQ5lHu7jc8olOsGjWDCsBpJhWqfGa/YIM=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/privatedns/armprivatedns v1.3.0/go.mod h1:GE4m0rnnfwLGX0Y9A9A25Zx5N/90jneT5ABevqzhuFQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/recoveryservices/armrecoveryservices v1.6.0 h1:tyFbORs8iNJGoD4DCRTweqLRCS8PiWqyoj8TqLFZZfo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/recoveryservices/armrecoveryservices v1.6.0/go.mod h1:D01KTLlDky2hIhRbX5NjyDb84O6jflookw6b+Gd5h/U=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/relay/armrelay v1.2.0 h1:ddxi4cOpXITuxtF1OufEPMDxKXliXkCed2G5wIIS6q4=
