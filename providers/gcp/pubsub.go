@@ -86,6 +86,33 @@ func (g PubsubGenerator) createTopicsListResources(ctx context.Context, topicsLi
 	return resources
 }
 
+// Run on schemasList and create for each TerraformResource
+func (g PubsubGenerator) createSchemasResources(ctx context.Context, schemasList *pubsub.ProjectsSchemasListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	if err := schemasList.Pages(ctx, func(page *pubsub.ListSchemasResponse) error {
+		for _, obj := range page.Schemas {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_pubsub_schema",
+				g.ProviderName,
+				map[string]string{
+					"name":    name,
+					"project": g.GetArgs()["project"].(string),
+				},
+				pubsubAllowEmptyValues,
+				pubsubAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 func (g *PubsubGenerator) InitResources() error {
 	ctx := context.Background()
@@ -100,8 +127,12 @@ func (g *PubsubGenerator) InitResources() error {
 	topicsList := pubsubService.Projects.Topics.List("projects/" + g.GetArgs()["project"].(string))
 	topicsResources := g.createTopicsListResources(ctx, topicsList)
 
+	schemasList := pubsubService.Projects.Schemas.List("projects/" + g.GetArgs()["project"].(string))
+	schemasResources := g.createSchemasResources(ctx, schemasList)
+
 	g.Resources = append(g.Resources, subscriptionsResources...)
 	g.Resources = append(g.Resources, topicsResources...)
+	g.Resources = append(g.Resources, schemasResources...)
 
 	return nil
 }
