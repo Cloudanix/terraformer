@@ -183,6 +183,7 @@ List of supported GCP services:
     * `google_parallelstore_instance`
 *   `privateca`
     * `google_privateca_ca_pool`
+    * `google_privateca_certificate_authority`
 *   `project`
     * `google_project`
 *   `pubsub`

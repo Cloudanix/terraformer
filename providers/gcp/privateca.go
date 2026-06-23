@@ -33,24 +33,29 @@ type PrivatecaGenerator struct {
 	GCPService
 }
 
-// Run on caPoolsList and create for each TerraformResource
-func (g PrivatecaGenerator) createResources(ctx context.Context, caPoolsList *privateca.ProjectsLocationsCaPoolsListCall) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
+// Generate TerraformResources from GCP API,
+func (g *PrivatecaGenerator) InitResources() error {
+	ctx := context.Background()
+	privatecaService, err := privateca.NewService(ctx)
+	if err != nil {
+		return err
+	}
+	project := g.GetArgs()["project"].(string)
 	location := g.GetArgs()["region"].(compute.Region).Name
+
+	poolNames := []string{}
+	caPoolsList := privatecaService.Projects.Locations.CaPools.List("projects/" + project + "/locations/" + location)
 	if err := caPoolsList.Pages(ctx, func(page *privateca.ListCaPoolsResponse) error {
 		for _, obj := range page.CaPools {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
-			resources = append(resources, terraformutils.NewResource(
+			poolNames = append(poolNames, name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name,
 				name,
 				"google_privateca_ca_pool",
 				g.ProviderName,
-				map[string]string{
-					"name":     name,
-					"project":  g.GetArgs()["project"].(string),
-					"location": location,
-				},
+				map[string]string{"name": name, "project": project, "location": location},
 				privatecaAllowEmptyValues,
 				privatecaAdditionalFields,
 			))
@@ -59,19 +64,34 @@ func (g PrivatecaGenerator) createResources(ctx context.Context, caPoolsList *pr
 	}); err != nil {
 		log.Println(err)
 	}
-	return resources
-}
 
-// Generate TerraformResources from GCP API,
-func (g *PrivatecaGenerator) InitResources() error {
-	ctx := context.Background()
-	privatecaService, err := privateca.NewService(ctx)
-	if err != nil {
-		return err
+	// Walk each CA pool for its certificate authorities.
+	for _, pool := range poolNames {
+		caList := privatecaService.Projects.Locations.CaPools.CertificateAuthorities.List(
+			"projects/" + project + "/locations/" + location + "/caPools/" + pool)
+		if err := caList.Pages(ctx, func(page *privateca.ListCertificateAuthoritiesResponse) error {
+			for _, obj := range page.CertificateAuthorities {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name,
+					name,
+					"google_privateca_certificate_authority",
+					g.ProviderName,
+					map[string]string{
+						"certificate_authority_id": name,
+						"pool":                     pool,
+						"project":                  project,
+						"location":                 location,
+					},
+					privatecaAllowEmptyValues,
+					privatecaAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
-
-	caPoolsList := privatecaService.Projects.Locations.CaPools.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, caPoolsList)
 	return nil
 }
