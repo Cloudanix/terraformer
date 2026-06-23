@@ -71,8 +71,65 @@ func (g *ManagedKafkaGenerator) InitResources() error {
 		return err
 	}
 
-	clustersList := managedKafkaService.Projects.Locations.Clusters.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, clustersList)
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
+	parent := "projects/" + project + "/locations/" + location
+	clustersList := managedKafkaService.Projects.Locations.Clusters.List(parent)
+	clusterResources := g.createResources(ctx, clustersList)
+	g.Resources = clusterResources
+	for _, cr := range clusterResources {
+		clFull := cr.InstanceState.ID
+		clName := strings.Split(clFull, "/")[len(strings.Split(clFull, "/"))-1]
+		if terr := managedKafkaService.Projects.Locations.Clusters.Topics.List(clFull).Pages(ctx, func(p *managedkafka.ListTopicsResponse) error {
+			for _, o := range p.Topics {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_managed_kafka_topic", g.ProviderName,
+					map[string]string{"topic_id": t[len(t)-1], "cluster": clName, "location": location, "project": project},
+					managedKafkaAllowEmptyValues, managedKafkaAdditionalFields))
+			}
+			return nil
+		}); terr != nil {
+			log.Println(terr)
+		}
+		if aerr := managedKafkaService.Projects.Locations.Clusters.Acls.List(clFull).Pages(ctx, func(p *managedkafka.ListAclsResponse) error {
+			for _, o := range p.Acls {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_managed_kafka_acl", g.ProviderName,
+					map[string]string{"acl_id": t[len(t)-1], "cluster": clName, "location": location, "project": project},
+					managedKafkaAllowEmptyValues, managedKafkaAdditionalFields))
+			}
+			return nil
+		}); aerr != nil {
+			log.Println(aerr)
+		}
+	}
+
+	if err := managedKafkaService.Projects.Locations.ConnectClusters.List(parent).Pages(ctx, func(p *managedkafka.ListConnectClustersResponse) error {
+		for _, o := range p.ConnectClusters {
+			t := strings.Split(o.Name, "/")
+			ccName := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, ccName, "google_managed_kafka_connect_cluster", g.ProviderName,
+				map[string]string{"connect_cluster_id": ccName, "location": location, "project": project},
+				managedKafkaAllowEmptyValues, managedKafkaAdditionalFields))
+			if cerr := managedKafkaService.Projects.Locations.ConnectClusters.Connectors.List(o.Name).Pages(ctx, func(cp *managedkafka.ListConnectorsResponse) error {
+				for _, c := range cp.Connectors {
+					ct := strings.Split(c.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						c.Name, ct[len(ct)-1], "google_managed_kafka_connector", g.ProviderName,
+						map[string]string{"connector_id": ct[len(ct)-1], "connect_cluster": ccName, "location": location, "project": project},
+						managedKafkaAllowEmptyValues, managedKafkaAdditionalFields))
+				}
+				return nil
+			}); cerr != nil {
+				log.Println(cerr)
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
