@@ -386,6 +386,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudtrail_event_data_store`
 *   `cloudwatch`
     * `aws_cloudwatch_dashboard`
+    * `aws_cloudwatch_contributor_insight_rule`
     * `aws_cloudwatch_event_rule`
     * `aws_cloudwatch_event_target`
     * `aws_cloudwatch_metric_alarm`

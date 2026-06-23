@@ -46,6 +46,9 @@ func (g *CloudWatchGenerator) InitResources() error {
 	if err := g.createMetricStreams(cloudwatchSvc); err != nil {
 		return err
 	}
+	if err := g.createInsightRules(cloudwatchSvc); err != nil {
+		return err
+	}
 
 	cloudwatcheventsSvc := cloudwatchevents.NewFromConfig(config)
 	err = g.createRules(cloudwatcheventsSvc)
@@ -72,6 +75,26 @@ func (g *CloudWatchGenerator) InitResources() error {
 		}
 	}
 
+	return nil
+}
+
+// createInsightRules emits CloudWatch Contributor Insights rules (imported by name).
+func (g *CloudWatchGenerator) createInsightRules(svc *cloudwatch.Client) error {
+	p := cloudwatch.NewDescribeInsightRulesPaginator(svc, &cloudwatch.DescribeInsightRulesInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, r := range page.InsightRules {
+			name := StringValue(r.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_contributor_insight_rule", "aws", cloudwatchAllowEmptyValues))
+		}
+	}
 	return nil
 }
 
