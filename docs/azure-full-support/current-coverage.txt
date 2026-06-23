@@ -139,6 +139,7 @@ azurerm_mariadb_database
 azurerm_mariadb_firewall_rule
 azurerm_mariadb_server
 azurerm_mariadb_virtual_network_rule
+azurerm_mobile_network
 azurerm_monitor_action_group
 azurerm_monitor_activity_log_alert
 azurerm_monitor_autoscale_setting
@@ -163,6 +164,7 @@ azurerm_network_security_group
 azurerm_network_security_rule
 azurerm_network_watcher
 azurerm_network_watcher_flow_log
+azurerm_new_relic_monitor
 azurerm_nginx_deployment
 azurerm_notification_hub_namespace
 azurerm_oracle_autonomous_database
@@ -244,6 +246,7 @@ azurerm_virtual_network_gateway_connection
 azurerm_virtual_network_peering
 azurerm_virtual_wan
 azurerm_vmware_private_cloud
+azurerm_voice_services_communications_gateway
 azurerm_web_pubsub
 azurerm_windows_function_app
 azurerm_windows_virtual_machine

@@ -6,7 +6,7 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **250** types (+109). Phase 1 mgmt-plane complete (incl. app_service
+- Current: **253** types (+112). Phase 1 mgmt-plane complete (incl. app_service
   modern apps + service_plan); Phase 2 incl. policy; ~50 new Phase 2/3 Track 2
   services. Phase 5 migration DONE (35/35 Track 1→2). azuread (P4) already in fork.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
@@ -70,7 +70,7 @@ app_service (modern web/function apps + service_plan).
 Also done (P3 long-tail batch, registration-tested): hdinsight (per-kind cluster,
 mapping unit-tested), automanage, spatial_anchors, lighthouse, service_fabric,
 arc (hybridcompute), databox_edge, orbital (spacecraft + contact_profile),
-oracle (exadata + cloud_vm_cluster + autonomous_database).
+oracle (exadata + cloud_vm_cluster + autonomous_database), mobile_network, voice_services, new_relic.
 
 Not yet: sentinel (workspace-scoped, many sub-resources), workloads (SAP), and
 the remaining niche single-resource services + multi-resource sub-resource
