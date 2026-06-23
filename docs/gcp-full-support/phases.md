@@ -83,6 +83,17 @@ validation (the §9 bar the sandbox cannot run).
 
 Coverage 88 → 202 emitted, 68 hand-wired services, SA1019 lint debt 0.
 
+## Progress update (297 commits): 88 → 325 emitted, GA gap → 957
+
+92 hand-wired services + 28 compute. Deep multi-level parent walks added across
+bigtable, dataplex (8 resources), vertexAI (6), spanner (instance→database→
+backup_schedule/instance_partition), privateca (pool→CA/certificate), gkeHub
+(scope→namespace/rbac), apphub (app→service/workload), healthcare, alloydb,
+analyticsHub (exchange→listing), cloudBuildV2 (connection→repository), biglake
+(catalog→database→table), networkConnectivity/Services/Security, etc. Verification
+sweeps now return predominantly NO-GA / missing-SDK-package / bespoke for new
+candidates — the cleanly-importable GA surface is worked to its practical floor.
+
 ## Residual characterization (after ~286 emitted, ~995 GA gap)
 
 The cleanly-importable GA surface (single project/region/location List, plus
