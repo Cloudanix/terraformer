@@ -102,5 +102,18 @@ func (g *BackupdrGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	if err := backupdrService.Projects.Locations.BackupPlanAssociations.List(parent).Pages(ctx, func(p *backupdr.ListBackupPlanAssociationsResponse) error {
+		for _, o := range p.BackupPlanAssociations {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_backup_dr_backup_plan_association", g.ProviderName,
+				map[string]string{"backup_plan_association_id": name, "project": proj, "location": loc},
+				backupdrAllowEmptyValues, backupdrAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
