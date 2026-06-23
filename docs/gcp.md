@@ -58,6 +58,8 @@ List of supported GCP services:
     * `google_sql_database_instance`
 *   `dataProc`
     * `google_dataproc_cluster`
+*   `dataplex`
+    * `google_dataplex_lake`
 *   `datafusion`
     * `google_data_fusion_instance`
 *   `disks`
