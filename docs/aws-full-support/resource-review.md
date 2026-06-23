@@ -80,10 +80,55 @@ buildable against the pinned SDKs, now implemented (one commit each):
   adopt-existing / tag-per-parent:** the large structural majority — fully
   catalogued in `no-list-api.md`.
 
+## Post-upgrade service review (all OTHER addable services)
+
+After the aws-sdk-go-v2 upgrade, audited every terraform-provider-aws **service
+prefix with zero terraformer coverage** (17 found) to see what whole services
+could now be added. Findings:
+
+- **No net-new service from already-vendored SDKs** — every SDK that is in
+  `go.mod` and has terraform-provider-aws resources is already a registered
+  generator. The cached modules that the earlier review flagged "unvendored"
+  (evidently, lexmodelsv2, paymentcryptography, customerprofiles, dataexchange,
+  bcmdataexports, chatbot) turned out to be **already registered**.
+
+- **Added this review** (SDK already vendored, ops now usable):
+  - `aws_paymentcryptography_key_alias` (ListAliases)
+  - ELB-classic policy family on the existing `elb` service:
+    `aws_load_balancer_policy`, `aws_app_cookie_stickiness_policy`,
+    `aws_lb_cookie_stickiness_policy`, `aws_proxy_protocol_policy`,
+    `aws_load_balancer_listener_policy`,
+    `aws_load_balancer_backend_server_policy` (DescribeLoadBalancerPolicies +
+    listener/backend descriptions; elasticloadbalancing classic SDK).
+
+- **Blocked: SDK module not vendored** — these services would each be a clean
+  new generator, but their `aws-sdk-go-v2/service/<x>` module is absent from
+  `go.mod` (and the sandbox blocks fetching new modules). Adding any of them is a
+  deliberate `go get` + dependency-addition decision:
+  | Service (SDK module) | TF resources | List API exists |
+  |---|---|---|
+  | `account` | account_region, account_alternate_contact, account_primary_contact | ListRegions / GetAlternateContact / GetContactInformation |
+  | `codecatalyst` | project, dev_environment, source_repository | ListProjects / ListSourceRepositories |
+  | `computeoptimizer` | enrollment_status, recommendation_preferences | GetEnrollmentStatus / GetRecommendationPreferences (singletons) |
+  | `costoptimizationhub` | enrollment_status, preferences | singletons |
+  | `devopsguru` | notification_channel, resource_collection, … | ListNotificationChannels / GetResourceCollection |
+  | `lexmodelbuildingservice` (lex v1) | lex_bot, lex_intent, lex_slot_type, lex_bot_alias | GetBots / GetIntents / GetSlotTypes |
+  | `simpledb` | simpledb_domain | ListDomains (service AWS-deprecated) |
+  | `worklink` | worklink_fleet, … | ListFleets (service AWS-deprecated) |
+  | `cloudfrontkeyvaluestore` | cloudfrontkeyvaluestore_key | ListKeys (data-plane keys) |
+  | `serverlessapplicationrepository` | cloudformation_stack | deploy action, no import |
+
+  Recommended to actually add (real infra, supported services): **account**,
+  **codecatalyst**, **devopsguru**. The rest are deprecated/data-plane/no-import.
+
+- **Remain not addable regardless of SDK** (data-plane / no-import / action):
+  `cloudcontrolapi_resource`, `redshiftdata_statement`,
+  `snapshot_create_volume_permission`. See no-list-api.md.
+
 ## Result
 
-`missing-resources.txt` = **205**, every entry mapped to one of the verdicts
-above. Coverage **1266** `aws_*` types. After the aws-sdk-go-v2 upgrade resolved
+`missing-resources.txt` = **198**, every entry mapped to one of the verdicts
+above. Coverage **1273** `aws_*` types. After the aws-sdk-go-v2 upgrade resolved
 the "op absent" group, the buildable frontier is exhausted: remaining gains need
 an SDK module that is **entirely unvendored** (codecatalyst, drs, evidently, lex
 v1, paymentcryptography, computeoptimizer, costoptimizationhub, simpledb,
