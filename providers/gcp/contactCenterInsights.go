@@ -43,6 +43,7 @@ func (g *ContactCenterInsightsGenerator) InitResources() error {
 	location := g.GetArgs()["region"].(compute.Region).Name
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + location
 
+	project := g.GetArgs()["project"].(string)
 	viewsList := cciService.Projects.Locations.Views.List(parent)
 	if err := viewsList.Pages(ctx, func(page *contactcenterinsights.GoogleCloudContactcenterinsightsV1ListViewsResponse) error {
 		for _, obj := range page.Views {
@@ -50,9 +51,82 @@ func (g *ContactCenterInsightsGenerator) InitResources() error {
 			name := t[len(t)-1]
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_contact_center_insights_view", g.ProviderName,
-				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				map[string]string{"name": name, "project": project, "location": location},
 				contactCenterInsightsAllowEmptyValues, contactCenterInsightsAdditionalFields,
 			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := cciService.Projects.Locations.AnalysisRules.List(parent).Pages(ctx, func(p *contactcenterinsights.GoogleCloudContactcenterinsightsV1ListAnalysisRulesResponse) error {
+		for _, o := range p.AnalysisRules {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_contact_center_insights_analysis_rule", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "location": location, "project": project},
+				contactCenterInsightsAllowEmptyValues, contactCenterInsightsAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := cciService.Projects.Locations.AssessmentRules.List(parent).Pages(ctx, func(p *contactcenterinsights.GoogleCloudContactcenterinsightsV1ListAssessmentRulesResponse) error {
+		for _, o := range p.AssessmentRules {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_contact_center_insights_assessment_rule", g.ProviderName,
+				map[string]string{"assessment_rule_id": t[len(t)-1], "location": location, "project": project},
+				contactCenterInsightsAllowEmptyValues, contactCenterInsightsAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := cciService.Projects.Locations.AutoLabelingRules.List(parent).Pages(ctx, func(p *contactcenterinsights.GoogleCloudContactcenterinsightsV1ListAutoLabelingRulesResponse) error {
+		for _, o := range p.AutoLabelingRules {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_contact_center_insights_auto_labeling_rule", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "location": location, "project": project},
+				contactCenterInsightsAllowEmptyValues, contactCenterInsightsAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := cciService.Projects.Locations.QaScorecards.List(parent).Pages(ctx, func(p *contactcenterinsights.GoogleCloudContactcenterinsightsV1ListQaScorecardsResponse) error {
+		for _, o := range p.QaScorecards {
+			t := strings.Split(o.Name, "/")
+			scorecardID := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, scorecardID, "google_contact_center_insights_qa_scorecard", g.ProviderName,
+				map[string]string{"qa_scorecard_id": scorecardID, "location": location, "project": project},
+				contactCenterInsightsAllowEmptyValues, contactCenterInsightsAdditionalFields))
+			if rerr := cciService.Projects.Locations.QaScorecards.Revisions.List(o.Name).Pages(ctx, func(rp *contactcenterinsights.GoogleCloudContactcenterinsightsV1ListQaScorecardRevisionsResponse) error {
+				for _, rev := range rp.QaScorecardRevisions {
+					rt := strings.Split(rev.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						rev.Name, scorecardID+"_"+rt[len(rt)-1], "google_contact_center_insights_qa_scorecard_revision", g.ProviderName,
+						map[string]string{"qa_scorecard_revision_id": rt[len(rt)-1], "qa_scorecard": scorecardID, "location": location, "project": project},
+						contactCenterInsightsAllowEmptyValues, contactCenterInsightsAdditionalFields))
+					if qerr := cciService.Projects.Locations.QaScorecards.Revisions.QaQuestions.List(rev.Name).Pages(ctx, func(qp *contactcenterinsights.GoogleCloudContactcenterinsightsV1ListQaQuestionsResponse) error {
+						for _, q := range qp.QaQuestions {
+							qt := strings.Split(q.Name, "/")
+							g.Resources = append(g.Resources, terraformutils.NewResource(
+								q.Name, scorecardID+"_"+qt[len(qt)-1], "google_contact_center_insights_qa_question", g.ProviderName,
+								map[string]string{"qa_question_id": qt[len(qt)-1], "location": location, "project": project},
+								contactCenterInsightsAllowEmptyValues, contactCenterInsightsAdditionalFields))
+						}
+						return nil
+					}); qerr != nil {
+						log.Println(qerr)
+					}
+				}
+				return nil
+			}); rerr != nil {
+				log.Println(rerr)
+			}
 		}
 		return nil
 	}); err != nil {
