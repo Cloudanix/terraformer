@@ -21,6 +21,7 @@ import (
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
+	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
 )
 
 var eipAllowEmptyValues = []string{"tags."}
@@ -49,6 +50,25 @@ func (g *ElasticIPGenerator) createElasticIpsResources(svc *ec2.Client) []terraf
 		if assocID := StringValue(eip.AssociationId); assocID != "" {
 			resources = append(resources, terraformutils.NewSimpleResource(
 				assocID, assocID, "aws_eip_association", "aws", eipAllowEmptyValues))
+		}
+	}
+
+	// Reverse-DNS (PTR) records set on EIPs map to aws_eip_domain_name (import
+	// by allocation id). DescribeAddressesAttribute(domain-name) lists them.
+	for p := ec2.NewDescribeAddressesAttributePaginator(svc, &ec2.DescribeAddressesAttributeInput{
+		Attribute: ec2types.AddressAttributeNameDomainName,
+	}); p.HasMorePages(); {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, attr := range page.Addresses {
+			allocID := StringValue(attr.AllocationId)
+			if allocID == "" || StringValue(attr.PtrRecord) == "" {
+				continue
+			}
+			resources = append(resources, terraformutils.NewSimpleResource(
+				allocID, allocID, "aws_eip_domain_name", "aws", eipAllowEmptyValues))
 		}
 	}
 

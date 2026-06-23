@@ -571,6 +571,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `eip`
     * `aws_eip`
     * `aws_eip_association`
+    * `aws_eip_domain_name`
 *   `eks`
     * `aws_eks_cluster`
     * `aws_eks_node_group`

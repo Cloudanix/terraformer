@@ -431,6 +431,7 @@ aws_efs_replication_configuration
 aws_egress_only_internet_gateway
 aws_eip
 aws_eip_association
+aws_eip_domain_name
 aws_eks_addon
 aws_eks_cluster
 aws_eks_fargate_profile
