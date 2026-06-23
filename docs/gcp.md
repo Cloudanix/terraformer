@@ -205,6 +205,8 @@ List of supported GCP services:
     * `google_compute_managed_ssl_certificate`
 *   `sslPolicies`
     * `google_compute_ssl_policy`
+*   `vertexAI`
+    * `google_vertex_ai_endpoint`
 *   `vpcAccess`
     * `google_vpc_access_connector`
 *   `workflows`
