@@ -32,6 +32,7 @@ var ComputeServices = map[string]terraformutils.ServiceGenerator{
 	"forwardingRules":               &GCPFacade{service: &ForwardingRulesGenerator{}},
 	"globalAddresses":               &GCPFacade{service: &GlobalAddressesGenerator{}},
 	"globalForwardingRules":         &GCPFacade{service: &GlobalForwardingRulesGenerator{}},
+	"globalNetworkEndpointGroups":   &GCPFacade{service: &GlobalNetworkEndpointGroupsGenerator{}},
 	"healthChecks":                  &GCPFacade{service: &HealthChecksGenerator{}},
 	"httpHealthChecks":              &GCPFacade{service: &HttpHealthChecksGenerator{}},
 	"httpsHealthChecks":             &GCPFacade{service: &HttpsHealthChecksGenerator{}},
