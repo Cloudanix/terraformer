@@ -86,6 +86,8 @@ List of supported GCP services:
     * `google_dialogflow_cx_agent`
 *   `disks`
     * `google_compute_disk`
+*   `dlp`
+    * `google_data_loss_prevention_inspect_template`
 *   `dns`
     * `google_dns_managed_zone`
     * `google_dns_record_set`
