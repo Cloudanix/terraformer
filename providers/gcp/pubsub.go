@@ -134,6 +134,37 @@ func (g *PubsubGenerator) InitResources() error {
 	g.Resources = append(g.Resources, topicsResources...)
 	g.Resources = append(g.Resources, schemasResources...)
 
+	project := g.GetArgs()["project"].(string)
+	for _, r := range topicsResources {
+		name := r.Item["name"].(string)
+		full := "projects/" + project + "/topics/" + name
+		if policy, perr := pubsubService.Projects.Topics.GetIamPolicy(full).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						full+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+						"google_pubsub_topic_iam_member", g.ProviderName,
+						map[string]string{"topic": name, "role": b.Role, "member": m, "project": project},
+						pubsubAllowEmptyValues, pubsubAdditionalFields))
+				}
+			}
+		}
+	}
+	for _, r := range subscriptionsResources {
+		name := r.Item["name"].(string)
+		full := "projects/" + project + "/subscriptions/" + name
+		if policy, perr := pubsubService.Projects.Subscriptions.GetIamPolicy(full).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						full+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+						"google_pubsub_subscription_iam_member", g.ProviderName,
+						map[string]string{"subscription": name, "role": b.Role, "member": m, "project": project},
+						pubsubAllowEmptyValues, pubsubAdditionalFields))
+				}
+			}
+		}
+	}
 	return nil
 }
 
