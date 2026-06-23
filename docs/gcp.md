@@ -102,6 +102,8 @@ List of supported GCP services:
     * `google_cloudfunctions2_function`
 *   `cloudbuild`
     * `google_cloudbuild_trigger`
+*   `cloudBuildV2`
+    * `google_cloudbuildv2_connection`
 *   `clouddeploy`
     * `google_clouddeploy_delivery_pipeline`
     * `google_clouddeploy_target`
