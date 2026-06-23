@@ -53,6 +53,17 @@ func (g SpannerGenerator) createDatabasesResources(ctx context.Context, svc *spa
 				spannerAllowEmptyValues,
 				spannerAdditionalFields,
 			))
+			if policy, perr := svc.Projects.Instances.Databases.GetIamPolicy(obj.Name, &spanner.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_spanner_database_iam_member", g.ProviderName,
+							map[string]string{"instance": instanceName, "database": name, "role": b.Role, "member": m, "project": project},
+							spannerAllowEmptyValues, spannerAdditionalFields))
+					}
+				}
+			}
 			// Walk the database for its backup schedules.
 			if err := svc.Projects.Instances.Databases.BackupSchedules.List(obj.Name).Pages(ctx, func(bp *spanner.ListBackupSchedulesResponse) error {
 				for _, bs := range bp.BackupSchedules {
