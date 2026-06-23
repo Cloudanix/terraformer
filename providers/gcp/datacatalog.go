@@ -70,8 +70,32 @@ func (g *DatacatalogGenerator) InitResources() error {
 		return err
 	}
 
-	entryGroupsList := datacatalogService.Projects.Locations.EntryGroups.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, entryGroupsList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	entryGroupsList := datacatalogService.Projects.Locations.EntryGroups.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, entryGroupsList)...)
+
+	taxonomiesList := datacatalogService.Projects.Locations.Taxonomies.List(parent)
+	g.Resources = append(g.Resources, g.createTaxonomiesResources(ctx, taxonomiesList)...)
 	return nil
+}
+
+// Run on taxonomiesList and create for each TerraformResource
+func (g DatacatalogGenerator) createTaxonomiesResources(ctx context.Context, list *datacatalog.ProjectsLocationsTaxonomiesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	region := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *datacatalog.GoogleCloudDatacatalogV1ListTaxonomiesResponse) error {
+		for _, obj := range page.Taxonomies {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_data_catalog_taxonomy", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "region": region},
+				datacatalogAllowEmptyValues, datacatalogAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
