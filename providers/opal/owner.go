@@ -1,7 +1,6 @@
 package opal
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -17,7 +16,7 @@ func (g *OwnerGenerator) InitResources() error {
 		return fmt.Errorf("unable to list opal owners: %v", err)
 	}
 
-	owners, _, err := client.OwnersApi.GetOwners(context.TODO()).Execute()
+	owners, _, err := client.OwnersApi.GetOwners(runContext()).Execute()
 	if err != nil {
 		return fmt.Errorf("unable to list opal owners: %v", err)
 	}
@@ -47,7 +46,7 @@ func (g *OwnerGenerator) InitResources() error {
 			break
 		}
 
-		owners, _, err = client.OwnersApi.GetOwners(context.TODO()).Cursor(*owners.Next.Get()).Execute()
+		owners, _, err = client.OwnersApi.GetOwners(runContext()).Cursor(*owners.Next.Get()).Execute()
 		if err != nil {
 			return fmt.Errorf("unable to list opal owners: %v", err)
 		}

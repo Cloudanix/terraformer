@@ -1,7 +1,6 @@
 package opal
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -17,7 +16,7 @@ func (g *OnCallScheduleGenerator) InitResources() error {
 		return fmt.Errorf("unable to list opal on call schedules: %v", err)
 	}
 
-	onCallSchedules, _, err := client.OnCallSchedulesApi.GetOnCallSchedules(context.TODO()).Execute()
+	onCallSchedules, _, err := client.OnCallSchedulesApi.GetOnCallSchedules(runContext()).Execute()
 	if err != nil {
 		return fmt.Errorf("unable to list opal on call schedules: %v", err)
 	}
