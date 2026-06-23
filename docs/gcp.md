@@ -1,5 +1,9 @@
 ### Use with GCP
 
+**Supported provider floor:** `terraform-provider-google` / `-google-beta` **= 7.37.0**.
+Terraformer refreshes generated state through the real provider plugin, so the
+plugin you run must be at or above this version. SDK floor: `google.golang.org/api v0.286.0`.
+
 In order to access the information from your Google Project, you need to provide authentication credentials
 by setting up the environment variable `GOOGLE_APPLICATION_CREDENTIALS` with the file path of the JSON
 file that contains your service account key. 
