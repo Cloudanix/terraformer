@@ -380,7 +380,52 @@ func (g *RDSGenerator) InitResources() error {
 	if err := g.loadDBShardGroups(svc); err != nil {
 		return err
 	}
+	if err := g.loadCustomDBEngineVersions(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// customRDSEngines are the RDS Custom BYOL engine families. DescribeDBEngineVersions
+// otherwise returns thousands of AWS-managed versions; querying only these keeps
+// the import to customer-created CEVs (aws_rds_custom_db_engine_version).
+var customRDSEngines = []string{
+	"custom-oracle-ee", "custom-oracle-ee-cdb", "custom-oracle-se2", "custom-oracle-se2-cdb",
+	"custom-sqlserver-ee", "custom-sqlserver-se", "custom-sqlserver-web", "custom-sqlserver-dev",
+}
+
+// rdsCustomEngineVersionID builds the aws_rds_custom_db_engine_version import id.
+func rdsCustomEngineVersionID(engine, version string) string {
+	return engine + ":" + version
+}
+
+// loadCustomDBEngineVersions emits customer-created RDS Custom engine versions.
+func (g *RDSGenerator) loadCustomDBEngineVersions(svc *rds.Client) error {
+	includeAll := true
+	for i := range customRDSEngines {
+		engine := customRDSEngines[i]
+		p := rds.NewDescribeDBEngineVersionsPaginator(svc, &rds.DescribeDBEngineVersionsInput{
+			Engine:     &engine,
+			IncludeAll: &includeAll,
+		})
+		for p.HasMorePages() {
+			page, err := p.NextPage(context.TODO())
+			if err != nil {
+				// A family with no custom versions returns an error for some accounts; skip it.
+				break
+			}
+			for _, v := range page.DBEngineVersions {
+				eng, ver := StringValue(v.Engine), StringValue(v.EngineVersion)
+				if eng == "" || ver == "" {
+					continue
+				}
+				id := rdsCustomEngineVersionID(eng, ver)
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_rds_custom_db_engine_version", "aws", RDSAllowEmptyValues))
+			}
+		}
+	}
 	return nil
 }
 
