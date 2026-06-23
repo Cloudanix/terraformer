@@ -43,6 +43,38 @@ func (g *DataplexGenerator) InitResources() error {
 	project := g.GetArgs()["project"].(string)
 	location := g.GetArgs()["region"].(compute.Region).Name
 
+	entryGroupsList := dataplexService.Projects.Locations.EntryGroups.List("projects/" + project + "/locations/" + location)
+	if err := entryGroupsList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListEntryGroupsResponse) error {
+		for _, obj := range page.EntryGroups {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_dataplex_entry_group", g.ProviderName,
+				map[string]string{"entry_group_id": name, "project": project, "location": location},
+				dataplexAllowEmptyValues, dataplexAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	aspectTypesList := dataplexService.Projects.Locations.AspectTypes.List("projects/" + project + "/locations/" + location)
+	if err := aspectTypesList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListAspectTypesResponse) error {
+		for _, obj := range page.AspectTypes {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_dataplex_aspect_type", g.ProviderName,
+				map[string]string{"aspect_type_id": name, "project": project, "location": location},
+				dataplexAllowEmptyValues, dataplexAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	lakeNames := []string{}
 	lakesList := dataplexService.Projects.Locations.Lakes.List("projects/" + project + "/locations/" + location)
 	if err := lakesList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListLakesResponse) error {

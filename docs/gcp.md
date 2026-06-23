@@ -104,6 +104,8 @@ List of supported GCP services:
     * `google_dataplex_lake`
     * `google_dataplex_zone`
     * `google_dataplex_task`
+    * `google_dataplex_entry_group`
+    * `google_dataplex_aspect_type`
 *   `datafusion`
     * `google_data_fusion_instance`
 *   `dataprocMetastore`
