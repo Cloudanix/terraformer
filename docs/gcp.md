@@ -297,6 +297,7 @@ List of supported GCP services:
     * `google_privateca_certificate_authority`
 *   `project`
     * `google_project`
+    * `google_project_service`
 *   `pubsub`
 *   `pubsubLite`
     * `google_pubsub_lite_topic`

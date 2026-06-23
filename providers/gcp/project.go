@@ -15,6 +15,12 @@
 package gcp
 
 import (
+	"context"
+	"log"
+	"strings"
+
+	"google.golang.org/api/serviceusage/v1"
+
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
 
@@ -40,5 +46,39 @@ func (g *ProjectGenerator) InitResources() error {
 		projectAdditionalFields,
 	))
 
+	g.loadProjectServices()
 	return nil
+}
+
+// loadProjectServices enumerates enabled APIs (google_project_service).
+func (g *ProjectGenerator) loadProjectServices() {
+	ctx := context.Background()
+	project := g.GetArgs()["project"].(string)
+	svc, err := serviceusage.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	call := svc.Services.List("projects/" + project).Filter("state:ENABLED")
+	if err := call.Pages(ctx, func(page *serviceusage.ListServicesResponse) error {
+		for _, s := range page.Services {
+			t := strings.Split(s.Name, "/")
+			svcName := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				project+"/"+svcName,
+				project+"/"+svcName,
+				"google_project_service",
+				g.ProviderName,
+				map[string]string{
+					"project": project,
+					"service": svcName,
+				},
+				projectAllowEmptyValues,
+				projectAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 }
