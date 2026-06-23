@@ -1,83 +1,132 @@
-# AWS services addable after the SDK upgrade — review (2026-06-23)
+# AWS coverage review after the SDK upgrade (2026-06-23)
 
-Scope: what net-new AWS coverage the recent `aws-sdk-go-v2` upgrade (84 service
-modules to latest) actually unlocks. Method: diff the 1453-row TF resource
-universe (`tf-aws-all-resources.txt`) against the 1346 `aws_*` types terraformer
-emits; resolve the 184-row gap (`missing-resources.txt`) against the vendored
-SDK module set and `no-list-api.md` exclusion classes.
+Two passes. **Pass 1** diffed the committed schema dump (`tf-aws-all-resources.txt`,
+1453 rows) and concluded "net-new services essentially complete." **Pass 2** went
+to the authoritative live source and found the dump was **stale** — so pass 1
+understated the gap. This doc supersedes pass 1's conclusion.
 
-**Headline:** net-new *services* are essentially complete. The upgrade already
-landed its wins — `ecr_repository_creation_template`, `eks_access_entry`,
-`eks_access_policy_association`, `lambda_function_recursion_config`,
-`dynamodb_resource_policy`, `codebuild_fleet`, `vpc_security_group_vpc_association`,
-`iam_organizations_features` are all emitted now. What remains is a short, exact
-list below.
+## Method (pass 2 — authoritative)
 
-## Tier 1 — buildable now, SDK already vendored, NO dep bump (do these)
+- Live resource universe = filenames under `website/docs/r/` in
+  `hashicorp/terraform-provider-aws@main` (exact resource names, fetched via the
+  GitHub tree API): **1669** `aws_*` resources.
+- Service registry = `names/data/names_data.hcl`: **366** services.
+- Terraformer emits **1348** distinct `aws_*` types across **225/366** services.
+- SDK List/Describe ops verified against the **go.mod-pinned** SDK version (not
+  whatever's first in the module cache — that bug made an earlier check report
+  false negatives on cloudfront/appsync/redshift/securityhub).
 
-| Service | Add | API | Notes |
-|---|---|---|---|
-| evidently | `aws_evidently_feature`, `aws_evidently_launch`, `aws_evidently_segment` | `ListFeatures`/`ListLaunches` (per project), `ListSegments` (account) | `evidently.go` already paginates projects → iterate them for feature/launch; segment is account-level. evidently@v1.30.0 vendored. |
-| computeoptimizer | `aws_computeoptimizer_recommendation_preferences` | `GetRecommendationPreferences` | Singleton config; needs a `resourceType` arg loop. Marginal value. |
+**Gap vs live provider = 352** (not 184). The committed dump missed **236**
+resources the provider has added since it was generated.
 
-evidently is the clean win: 3 resources, zero new deps, generator pattern already
-in the file.
+## Net-new top-level services: 0 addable
 
-## Tier 2 — real services, need a one-module dep bump (`go get` each)
+9 services terraformer covers 0 of — all correctly excluded:
 
-| Service | Add | API | Cost |
-|---|---|---|---|
-| drs (Elastic Disaster Recovery) | `aws_drs_replication_configuration_template` | `DescribeReplicationConfigurationTemplates` | `drs.go` exists but is an empty stub. +1 SDK module. |
-| codecatalyst | `aws_codecatalyst_project`, `_dev_environment`, `_source_repository` | `ListSpaces`→`ListProjects`→`ListDevEnvironments`/`ListSourceRepositories` | `codecatalyst.go` empty stub. Multi-step (space-scoped). +1 SDK module. |
-| serverlessapplicationrepository | `aws_serverlessapplicationrepository_cloudformation_stack` | `ListApplications` | Semantics iffy — TF resource *deploys* a stack; List returns owned apps. **Skip unless requested.** |
+| Service | Why excluded |
+|---|---|
+| lexmodels (lex v1) | Superseded by `aws_lexv2models_*` (built) |
+| codecatalyst | Not cleanly reverse-importable (dev_environment no import; project/source_repository import by bare name but are space/project-scoped) |
+| cloudcontrol (`aws_cloudcontrolapi_resource`) | Generic meta-resource |
+| redshiftdata (`aws_redshiftdata_statement`) | Data-plane (runs SQL) |
+| cloudfrontkeyvaluestore (`_key`, `_keys_exclusive`) | Data-plane KV items in a store (container already built) |
+| elb (`aws_elb_attachment`) | Structural attachment (elb built) |
+| serverlessrepo (`_cloudformation_stack`) | Deploy action, not durable infra |
+| outposts (`aws_outposts_capacity_task`) | Action resource |
 
-## Tier 3 — correctly excluded, do NOT add (confirmed)
+The headline holds for *services* — but the SDK upgrade opened a real backlog of
+**new child-resources on services we already cover**.
 
-- **AWS-deprecated:** simpledb, worklink.
-- **Superseded:** lex v1 (`lexmodelbuildingservice`) — v2 `aws_lexv2models_*` already built.
-- **Data-plane / meta / no-import:** redshiftdata, cloudcontrolapi,
-  `aws_customerprofiles_profile`, snapshot/ami copy/launch-permission,
-  spot_datafeed, ses identity verification, transfer_tag, etc.
-- **~150 structural suffixes with no List API:** `*_attachment`, `*_policy`,
-  `*_accepter`, `*_association`, `*_tag`, `*_validation`, `aws_default_*`,
-  inline-policy conflicts (sqs/sns `*_policy`). Catalogued in `no-list-api.md`.
+## Addable now — SDK already vendored, no dep bump (~30)
 
-## Doc-hygiene fix (stale, hurts the audit's trust)
+Each verified to have a List/Describe op in the go.mod-pinned SDK. Standard
+`List → NewSimpleResource` generators; add to the existing service file.
 
-`no-list-api.md` → "SDK not vendored in the pinned aws-sdk-go-v2 module set" is
-**out of date**. These are now vendored AND built, and must be removed from that
-list: **evidently** (project), **devopsguru** (4 resources), **paymentcryptography**
-(key, key_alias), **computeoptimizer** (enrollment_status), **costoptimizationhub**
-(enrollment_status, preferences), **customerprofiles** (domain). Only still-unvendored:
-cloudwatchevidently-v?/lex-v1/drs/codecatalyst/serverlessapplicationrepository/
-simpledb/worklink/redshiftdata/cloudcontrolapi.
+| Resource | Service file | List/Describe op |
+|---|---|---|
+| `aws_cloudfront_vpc_origin` | cloudfront | `ListVpcOrigins` |
+| `aws_cloudfront_anycast_ip_list` | cloudfront | `ListAnycastIpLists` |
+| `aws_cloudfront_distribution_tenant` | cloudfront | `ListDistributionTenants` |
+| `aws_cloudfront_connection_group` | cloudfront | `ListConnectionGroups` |
+| `aws_cloudfront_trust_store` | cloudfront | `ListTrustStores` |
+| `aws_bedrock_inference_profile` | bedrock | `ListInferenceProfiles` |
+| `aws_bedrockagent_flow` | bedrockagent | `ListFlows` |
+| `aws_bedrockagent_prompt` | bedrockagent | `ListPrompts` |
+| `aws_appsync_api` | appsync | `ListApis` |
+| `aws_appsync_channel_namespace` | appsync | `ListChannelNamespaces` (per-api) |
+| `aws_athena_capacity_reservation` | athena | `ListCapacityReservations` |
+| `aws_opensearch_application` | opensearch | `ListApplications` |
+| `aws_opensearchserverless_collection_group`* | opensearchserverless | verify (`ListCollections` is the collection, not group) |
+| `aws_memorydb_multi_region_cluster` | memorydb | `DescribeMultiRegionClusters` |
+| `aws_timestreaminfluxdb_db_cluster` | timestreaminfluxdb | `ListDbClusters` |
+| `aws_vpclattice_resource_gateway` | vpclattice | `ListResourceGateways` |
+| `aws_wafv2_api_key` | wafv2 | `ListAPIKeys` (per-scope) |
+| `aws_workmail_domain` | workmail | `ListMailDomains` (per-org) |
+| `aws_cloudwatch_log_anomaly_detector` | logs | `ListLogAnomalyDetectors` |
+| `aws_cloudwatch_log_delivery` | logs | `DescribeDeliveries` |
+| `aws_cloudwatch_log_delivery_destination` | logs | `DescribeDeliveryDestinations` |
+| `aws_cloudwatch_log_delivery_source` | logs | `DescribeDeliverySources` |
+| `aws_cloudwatch_contributor_insight_rule` | cloudwatch | `DescribeInsightRules` |
+| `aws_lakeformation_lf_tag_expression` | lakeformation | `ListLFTagExpressions` |
+| `aws_rds_shard_group` | rds | `DescribeDBShardGroups` |
+| `aws_redshift_integration` | redshift | `DescribeIntegrations` |
+| `aws_route53domains_domain` | route53domains | `ListDomains` |
+| `aws_sagemaker_model_card` | sagemaker | `ListModelCards` |
+| `aws_sagemaker_algorithm` | sagemaker | `ListAlgorithms` |
+| `aws_sagemaker_mlflow_app` | sagemaker | `ListMlflowTrackingServers` |
+| `aws_transfer_web_app` | transfer | `ListWebApps` |
+| `aws_transfer_host_key` | transfer | `ListHostKeys` (per-server) |
+| `aws_glue_catalog` | glue | `GetCatalogs` |
+| `aws_securityhub_automation_rule_v2` | securityhub | `ListAutomationRulesV2` |
+
+\* opensearchserverless_collection_group needs the right op confirmed before build.
+
+**Add with care (filter required, else noise):**
+- `aws_rds_custom_db_engine_version` — `DescribeDBEngineVersions` returns all AWS
+  engine versions; filter to customer-owned (`CustomEngineVersion`) only.
+- `aws_elastictranscoder_preset` — `ListPresets` returns AWS system presets too;
+  filter to non-system.
+
+**Per-parent enumeration (multi-step, lower priority):** appsync_channel_namespace
+(per api), wafv2_api_key (per scope), workmail_domain (per org), transfer_host_key
+(per server) — need a parent loop like the evidently pattern.
+
+## Excluded (the remaining ~290 of the 352 gap)
+
+Documented classes in [no-list-api.md](no-list-api.md):
+- **Structural suffixes (~136):** `*_association` (31), `*_policy` (22),
+  `*_accepter` (16), `*_attachment` (12), `*_exclusive` (iam/route53/ram/ssoadmin/
+  vpc_security_group_rules — conflict with parent, double-manage), `*_tag`,
+  `*_permission`, `*_membership`, `*_default_*`.
+- **Data-plane / action / no-import:** kms_ciphertext, lambda_invocation,
+  iot_logging_options, secretsmanager_secret_version, dataexchange_revision*,
+  customerprofiles_profile, msk_topic, ebs_fast_snapshot_restore,
+  vpc_ipam_preview_next_cidr, quicksight_ingestion, grafana_workspace_api_key,
+  iam_user_login_profile, snapshot/ami copy+permission.
+- **Transient job executions (not durable infra):** sagemaker_training_job,
+  sagemaker_labeling_job, sagemaker_hyper_parameter_tuning_job,
+  sagemaker_model_card_export_job.
+- **Two-account handshake:** dx_hosted_*, dx_bgp_peer, dx_connection_confirmation,
+  directory_service_shared_directory_accepter.
+- **Superseded:** kinesis_analytics_application (v1; v2 built), lex v1.
+- **Org-level singletons (low value):** organizations_aws_service_access,
+  ram_sharing_with_organization, servicecatalog_organizations_access,
+  vpc_ipam_organization_admin_account, cloudtrail_organization_delegated_admin_account.
+
+## Status of this session's edits
+
+- `computeoptimizer_recommendation_preferences` — DONE (committed).
+- `drs_replication_configuration_template` — DONE (committed, dep vendored).
+- evidently feature/launch/segment — DROPPED (SDK marks service AWS-EOL).
+- codecatalyst — SKIPPED (not cleanly importable).
 
 ## Recommendation
 
-1. Ship **evidently feature/launch/segment** — no dep bump, 3 resources, trivial.
-2. Optionally **drs** (+1 dep, 1 clean resource) and **codecatalyst** (+1 dep, 3
-   resources, multi-step) if disaster-recovery / dev-tooling coverage is wanted.
-3. Correct the `no-list-api.md` unvendored section.
-4. Everything else in the 184-row gap is a documented exclusion class — leave it.
-
-## Outcome (2026-06-23, this session)
-
-- **evidently — DROPPED.** The vendored SDK is marked deprecated ("AWS has
-  deprecated this service… no longer available for use"). CloudWatch Evidently
-  is EOL. Building feature/launch/segment for a dead service = waste; the
-  existing `aws_evidently_project` stays only for historical reasons. Logged in
-  `no-list-api.md` under AWS-deprecated.
-- **computeoptimizer recommendation_preferences — DONE.** Iterates the
-  importable `ResourceType` enum, paginates `GetRecommendationPreferences`, keys
-  by `resourceType,scopeName,scopeValue`. (commit)
-- **drs — DONE.** `aws_drs_replication_configuration_template` via
-  `DescribeReplicationConfigurationTemplates`; SDK vendored through the
-  curl→file-proxy workflow. (commit)
-- **codecatalyst — SKIPPED (not cleanly importable).** `dev_environment` has no
-  `terraform import`; `project` / `source_repository` import by a bare name but
-  are space/project-scoped, so a generated import would not round-trip on
-  refresh. Dep dropped via `go mod tidy`. Logged in `no-list-api.md`.
-
-Net new this session: **2 resource types** (computeoptimizer prefs, drs template).
-Confirms the headline: the SDK upgrade left essentially no net-new *services* to
-add — the residue is deprecated, data-plane, or non-importable.
+The ~30 "addable now" rows are the real post-upgrade backlog: clean
+`List→NewSimpleResource` adds on already-registered services, zero new deps. Ship
+in batches by service file (cloudfront, cloudwatchlogs, sagemaker, bedrock(agent),
+appsync, rds/redshift, transfer, misc), one commit per service, refreshing
+`docs/aws.md`. Verify each resource's import-ID format against the TF docs before
+building (some are composite, e.g. `name:parent`). Regenerate
+`tf-aws-all-resources.txt` (it is ~236 resources stale) when the schema dump can
+run outside the sandbox.
