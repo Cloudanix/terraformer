@@ -80,6 +80,28 @@ func (g *BigtableGenerator) InitResources() error {
 			}
 		}
 
+		// Walk the instance for its logical views.
+		lvList, lerr := bigtableService.Projects.Instances.LogicalViews.List(obj.Name).Do()
+		if lerr == nil {
+			for _, lv := range lvList.LogicalViews {
+				lt := strings.Split(lv.Name, "/")
+				lvName := lt[len(lt)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					project+"/"+instanceName+"/"+lvName,
+					lvName,
+					"google_bigtable_logical_view",
+					g.ProviderName,
+					map[string]string{
+						"logical_view_id": lvName,
+						"instance":        instanceName,
+						"project":         project,
+					},
+					bigtableAllowEmptyValues,
+					bigtableAdditionalFields,
+				))
+			}
+		}
+
 		// Walk the instance for its app profiles.
 		profilesList, perr := bigtableService.Projects.Instances.AppProfiles.List(obj.Name).Do()
 		if perr == nil {
