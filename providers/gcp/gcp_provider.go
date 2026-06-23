@@ -155,6 +155,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["beyondcorp"] = &GCPFacade{service: &BeyondcorpGenerator{}}
 	services["identityPlatform"] = &GCPFacade{service: &IdentityPlatformGenerator{}}
 	services["apihub"] = &GCPFacade{service: &ApihubGenerator{}}
+	services["apigee"] = &GCPFacade{service: &ApigeeGenerator{}}
 	services["healthcare"] = &GCPFacade{service: &HealthcareGenerator{}}
 	services["looker"] = &GCPFacade{service: &LookerGenerator{}}
 	services["datastream"] = &GCPFacade{service: &DatastreamGenerator{}}
