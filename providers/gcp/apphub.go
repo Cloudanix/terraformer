@@ -99,13 +99,27 @@ func (g *ApphubGenerator) InitResources() error {
 		log.Println(err)
 	}
 	for _, app := range appNames {
+		appID := strings.Split(app, "/")[len(strings.Split(app, "/"))-1]
 		if err := apphubService.Projects.Locations.Applications.Services.List(app).Pages(ctx, func(p *apphub.ListServicesResponse) error {
 			for _, o := range p.Services {
 				t := strings.Split(o.Name, "/")
 				name := t[len(t)-1]
 				g.Resources = append(g.Resources, terraformutils.NewResource(
 					o.Name, name, "google_apphub_service", g.ProviderName,
-					map[string]string{"service_id": name, "application_id": strings.Split(app, "/")[len(strings.Split(app, "/"))-1], "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+					map[string]string{"service_id": name, "application_id": appID, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+					apphubAllowEmptyValues, apphubAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+		if err := apphubService.Projects.Locations.Applications.Workloads.List(app).Pages(ctx, func(p *apphub.ListWorkloadsResponse) error {
+			for _, o := range p.Workloads {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_apphub_workload", g.ProviderName,
+					map[string]string{"workload_id": name, "application_id": appID, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
 					apphubAllowEmptyValues, apphubAdditionalFields))
 			}
 			return nil
