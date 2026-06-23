@@ -58,6 +58,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `auditmanager`
     * `aws_auditmanager_assessment`
     * `aws_auditmanager_control`
+    * `aws_auditmanager_framework_share`
     * `aws_auditmanager_framework`
     * `aws_auditmanager_assessment_report`
     * `aws_auditmanager_account_registration`

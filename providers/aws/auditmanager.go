@@ -50,6 +50,20 @@ func (g *AuditManagerGenerator) InitResources() error {
 	}
 
 	ctx := context.TODO()
+	for sp := auditmanager.NewListAssessmentFrameworkShareRequestsPaginator(svc, &auditmanager.ListAssessmentFrameworkShareRequestsInput{RequestType: types.ShareRequestTypeSent}); sp.HasMorePages(); {
+		page, err := sp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, s := range page.AssessmentFrameworkShareRequests {
+			id := StringValue(s.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_auditmanager_framework_share", "aws", defaultAllowEmptyValues))
+		}
+	}
 	for cp := auditmanager.NewListControlsPaginator(svc, &auditmanager.ListControlsInput{ControlType: types.ControlTypeCustom}); cp.HasMorePages(); {
 		page, err := cp.NextPage(ctx)
 		if err != nil {
