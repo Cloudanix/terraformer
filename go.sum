@@ -294,6 +294,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal/v3 v3.2.0 h1:+lnL
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/internal/v3 v3.2.0/go.mod h1:tStOHrivWUrcBolspvKV70Us1ckESYGYSHdG4LX8zyY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/iothub/armiothub v1.3.0 h1:NZP+oPbAVFy7PhQ4PTD3SuGWbEziNhp7lphGkkN707s=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/iothub/armiothub v1.3.0/go.mod h1:djbLk3ngutFfQ9fSOM29UzywAkcBI1YUsuUnxTQGsqU=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.4.0 h1:HlZMUZW8S4P9oob1nCHxCCKrytxyLc+24nUJGssoEto=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/keyvault/armkeyvault v1.4.0/go.mod h1:StGsLbuJh06Bd8IBfnAlIFV3fLb+gkczONWf15hpX2E=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto v1.3.1 h1:ik0pyYcwUqdiPPXOioZfKL62SVu7iN5eh5zxHEbV3VE=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/kusto/armkusto v1.3.1/go.mod h1:st4TFPle8b16a2B9MEN+ofQT6iJjWBPAD9F5rfMQtZg=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/loadtesting/armloadtesting v1.2.0 h1:UnbtrzCN1v4pkhJdq66JEqPznTGwXmXaSv3IWFFSCSU=
