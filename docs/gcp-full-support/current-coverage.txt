@@ -1,4 +1,5 @@
 google_access_context_manager_access_policy
+google_alloydb_backup
 google_alloydb_cluster
 google_alloydb_instance
 google_api_gateway_api
@@ -122,6 +123,7 @@ google_dataplex_lake
 google_dataplex_task
 google_dataplex_zone
 google_dataproc_autoscaling_policy
+google_dataproc_batch
 google_dataproc_cluster
 google_dataproc_job
 google_dataproc_metastore_service
@@ -144,6 +146,7 @@ google_filestore_backup
 google_filestore_instance
 google_firestore_database
 google_gke_backup_backup_plan
+google_gke_backup_restore_plan
 google_gke_hub_feature
 google_gke_hub_membership
 google_gkeonprem_vmware_cluster
