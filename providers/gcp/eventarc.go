@@ -105,6 +105,32 @@ func (g *EventarcGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	if err := eventarcService.Projects.Locations.Enrollments.List(parent).Pages(ctx, func(p *eventarc.ListEnrollmentsResponse) error {
+		for _, o := range p.Enrollments {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_eventarc_enrollment", g.ProviderName,
+				map[string]string{"enrollment_id": name, "project": proj, "location": loc},
+				eventarcAllowEmptyValues, eventarcAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := eventarcService.Projects.Locations.MessageBuses.List(parent).Pages(ctx, func(p *eventarc.ListMessageBusesResponse) error {
+		for _, o := range p.MessageBuses {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_eventarc_message_bus", g.ProviderName,
+				map[string]string{"message_bus_id": name, "project": proj, "location": loc},
+				eventarcAllowEmptyValues, eventarcAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
