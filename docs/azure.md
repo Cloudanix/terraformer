@@ -196,6 +196,8 @@ export ARM_USE_ADAL=true
     * `azurerm_automation_account`
 *   `data_protection`
     * `azurerm_data_protection_backup_vault`
+*   `app_configuration`
+    * `azurerm_app_configuration`
 *   `apim`
     * `azurerm_api_management`
 *   `bastion`
@@ -214,6 +216,8 @@ export ARM_USE_ADAL=true
     * `azurerm_dynatrace_monitor`
 *   `digital_twins`
     * `azurerm_digital_twins_instance`
+*   `elastic`
+    * `azurerm_elastic_cloud_elasticsearch`
 *   `elastic_san`
     * `azurerm_elastic_san`
 *   `hdinsight`
@@ -252,10 +256,14 @@ export ARM_USE_ADAL=true
     * `azurerm_cognitive_account`
 *   `container_app`
     * `azurerm_container_app`
+*   `iotcentral`
+    * `azurerm_iotcentral_application`
 *   `iothub`
     * `azurerm_iothub`
 *   `kusto`
     * `azurerm_kusto_cluster`
+*   `maintenance`
+    * `azurerm_maintenance_configuration`
 *   `management_group`
     * `azurerm_management_group`
 *   `stream_analytics`
@@ -291,6 +299,8 @@ export ARM_USE_ADAL=true
     * `azurerm_machine_learning_workspace`
 *   `managed_identity`
     * `azurerm_user_assigned_identity`
+*   `service_networking`
+    * `azurerm_application_load_balancer`
 *   `service_fabric`
     * `azurerm_service_fabric_cluster`
 *   `spatial_anchors`
@@ -370,6 +380,8 @@ export ARM_USE_ADAL=true
     * `azurerm_public_ip_prefix`
 *   `purview`
     * `azurerm_purview_account`
+*   `redis_enterprise`
+    * `azurerm_redis_enterprise_cluster`
 *   `redis`
     * `azurerm_redis_cache`
     * `azurerm_redis_firewall_rule`

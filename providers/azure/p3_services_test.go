@@ -46,4 +46,10 @@ func TestP3ServicesRegistered(t *testing.T) {
 	assertRegistered(t, "voice_services", &VoiceServicesGenerator{})
 	assertRegistered(t, "new_relic", &NewRelicGenerator{})
 	assertRegistered(t, "hpc_cache", &HPCCacheGenerator{})
+	assertRegistered(t, "app_configuration", &AppConfigurationGenerator{})
+	assertRegistered(t, "iotcentral", &IoTCentralGenerator{})
+	assertRegistered(t, "elastic", &ElasticGenerator{})
+	assertRegistered(t, "redis_enterprise", &RedisEnterpriseGenerator{})
+	assertRegistered(t, "maintenance", &MaintenanceGenerator{})
+	assertRegistered(t, "service_networking", &ServiceNetworkingGenerator{})
 }

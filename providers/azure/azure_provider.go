@@ -340,7 +340,13 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 	return map[string]terraformutils.ServiceGenerator{
 		"analysis":                             &AnalysisGenerator{},
 		"apim":                                 &APIManagementGenerator{},
+		"app_configuration":                    &AppConfigurationGenerator{},
 		"app_service":                          &AppServiceGenerator{},
+		"elastic":                              &ElasticGenerator{},
+		"iotcentral":                           &IoTCentralGenerator{},
+		"maintenance":                          &MaintenanceGenerator{},
+		"redis_enterprise":                     &RedisEnterpriseGenerator{},
+		"service_networking":                   &ServiceNetworkingGenerator{},
 		"application_insights":                 &ApplicationInsightsGenerator{},
 		"arc":                                  &ArcGenerator{},
 		"bastion":                              &BastionGenerator{},
