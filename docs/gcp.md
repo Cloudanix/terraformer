@@ -57,6 +57,8 @@ List of supported GCP services:
     * `google_binary_authorization_attestor`
 *   `backupdr`
     * `google_backup_dr_management_server`
+    * `google_backup_dr_backup_plan`
+    * `google_backup_dr_backup_vault`
 *   `backendBuckets`
     * `google_compute_backend_bucket`
 *   `backendServices`

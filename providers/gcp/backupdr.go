@@ -70,8 +70,37 @@ func (g *BackupdrGenerator) InitResources() error {
 		return err
 	}
 
-	managementServersList := backupdrService.Projects.Locations.ManagementServers.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, managementServersList)
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
+	parent := "projects/" + proj + "/locations/" + loc
+	managementServersList := backupdrService.Projects.Locations.ManagementServers.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, managementServersList)...)
+
+	if err := backupdrService.Projects.Locations.BackupPlans.List(parent).Pages(ctx, func(p *backupdr.ListBackupPlansResponse) error {
+		for _, o := range p.BackupPlans {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_backup_dr_backup_plan", g.ProviderName,
+				map[string]string{"backup_plan_id": name, "project": proj, "location": loc},
+				backupdrAllowEmptyValues, backupdrAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := backupdrService.Projects.Locations.BackupVaults.List(parent).Pages(ctx, func(p *backupdr.ListBackupVaultsResponse) error {
+		for _, o := range p.BackupVaults {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_backup_dr_backup_vault", g.ProviderName,
+				map[string]string{"backup_vault_id": name, "project": proj, "location": loc},
+				backupdrAllowEmptyValues, backupdrAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
