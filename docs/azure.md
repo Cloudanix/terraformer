@@ -180,6 +180,8 @@ export ARM_USE_ADAL=true
     * `azurerm_log_analytics_workspace`
 *   `managed_identity`
     * `azurerm_user_assigned_identity`
+*   `traffic_manager`
+    * `azurerm_traffic_manager_profile`
     * `azurerm_lb_backend_address_pool`
     * `azurerm_lb_nat_rule`
     * `azurerm_lb_probe`

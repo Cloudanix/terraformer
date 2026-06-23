@@ -425,6 +425,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"storage_container":                    &StorageContainerGenerator{},
 		"synapse":                              &SynapseGenerator{},
 		"subnet":                               &SubnetGenerator{},
+		"traffic_manager":                      &TrafficManagerGenerator{},
 		"virtual_machine":                      &VirtualMachineGenerator{},
 		"virtual_network":                      &VirtualNetworkGenerator{},
 	}
