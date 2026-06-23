@@ -1,3 +1,4 @@
+google_apphub_application
 google_artifact_registry_repository
 google_backup_dr_management_server
 google_biglake_catalog
@@ -99,8 +100,10 @@ google_container_node_pool
 google_data_catalog_entry_group
 google_data_fusion_instance
 google_dataplex_lake
+google_dataproc_autoscaling_policy
 google_dataproc_cluster
 google_dataproc_job
+google_dataproc_metastore_service
 google_datastream_stream
 google_dialogflow_cx_agent
 google_dns_managed_zone
@@ -116,6 +119,7 @@ google_kms_crypto_key
 google_kms_key_ring
 google_logging_metric
 google_looker_instance
+google_managed_kafka_cluster
 google_memcache_instance
 google_monitoring_alert_policy
 google_monitoring_group
@@ -123,7 +127,10 @@ google_monitoring_notification_channel
 google_monitoring_uptime_check_config
 google_netapp_storage_pool
 google_network_connectivity_hub
+google_network_services_mesh
 google_notebooks_instance
+google_oracle_database_cloud_exadata_infrastructure
+google_parallelstore_instance
 google_privateca_ca_pool
 google_project
 google_project_iam_custom_role
@@ -146,6 +153,7 @@ google_storage_bucket_iam_policy
 google_storage_default_object_acl
 google_storage_notification
 google_storage_transfer_job
+google_vertex_ai_dataset
 google_vertex_ai_endpoint
 google_vmwareengine_private_cloud
 google_vpc_access_connector
