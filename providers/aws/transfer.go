@@ -110,6 +110,25 @@ func (g *TransferGenerator) InitResources() error {
 					sid+"/"+aid, sid+"_"+aid, "aws_transfer_agreement", "aws", defaultAllowEmptyValues))
 			}
 		}
+		var hkToken *string
+		for {
+			out, err := svc.ListHostKeys(ctx, &transfer.ListHostKeysInput{ServerId: &sid, NextToken: hkToken})
+			if err != nil {
+				break
+			}
+			for _, hk := range out.HostKeys {
+				keyID := StringValue(hk.HostKeyId)
+				if keyID == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					sid+"/"+keyID, sid+"_"+keyID, "aws_transfer_host_key", "aws", defaultAllowEmptyValues))
+			}
+			if out.NextToken == nil {
+				break
+			}
+			hkToken = out.NextToken
+		}
 	}
 
 	for cp := transfer.NewListCertificatesPaginator(svc, &transfer.ListCertificatesInput{}); cp.HasMorePages(); {
