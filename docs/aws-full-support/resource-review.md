@@ -158,6 +158,36 @@ unix-socket bind). Recommend doing it as an explicit, separate change: bump the
 floor, run `gen-gap-list.sh` in a normal environment, then add the new services
 with the §5 recipe.
 
+## Latest-provider service review (beyond the 5.80.0 floor)
+
+Fetched the authoritative resource list from the terraform-provider-aws `main`
+branch (git tree → `website/docs/r/*`) = **1668 resources**, vs 1453 in the
+pinned 5.80.0 schema. Diff → **19 service prefixes new since 5.80.0**. For each,
+checked SDK availability (fetchable via the proxy) + a clean List API + import.
+
+**Added (11 services, 19 resources)** — SDK module fetched + generator written
+(terraformer refreshes against the user's *runtime* provider, so building ahead
+of the pinned floor is valid):
+`dsql`, `workmail`, `odb`, `networkflowmonitor`, `notifications`,
+`notificationscontacts`, `savingsplans`, `timestream-query`, `billing`,
+`invoicing`, `observabilityadmin`.
+
+**Not added (assessed):**
+| Service | Reason |
+|---|---|
+| `bedrockagentcore` (18 resources) | mostly data-plane/runtime (agent_runtime, browser, code_interpreter, memory, gateway…); few have a clean list+import; revisit selectively |
+| `s3vectors` (vector_bucket/index/policy), `s3files` (file_system/access_point/…) | brand-new (preview) services; import IDs not yet stable in provider docs |
+| `arczonalshift`, `arcregionswitch` | zonal-shift/region-switch configs; per-resource enable state, ambiguous import |
+| `uxc_account_customizations` | account singleton, niche |
+| `outposts_capacity_task` | data-plane task (run-to-completion action) |
+| `dsql_cluster_peering` | multi-region peering config on a cluster, not separately enumerable |
+| `cloudfrontkeyvaluestore_keys_exclusive` | Terraform-only "exclusive" management construct |
+| `billing`/`invoicing`/`observabilityadmin` extra org-variant resources | org-admin/management-account-only variants; add if needed |
+
+Note: these additions are **beyond** the pinned 5.80.0 gap list, so they don't
+change `missing-resources.txt` (still measured against the floor); they raise the
+coverage count and forward-support newer runtime providers.
+
 ## Result
 
 `missing-resources.txt` = **184**, every entry mapped to one of the verdicts

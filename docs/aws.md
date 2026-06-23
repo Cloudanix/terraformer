@@ -33,6 +33,36 @@ terraformer import aws --resources=sg --regions=us-east-1
 
 #### Supported services
 
+*   `dsql`
+    * `aws_dsql_cluster`
+*   `workmail`
+    * `aws_workmail_organization`
+    * `aws_workmail_group`
+    * `aws_workmail_user`
+*   `odb`
+    * `aws_odb_network`
+    * `aws_odb_cloud_vm_cluster`
+    * `aws_odb_cloud_exadata_infrastructure`
+    * `aws_odb_cloud_autonomous_vm_cluster`
+    * `aws_odb_network_peering_connection`
+*   `networkflowmonitor`
+    * `aws_networkflowmonitor_monitor`
+    * `aws_networkflowmonitor_scope`
+*   `notifications`
+    * `aws_notifications_notification_hub`
+    * `aws_notifications_notification_configuration`
+*   `notificationscontacts`
+    * `aws_notificationscontacts_email_contact`
+*   `savingsplans`
+    * `aws_savingsplans_savings_plan`
+*   `timestream-query`
+    * `aws_timestreamquery_scheduled_query`
+*   `billing`
+    * `aws_billing_view`
+*   `invoicing`
+    * `aws_invoicing_invoice_unit`
+*   `observabilityadmin`
+    * `aws_observabilityadmin_telemetry_rule`
 *   `account`
     * `aws_account_region`
     * `aws_account_alternate_contact`
