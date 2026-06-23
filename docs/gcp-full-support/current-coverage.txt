@@ -123,6 +123,7 @@ google_healthcare_dicom_store
 google_healthcare_fhir_store
 google_healthcare_hl7_v2_store
 google_kms_crypto_key
+google_kms_crypto_key_version
 google_kms_key_ring
 google_logging_metric
 google_looker_instance
@@ -155,6 +156,7 @@ google_spanner_database
 google_spanner_instance
 google_sql_database
 google_sql_database_instance
+google_sql_user
 google_storage_bucket
 google_storage_bucket_acl
 google_storage_bucket_iam_binding
