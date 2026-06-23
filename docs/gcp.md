@@ -130,6 +130,7 @@ List of supported GCP services:
     * `google_container_node_pool`
 *   `gkeHub`
     * `google_gke_hub_membership`
+    * `google_gke_hub_feature`
 *   `globalAddresses`
     * `google_compute_global_address`
 *   `globalForwardingRules`

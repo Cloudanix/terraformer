@@ -71,8 +71,40 @@ func (g *GkeHubGenerator) InitResources() error {
 		return err
 	}
 
-	membershipsList := gkeHubService.Projects.Locations.Memberships.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, membershipsList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	membershipsList := gkeHubService.Projects.Locations.Memberships.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, membershipsList)...)
+
+	featuresList := gkeHubService.Projects.Locations.Features.List(parent)
+	g.Resources = append(g.Resources, g.createFeaturesResources(ctx, featuresList)...)
 	return nil
+}
+
+// Run on featuresList and create for each TerraformResource (response field is Resources)
+func (g GkeHubGenerator) createFeaturesResources(ctx context.Context, list *gkehub.ProjectsLocationsFeaturesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *gkehub.ListFeaturesResponse) error {
+		for _, obj := range page.Resources {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_gke_hub_feature",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				gkeHubAllowEmptyValues,
+				gkeHubAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
