@@ -44,6 +44,8 @@ List of supported GCP services:
     * `google_cloud_run_v2_service`
 *   `composer`
     * `google_composer_environment`
+*   `certificateManager`
+    * `google_certificate_manager_certificate`
 *   `cloudFunctions`
     * `google_cloudfunctions_function`
     * `google_cloudfunctions2_function`
