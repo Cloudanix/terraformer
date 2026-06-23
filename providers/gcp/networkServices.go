@@ -105,5 +105,37 @@ func (g *NetworkServicesGenerator) InitResources() error {
 
 	gatewaysList := networkServicesService.Projects.Locations.Gateways.List(parent)
 	g.Resources = append(g.Resources, g.createGatewaysResources(ctx, gatewaysList)...)
+
+	httpRoutesList := networkServicesService.Projects.Locations.HttpRoutes.List(parent)
+	g.Resources = append(g.Resources, g.createHTTPRoutesResources(ctx, httpRoutesList)...)
 	return nil
+}
+
+// Run on httpRoutesList and create for each TerraformResource
+func (g NetworkServicesGenerator) createHTTPRoutesResources(ctx context.Context, list *networkservices.ProjectsLocationsHttpRoutesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *networkservices.ListHttpRoutesResponse) error {
+		for _, obj := range page.HttpRoutes {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_network_services_http_route",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				networkServicesAllowEmptyValues,
+				networkServicesAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
