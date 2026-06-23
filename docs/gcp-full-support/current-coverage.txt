@@ -166,6 +166,7 @@ google_eventarc_trigger
 google_filestore_backup
 google_filestore_instance
 google_filestore_snapshot
+google_firestore_backup_schedule
 google_firestore_database
 google_gke_backup_backup_channel
 google_gke_backup_backup_plan
