@@ -103,6 +103,17 @@ func (g *DatacatalogGenerator) InitResources() error {
 				obj.Name, name, "google_data_catalog_taxonomy", g.ProviderName,
 				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "region": g.GetArgs()["region"].(compute.Region).Name},
 				datacatalogAllowEmptyValues, datacatalogAdditionalFields))
+			if policy, perr := datacatalogService.Projects.Locations.Taxonomies.GetIamPolicy(obj.Name, &datacatalog.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_data_catalog_taxonomy_iam_member", g.ProviderName,
+							map[string]string{"taxonomy": name, "role": b.Role, "member": m, "project": project, "region": region},
+							datacatalogAllowEmptyValues, datacatalogAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
