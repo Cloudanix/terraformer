@@ -148,6 +148,8 @@ List of supported GCP services:
     * `google_monitoring_uptime_check_config`
 *   `notebooks`
     * `google_notebooks_instance`
+*   `netapp`
+    * `google_netapp_storage_pool`
 *   `networkConnectivity`
     * `google_network_connectivity_hub`
 *   `networks`
