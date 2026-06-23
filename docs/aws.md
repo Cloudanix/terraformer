@@ -1193,6 +1193,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshift_hsm_configuration`
 *   `resourcegroups`
     * `aws_resourcegroups_group`
+    * `aws_resourcegroups_resource`
 *   `route53`
     * `aws_route53_zone`
     * `aws_route53_record`

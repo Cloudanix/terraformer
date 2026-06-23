@@ -42,12 +42,40 @@ func (g *ResourceGroupsGenerator) InitResources() error {
 		}
 		for _, groupIdentifier := range page.GroupIdentifiers {
 			groupName := StringValue(groupIdentifier.GroupName)
+			groupArn := StringValue(groupIdentifier.GroupArn)
 			resources = append(resources, terraformutils.NewSimpleResource(
 				groupName,
 				groupName,
 				"aws_resourcegroups_group",
 				"aws",
 				resourcegroupsAllowEmptyValues))
+
+			// aws_resourcegroups_resource models a MANUAL group membership. Skip
+			// query-based groups (membership is computed from a tag/CFN query, not
+			// individually managed). A group with no query → manual.
+			if _, qErr := svc.GetGroupQuery(context.TODO(), &resourcegroups.GetGroupQueryInput{Group: &groupName}); qErr == nil {
+				continue // query-based group → members are auto, not managed resources
+			}
+			if groupArn == "" {
+				continue
+			}
+			for rp := resourcegroups.NewListGroupResourcesPaginator(svc, &resourcegroups.ListGroupResourcesInput{Group: &groupArn}); rp.HasMorePages(); {
+				rpage, err := rp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, item := range rpage.Resources {
+					if item.Identifier == nil {
+						continue
+					}
+					resourceArn := StringValue(item.Identifier.ResourceArn)
+					if resourceArn == "" {
+						continue
+					}
+					resources = append(resources, terraformutils.NewSimpleResource(
+						groupArn+","+resourceArn, groupName+"_resource", "aws_resourcegroups_resource", "aws", resourcegroupsAllowEmptyValues))
+				}
+			}
 		}
 	}
 	g.Resources = resources

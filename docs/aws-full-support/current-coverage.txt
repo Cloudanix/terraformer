@@ -897,6 +897,7 @@ aws_resiliencehub_app
 aws_resourceexplorer2_index
 aws_resourceexplorer2_view
 aws_resourcegroups_group
+aws_resourcegroups_resource
 aws_rolesanywhere_profile
 aws_rolesanywhere_trust_anchor
 aws_route_table
