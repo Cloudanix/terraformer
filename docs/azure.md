@@ -169,6 +169,7 @@ export ARM_USE_ADAL=true
     * `azurerm_eventhub_consumer_group`
     * `azurerm_eventhub_namespace`
     * `azurerm_eventhub_namespace_authorization_rule`
+    * `azurerm_eventhub_namespace_disaster_recovery_config`
 *   `ddos`
     * `azurerm_network_ddos_protection_plan`
 *   `firewall`

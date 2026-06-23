@@ -124,6 +124,26 @@ func (az *EventHubGenerator) appendAuthorizationRules(namespace *eventhub.EHName
 	return nil
 }
 
+func (az *EventHubGenerator) appendDisasterRecoveryConfigs(namespace *eventhub.EHNamespace, namespaceRg *ResourceID) error {
+	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
+	client := eventhub.NewDisasterRecoveryConfigsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = authorizer
+	ctx := context.Background()
+	iterator, err := client.ListComplete(ctx, namespaceRg.ResourceGroup, *namespace.Name)
+	if err != nil {
+		return err
+	}
+	for iterator.NotDone() {
+		item := iterator.Value()
+		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_eventhub_namespace_disaster_recovery_config")
+		if err := iterator.NextWithContext(ctx); err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+	return nil
+}
+
 func (az *EventHubGenerator) InitResources() error {
 
 	namespaces, err := az.listNamespaces()
@@ -141,6 +161,10 @@ func (az *EventHubGenerator) InitResources() error {
 			return err
 		}
 		err = az.appendAuthorizationRules(&namespace, namespaceRg)
+		if err != nil {
+			return err
+		}
+		err = az.appendDisasterRecoveryConfigs(&namespace, namespaceRg)
 		if err != nil {
 			return err
 		}
