@@ -228,4 +228,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionInstanceTemplates": basicGCPResource{
 		terraformName: "google_compute_region_instance_template",
 	},
+	"regionInstantSnapshots": basicGCPResource{
+		terraformName: "google_compute_region_instant_snapshot",
+	},
 }
