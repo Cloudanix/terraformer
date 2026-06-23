@@ -32,22 +32,23 @@ type SpannerGenerator struct {
 	GCPService
 }
 
-// Run on instancesList and create for each TerraformResource
-func (g SpannerGenerator) createResources(ctx context.Context, instancesList *spanner.ProjectsInstancesListCall) []terraformutils.Resource {
+// Run on databasesList and create for each TerraformResource (per-instance walk)
+func (g SpannerGenerator) createDatabasesResources(ctx context.Context, databasesList *spanner.ProjectsInstancesDatabasesListCall, instanceName string) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
 	project := g.GetArgs()["project"].(string)
-	if err := instancesList.Pages(ctx, func(page *spanner.ListInstancesResponse) error {
-		for _, obj := range page.Instances {
+	if err := databasesList.Pages(ctx, func(page *spanner.ListDatabasesResponse) error {
+		for _, obj := range page.Databases {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
 			resources = append(resources, terraformutils.NewResource(
-				project+"/"+name,
+				project+"/"+instanceName+"/"+name,
 				name,
-				"google_spanner_instance",
+				"google_spanner_database",
 				g.ProviderName,
 				map[string]string{
-					"name":    name,
-					"project": project,
+					"name":     name,
+					"instance": instanceName,
+					"project":  project,
 				},
 				spannerAllowEmptyValues,
 				spannerAdditionalFields,
@@ -68,7 +69,34 @@ func (g *SpannerGenerator) InitResources() error {
 		return err
 	}
 
-	instancesList := spannerService.Projects.Instances.List("projects/" + g.GetArgs()["project"].(string))
-	g.Resources = g.createResources(ctx, instancesList)
+	project := g.GetArgs()["project"].(string)
+
+	// List instances, capturing names for the per-instance database walk.
+	instanceNames := []string{}
+	instancesList := spannerService.Projects.Instances.List("projects/" + project)
+	if err := instancesList.Pages(ctx, func(page *spanner.ListInstancesResponse) error {
+		for _, obj := range page.Instances {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			instanceNames = append(instanceNames, name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				project+"/"+name,
+				name,
+				"google_spanner_instance",
+				g.ProviderName,
+				map[string]string{"name": name, "project": project},
+				spannerAllowEmptyValues,
+				spannerAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	for _, instanceName := range instanceNames {
+		databasesList := spannerService.Projects.Instances.Databases.List("projects/" + project + "/instances/" + instanceName)
+		g.Resources = append(g.Resources, g.createDatabasesResources(ctx, databasesList, instanceName)...)
+	}
 	return nil
 }

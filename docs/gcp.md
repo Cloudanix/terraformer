@@ -225,6 +225,7 @@ List of supported GCP services:
     * `google_service_directory_namespace`
 *   `spanner`
     * `google_spanner_instance`
+    * `google_spanner_database`
 *   `sslCertificates`
     * `google_compute_managed_ssl_certificate`
 *   `sslPolicies`
