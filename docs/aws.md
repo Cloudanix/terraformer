@@ -968,6 +968,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lakeformation_lf_tag`
     * `aws_lakeformation_data_cells_filter`
     * `aws_lakeformation_data_lake_settings`
+    * `aws_lakeformation_lf_tag_expression`
 *   `kms`
     * `aws_kms_key`
     * `aws_kms_alias`
@@ -1227,6 +1228,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_rds_cluster_parameter_group`
     * `aws_rds_cluster_endpoint`
     * `aws_rds_reserved_instance`
+    * `aws_rds_shard_group`
     * `aws_rds_integration`
     * `aws_rds_export_task`
 *   `quicksight`
@@ -1302,6 +1304,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshift_cluster`
     * `aws_redshift_cluster_iam_roles`
     * `aws_redshift_resource_policy`
+    * `aws_redshift_integration`
     * `aws_redshift_data_share_authorization`
     * `aws_redshift_partner`
     * `aws_redshift_snapshot_copy_grant`

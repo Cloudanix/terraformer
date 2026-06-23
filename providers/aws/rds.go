@@ -377,8 +377,34 @@ func (g *RDSGenerator) InitResources() error {
 	if err := g.loadRDSExtras(svc); err != nil {
 		return err
 	}
+	if err := g.loadDBShardGroups(svc); err != nil {
+		return err
+	}
 
 	return nil
+}
+
+// loadDBShardGroups emits Aurora Limitless DB shard groups (imported by identifier).
+func (g *RDSGenerator) loadDBShardGroups(svc *rds.Client) error {
+	var marker *string
+	for {
+		out, err := svc.DescribeDBShardGroups(context.TODO(), &rds.DescribeDBShardGroupsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, s := range out.DBShardGroups {
+			id := StringValue(s.DBShardGroupIdentifier)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_rds_shard_group", "aws", RDSAllowEmptyValues))
+		}
+		marker = out.Marker
+		if marker == nil {
+			return nil
+		}
+	}
 }
 
 func (g *RDSGenerator) loadRDSExtras(svc *rds.Client) error {

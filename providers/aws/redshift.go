@@ -277,7 +277,30 @@ func (g *RedshiftGenerator) InitResources() error {
 	if err := g.loadRedshiftExtras(svc); err != nil {
 		return err
 	}
+	if err := g.loadRedshiftIntegrations(svc); err != nil {
+		return err
+	}
 
+	return nil
+}
+
+// loadRedshiftIntegrations emits zero-ETL integrations (imported by ARN).
+func (g *RedshiftGenerator) loadRedshiftIntegrations(svc *redshift.Client) error {
+	p := redshift.NewDescribeIntegrationsPaginator(svc, &redshift.DescribeIntegrationsInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, i := range page.Integrations {
+			arn := StringValue(i.IntegrationArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(i.IntegrationName), "aws_redshift_integration", "aws", RedshiftAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

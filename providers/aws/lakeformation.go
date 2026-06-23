@@ -97,5 +97,24 @@ func (g *LakeFormationGenerator) InitResources() error {
 				accountID, accountID, "aws_lakeformation_data_lake_settings", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for ep := lakeformation.NewListLFTagExpressionsPaginator(svc, &lakeformation.ListLFTagExpressionsInput{}); ep.HasMorePages(); {
+		page, err := ep.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, e := range page.LFTagExpressions {
+			name := StringValue(e.Name)
+			if name == "" {
+				continue
+			}
+			id := name
+			if cat := StringValue(e.CatalogId); cat != "" {
+				id = name + "," + cat
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, name, "aws_lakeformation_lf_tag_expression", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
