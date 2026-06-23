@@ -8,7 +8,7 @@ by `providers/azure/*.go` (excluding test files).
 - Baseline: **141** types (35 services), measured 2026-06-23.
 - Current: **231** types (+90). Phase 1 mgmt-plane complete (incl. app_service
   modern apps + service_plan); Phase 2 incl. policy; ~50 new Phase 2/3 Track 2
-  services. Phase 5 migration 27/35 done. azuread (P4) not started.
+  services. Phase 5 migration DONE (35/35 Track 1→2). azuread (P4) already in fork.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
 
 ## Phase 0 — foundations (DONE)
@@ -71,16 +71,23 @@ Not yet: sentinel, lighthouse, hdinsight (per-kind), spatial_anchors, orbital,
 automanage, workloads (SAP), and the remaining long-tail single-resource
 services + multi-resource sub-resource expansions.
 
-## Phase 4 — azuread (not started)
+## Phase 4 — azuread (already present in this fork)
 
-`providers/azuread/` separate stream.
+`providers/azuread/` exists and is registered in `cmd/provider_cmd_azuread.go`:
+azuread_user, azuread_group, azuread_application, azuread_service_principal,
+azuread_app_role_assignment (Microsoft Graph via go-azure-helpers/hamilton).
+No work required for this phase.
 
-## Phase 5 — Track 1 → Track 2 migration (in progress)
+## Phase 5 — Track 1 → Track 2 migration (DONE)
 
 Behavior-preserving SDK swaps (same resource types + ARM import IDs), validated
 by build/vet/test (live no-diff `terraform plan` round-trip not available in the
-offline sandbox). **27 of 35 migrated** — networking + compute + dns + several
-single-resource services done:
+offline sandbox). **All 35 services migrated** — `grep -rl
+"azure-sdk-for-go/services" providers/azure` is empty. The Track 1 autorest auth
+path is removed; azidentity is the sole credential. azure-sdk-for-go v63 demoted
+to an indirect dep (go-autorest/hamilton retained for azuread + azuredevops).
+data-plane azblob retained for azurerm_storage_blob. Coverage of the migrated
+set (representative):
 - compute/network: disk, public_ip (+prefix), ssh_public_key, network_interface,
   route_table (+route/route_filter), network_security_group (+rule),
   virtual_network, subnet (+associations), private_endpoint (+link_service),
@@ -90,17 +97,14 @@ single-resource services done:
 - other: resource_group (armresources), management_lock (armlocks),
   app_service (armappservice, also modernized)
 
-Also migrated: dns, private_dns, keyvault, analysis, databricks, purview, redis, eventhub, security_center (contact + subscription_pricing).
-
-**Remaining 8 files (heaviest; each needs its own armXxx module):**
-storage_account/blob/container (armstorage; blob/container are partly data-plane),
-database (multi-engine armmysql/armpostgresql/armsql/armmariadb + flexible gaps),
-cosmosdb (armcosmos — has mongo/cassandra/gremlin gaps to convert), container
-(armcontainerinstance + armcontainerregistry — has registry gaps), data_factory
-(armdatafactory, ~40 resource types — largest), synapse (armsynapse — multiple
-resources).
-Done when `grep -rl "azure-sdk-for-go/services" providers/azure` is empty; then
-drop Track 1 + go-autorest/hamilton from go.mod.
+- also: dns, private_dns, keyvault, analysis, databricks, purview, redis,
+  eventhub, security_center (contact + subscription_pricing), cosmosdb (sql/table/
+  mongo/cassandra/gremlin), synapse (mgmt-plane; managed_private_endpoint deferred
+  data-plane), container (group + registry/webhook/replication/task), database
+  (mariadb/mysql/postgresql/sql families + flexible tiers), storage_account/
+  container, storage_blob (mgmt keys via armstorage + azblob data-plane),
+  data_factory (factory + ~40 dataset/linked_service/trigger/IR/pipeline/dataflow
+  types via typed Get*().Type accessors).
 
 ## How to build/test offline (sandbox)
 
