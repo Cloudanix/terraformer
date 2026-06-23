@@ -72,6 +72,22 @@ func (g *NotebooksGenerator) InitResources() error {
 
 	instancesList := notebooksService.Projects.Locations.Instances.List(
 		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, instancesList)
+	instanceResources := g.createResources(ctx, instancesList)
+	g.Resources = append(g.Resources, instanceResources...)
+
+	for _, r := range instanceResources {
+		res := r.InstanceState.ID
+		if policy, perr := notebooksService.Projects.Locations.Instances.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, strings.Split(res, "/")[len(strings.Split(res, "/"))-1]+"_"+b.Role+"_"+m,
+						"google_notebooks_instance_iam_member", g.ProviderName,
+						map[string]string{"instance_name": strings.Split(res, "/")[len(strings.Split(res, "/"))-1], "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+						notebooksAllowEmptyValues, notebooksAdditionalFields))
+				}
+			}
+		}
+	}
 	return nil
 }

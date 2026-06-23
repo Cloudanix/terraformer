@@ -286,6 +286,7 @@ List of supported GCP services:
     * `google_monitoring_service`
 *   `notebooks`
     * `google_notebooks_instance`
+    * `google_notebooks_instance_iam_member`
 *   `netapp`
     * `google_netapp_storage_pool`
     * `google_netapp_volume`
