@@ -167,6 +167,7 @@ List of supported GCP services:
     * `google_looker_instance`
 *   `logging`
     * `google_logging_metric`
+    * `google_logging_project_sink`
 *   `managedKafka`
     * `google_managed_kafka_cluster`
 *   `memcache`

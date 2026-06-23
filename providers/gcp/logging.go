@@ -59,6 +59,32 @@ func (g *LoggingGenerator) loadLoggingMetrics(ctx context.Context, client *logad
 	return nil
 }
 
+func (g *LoggingGenerator) loadLoggingSinks(ctx context.Context, client *logadmin.Client) error {
+	sinkIterator := client.Sinks(ctx)
+	for {
+		sink, err := sinkIterator.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return err
+		}
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			sink.ID,
+			sink.ID,
+			"google_logging_project_sink",
+			g.ProviderName,
+			map[string]string{
+				"name":    sink.ID,
+				"project": g.GetArgs()["project"].(string),
+			},
+			loggingAllowEmptyValues,
+			loggingAdditionalFields,
+		))
+	}
+	return nil
+}
+
 // Generate TerraformResources from GCP API
 func (g *LoggingGenerator) InitResources() error {
 	project := g.GetArgs()["project"].(string)
@@ -69,6 +95,9 @@ func (g *LoggingGenerator) InitResources() error {
 	}
 
 	if err := g.loadLoggingMetrics(ctx, client); err != nil {
+		return err
+	}
+	if err := g.loadLoggingSinks(ctx, client); err != nil {
 		return err
 	}
 
