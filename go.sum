@@ -330,6 +330,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb v1.2.0 
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mariadb/armmariadb v1.2.0/go.mod h1:DjMBNXv1qSHIv81Mj/MeAru4hk5WhOW4YZ40c+zo+Us=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mixedreality/armmixedreality v0.7.0 h1:pxyS8jjqh+x0b4YT8jMC3SELKI5A1rTP2CaTrBdz8KM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mixedreality/armmixedreality v0.7.0/go.mod h1:MwqYbQT7vnRqV9m4rfna7pkcSsQqUK6cB895MAklOHU=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mobilenetwork/armmobilenetwork v1.0.0 h1:MoFWZVgBS8kTjNJLCiwFlyb9OWWBwVaznRn2e6tUKkA=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mobilenetwork/armmobilenetwork v1.0.0/go.mod h1:5apQFOISjmD74K+HATj9gdRS2XT/GA7FIhbxiu9TqKA=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.12.0 h1:qmeVFr8V9dDzhLZDDgdqyOEl+XLhhMpm7xrOajxqKuk=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/monitor/armmonitor v0.12.0/go.mod h1:x/aYmuTilxu4yQMFj2r3ZE3iiO2wxYFFmh6dRg2IWiQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/msi/armmsi v1.3.0 h1:L7G3dExHBgUxsO3qpTGhk/P2dgnYyW48yn7AO33Tbek=
@@ -342,6 +344,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/netapp/armnetapp/v7 v7.7.0
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/netapp/armnetapp/v7 v7.7.0/go.mod h1:5qSzgQYMuIAXNNsnKJFlnaCCijSMkKRS9iamllg/cq0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7 v7.2.0 h1:DgqO2jYgDEqmN8W5sPP+ZU7Tfxyn+i9RqXtNsX6Enb8=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7 v7.2.0/go.mod h1:FBChJszHNRdH5AYJ+Y/NgWilJihKa5WcSlFrNnj2eY0=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/newrelic/armnewrelicobservability v1.2.0 h1:QR8FNNYmVtlQCs8gyExvXg2sRIF+aKckz3Ut0b/k1dc=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/newrelic/armnewrelicobservability v1.2.0/go.mod h1:Ev8vZ5FCUvNtcWlsaM5RSkZnoo86NS6XuEkTsk7wpjU=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/nginx/armnginx v1.0.1 h1:CHxPPRzAmUuS2IICn2+yaDK1UvOJQYnO+LNFxTxFRUU=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/nginx/armnginx v1.0.1/go.mod h1:48/T/8W/5Aovgn3AD+koLpqWo/1H86Z8DoGkhJIlThg=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/notificationhubs/armnotificationhubs v1.2.0 h1:ZzshIzB4SnLLHFFHbBMxG5Sn2QCo9LWl4K5Nqz0Eysk=
@@ -400,6 +404,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse v0.8.0 
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse v0.8.0/go.mod h1:IzuvA34YNVnlifc1+KhCouAKEf1VYzV439FOpyfTHzA=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager v1.3.0 h1:e3kTG23M5ps+DjvPolK4dcgohDY8sHsXU7zrdHj1WzY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/trafficmanager/armtrafficmanager v1.3.0/go.mod h1:Os5dq8Cvvz97rJauZhZJAfKHN+OEvF/0nVmHzF4aVys=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/voiceservices/armvoiceservices v1.1.0 h1:57QzLbWqM536dsyenvwelMGkT6W04x75t6ViwNtPtqc=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/voiceservices/armvoiceservices v1.1.0/go.mod h1:2r+8ByZHYkhpQhqXqDofvPf59OPomKzy4kKRjbPq/H0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub v1.3.0 h1:NyzzELDBMwCl+jHnUAEzv/4t9tp0vVn78vUou/7yqvM=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/webpubsub/armwebpubsub v1.3.0/go.mod h1:3cqAZX7JxhdbywHK3b1iaO/VcP9Kv+yvZ/s44EO2+LI=
 github.com/Azure/azure-storage-blob-go v0.10.0 h1:evCwGreYo3XLeBV4vSxLbLiYb6e0SzsJiXQVRGsRXxs=

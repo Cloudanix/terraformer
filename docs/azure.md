@@ -258,6 +258,8 @@ export ARM_USE_ADAL=true
     * `azurerm_management_group`
 *   `stream_analytics`
     * `azurerm_stream_analytics_job`
+*   `mobile_network`
+    * `azurerm_mobile_network`
 *   `monitor`
     * `azurerm_monitor_action_group`
     * `azurerm_monitor_activity_log_alert`
@@ -297,6 +299,8 @@ export ARM_USE_ADAL=true
     * `azurerm_traffic_manager_profile`
 *   `vmware`
     * `azurerm_vmware_private_cloud`
+*   `voice_services`
+    * `azurerm_voice_services_communications_gateway`
 *   `virtual_wan`
     * `azurerm_virtual_hub`
     * `azurerm_virtual_wan`
@@ -313,6 +317,8 @@ export ARM_USE_ADAL=true
     * `azurerm_maps_account`
 *   `netapp`
     * `azurerm_netapp_account`
+*   `new_relic`
+    * `azurerm_new_relic_monitor`
 *   `nginx`
     * `azurerm_nginx_deployment`
 *   `notification_hub`

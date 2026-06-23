@@ -42,4 +42,7 @@ func TestP3ServicesRegistered(t *testing.T) {
 	assertRegistered(t, "databox_edge", &DataBoxEdgeGenerator{})
 	assertRegistered(t, "orbital", &OrbitalGenerator{})
 	assertRegistered(t, "oracle", &OracleGenerator{})
+	assertRegistered(t, "mobile_network", &MobileNetworkGenerator{})
+	assertRegistered(t, "voice_services", &VoiceServicesGenerator{})
+	assertRegistered(t, "new_relic", &NewRelicGenerator{})
 }
