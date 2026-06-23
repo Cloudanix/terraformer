@@ -197,6 +197,7 @@ List of supported GCP services:
 *   `iam`
     * `google_project_iam_custom_role`
     * `google_project_iam_member`
+    * `google_project_iam_audit_config`
     * `google_service_account`
     * `google_iam_workload_identity_pool`
     * `google_iam_workload_identity_pool_provider`

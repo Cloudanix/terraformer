@@ -90,6 +90,25 @@ func (g *IamGenerator) createIamCustomRoleResources(rolesResponse *adminpb.ListR
 	return resources
 }
 
+func (g *IamGenerator) createIamAuditConfigResources(policy *cloudresourcemanager.Policy, project string) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	for _, ac := range policy.AuditConfigs {
+		resources = append(resources, terraformutils.NewResource(
+			project+"/"+ac.Service,
+			project+"/"+ac.Service,
+			"google_project_iam_audit_config",
+			g.ProviderName,
+			map[string]string{
+				"project": project,
+				"service": ac.Service,
+			},
+			IamAllowEmptyValues,
+			IamAdditionalFields,
+		))
+	}
+	return resources
+}
+
 func (g *IamGenerator) createIamMemberResources(policy *cloudresourcemanager.Policy, project string) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
 	for _, b := range policy.Bindings {
@@ -197,6 +216,7 @@ func (g *IamGenerator) InitResources() error {
 	g.Resources = g.createServiceAccountResources(serviceAccountsIterator)
 	g.Resources = append(g.Resources, g.createIamCustomRoleResources(rolesResponse, projectID)...)
 	g.Resources = append(g.Resources, g.createIamMemberResources(policyResponse, projectID)...)
+	g.Resources = append(g.Resources, g.createIamAuditConfigResources(policyResponse, projectID)...)
 	g.Resources = append(g.Resources, g.createWorkloadIdentityPoolResources(ctx, projectID)...)
 	return nil
 }
