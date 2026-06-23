@@ -47,6 +47,10 @@ func (g *S3TablesGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(bucket.Name), "aws_s3tables_table_bucket", "aws", defaultAllowEmptyValues))
+			if _, err := svc.GetTableBucketPolicy(context.TODO(), &s3tables.GetTableBucketPolicyInput{TableBucketARN: bucket.Arn}); err == nil {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					arn, StringValue(bucket.Name), "aws_s3tables_table_bucket_policy", "aws", defaultAllowEmptyValues))
+			}
 
 			bucketARN := arn
 			for np := s3tables.NewListNamespacesPaginator(svc, &s3tables.ListNamespacesInput{TableBucketARN: &bucketARN}); np.HasMorePages(); {
@@ -78,6 +82,12 @@ func (g *S3TablesGenerator) InitResources() error {
 					}
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						bucketARN+";"+ns+";"+tn, ns+"_"+tn, "aws_s3tables_table", "aws", defaultAllowEmptyValues))
+					if _, err := svc.GetTablePolicy(context.TODO(), &s3tables.GetTablePolicyInput{
+						TableBucketARN: &bucketARN, Namespace: &ns, Name: &tn,
+					}); err == nil {
+						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+							bucketARN+";"+ns+";"+tn, ns+"_"+tn, "aws_s3tables_table_policy", "aws", defaultAllowEmptyValues))
+					}
 				}
 			}
 		}

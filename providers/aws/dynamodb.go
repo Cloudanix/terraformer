@@ -80,6 +80,12 @@ func (g *DynamoDbGenerator) InitResources() error {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					tableName+":"+region, tableName+"_"+region, "aws_dynamodb_table_replica", "aws", dynamodbAllowEmptyValues))
 			}
+			if arn := StringValue(out.Table.TableArn); arn != "" {
+				if _, err := svc.GetResourcePolicy(context.TODO(), &dynamodb.GetResourcePolicyInput{ResourceArn: &arn}); err == nil {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						arn, tableName, "aws_dynamodb_resource_policy", "aws", dynamodbAllowEmptyValues))
+				}
+			}
 		}
 	}
 

@@ -107,6 +107,20 @@ func (g *CodeBuildGenerator) InitResources() error {
 				arn, arn, "aws_codebuild_report_group", "aws", codebuildAllowEmptyValues))
 		}
 	}
+
+	for fp := codebuild.NewListFleetsPaginator(svc, &codebuild.ListFleetsInput{}); fp.HasMorePages(); {
+		page, err := fp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, arn := range page.Fleets {
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_codebuild_fleet", "aws", codebuildAllowEmptyValues))
+		}
+	}
 	return nil
 }
 

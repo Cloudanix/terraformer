@@ -259,6 +259,22 @@ func (g *SecurityGenerator) InitResources() error {
 	})
 	g.Resources = g.createResources(resourcesToFilter)
 
+	// Additional (non-home) VPC associations of a security group.
+	for ap := ec2.NewDescribeSecurityGroupVpcAssociationsPaginator(svc, &ec2.DescribeSecurityGroupVpcAssociationsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, a := range page.SecurityGroupVpcAssociations {
+			gid, vpcID := StringValue(a.GroupId), StringValue(a.VpcId)
+			if gid == "" || vpcID == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				gid+","+vpcID, gid+"_"+vpcID, "aws_vpc_security_group_vpc_association", "aws", SgAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 

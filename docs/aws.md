@@ -311,6 +311,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codebuild_project`
     * `aws_codebuild_report_group`
     * `aws_codebuild_resource_policy`
+    * `aws_codebuild_fleet`
     * `aws_codebuild_webhook`
     * `aws_codebuild_source_credential`
 *   `codecommit`
@@ -489,6 +490,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_dynamodb_table`
     * `aws_dynamodb_global_table`
     * `aws_dynamodb_table_export`
+    * `aws_dynamodb_resource_policy`
     * `aws_dynamodb_kinesis_streaming_destination`
     * `aws_dynamodb_contributor_insights`
     * `aws_dynamodb_table_replica`
@@ -1295,6 +1297,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3tables_table_bucket`
     * `aws_s3tables_namespace`
     * `aws_s3tables_table`
+    * `aws_s3tables_table_bucket_policy`
+    * `aws_s3tables_table_policy`
 *   `secretsmanager`
     * `aws_secretsmanager_secret`
     * `aws_secretsmanager_secret_policy`
@@ -1382,6 +1386,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `sg`
     * `aws_security_group`
     * `aws_security_group_rule` (if a rule cannot be inlined)
+    * `aws_vpc_security_group_vpc_association`
 *   `sns`
     * `aws_sns_topic`
     * `aws_sns_topic_data_protection_policy`
