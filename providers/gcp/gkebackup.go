@@ -92,6 +92,22 @@ func (g *GkebackupGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+
+	restoreChannelsList := gkebackupService.Projects.Locations.RestoreChannels.List(parent)
+	if err := restoreChannelsList.Pages(ctx, func(page *gkebackup.ListRestoreChannelsResponse) error {
+		for _, obj := range page.RestoreChannels {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_gke_backup_restore_channel", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				gkebackupAllowEmptyValues, gkebackupAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
