@@ -93,6 +93,8 @@ List of supported GCP services:
 *   `clouddeploy`
     * `google_clouddeploy_delivery_pipeline`
     * `google_clouddeploy_target`
+    * `google_clouddeploy_custom_target_type`
+    * `google_clouddeploy_deploy_policy`
 *   `cloudsql`
     * `google_sql_database`
     * `google_sql_database_instance`

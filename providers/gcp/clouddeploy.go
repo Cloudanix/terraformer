@@ -76,6 +76,35 @@ func (g *ClouddeployGenerator) InitResources() error {
 
 	targetsList := clouddeployService.Projects.Locations.Targets.List(parent)
 	g.Resources = append(g.Resources, g.createTargetsResources(ctx, targetsList)...)
+
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
+	if err := clouddeployService.Projects.Locations.CustomTargetTypes.List(parent).Pages(ctx, func(p *clouddeploy.ListCustomTargetTypesResponse) error {
+		for _, o := range p.CustomTargetTypes {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_clouddeploy_custom_target_type", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				clouddeployAllowEmptyValues, clouddeployAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := clouddeployService.Projects.Locations.DeployPolicies.List(parent).Pages(ctx, func(p *clouddeploy.ListDeployPoliciesResponse) error {
+		for _, o := range p.DeployPolicies {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_clouddeploy_deploy_policy", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				clouddeployAllowEmptyValues, clouddeployAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
