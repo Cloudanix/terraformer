@@ -94,7 +94,23 @@ func (g *ClouddeployGenerator) InitResources() error {
 	}
 
 	targetsList := clouddeployService.Projects.Locations.Targets.List(parent)
-	g.Resources = append(g.Resources, g.createTargetsResources(ctx, targetsList)...)
+	targetRes := g.createTargetsResources(ctx, targetsList)
+	g.Resources = append(g.Resources, targetRes...)
+	for _, r := range targetRes {
+		res := r.InstanceState.ID
+		if policy, perr := clouddeployService.Projects.Locations.Targets.GetIamPolicy(res).Do(); perr == nil {
+			short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_clouddeploy_target_iam_member", g.ProviderName,
+						map[string]string{"name": short, "role": b.Role, "member": m, "project": proj, "location": loc},
+						clouddeployAllowEmptyValues, clouddeployAdditionalFields))
+				}
+			}
+		}
+	}
 
 	if err := clouddeployService.Projects.Locations.CustomTargetTypes.List(parent).Pages(ctx, func(p *clouddeploy.ListCustomTargetTypesResponse) error {
 		for _, o := range p.CustomTargetTypes {
