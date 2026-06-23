@@ -156,6 +156,7 @@ google_dataplex_entry_group
 google_dataplex_entry_type
 google_dataplex_glossary
 google_dataplex_lake
+google_dataplex_lake_iam_member
 google_dataplex_task
 google_dataplex_zone
 google_dataproc_autoscaling_policy
