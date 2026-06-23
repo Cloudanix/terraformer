@@ -106,6 +106,7 @@ google_essential_contacts_contact
 google_eventarc_trigger
 google_filestore_instance
 google_firestore_database
+google_gke_hub_membership
 google_healthcare_dataset
 google_kms_crypto_key
 google_kms_key_ring
@@ -116,6 +117,7 @@ google_monitoring_alert_policy
 google_monitoring_group
 google_monitoring_notification_channel
 google_monitoring_uptime_check_config
+google_netapp_storage_pool
 google_network_connectivity_hub
 google_notebooks_instance
 google_privateca_ca_pool
@@ -140,5 +142,8 @@ google_storage_bucket_iam_policy
 google_storage_default_object_acl
 google_storage_notification
 google_storage_transfer_job
+google_vertex_ai_endpoint
+google_vmwareengine_private_cloud
 google_vpc_access_connector
 google_workflows_workflow
+google_workstations_workstation_cluster

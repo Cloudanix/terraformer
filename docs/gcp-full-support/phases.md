@@ -18,11 +18,29 @@ Done & committed (build + vet + gofmt clean; one resource/service per commit):
 - **Phase 1** ✓ SDK bump `google.golang.org/api v0.214→v0.286`, floor pinned 7.37.0, compute regen zero-churn.
 - **Phase 2** ✓ authoritative backlog (1277 GA / 1411 beta; gap 1177→1150).
 - **Phase 3** ✓ 28 compute resources via codegen (§4a + authoritative remainder).
-- **Phase 5 P1** ✓ 12 new services: secretManager, artifactRegistry, spanner,
-  bigtable, cloudRun, filestore, workflows, eventarc, vpcAccess, composer,
-  notebooks, certificateManager. Plus pubsub→schema (Phase 4b).
+- **Phase 4b** ✓ pubsub→schema.
+- **Phase 5/6/7/8** ✓ 32 new single-resource services (one commit each):
+  - P1: secretManager, artifactRegistry, spanner, bigtable, cloudRun, filestore,
+    workflows, eventarc, vpcAccess, composer, notebooks, certificateManager
+  - P2/governance: binaryAuthorization, essentialContacts, networkConnectivity
+  - P3/data-ML: firestore, datafusion, dataplex, healthcare, looker, datastream,
+    datacatalog, vertexAI (endpoint)
+  - P4/long-tail: serviceDirectory, memcache, privateca, clouddeploy, dialogflow,
+    gkeHub, vmwareengine, workstations, netapp
 
-Coverage 88 → 129 emitted `google_*` types.
+Coverage 88 → 149 emitted `google_*` types. GA gap 1177 → 1130.
+
+Each new service emits ONE top-level resource (the primary list-able collection).
+Sub-resources (e.g. spanner_database, vertex_ai_dataset, dataplex_zone,
+healthcare_*_store, privateca_certificate_authority) are follow-up expansions
+of these services, not yet added.
+
+Deferred (need special handling, not the simple project/region list pattern):
+- Org/folder-scoped: securityCenter (scc), accessContextManager, orgPolicy,
+  apigee, tags (List uses query-param parent) — different arg model.
+- Special list signatures: dlp, storagetransfer (filter param), cloudidentity,
+  serviceNetworking (network param), beyondcorp (prefixed response type).
+- dataflow (data-plane jobs), apigateway/tpu (beta-only / renamed in GA).
 
 > **Validation caveat:** all of the above is **compile-validated only**
 > (`go build`/`vet`/`gofmt` + codegen determinism). The plan's correctness bar
