@@ -139,6 +139,43 @@ func (g *CosmosDBGenerator) listMongoDB(resourceGroupName string, accountName st
 	return resources, nil
 }
 
+func (g *CosmosDBGenerator) listCassandra(resourceGroupName string, accountName string) ([]terraformutils.Resource, error) {
+	var resources []terraformutils.Resource
+	ctx := context.Background()
+	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
+	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
+	client := documentdb.NewCassandraResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
+
+	keyspaces, err := client.ListCassandraKeyspaces(ctx, resourceGroupName, accountName)
+	if err != nil {
+		return nil, err
+	}
+	for _, keyspace := range *keyspaces.Value {
+		resources = append(resources, terraformutils.NewSimpleResource(
+			*keyspace.ID,
+			*keyspace.Name,
+			"azurerm_cosmosdb_cassandra_keyspace",
+			g.ProviderName,
+			[]string{}))
+
+		tables, err := client.ListCassandraTables(ctx, resourceGroupName, accountName, *keyspace.Name)
+		if err != nil {
+			return nil, err
+		}
+		for _, table := range *tables.Value {
+			resources = append(resources, terraformutils.NewSimpleResource(
+				*table.ID,
+				*table.Name,
+				"azurerm_cosmosdb_cassandra_table",
+				g.ProviderName,
+				[]string{}))
+		}
+	}
+
+	return resources, nil
+}
+
 func (g *CosmosDBGenerator) listAndAddForDatabaseAccounts() ([]terraformutils.Resource, error) {
 	var resources []terraformutils.Resource
 	ctx := context.Background()
@@ -190,6 +227,12 @@ func (g *CosmosDBGenerator) listAndAddForDatabaseAccounts() ([]terraformutils.Re
 			return nil, err
 		}
 		resources = append(resources, mongo...)
+
+		cassandra, err := g.listCassandra(id.ResourceGroup, *account.Name)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, cassandra...)
 	}
 
 	return resources, nil

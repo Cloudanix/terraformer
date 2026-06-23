@@ -72,6 +72,8 @@ export ARM_USE_ADAL=true
     * `azurerm_container_registry_webhook`
 *   `cosmosdb`
     * `azurerm_cosmosdb_account`
+    * `azurerm_cosmosdb_cassandra_keyspace`
+    * `azurerm_cosmosdb_cassandra_table`
     * `azurerm_cosmosdb_mongo_collection`
     * `azurerm_cosmosdb_mongo_database`
     * `azurerm_cosmosdb_sql_container`
