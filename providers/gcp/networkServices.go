@@ -62,6 +62,35 @@ func (g NetworkServicesGenerator) createResources(ctx context.Context, meshesLis
 	return resources
 }
 
+// Run on gatewaysList and create for each TerraformResource
+func (g NetworkServicesGenerator) createGatewaysResources(ctx context.Context, list *networkservices.ProjectsLocationsGatewaysListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *networkservices.ListGatewaysResponse) error {
+		for _, obj := range page.Gateways {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_network_services_gateway",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				networkServicesAllowEmptyValues,
+				networkServicesAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 func (g *NetworkServicesGenerator) InitResources() error {
 	ctx := context.Background()
@@ -70,8 +99,11 @@ func (g *NetworkServicesGenerator) InitResources() error {
 		return err
 	}
 
-	meshesList := networkServicesService.Projects.Locations.Meshes.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, meshesList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	meshesList := networkServicesService.Projects.Locations.Meshes.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, meshesList)...)
+
+	gatewaysList := networkServicesService.Projects.Locations.Gateways.List(parent)
+	g.Resources = append(g.Resources, g.createGatewaysResources(ctx, gatewaysList)...)
 	return nil
 }

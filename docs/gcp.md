@@ -173,6 +173,7 @@ List of supported GCP services:
     * `google_network_connectivity_hub`
 *   `networkServices`
     * `google_network_services_mesh`
+    * `google_network_services_gateway`
 *   `networks`
     * `google_compute_network`
 *   `nodeGroups`
