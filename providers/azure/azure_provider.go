@@ -420,6 +420,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"management_lock":                      &ManagementLockGenerator{},
 		"monitor":                              &MonitorGenerator{},
 		"nat_gateway":                          &NatGatewayGenerator{},
+		"netapp":                               &NetAppGenerator{},
 		"network_interface":                    &NetworkInterfaceGenerator{},
 		"network_security_group":               &NetworkSecurityGroupGenerator{},
 		"network_watcher":                      &NetworkWatcherGenerator{},

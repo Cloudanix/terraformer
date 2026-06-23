@@ -235,6 +235,8 @@ export ARM_USE_ADAL=true
     * `azurerm_lb_probe`
 *   `nat_gateway`
     * `azurerm_nat_gateway`
+*   `netapp`
+    * `azurerm_netapp_account`
 *   `network_interface`
     * `azurerm_network_interface`
 *   `network_security_group`
