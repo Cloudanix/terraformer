@@ -191,6 +191,8 @@ export ARM_USE_ADAL=true
     * `azurerm_firewall`
 *   `kubernetes_fleet`
     * `azurerm_kubernetes_fleet_manager`
+*   `frontdoor`
+    * `azurerm_frontdoor`
 *   `kubernetes`
     * `azurerm_kubernetes_cluster`
     * `azurerm_kubernetes_cluster_node_pool`

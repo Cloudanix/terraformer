@@ -401,6 +401,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"eventgrid":                            &EventGridGenerator{},
 		"eventhub":                             &EventHubGenerator{},
 		"firewall":                             &FirewallGenerator{},
+		"frontdoor":                            &FrontDoorGenerator{},
 		"iothub":                               &IoTHubGenerator{},
 		"keyvault":                             &KeyVaultGenerator{},
 		"kubernetes":                           &KubernetesGenerator{},

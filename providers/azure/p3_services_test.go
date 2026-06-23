@@ -61,4 +61,5 @@ func TestP3ServicesRegistered(t *testing.T) {
 	assertRegistered(t, "lab_service", &LabServiceGenerator{})
 	assertRegistered(t, "portal", &PortalGenerator{})
 	assertRegistered(t, "custom_provider", &CustomProviderGenerator{})
+	assertRegistered(t, "frontdoor", &FrontDoorGenerator{})
 }
