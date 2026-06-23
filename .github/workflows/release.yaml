@@ -18,17 +18,11 @@ jobs:
           go-version-file: go.mod
           cache: true
       - name: Test
-        run: go build -v && go test ./...
-      - name: Build for linux/amd64
-        run: go build -o terraformer-all-linux-amd64
-      - name: Build for linux/arm64
-        run: GOOS=linux GOARCH=arm64 go build -o terraformer-all-linux-arm64
-      - name: Build for mac
-        run: GOOS=darwin go build -o terraformer-all-darwin-amd64
-      - name: Build for mac Apple Silicon
-        run: GOOS=darwin GOARCH=arm64 go build -o terraformer-all-darwin-arm64
+        run: make build test
+      - name: Cross-compile release binaries (linux/mac, amd64+arm64)
+        run: make release
       - name: Build for all providers
-        run: go run build/multi-build/main.go
+        run: make build-providers
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:

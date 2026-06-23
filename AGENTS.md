@@ -19,9 +19,14 @@ golangci-lint run                # lint (config .golangci.json, v2 schema)
 go mod tidy                      # CI runs this; keep go.mod/go.sum clean
 ```
 
-CI matrix: ubuntu + macos, Go version pinned by `go.mod`. CI = `go build -v && go test ./...`.
+A `Makefile` wraps these so local == CI (`make help` lists targets). `make ci`
+reproduces the test workflow (tidy + build + test); `make check` adds the linter
+(`make lint`); `make release` / `make build-providers` mirror the release
+workflow. CI (`.github/workflows/test.yml`, `release.yaml`) invokes these targets.
 
-Lint enables `gocritic`, `revive`, `unconvert`, `unparam` + `gofmt`/`goimports`. Run `golangci-lint run` before committing.
+CI matrix: ubuntu + macos, Go version pinned by `go.mod`. CI test job = `make ci`.
+
+Lint enables `gocritic`, `revive`, `unconvert`, `unparam` + `gofmt`/`goimports`. Run `golangci-lint run` (or `make lint`) before committing.
 
 ### Running a generated import
 

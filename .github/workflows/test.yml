@@ -21,7 +21,5 @@ jobs:
       with:
         go-version-file: go.mod
         cache: true
-    - name: Go Mod Tidy
-      run: go mod tidy
-    - name: Test
-      run: go build -v && go test ./...
+    - name: CI (tidy + build + test)
+      run: make ci
