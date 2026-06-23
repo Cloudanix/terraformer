@@ -14,12 +14,16 @@
 package cmd
 
 import (
+	"context"
 	"fmt"
 	"log"
 	"os"
+	"os/signal"
 	"sort"
 	"strings"
 	"sync"
+	"syscall"
+	"time"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils/terraformerstring"
 
@@ -54,6 +58,8 @@ type ImportOptions struct {
 	NoSort        bool
 	RetryCount    int
 	RetrySleepMs  int
+	Timeout       int             `json:"-"` // per-service SDK timeout in seconds; 0 = no timeout
+	Context       context.Context `json:"-"` // import-run context (deadline + Ctrl-C cancellation)
 }
 
 const DefaultPathPattern = "{output}/{provider}/{service}/"
@@ -92,6 +98,19 @@ func Import(provider terraformutils.ProviderGenerator, options ImportOptions, ar
 		return err
 	}
 	defer providerWrapper.Kill()
+
+	// Import-run context: cancels on Ctrl-C / SIGTERM, and (if --timeout > 0)
+	// after the deadline. Generators that thread it into their SDK calls stop
+	// hanging on a single stuck API call.
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+	if options.Timeout > 0 {
+		var cancel context.CancelFunc
+		ctx, cancel = context.WithTimeout(ctx, time.Duration(options.Timeout)*time.Second)
+		defer cancel()
+	}
+	options.Context = ctx
+
 	providerMapping := terraformutils.NewProvidersMapping(provider)
 
 	err = initAllServicesResources(providerMapping, options, args, providerWrapper)
@@ -157,6 +176,13 @@ func initAllServicesResources(providersMapping *terraformutils.ProvidersMapping,
 	var failedServices []string
 
 	for _, service := range options.Resources {
+		// Stop launching new services once the run is cancelled (Ctrl-C) or the
+		// --timeout deadline passed. A second Ctrl-C hard-kills (signal.NotifyContext
+		// restores default handling after the first signal).
+		if options.Context != nil && options.Context.Err() != nil {
+			log.Printf("import cancelled (%v); skipping remaining services", options.Context.Err())
+			break
+		}
 		serviceProvider := providersMapping.AddServiceToProvider(service)
 		err := serviceProvider.Init(args)
 		if err != nil {
@@ -205,6 +231,11 @@ func initServiceResources(service string, provider terraformutils.ProviderGenera
 		return err
 	}
 	provider.GetService().ParseFilters(options.Filter)
+	// Optional: pass the import-run context to generators that embed the base
+	// Service (most do). Providers that don't are unaffected.
+	if c, ok := provider.GetService().(interface{ SetContext(context.Context) }); ok && options.Context != nil {
+		c.SetContext(options.Context)
+	}
 	err = provider.GetService().InitResources()
 	if err != nil {
 		log.Printf("%s error initializing resources in service %s, err: %s\n", provider.GetName(), service, err)
@@ -407,4 +438,5 @@ func baseProviderFlags(flag *pflag.FlagSet, options *ImportOptions, sampleRes, s
 	flag.StringVarP(&options.Output, "output", "O", "hcl", "output format hcl or json")
 	flag.IntVarP(&options.RetryCount, "retry-number", "n", 5, "number of retries to perform when refresh fails")
 	flag.IntVarP(&options.RetrySleepMs, "retry-sleep-ms", "m", 300, "time in ms to sleep between retries")
+	flag.IntVarP(&options.Timeout, "timeout", "", 0, "per-import SDK timeout in seconds (0 = no timeout); also enables Ctrl-C cancellation")
 }

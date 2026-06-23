@@ -15,6 +15,7 @@
 package terraformutils
 
 import (
+	"context"
 	"log"
 	"strings"
 
@@ -47,6 +48,23 @@ type Service struct {
 	Args         map[string]interface{}
 	Filter       []ResourceFilter
 	Verbose      bool
+	ctx          context.Context
+}
+
+// SetContext sets the import-run context (deadline + cancellation). The
+// orchestrator sets it per service before InitResources; generators that pass it
+// to their SDK calls get the run's timeout and Ctrl-C cancellation.
+func (s *Service) SetContext(ctx context.Context) {
+	s.ctx = ctx
+}
+
+// Context returns the import-run context, or context.Background() if unset (e.g.
+// plan replay or tests), so callers can use it unconditionally.
+func (s *Service) Context() context.Context {
+	if s.ctx == nil {
+		return context.Background()
+	}
+	return s.ctx
 }
 
 func (s *Service) SetProviderName(providerName string) {

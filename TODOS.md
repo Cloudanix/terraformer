@@ -112,7 +112,31 @@ large resource set.
 
 ---
 
-## T3 — Replace `context.TODO()` with a timeout/cancellable context
+## T3 — Replace `context.TODO()` with a timeout/cancellable context — FOUNDATION DONE
+
+> Landed: the orchestration foundation + adoption API.
+> - `--timeout <seconds>` flag (0 = off) on every provider import command
+>   (`baseProviderFlags`).
+> - `Import()` builds a run context: `signal.NotifyContext` (Ctrl-C / SIGTERM)
+>   wrapped in `context.WithTimeout` when `--timeout > 0`. A second Ctrl-C
+>   hard-kills (NotifyContext restores default handling after the first signal),
+>   so this is not a regression.
+> - `terraformutils.Service` gained `SetContext`/`Context()` (defaults to
+>   `context.Background()`); `initServiceResources` sets it per service via an
+>   optional interface assertion, so the ~6 providers whose generators don't embed
+>   `Service` are unaffected (no interface change, nothing breaks).
+> - `initAllServicesResources` stops launching new services once the context is
+>   cancelled/expired (service-granularity cancellation, real teeth for the flag).
+> - `globalaccelerator` converted as the end-to-end demonstrator
+>   (`ctx := g.Context()`), unit-tested in `terraformutils/service_context_test.go`.
+>
+> **Remaining (the mechanical sweep — deliberately its own PR):** convert the
+> ~1000 `context.TODO()` call sites across all providers (727 in AWS) to
+> `g.Context()` so a hung *individual* SDK call inside a service also honours the
+> deadline. Must land atomically per provider to avoid a half-converted tree;
+> many sites are in receiver-less helpers that first need a `ctx` parameter
+> threaded in. The API and wiring above are in place, so this is now pure
+> mechanical follow-up with no design left to do.
 
 **What:** Sweep every generator's `context.TODO()` and give the import run a
 real context with a timeout (and Ctrl-C cancellation), threaded from the CLI.
