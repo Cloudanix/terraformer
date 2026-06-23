@@ -157,6 +157,18 @@ func (g *IamGenerator) createWorkloadIdentityPoolResources(ctx context.Context, 
 				IamAdditionalFields,
 			))
 
+			if policy, perr := iamService.Projects.Locations.WorkloadIdentityPools.GetIamPolicy(pool.Name, &iamv1.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							pool.Name+" "+b.Role+" "+m, id+"_"+b.Role+"_"+m,
+							"google_iam_workload_identity_pool_iam_member", g.ProviderName,
+							map[string]string{"workload_identity_pool_id": id, "role": b.Role, "member": m, "project": project},
+							IamAllowEmptyValues, IamAdditionalFields))
+					}
+				}
+			}
+
 			// Walk the pool for its providers.
 			provList := iamService.Projects.Locations.WorkloadIdentityPools.Providers.List(pool.Name)
 			if perr := provList.Pages(ctx, func(pp *iamv1.ListWorkloadIdentityPoolProvidersResponse) error {
