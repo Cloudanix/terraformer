@@ -264,6 +264,20 @@ func (g *DataplexGenerator) InitResources() error {
 						}
 					}
 				}
+				zoneName := name
+				if aerr := dataplexService.Projects.Locations.Lakes.Zones.Assets.List(obj.Name).Pages(ctx, func(ap *dataplex.GoogleCloudDataplexV1ListAssetsResponse) error {
+					for _, a := range ap.Assets {
+						at := strings.Split(a.Name, "/")
+						aName := at[len(at)-1]
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							a.Name, aName, "google_dataplex_asset", g.ProviderName,
+							map[string]string{"name": aName, "dataplex_zone": zoneName, "lake": lake, "project": project, "location": location},
+							dataplexAllowEmptyValues, dataplexAdditionalFields))
+					}
+					return nil
+				}); aerr != nil {
+					log.Println(aerr)
+				}
 			}
 			return nil
 		}); err != nil {
