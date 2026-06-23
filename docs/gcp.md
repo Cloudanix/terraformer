@@ -123,6 +123,8 @@ List of supported GCP services:
 *   `kms`
     * `google_kms_crypto_key`
     * `google_kms_key_ring`
+*   `looker`
+    * `google_looker_instance`
 *   `logging`
     * `google_logging_metric`
 *   `memoryStore`
