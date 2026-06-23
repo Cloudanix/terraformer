@@ -217,6 +217,9 @@ List of supported GCP services:
 *   `networkConnectivity`
     * `google_network_connectivity_hub`
     * `google_network_connectivity_spoke`
+*   `networkSecurity`
+    * `google_network_security_server_tls_policy`
+    * `google_network_security_client_tls_policy`
 *   `networkServices`
     * `google_network_services_mesh`
     * `google_network_services_gateway`
