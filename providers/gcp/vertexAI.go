@@ -165,7 +165,41 @@ func (g *VertexAIGenerator) InitResources() error {
 	if err := vertexAIService.Projects.Locations.FeatureGroups.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListFeatureGroupsResponse) error {
 		for _, o := range p.FeatureGroups {
 			t := strings.Split(o.Name, "/")
-			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_feature_group"))
+			fgName := t[len(t)-1]
+			g.Resources = append(g.Resources, mk(fgName, "google_vertex_ai_feature_group"))
+			if ferr := vertexAIService.Projects.Locations.FeatureGroups.Features.List(o.Name).Pages(ctx, func(fp *aiplatform.GoogleCloudAiplatformV1ListFeaturesResponse) error {
+				for _, f := range fp.Features {
+					ft := strings.Split(f.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						f.Name, fgName+"_"+ft[len(ft)-1], "google_vertex_ai_feature_group_feature", g.ProviderName,
+						map[string]string{"name": ft[len(ft)-1], "feature_group": fgName, "region": loc, "project": proj},
+						vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+				}
+				return nil
+			}); ferr != nil {
+				log.Println(ferr)
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.Tensorboards.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListTensorboardsResponse) error {
+		for _, o := range p.Tensorboards {
+			t := strings.Split(o.Name, "/")
+			tbName := t[len(t)-1]
+			if xerr := vertexAIService.Projects.Locations.Tensorboards.Experiments.List(o.Name).Pages(ctx, func(xp *aiplatform.GoogleCloudAiplatformV1ListTensorboardExperimentsResponse) error {
+				for _, x := range xp.TensorboardExperiments {
+					xt := strings.Split(x.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						x.Name, tbName+"_"+xt[len(xt)-1], "google_vertex_ai_tensorboard_experiment", g.ProviderName,
+						map[string]string{"name": xt[len(xt)-1], "tensorboard": tbName, "region": loc, "project": proj},
+						vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+				}
+				return nil
+			}); xerr != nil {
+				log.Println(xerr)
+			}
 		}
 		return nil
 	}); err != nil {
