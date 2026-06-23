@@ -70,8 +70,26 @@ func (g *BigQueryConnectionGenerator) InitResources() error {
 		return err
 	}
 
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
 	connectionsList := bqConnService.Projects.Locations.Connections.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, connectionsList)
+		"projects/" + project + "/locations/" + location)
+	connRes := g.createResources(ctx, connectionsList)
+	g.Resources = connRes
+	for _, r := range connRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := bqConnService.Projects.Locations.Connections.GetIamPolicy(res, &bigqueryconnection.GetIamPolicyRequest{}).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_bigquery_connection_iam_member", g.ProviderName,
+						map[string]string{"connection_id": short, "role": b.Role, "member": m, "project": project, "location": location},
+						bigQueryConnectionAllowEmptyValues, bigQueryConnectionAdditionalFields))
+				}
+			}
+		}
+	}
 	return nil
 }
