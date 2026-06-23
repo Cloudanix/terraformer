@@ -189,6 +189,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["recaptchaEnterprise"] = &GCPFacade{service: &RecaptchaEnterpriseGenerator{}}
 	services["workbench"] = &GCPFacade{service: &WorkbenchGenerator{}}
 	services["developerConnect"] = &GCPFacade{service: &DeveloperConnectGenerator{}}
+	services["bigQueryConnection"] = &GCPFacade{service: &BigQueryConnectionGenerator{}}
 	return services
 }
 
