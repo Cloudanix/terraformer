@@ -213,6 +213,8 @@ List of supported GCP services:
     * `google_vmwareengine_private_cloud`
 *   `vpcAccess`
     * `google_vpc_access_connector`
+*   `workstations`
+    * `google_workstations_workstation_cluster`
 *   `workflows`
     * `google_workflows_workflow`
 *   `subnetworks`
