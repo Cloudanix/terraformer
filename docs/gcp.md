@@ -136,6 +136,7 @@ List of supported GCP services:
     * `google_dataproc_session_template`
 *   `dataplex`
     * `google_dataplex_lake`
+    * `google_dataplex_lake_iam_member`
     * `google_dataplex_zone`
     * `google_dataplex_task`
     * `google_dataplex_entry_group`

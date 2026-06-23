@@ -140,6 +140,18 @@ func (g *DataplexGenerator) InitResources() error {
 
 	// Walk each lake for its zones and tasks.
 	for _, lake := range lakeNames {
+		lakePath := "projects/" + project + "/locations/" + location + "/lakes/" + lake
+		if policy, perr := dataplexService.Projects.Locations.Lakes.GetIamPolicy(lakePath).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						lakePath+" "+b.Role+" "+m, lake+"_"+b.Role+"_"+m,
+						"google_dataplex_lake_iam_member", g.ProviderName,
+						map[string]string{"lake": lake, "role": b.Role, "member": m, "project": project, "location": location},
+						dataplexAllowEmptyValues, dataplexAdditionalFields))
+				}
+			}
+		}
 		tasksList := dataplexService.Projects.Locations.Lakes.Tasks.List(
 			"projects/" + project + "/locations/" + location + "/lakes/" + lake)
 		if err := tasksList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListTasksResponse) error {
