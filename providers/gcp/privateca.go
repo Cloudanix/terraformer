@@ -59,6 +59,17 @@ func (g *PrivatecaGenerator) InitResources() error {
 				privatecaAllowEmptyValues,
 				privatecaAdditionalFields,
 			))
+			if policy, perr := privatecaService.Projects.Locations.CaPools.GetIamPolicy(obj.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_privateca_ca_pool_iam_member", g.ProviderName,
+							map[string]string{"ca_pool": name, "role": b.Role, "member": m, "project": project, "location": location},
+							privatecaAllowEmptyValues, privatecaAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
