@@ -153,7 +153,23 @@ func (g *CloudRunGenerator) InitResources() error {
 	}
 
 	workerPoolsList := runService.Projects.Locations.WorkerPools.List(parent)
-	g.Resources = append(g.Resources, g.createWorkerPoolsResources(ctx, workerPoolsList)...)
+	workerPoolRes := g.createWorkerPoolsResources(ctx, workerPoolsList)
+	g.Resources = append(g.Resources, workerPoolRes...)
+	for _, r := range workerPoolRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := runService.Projects.Locations.WorkerPools.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_cloud_run_v2_worker_pool_iam_member", g.ProviderName,
+						map[string]string{"name": short, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+						cloudRunAllowEmptyValues, cloudRunAdditionalFields))
+				}
+			}
+		}
+	}
 	return nil
 }
 
