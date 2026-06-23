@@ -370,6 +370,7 @@ List of supported GCP services:
 *   `secretManager`
 *   `secureSourceManager`
     * `google_secure_source_manager_instance`
+    * `google_secure_source_manager_repository`
 *   `securityPosture`
     * `google_securityposture_posture` (requires GOOGLE_ORGANIZATION)
 *   `securityCenter`

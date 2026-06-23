@@ -70,8 +70,22 @@ func (g *SecureSourceManagerGenerator) InitResources() error {
 		return err
 	}
 
-	instancesList := ssmService.Projects.Locations.Instances.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, instancesList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	instancesList := ssmService.Projects.Locations.Instances.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, instancesList)...)
+
+	if err := ssmService.Projects.Locations.Repositories.List(parent).Pages(ctx, func(p *securesourcemanager.ListRepositoriesResponse) error {
+		for _, o := range p.Repositories {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_secure_source_manager_repository", g.ProviderName,
+				map[string]string{"repository_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				secureSourceManagerAllowEmptyValues, secureSourceManagerAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
