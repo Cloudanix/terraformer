@@ -219,4 +219,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionSecurityPolicies": basicGCPResource{
 		terraformName: "google_compute_region_security_policy",
 	},
+	"interconnects": basicGCPResource{
+		terraformName: "google_compute_interconnect",
+	},
 }
