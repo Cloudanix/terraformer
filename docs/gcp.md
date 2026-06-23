@@ -264,6 +264,8 @@ List of supported GCP services:
 *   `schedulerJobs`
     * `google_cloud_scheduler_job`
 *   `secretManager`
+*   `secureSourceManager`
+    * `google_secure_source_manager_instance`
 *   `securityCenter`
     * `google_scc_source` (requires GOOGLE_ORGANIZATION)
     * `google_secret_manager_secret`
