@@ -17,6 +17,7 @@ package gcp
 import (
 	"context"
 	"log"
+	"strings"
 
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dataproc/v1"
@@ -139,6 +140,34 @@ func (g DataprocGenerator) createWorkflowTemplateResources(ctx context.Context, 
 	return resources
 }
 
+// Run on batchesList and create for each TerraformResource
+func (g DataprocGenerator) createBatchResources(ctx context.Context, list *dataproc.ProjectsLocationsBatchesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	if err := list.Pages(ctx, func(page *dataproc.ListBatchesResponse) error {
+		for _, obj := range page.Batches {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_dataproc_batch",
+				g.ProviderName,
+				map[string]string{
+					"batch_id": name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": g.GetArgs()["region"].(compute.Region).Name,
+				},
+				dataprocAllowEmptyValues,
+				dataprocAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 // from each DataprocGenerator create 1 TerraformResource
 // Need DataprocGenerator name as ID for terraform resource
@@ -160,6 +189,9 @@ func (g *DataprocGenerator) InitResources() error {
 
 	wftList := dataprocService.Projects.Regions.WorkflowTemplates.List("projects/" + project + "/regions/" + region)
 	g.Resources = append(g.Resources, g.createWorkflowTemplateResources(ctx, wftList)...)
+
+	batchesList := dataprocService.Projects.Locations.Batches.List("projects/" + project + "/locations/" + region)
+	g.Resources = append(g.Resources, g.createBatchResources(ctx, batchesList)...)
 
 	// jobList := dataprocService.Projects.Regions.Jobs.List(g.GetArgs()["project"].(string), g.GetArgs()["region"])
 	// g.Resources = append(g.Resources, g.createJobResources(jobList, ctx)...)
