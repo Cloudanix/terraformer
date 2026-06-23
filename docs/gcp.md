@@ -112,6 +112,7 @@ List of supported GCP services:
     * `google_storage_bucket_iam_policy`
     * `google_storage_default_object_acl`
     * `google_storage_notification`
+    * `google_storage_hmac_key`
 *   `gke`
     * `google_container_cluster`
     * `google_container_node_pool`

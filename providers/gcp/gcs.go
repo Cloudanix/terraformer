@@ -181,6 +181,31 @@ func (g *GcsGenerator) createTransferJobsResources(ctx context.Context, storageT
 // Generate TerraformResources from GCP API,
 // from each bucket  create 1 TerraformResource
 // Need bucket name as ID for terraform resource
+func (g *GcsGenerator) createHmacKeysResources(ctx context.Context, gcsService *storage.Service) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	project := g.GetArgs()["project"].(string)
+	hmacKeysListCall := gcsService.Projects.HmacKeys.List(project)
+	if err := hmacKeysListCall.Pages(ctx, func(page *storage.HmacKeysMetadata) error {
+		for _, obj := range page.Items {
+			resources = append(resources, terraformutils.NewResource(
+				project+"/"+obj.AccessId,
+				obj.AccessId,
+				"google_storage_hmac_key",
+				g.ProviderName,
+				map[string]string{
+					"project": project,
+				},
+				[]string{""},
+				map[string]interface{}{},
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Print(err)
+	}
+	return resources
+}
+
 func (g *GcsGenerator) InitResources() error {
 	ctx := context.Background()
 	gcsService, err := storage.NewService(ctx)
@@ -189,6 +214,7 @@ func (g *GcsGenerator) InitResources() error {
 		return err
 	}
 	g.Resources = g.createBucketsResources(ctx, gcsService)
+	g.Resources = append(g.Resources, g.createHmacKeysResources(ctx, gcsService)...)
 
 	// TODO find bug with storageTransferService.TransferJobs.List().Pages
 	// storageTransferService, err := storagetransfer.NewService(ctx)
