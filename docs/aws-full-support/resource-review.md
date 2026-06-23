@@ -126,6 +126,38 @@ could now be added. Findings:
   `cloudcontrolapi_resource`, `redshiftdata_statement`,
   `snapshot_create_volume_permission`. See no-list-api.md.
 
+## SDK-module enumeration (definitive frontier check)
+
+Listed every `aws-sdk-go-v2/service/*` module present in the module cache and
+subtracted the ones terraformer imports: **223 of 231 cached modules are used.**
+The 8 unimported cached modules are all non-importable, confirming no addable
+service remains in the vendored/cached SDK set:
+
+| Uncovered cached SDK | Why not addable |
+|---|---|
+| `deadline`, `iotanalytics`, `iotwireless` | no `terraform-provider-aws` resource (provider bound) / AWS-deprecated |
+| `resourcegroupstaggingapi` | data-plane tagging API, no infra |
+| `signin`, `sso`, `ssooidc` | auth/SSO data-plane, no infra |
+| `ebs` (EBS direct/data-plane API) | the `aws_ebs_*` account-setting singletons (default_kms_key, encryption_by_default, snapshot_block_public_access) are already built via the **ec2** SDK; the remaining `aws_ebs_*` are data-plane copy/import/fast-restore actions |
+
+**Conclusion:** against the pinned provider floor (terraform-provider-aws 5.80.0)
+and the available SDK modules, every addable service IS added. The buildable
+service + resource frontier is exhausted modulo the documented exclusions.
+
+## Going further requires a provider-floor bump (separate decision)
+
+The only remaining way to add *more* services is to raise the
+terraform-provider-aws floor above 5.80.0 and regenerate the §3 gap list — newer
+provider versions (5.9x / 6.x) introduce services such as `notifications`,
+`notificationscontacts`, `socialmessaging`, `odb`, `mpa`, `evs`, `billing`,
+`invoicing`, `bedrock-agentcore`. Each would also need its `aws-sdk-go-v2/service/<x>`
+module fetched. That bump changes the supported-version contract (plan §3 pins
+the floor deliberately) and needs the provider schema regenerated via the plugin
+(blocked in this sandbox — `terraform providers schema` requires the go-plugin
+unix-socket bind). Recommend doing it as an explicit, separate change: bump the
+floor, run `gen-gap-list.sh` in a normal environment, then add the new services
+with the §5 recipe.
+
 ## Result
 
 `missing-resources.txt` = **184**, every entry mapped to one of the verdicts
