@@ -79,8 +79,8 @@ services + multi-resource sub-resource expansions.
 
 Behavior-preserving SDK swaps (same resource types + ARM import IDs), validated
 by build/vet/test (live no-diff `terraform plan` round-trip not available in the
-offline sandbox). **17 of 35 migrated** — the entire armnetwork networking
-cluster + compute are done:
+offline sandbox). **24 of 35 migrated** — networking + compute + dns + several
+single-resource services done:
 - compute/network: disk, public_ip (+prefix), ssh_public_key, network_interface,
   route_table (+route/route_filter), network_security_group (+rule),
   virtual_network, subnet (+associations), private_endpoint (+link_service),
@@ -90,11 +90,16 @@ cluster + compute are done:
 - other: resource_group (armresources), management_lock (armlocks),
   app_service (armappservice, also modernized)
 
-**Remaining 18 files (each needs its own armXxx module fetch):** dns, private_dns,
-storage_account, storage_blob, storage_container, database, cosmosdb, eventhub,
-keyvault, redis, container, data_factory (largest, ~40 types), synapse, analysis,
-databricks, purview, security_center_contact, security_center_subscription_pricing.
-Several already have Track 2 gap-additions; only their core list stays Track 1.
+Also migrated: dns, private_dns, keyvault, analysis, databricks, purview, redis.
+
+**Remaining 11 files (heavy tail; each needs its own armXxx module):**
+storage_account/blob/container (armstorage), database (multi-engine
+armmysql/armpostgresql/armsql/armmariadb + flexible gaps), cosmosdb (armcosmos —
+has mongo/cassandra/gremlin gaps to convert), eventhub (armeventhub — has
+auth_rule/DR gaps), container (armcontainerinstance + armcontainerregistry — has
+registry gaps), data_factory (armdatafactory, ~40 resource types — largest),
+synapse (armsynapse — multiple resources), security_center_contact +
+security_center_subscription_pricing (armsecurity v0.15 preview).
 Done when `grep -rl "azure-sdk-for-go/services" providers/azure` is empty; then
 drop Track 1 + go-autorest/hamilton from go.mod.
 
