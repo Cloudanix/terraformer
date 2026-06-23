@@ -107,7 +107,24 @@ func (g *VertexAIGenerator) InitResources() error {
 	g.Resources = append(g.Resources, g.createDatasetsResources(ctx, datasetsList)...)
 
 	fosList := vertexAIService.Projects.Locations.FeatureOnlineStores.List(parent)
-	g.Resources = append(g.Resources, g.createFeatureOnlineStoresResources(ctx, fosList)...)
+	fosResources := g.createFeatureOnlineStoresResources(ctx, fosList)
+	g.Resources = append(g.Resources, fosResources...)
+	for _, r := range fosResources {
+		fosFull := r.InstanceState.ID
+		fosName := strings.Split(fosFull, "/")[len(strings.Split(fosFull, "/"))-1]
+		if verr := vertexAIService.Projects.Locations.FeatureOnlineStores.FeatureViews.List(fosFull).Pages(ctx, func(vp *aiplatform.GoogleCloudAiplatformV1ListFeatureViewsResponse) error {
+			for _, fv := range vp.FeatureViews {
+				vt := strings.Split(fv.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					fv.Name, fosName+"_"+vt[len(vt)-1], "google_vertex_ai_feature_online_store_featureview", g.ProviderName,
+					map[string]string{"name": vt[len(vt)-1], "feature_online_store": fosName, "region": g.GetArgs()["region"].(compute.Region).Name, "project": g.GetArgs()["project"].(string)},
+					vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+			}
+			return nil
+		}); verr != nil {
+			log.Println(verr)
+		}
+	}
 
 	loc := g.GetArgs()["region"].(compute.Region).Name
 	proj := g.GetArgs()["project"].(string)
