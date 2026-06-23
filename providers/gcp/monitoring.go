@@ -17,6 +17,7 @@ package gcp
 import (
 	"context"
 	"log"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
@@ -201,5 +202,39 @@ func (g *MonitoringGenerator) InitResources() error {
 		return err
 	}
 
+	g.loadServices(ctx, project)
 	return nil
+}
+
+func (g *MonitoringGenerator) loadServices(ctx context.Context, project string) {
+	client, err := monitoring.NewServiceMonitoringClient(ctx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	it := client.ListServices(ctx, &monitoringpb.ListServicesRequest{Parent: "projects/" + project})
+	for {
+		svc, err := it.Next()
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			log.Println("error with monitoring service:", err)
+			break
+		}
+		t := strings.Split(svc.Name, "/")
+		name := t[len(t)-1]
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			svc.Name,
+			name,
+			"google_monitoring_service",
+			g.ProviderName,
+			map[string]string{
+				"service_id": name,
+				"project":    project,
+			},
+			monitoringAllowEmptyValues,
+			monitoringAdditionalFields,
+		))
+	}
 }
