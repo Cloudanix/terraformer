@@ -738,7 +738,6 @@ google_monitoring_custom_service
 google_monitoring_dashboard
 google_monitoring_metric_descriptor
 google_monitoring_monitored_project
-google_monitoring_service
 google_monitoring_slo
 google_netapp_active_directory
 google_netapp_backup
