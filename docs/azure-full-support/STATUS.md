@@ -6,8 +6,8 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **222** types (+81). Phase 1 mgmt-plane complete; Phase 2 incl. policy; ~45 new Phase 2/3 services. azuread (P4) + Track-1 migration (P5) not started.
-  branching gaps deferred (see Phase 1 below). ~50 new Track 2 services added.
+- Current: **222** types (+81). Phase 1 mgmt-plane complete; Phase 2 incl. policy;
+  ~45 new Phase 2/3 Track 2 services. azuread (P4) + Track-1 migration (P5) not started.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
 
 ## Phase 0 — foundations (DONE)
@@ -42,16 +42,18 @@ enumerations added to the existing generators):
   containerregistry API version than the one the file imports).
 These are real follow-ups, not silent omissions; revisit per `no-list-api.md`.
 
-## Phase 2 — P1 new services (in progress)
+## Phase 2 — P1 new services (largely done)
 
 Done: `nat_gateway`, `kubernetes` (cluster + node_pool, User-mode filter tested),
 `managed_identity`, `log_analytics`, `application_insights`, `traffic_manager`,
 `firewall`, `virtual_wan` (wan + hub), `monitor` (action_group, activity_log_alert,
 autoscale_setting, metric_alert), `cdn` (profile + endpoint), `role_assignment`
-(subscription-scoped).
+(subscription-scoped), `policy` (definition/set_definition Custom-filtered +
+assignment, subscription-scoped, isCustomPolicy unit-tested).
 
-Not yet: `policy`, `function_app`, `automation` runbooks/schedules (account done),
-role_definition (composite import ID + built-in filtering).
+Not yet: `function_app` (kind-branching, see Phase 1 deferred), `automation`
+runbooks/schedules (account done), role_definition (composite import ID +
+built-in filtering).
 
 ## Phase 3 — P2/P3 (largely done)
 
@@ -61,11 +63,11 @@ stream_analytics, machine_learning, container_app, netapp, mssql, powerbi,
 digital_twins, relay, web_pubsub, notification_hub, batch, dashboard (grafana),
 maps, private_dns_resolver, spring_cloud, data_share, healthcare, load_test,
 elastic_san, communication, dev_center, chaos_studio, confidential_ledger,
-fluid_relay.
+fluid_relay, data_protection, attestation.
 
 Not yet: sentinel, lighthouse, hdinsight (per-kind), spatial_anchors, orbital,
-automanage, workloads (SAP), vmware (AVS), data_protection, and the remaining
-long-tail single-resource services + multi-resource sub-resource expansions.
+automanage, workloads (SAP), vmware (AVS), and the remaining long-tail
+single-resource services + multi-resource sub-resource expansions.
 
 ## Phase 4 — azuread (not started)
 
