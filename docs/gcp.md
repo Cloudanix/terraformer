@@ -33,6 +33,8 @@ List of supported GCP services:
     * `google_access_context_manager_access_policy` (requires GOOGLE_ORGANIZATION)
 *   `apiGateway`
     * `google_api_gateway_api` (beta-only; use --provider-type beta)
+*   `alloydb`
+    * `google_alloydb_cluster`
 *   `apphub`
     * `google_apphub_application`
 *   `artifactRegistry`
