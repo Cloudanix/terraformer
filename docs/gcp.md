@@ -239,6 +239,7 @@ List of supported GCP services:
     * `google_network_connectivity_hub`
     * `google_network_connectivity_spoke`
     * `google_network_connectivity_service_connection_policy`
+    * `google_network_connectivity_internal_range`
 *   `networkSecurity`
     * `google_network_security_server_tls_policy`
     * `google_network_security_client_tls_policy`

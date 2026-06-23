@@ -78,6 +78,22 @@ func (g *NetworkConnectivityGenerator) InitResources() error {
 
 	scpList := networkConnectivityService.Projects.Locations.ServiceConnectionPolicies.List(regionalParent)
 	g.Resources = append(g.Resources, g.createSCPResources(ctx, scpList)...)
+
+	irList := networkConnectivityService.Projects.Locations.InternalRanges.List("projects/" + g.GetArgs()["project"].(string) + "/locations/global")
+	if err := irList.Pages(ctx, func(page *networkconnectivity.ListInternalRangesResponse) error {
+		for _, obj := range page.InternalRanges {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_network_connectivity_internal_range", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string)},
+				networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
