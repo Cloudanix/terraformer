@@ -76,6 +76,21 @@ func (g *EcrGenerator) InitResources() error {
 		}
 	}
 
+	for tp := ecr.NewDescribeRepositoryCreationTemplatesPaginator(svc, &ecr.DescribeRepositoryCreationTemplatesInput{}); tp.HasMorePages(); {
+		page, err := tp.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, tmpl := range page.RepositoryCreationTemplates {
+			prefix := StringValue(tmpl.Prefix)
+			if prefix == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				prefix, prefix, "aws_ecr_repository_creation_template", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	rules := ecr.NewDescribePullThroughCacheRulesPaginator(svc, &ecr.DescribePullThroughCacheRulesInput{})
 	for rules.HasMorePages() {
 		page, err := rules.NextPage(context.TODO())

@@ -101,6 +101,39 @@ func (g *EksGenerator) getClusterChildren(clusterName string, svc *eks.Client) e
 		}
 	}
 
+	for ae := eks.NewListAccessEntriesPaginator(svc, &eks.ListAccessEntriesInput{ClusterName: &clusterName}); ae.HasMorePages(); {
+		page, err := ae.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, principalArn := range page.AccessEntries {
+			if principalArn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				fmt.Sprintf("%s:%s", clusterName, principalArn),
+				fmt.Sprintf("%s_%s", clusterName, principalArn),
+				"aws_eks_access_entry", "aws", eksAllowEmptyValues))
+			principal := principalArn
+			for ap := eks.NewListAssociatedAccessPoliciesPaginator(svc, &eks.ListAssociatedAccessPoliciesInput{ClusterName: &clusterName, PrincipalArn: &principal}); ap.HasMorePages(); {
+				apage, err := ap.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, pol := range apage.AssociatedAccessPolicies {
+					policyArn := StringValue(pol.PolicyArn)
+					if policyArn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						fmt.Sprintf("%s#%s#%s", clusterName, principal, policyArn),
+						fmt.Sprintf("%s_%s", clusterName, policyArn),
+						"aws_eks_access_policy_association", "aws", eksAllowEmptyValues))
+				}
+			}
+		}
+	}
+
 	podIdentities := eks.NewListPodIdentityAssociationsPaginator(svc, &eks.ListPodIdentityAssociationsInput{ClusterName: &clusterName})
 	for podIdentities.HasMorePages() {
 		page, err := podIdentities.NextPage(ctx)

@@ -86,6 +86,14 @@ func (g *IamGenerator) InitResources() error {
 func (g *IamGenerator) getAccountResources(svc *iam.Client) {
 	ctx := context.TODO()
 
+	if feats, err := svc.ListOrganizationsFeatures(ctx, &iam.ListOrganizationsFeaturesInput{}); err == nil && len(feats.EnabledFeatures) > 0 {
+		orgID := StringValue(feats.OrganizationId)
+		if orgID != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				orgID, orgID, "aws_iam_organizations_features", "aws", IamAllowEmptyValues))
+		}
+	}
+
 	aliases := iam.NewListAccountAliasesPaginator(svc, &iam.ListAccountAliasesInput{})
 	for aliases.HasMorePages() {
 		page, err := aliases.NextPage(ctx)

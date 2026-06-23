@@ -556,6 +556,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ecr_replication_configuration`
     * `aws_ecr_registry_policy`
     * `aws_ecr_repository_policy`
+    * `aws_ecr_repository_creation_template`
 *   `ecrpublic`
     * `aws_ecrpublic_repository`
     * `aws_ecrpublic_repository_policy`
@@ -585,6 +586,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_eks_fargate_profile`
     * `aws_eks_identity_provider_config`
     * `aws_eks_pod_identity_association`
+    * `aws_eks_access_entry`
+    * `aws_eks_access_policy_association`
 *   `elasticache`
     * `aws_elasticache_cluster`
     * `aws_elasticache_parameter_group`
@@ -734,6 +737,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `iam`
     * `aws_iam_access_key`
     * `aws_iam_account_alias`
+    * `aws_iam_organizations_features`
     * `aws_iam_account_password_policy`
     * `aws_iam_group`
     * `aws_iam_group_policy`
@@ -873,6 +877,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lambda_function`
     * `aws_lambda_function_event_invoke_config`
     * `aws_lambda_function_url`
+    * `aws_lambda_function_recursion_config`
     * `aws_lambda_layer_version`
     * `aws_lambda_layer_version_permission`
     * `aws_lambda_permission`

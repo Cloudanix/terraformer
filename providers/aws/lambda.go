@@ -108,6 +108,14 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 				map[string]interface{}{},
 			))
 
+			if rc, err := svc.GetFunctionRecursionConfig(context.TODO(), &lambda.GetFunctionRecursionConfigInput{
+				FunctionName: function.FunctionName,
+			}); err == nil && rc.RecursiveLoop != "" && rc.RecursiveLoop != "Terminate" {
+				name := StringValue(function.FunctionName)
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name, name, "aws_lambda_function_recursion_config", "aws", lambdaAllowEmptyValues))
+			}
+
 			gp, err := svc.GetPolicy(context.TODO(), &lambda.GetPolicyInput{
 				FunctionName: aws.String(*function.FunctionArn),
 			})
