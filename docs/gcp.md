@@ -140,6 +140,7 @@ List of supported GCP services:
     * `google_project_iam_member`
     * `google_service_account`
     * `google_iam_workload_identity_pool`
+    * `google_iam_workload_identity_pool_provider`
 *   `images`
     * `google_compute_image`
 *   `instanceGroupManagers`
