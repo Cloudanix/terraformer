@@ -70,7 +70,7 @@ func (g VPCGenerator) createResources(vpcList []*godo.VPC) []terraformutils.Reso
 
 func (g *VPCGenerator) InitResources() error {
 	client := g.generateClient()
-	output, err := g.listVPCs(context.TODO(), client)
+	output, err := g.listVPCs(runContext(), client)
 	if err != nil {
 		return err
 	}

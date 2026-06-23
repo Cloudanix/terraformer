@@ -70,7 +70,7 @@ func (g VolumeSnapshotGenerator) createResources(snapshotList []godo.Snapshot) [
 
 func (g *VolumeSnapshotGenerator) InitResources() error {
 	client := g.generateClient()
-	output, err := g.listVolumeSnapshots(context.TODO(), client)
+	output, err := g.listVolumeSnapshots(runContext(), client)
 	if err != nil {
 		return err
 	}

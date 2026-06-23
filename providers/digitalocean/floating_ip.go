@@ -70,7 +70,7 @@ func (g FloatingIPGenerator) createResources(floatingIPList []godo.FloatingIP) [
 
 func (g *FloatingIPGenerator) InitResources() error {
 	client := g.generateClient()
-	output, err := g.listFloatingIPs(context.TODO(), client)
+	output, err := g.listFloatingIPs(runContext(), client)
 	if err != nil {
 		return err
 	}
