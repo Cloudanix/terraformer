@@ -78,6 +78,13 @@ Exit: every list-able `google_compute_*` in the diff has a `resources.go` entry;
 
 Exit: each touched service emits its full GA+beta listable resource set; `missing-resources.txt` shrinks per PR.
 
+> **Pre-existing debt surfaced by the SDK bump (do here):** `monitoring.go` +
+> `iam.go` use deprecated genproto types (`google.golang.org/genproto/googleapis/{monitoring/v3,iam/admin/v1}`,
+> staticcheck SA1019). Fixing = migrating the GAPIC client v1→v2
+> (`cloud.google.com/go/monitoring/apiv3` → `apiv3/v2`, matching `monitoringpb`/`adminpb`).
+> Not done in the bump commit (client+pb move together, needs round-trip
+> validation). Address when expanding monitoring/iam.
+
 ---
 
 ## Phase 5 — P1 new services (§4c) (1 PR each)
