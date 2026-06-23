@@ -18,9 +18,11 @@ import (
 	"context"
 	"log"
 	"regexp"
+	"strings"
 
 	admin "cloud.google.com/go/iam/admin/apiv1"
 	"google.golang.org/api/cloudresourcemanager/v1"
+	iamv1 "google.golang.org/api/iam/v1"
 	"google.golang.org/api/iterator"
 	adminpb "google.golang.org/genproto/googleapis/iam/admin/v1"
 
@@ -111,6 +113,38 @@ func (g *IamGenerator) createIamMemberResources(policy *cloudresourcemanager.Pol
 	return resources
 }
 
+func (g *IamGenerator) createWorkloadIdentityPoolResources(ctx context.Context, project string) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	iamService, err := iamv1.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return resources
+	}
+	poolsList := iamService.Projects.Locations.WorkloadIdentityPools.List("projects/" + project + "/locations/global")
+	if err := poolsList.Pages(ctx, func(page *iamv1.ListWorkloadIdentityPoolsResponse) error {
+		for _, pool := range page.WorkloadIdentityPools {
+			tm := strings.Split(pool.Name, "/")
+			id := tm[len(tm)-1]
+			resources = append(resources, terraformutils.NewResource(
+				pool.Name,
+				id,
+				"google_iam_workload_identity_pool",
+				g.ProviderName,
+				map[string]string{
+					"workload_identity_pool_id": id,
+					"project":                   project,
+				},
+				IamAllowEmptyValues,
+				IamAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 func (g *IamGenerator) InitResources() error {
 	ctx := context.Background()
 
@@ -138,5 +172,6 @@ func (g *IamGenerator) InitResources() error {
 	g.Resources = g.createServiceAccountResources(serviceAccountsIterator)
 	g.Resources = append(g.Resources, g.createIamCustomRoleResources(rolesResponse, projectID)...)
 	g.Resources = append(g.Resources, g.createIamMemberResources(policyResponse, projectID)...)
+	g.Resources = append(g.Resources, g.createWorkloadIdentityPoolResources(ctx, projectID)...)
 	return nil
 }
