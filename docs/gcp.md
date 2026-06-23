@@ -166,6 +166,8 @@ List of supported GCP services:
     * `google_compute_instance_template`
 *   `instances`
     * `google_compute_instance`
+*   `integrationConnectors`
+    * `google_integration_connectors_connection`
 *   `interconnectAttachments`
     * `google_compute_interconnect_attachment`
 *   `kms`
