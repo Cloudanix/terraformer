@@ -56,6 +56,8 @@ List of supported GCP services:
 *   `cloudsql`
     * `google_sql_database`
     * `google_sql_database_instance`
+*   `datacatalog`
+    * `google_data_catalog_entry_group`
 *   `dataProc`
     * `google_dataproc_cluster`
 *   `dataplex`
