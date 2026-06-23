@@ -194,6 +194,8 @@ List of supported GCP services:
 *   `packetMirrorings`
     * `google_compute_packet_mirroring`
 *   `oracleDatabase`
+*   `orgPolicy`
+    * `google_org_policy_policy`
     * `google_oracle_database_cloud_exadata_infrastructure`
 *   `parallelstore`
     * `google_parallelstore_instance`

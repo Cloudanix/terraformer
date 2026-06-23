@@ -168,6 +168,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["tags"] = &GCPFacade{service: &TagsGenerator{}}
 	services["dlp"] = &GCPFacade{service: &DlpGenerator{}}
 	services["discoveryEngine"] = &GCPFacade{service: &DiscoveryEngineGenerator{}}
+	services["orgPolicy"] = &GCPFacade{service: &OrgPolicyGenerator{}}
 	return services
 }
 
