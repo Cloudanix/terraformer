@@ -11,6 +11,31 @@ Operationalizes `plan.md` §8 with the four scope decisions locked (2026-06-23):
 
 One service = one PR. Re-run §3 diff after every PR; backlog shrinks monotonically.
 
+## Session status (2026-06-23)
+
+Done & committed (build + vet + gofmt clean; one resource/service per commit):
+- **Phase 0** ✓ codegen path fix + `make gcp-codegen`.
+- **Phase 1** ✓ SDK bump `google.golang.org/api v0.214→v0.286`, floor pinned 7.37.0, compute regen zero-churn.
+- **Phase 2** ✓ authoritative backlog (1277 GA / 1411 beta; gap 1177→1150).
+- **Phase 3** ✓ 28 compute resources via codegen (§4a + authoritative remainder).
+- **Phase 5 P1** ✓ 12 new services: secretManager, artifactRegistry, spanner,
+  bigtable, cloudRun, filestore, workflows, eventarc, vpcAccess, composer,
+  notebooks, certificateManager. Plus pubsub→schema (Phase 4b).
+
+Coverage 88 → 129 emitted `google_*` types.
+
+> **Validation caveat:** all of the above is **compile-validated only**
+> (`go build`/`vet`/`gofmt` + codegen determinism). The plan's correctness bar
+> (§9) — `terraform plan` refresh round-trip — needs network + a live project and
+> was NOT run (sandbox blocks it). Import IDs follow provider-doc conventions but
+> are unverified at refresh. **Run the integration round-trip per service before
+> relying on it.**
+
+Remaining (not started): P1 leftovers (serviceNetworking — needs network param;
+dataflow — data-plane; apigee — org-scoped/large), all of P2/P3/P4 (~30 services),
+and the Phase 4a IAM-all parent-walk workstream (deferred — import-ID correctness
+needs the refresh round-trip).
+
 ---
 
 ## Phase 0 — Foundations (1 PR)
