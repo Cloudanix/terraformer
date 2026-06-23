@@ -182,7 +182,23 @@ func (g *DataprocGenerator) InitResources() error {
 	region := g.GetArgs()["region"].(compute.Region).Name
 
 	clusterList := dataprocService.Projects.Regions.Clusters.List(project, region)
-	g.Resources = g.createClusterResources(ctx, clusterList)
+	clusterResources := g.createClusterResources(ctx, clusterList)
+	g.Resources = clusterResources
+	for _, r := range clusterResources {
+		cluster := r.InstanceState.ID
+		clusterPath := "projects/" + project + "/regions/" + region + "/clusters/" + cluster
+		if policy, perr := dataprocService.Projects.Regions.Clusters.GetIamPolicy(clusterPath, &dataproc.GetIamPolicyRequest{}).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						clusterPath+" "+b.Role+" "+m, cluster+"_"+b.Role+"_"+m,
+						"google_dataproc_cluster_iam_member", g.ProviderName,
+						map[string]string{"cluster": cluster, "role": b.Role, "member": m, "project": project, "region": region},
+						dataprocAllowEmptyValues, dataprocAdditionalFields))
+				}
+			}
+		}
+	}
 
 	policyList := dataprocService.Projects.Regions.AutoscalingPolicies.List("projects/" + project + "/regions/" + region)
 	g.Resources = append(g.Resources, g.createAutoscalingPolicyResources(ctx, policyList)...)
