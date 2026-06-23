@@ -268,6 +268,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/devcenter/armdevcenter v1.
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/devcenter/armdevcenter v1.1.0/go.mod h1:qJLxBR7/70APdLiiTQnUiQo2GoeUXwKkvydPM5SCFYY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/digitaltwins/armdigitaltwins v1.2.0 h1:GD96b78rv9jhShcYcJauisgqyXBFgEaTAvUMaPiFl9w=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/digitaltwins/armdigitaltwins v1.2.0/go.mod h1:ESqbgba0Fl1eop2bwoJ84Vmh+d093eDrYK2TdR9bKEM=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dns/armdns v1.2.0 h1:lpOxwrQ919lCZoNCd69rVt8u1eLZuMORrGXqy8sNf3c=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dns/armdns v1.2.0/go.mod h1:fSvRkb8d26z9dbL40Uf/OO6Vo9iExtZK3D0ulRV+8M0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dnsresolver/armdnsresolver v1.3.0 h1:oFR4sUr/00//HiGZNO4Y0b/yZn4GxMmBPng4GdErJiY=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dnsresolver/armdnsresolver v1.3.0/go.mod h1:Rwggm+UIAtUyKV+chyaPaUeiVeP7Y+XtXH7/BSI2J8A=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dynatrace/armdynatrace v1.1.0 h1:67EhVXXug4N65IQL0MS5iRiUyItcczoYEoTovRpOfV0=
