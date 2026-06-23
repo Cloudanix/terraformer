@@ -213,4 +213,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"networkFirewallPolicies": basicGCPResource{
 		terraformName: "google_compute_network_firewall_policy",
 	},
+	"regionNetworkFirewallPolicies": basicGCPResource{
+		terraformName: "google_compute_region_network_firewall_policy",
+	},
 }
