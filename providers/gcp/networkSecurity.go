@@ -175,6 +175,19 @@ func (g *NetworkSecurityGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	if err := nsService.Projects.Locations.FirewallEndpointAssociations.List(parent).Pages(ctx, func(p *networksecurity.ListFirewallEndpointAssociationsResponse) error {
+		for _, o := range p.FirewallEndpointAssociations {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_firewall_endpoint_association", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	if err := nsService.Projects.Locations.GatewaySecurityPolicies.List(parent).Pages(ctx, func(p *networksecurity.ListGatewaySecurityPoliciesResponse) error {
 		for _, o := range p.GatewaySecurityPolicies {
 			t := strings.Split(o.Name, "/")
