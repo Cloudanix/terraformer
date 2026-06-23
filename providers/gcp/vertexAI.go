@@ -121,7 +121,33 @@ func (g *VertexAIGenerator) InitResources() error {
 	if err := vertexAIService.Projects.Locations.Featurestores.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListFeaturestoresResponse) error {
 		for _, o := range p.Featurestores {
 			t := strings.Split(o.Name, "/")
-			g.Resources = append(g.Resources, mk(t[len(t)-1], "google_vertex_ai_featurestore"))
+			fsName := t[len(t)-1]
+			g.Resources = append(g.Resources, mk(fsName, "google_vertex_ai_featurestore"))
+			if eerr := vertexAIService.Projects.Locations.Featurestores.EntityTypes.List(o.Name).Pages(ctx, func(ep *aiplatform.GoogleCloudAiplatformV1ListEntityTypesResponse) error {
+				for _, et := range ep.EntityTypes {
+					ett := strings.Split(et.Name, "/")
+					etName := ett[len(ett)-1]
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						et.Name, fsName+"_"+etName, "google_vertex_ai_featurestore_entitytype", g.ProviderName,
+						map[string]string{"name": etName, "featurestore": o.Name, "region": loc, "project": proj},
+						vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+					if ferr := vertexAIService.Projects.Locations.Featurestores.EntityTypes.Features.List(et.Name).Pages(ctx, func(fp *aiplatform.GoogleCloudAiplatformV1ListFeaturesResponse) error {
+						for _, f := range fp.Features {
+							ft := strings.Split(f.Name, "/")
+							g.Resources = append(g.Resources, terraformutils.NewResource(
+								f.Name, etName+"_"+ft[len(ft)-1], "google_vertex_ai_featurestore_entitytype_feature", g.ProviderName,
+								map[string]string{"name": ft[len(ft)-1], "entitytype": et.Name, "region": loc, "project": proj},
+								vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+						}
+						return nil
+					}); ferr != nil {
+						log.Println(ferr)
+					}
+				}
+				return nil
+			}); eerr != nil {
+				log.Println(eerr)
+			}
 		}
 		return nil
 	}); err != nil {
