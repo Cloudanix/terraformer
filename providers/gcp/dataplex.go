@@ -33,24 +33,29 @@ type DataplexGenerator struct {
 	GCPService
 }
 
-// Run on lakesList and create for each TerraformResource
-func (g DataplexGenerator) createResources(ctx context.Context, lakesList *dataplex.ProjectsLocationsLakesListCall) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
+// Generate TerraformResources from GCP API,
+func (g *DataplexGenerator) InitResources() error {
+	ctx := context.Background()
+	dataplexService, err := dataplex.NewService(ctx)
+	if err != nil {
+		return err
+	}
+	project := g.GetArgs()["project"].(string)
 	location := g.GetArgs()["region"].(compute.Region).Name
+
+	lakeNames := []string{}
+	lakesList := dataplexService.Projects.Locations.Lakes.List("projects/" + project + "/locations/" + location)
 	if err := lakesList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListLakesResponse) error {
 		for _, obj := range page.Lakes {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
-			resources = append(resources, terraformutils.NewResource(
+			lakeNames = append(lakeNames, name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name,
 				name,
 				"google_dataplex_lake",
 				g.ProviderName,
-				map[string]string{
-					"name":     name,
-					"project":  g.GetArgs()["project"].(string),
-					"location": location,
-				},
+				map[string]string{"name": name, "project": project, "location": location},
 				dataplexAllowEmptyValues,
 				dataplexAdditionalFields,
 			))
@@ -59,19 +64,34 @@ func (g DataplexGenerator) createResources(ctx context.Context, lakesList *datap
 	}); err != nil {
 		log.Println(err)
 	}
-	return resources
-}
 
-// Generate TerraformResources from GCP API,
-func (g *DataplexGenerator) InitResources() error {
-	ctx := context.Background()
-	dataplexService, err := dataplex.NewService(ctx)
-	if err != nil {
-		return err
+	// Walk each lake for its zones.
+	for _, lake := range lakeNames {
+		zonesList := dataplexService.Projects.Locations.Lakes.Zones.List(
+			"projects/" + project + "/locations/" + location + "/lakes/" + lake)
+		if err := zonesList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListZonesResponse) error {
+			for _, obj := range page.Zones {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name,
+					name,
+					"google_dataplex_zone",
+					g.ProviderName,
+					map[string]string{
+						"name":     name,
+						"lake":     lake,
+						"project":  project,
+						"location": location,
+					},
+					dataplexAllowEmptyValues,
+					dataplexAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
-
-	lakesList := dataplexService.Projects.Locations.Lakes.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, lakesList)
 	return nil
 }
