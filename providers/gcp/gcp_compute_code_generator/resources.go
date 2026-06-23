@@ -240,4 +240,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"targetGrpcProxies": basicGCPResource{
 		terraformName: "google_compute_target_grpc_proxy",
 	},
+	"regionTargetTcpProxies": basicGCPResource{
+		terraformName: "google_compute_region_target_tcp_proxy",
+	},
 }
