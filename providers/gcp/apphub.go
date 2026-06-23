@@ -70,8 +70,22 @@ func (g *ApphubGenerator) InitResources() error {
 		return err
 	}
 
-	applicationsList := apphubService.Projects.Locations.Applications.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, applicationsList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	applicationsList := apphubService.Projects.Locations.Applications.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, applicationsList)...)
+
+	if err := apphubService.Projects.Locations.ServiceProjectAttachments.List(parent).Pages(ctx, func(p *apphub.ListServiceProjectAttachmentsResponse) error {
+		for _, o := range p.ServiceProjectAttachments {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_apphub_service_project_attachment", g.ProviderName,
+				map[string]string{"service_project_attachment_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				apphubAllowEmptyValues, apphubAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

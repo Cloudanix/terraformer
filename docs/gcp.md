@@ -41,6 +41,7 @@ List of supported GCP services:
     * `google_bigquery_analytics_hub_data_exchange`
 *   `apphub`
     * `google_apphub_application`
+    * `google_apphub_service_project_attachment`
 *   `artifactRegistry`
     * `google_artifact_registry_repository`
 *   `binaryAuthorization`
