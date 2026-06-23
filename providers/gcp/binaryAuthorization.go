@@ -67,7 +67,24 @@ func (g *BinaryAuthorizationGenerator) InitResources() error {
 		return err
 	}
 
-	attestorsList := binaryAuthorizationService.Projects.Attestors.List("projects/" + g.GetArgs()["project"].(string))
-	g.Resources = g.createResources(ctx, attestorsList)
+	project := g.GetArgs()["project"].(string)
+	attestorsList := binaryAuthorizationService.Projects.Attestors.List("projects/" + project)
+	attestorRes := g.createResources(ctx, attestorsList)
+	g.Resources = attestorRes
+	for _, r := range attestorRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := binaryAuthorizationService.Projects.Attestors.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_binary_authorization_attestor_iam_member", g.ProviderName,
+						map[string]string{"attestor": short, "role": b.Role, "member": m, "project": project},
+						binaryAuthorizationAllowEmptyValues, binaryAuthorizationAdditionalFields))
+				}
+			}
+		}
+	}
 	return nil
 }
