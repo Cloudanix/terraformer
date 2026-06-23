@@ -50,6 +50,18 @@ func (g CloudDNSGenerator) createZonesResources(ctx context.Context, svc *dns.Se
 				cloudDNSAllowEmptyValues,
 				cloudDNSAdditionalFields,
 			))
+			zonePath := "projects/" + project + "/managedZones/" + zone.Name
+			if policy, perr := svc.ManagedZones.GetIamPolicy(zonePath, &dns.GoogleIamV1GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							zonePath+" "+b.Role+" "+m, zone.Name+"_"+b.Role+"_"+m,
+							"google_dns_managed_zone_iam_member", g.ProviderName,
+							map[string]string{"managed_zone": zone.Name, "role": b.Role, "member": m, "project": project},
+							cloudDNSAllowEmptyValues, cloudDNSAdditionalFields))
+					}
+				}
+			}
 			records := g.createRecordsResources(ctx, svc, project, zone.Name)
 			resources = append(resources, records...)
 		}
