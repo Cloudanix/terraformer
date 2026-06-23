@@ -254,6 +254,7 @@ List of supported GCP services:
     * `google_compute_interconnect_attachment`
 *   `kms`
     * `google_kms_crypto_key`
+    * `google_kms_key_ring_iam_member`
     * `google_kms_crypto_key_version`
     * `google_kms_crypto_key_iam_member`
     * `google_kms_ekm_connection`
