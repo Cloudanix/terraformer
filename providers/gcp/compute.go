@@ -91,5 +91,6 @@ var ComputeServices = map[string]terraformutils.ServiceGenerator{
 	"targetTcpProxies":              &GCPFacade{service: &TargetTcpProxiesGenerator{}},
 	"targetVpnGateways":             &GCPFacade{service: &TargetVpnGatewaysGenerator{}},
 	"urlMaps":                       &GCPFacade{service: &UrlMapsGenerator{}},
+	"vpnGateways":                   &GCPFacade{service: &VpnGatewaysGenerator{}},
 	"vpnTunnels":                    &GCPFacade{service: &VpnTunnelsGenerator{}},
 }

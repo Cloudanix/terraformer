@@ -243,4 +243,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionTargetTcpProxies": basicGCPResource{
 		terraformName: "google_compute_region_target_tcp_proxy",
 	},
+	"vpnGateways": basicGCPResource{
+		terraformName: "google_compute_ha_vpn_gateway",
+	},
 }
