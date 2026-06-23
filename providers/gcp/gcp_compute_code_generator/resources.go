@@ -195,4 +195,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionNetworkEndpointGroups": basicGCPResource{
 		terraformName: "google_compute_region_network_endpoint_group",
 	},
+	"regionSslPolicies": basicGCPResource{
+		terraformName: "google_compute_region_ssl_policy",
+	},
 }
