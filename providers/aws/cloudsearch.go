@@ -46,6 +46,11 @@ func (g *CloudSearchGenerator) InitResources() error {
 		}
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			name, name, "aws_cloudsearch_domain", "aws", defaultAllowEmptyValues))
+		if pol, err := svc.DescribeServiceAccessPolicies(context.TODO(), &cloudsearch.DescribeServiceAccessPoliciesInput{DomainName: d.DomainName}); err == nil &&
+			pol.AccessPolicies != nil && StringValue(pol.AccessPolicies.Options) != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudsearch_domain_service_access_policy", "aws", defaultAllowEmptyValues))
+		}
 	}
 	return nil
 }

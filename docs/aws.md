@@ -94,6 +94,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cur_report_definition`
 *   `cloudsearch`
     * `aws_cloudsearch_domain`
+    * `aws_cloudsearch_domain_service_access_policy`
 *   `elastictranscoder`
     * `aws_elastictranscoder_pipeline`
 *   `evidently`
@@ -563,6 +564,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ecs_capacity_provider`
     * `aws_ecs_cluster_capacity_providers`
     * `aws_ecs_task_set`
+    * `aws_ecs_account_setting_default`
 *   `efs`
     * `aws_efs_access_point`
     * `aws_efs_file_system`
@@ -1075,6 +1077,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_organizations_policy`
     * `aws_organizations_policy_attachment`
     * `aws_organizations_delegated_administrator`
+    * `aws_organizations_resource_policy`
 *   `qldb`
     * `aws_qldb_ledger`
     * `aws_qldb_stream`

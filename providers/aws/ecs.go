@@ -37,6 +37,17 @@ func (g *EcsGenerator) InitResources() error {
 	}
 	svc := ecs.NewFromConfig(config)
 
+	if settings, err := svc.ListAccountSettings(context.TODO(), &ecs.ListAccountSettingsInput{}); err == nil {
+		for _, s := range settings.Settings {
+			name := string(s.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_ecs_account_setting_default", "aws", ecsAllowEmptyValues))
+		}
+	}
+
 	p := ecs.NewListClustersPaginator(svc, &ecs.ListClustersInput{})
 	for p.HasMorePages() {
 		page, e := p.NextPage(context.TODO())

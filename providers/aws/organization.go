@@ -165,5 +165,15 @@ func (g *OrganizationGenerator) InitResources() error {
 		}
 	}
 
+	// Org-wide resource policy (singleton; present only when one is attached).
+	if rp, err := svc.DescribeResourcePolicy(context.TODO(), &organizations.DescribeResourcePolicyInput{}); err == nil &&
+		rp.ResourcePolicy != nil && rp.ResourcePolicy.ResourcePolicySummary != nil {
+		policyID := StringValue(rp.ResourcePolicy.ResourcePolicySummary.Id)
+		if policyID != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				policyID, policyID, "aws_organizations_resource_policy", "aws", organizationAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
