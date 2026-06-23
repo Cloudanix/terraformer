@@ -70,8 +70,40 @@ func (g *EventarcGenerator) InitResources() error {
 		return err
 	}
 
-	triggersList := eventarcService.Projects.Locations.Triggers.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, triggersList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	triggersList := eventarcService.Projects.Locations.Triggers.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, triggersList)...)
+
+	channelsList := eventarcService.Projects.Locations.Channels.List(parent)
+	g.Resources = append(g.Resources, g.createChannelsResources(ctx, channelsList)...)
 	return nil
+}
+
+// Run on channelsList and create for each TerraformResource
+func (g EventarcGenerator) createChannelsResources(ctx context.Context, list *eventarc.ProjectsLocationsChannelsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *eventarc.ListChannelsResponse) error {
+		for _, obj := range page.Channels {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_eventarc_channel",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				eventarcAllowEmptyValues,
+				eventarcAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }

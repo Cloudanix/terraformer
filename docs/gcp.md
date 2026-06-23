@@ -105,6 +105,7 @@ List of supported GCP services:
     * `google_document_ai_processor`
 *   `eventarc`
     * `google_eventarc_trigger`
+    * `google_eventarc_channel`
 *   `filestore`
     * `google_filestore_instance`
 *   `firestore`
