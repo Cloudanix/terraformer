@@ -235,6 +235,7 @@ List of supported GCP services:
     * `google_notebooks_instance`
 *   `netapp`
     * `google_netapp_storage_pool`
+    * `google_netapp_volume`
 *   `networkConnectivity`
     * `google_network_connectivity_hub`
     * `google_network_connectivity_spoke`

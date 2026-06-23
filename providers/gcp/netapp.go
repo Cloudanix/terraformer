@@ -70,8 +70,32 @@ func (g *NetappGenerator) InitResources() error {
 		return err
 	}
 
-	storagePoolsList := netappService.Projects.Locations.StoragePools.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, storagePoolsList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	storagePoolsList := netappService.Projects.Locations.StoragePools.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, storagePoolsList)...)
+
+	volumesList := netappService.Projects.Locations.Volumes.List(parent)
+	g.Resources = append(g.Resources, g.createVolumesResources(ctx, volumesList)...)
 	return nil
+}
+
+// Run on volumesList and create for each TerraformResource
+func (g NetappGenerator) createVolumesResources(ctx context.Context, list *netapp.ProjectsLocationsVolumesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *netapp.ListVolumesResponse) error {
+		for _, obj := range page.Volumes {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_netapp_volume", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				netappAllowEmptyValues, netappAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
