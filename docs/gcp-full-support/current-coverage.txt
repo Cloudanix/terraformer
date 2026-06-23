@@ -251,6 +251,7 @@ google_secret_manager_secret
 google_secure_source_manager_instance
 google_service_account
 google_service_directory_namespace
+google_service_directory_service
 google_spanner_database
 google_spanner_instance
 google_sql_database
