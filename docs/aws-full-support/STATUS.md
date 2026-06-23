@@ -110,8 +110,8 @@ on already-registered services — not net-new services, which were already done
 
 ## Coverage tally
 
-Current coverage: 234 services / **1232** `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = **239** — the clean-import buildable tail is now empty;
+Current coverage: 234 services / **1234** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **237** — the clean-import buildable tail is now empty;
 every remaining entry maps to a documented exclusion class in
 [no-list-api.md](no-list-api.md) (structural attachment/policy/accepter/tag/
 exclusive suffixes, unvendored SDKs, data-plane/no-import objects, and

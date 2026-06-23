@@ -99,6 +99,27 @@ cannot reverse them: `aws_s3_object`, `aws_s3_bucket_object`, `aws_s3_object_cop
 and the dx hosted-VIF / accepter / confirmation / proposal handshake resources
 (the *accepting*/*requesting* side of a two-account flow, with no list API).
 
+Specifically excluded (verified individually against the SDK):
+- `aws_acmpca_certificate` — IssueCertificate is an action; issued certs are not
+  enumerable and the resource has no import.
+- `aws_cognito_managed_user_pool_client` — same ListUserPoolClients as
+  `aws_cognito_user_pool_client` (already built); a separate generator would
+  double-emit the same clients. Managed-vs-unmanaged isn't distinguishable from
+  the list.
+- `aws_db_instance_automated_backups_replication` — cross-region replication
+  *action* defined on the destination side from a source ARN; no reliable way to
+  distinguish a replicated automated backup from an original via
+  DescribeDBInstanceAutomatedBackups, and import is ambiguous.
+- `aws_dx_bgp_peer`, `aws_dx_connection_confirmation`, `aws_dx_hosted_connection`,
+  `aws_dx_hosted_{private,public,transit}_virtual_interface` — Direct Connect
+  hosted/allocation + BGP-peer resources have no `terraform import` support
+  (provider docs) and/or are the allocate-to-other-account action side.
+- `aws_ec2_instance_metadata_defaults` — account+region singleton set via
+  ModifyInstanceMetadataDefaults; no per-resource import identity.
+- `aws_servicecatalog_organizations_access` — org-access enable/disable singleton.
+- `aws_vpc_block_public_access_options` — region singleton
+  (DescribeVpcBlockPublicAccessOptions); no per-resource import identity.
+
 Also intentionally skipped: `aws_elastictranscoder_preset` — Elastic Transcoder's
 SDK is AWS-deprecated ("no longer available for use"); adding new generator code
 against the deprecated package trips staticcheck SA1019. (ListPresets also returns
