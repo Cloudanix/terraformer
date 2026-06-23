@@ -109,6 +109,19 @@ func (g *SpannerGenerator) InitResources() error {
 	}
 
 	for _, instanceName := range instanceNames {
+		instancePath := "projects/" + project + "/instances/" + instanceName
+		if policy, perr := spannerService.Projects.Instances.GetIamPolicy(instancePath, &spanner.GetIamPolicyRequest{}).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						instancePath+" "+b.Role+" "+m, instanceName+"_"+b.Role+"_"+m,
+						"google_spanner_instance_iam_member", g.ProviderName,
+						map[string]string{"instance": instanceName, "role": b.Role, "member": m, "project": project},
+						spannerAllowEmptyValues, spannerAdditionalFields))
+				}
+			}
+		}
+
 		databasesList := spannerService.Projects.Instances.Databases.List("projects/" + project + "/instances/" + instanceName)
 		g.Resources = append(g.Resources, g.createDatabasesResources(ctx, spannerService, databasesList, instanceName)...)
 
