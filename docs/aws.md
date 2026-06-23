@@ -373,6 +373,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudfront_continuous_deployment_policy`
     * `aws_cloudfront_realtime_log_config`
     * `aws_cloudfront_monitoring_subscription`
+    * `aws_cloudfront_vpc_origin`
+    * `aws_cloudfront_anycast_ip_list`
+    * `aws_cloudfront_distribution_tenant`
+    * `aws_cloudfront_connection_group`
+    * `aws_cloudfront_trust_store`
 *   `cloudhsm`
     * `aws_cloudhsm_v2_cluster`
     * `aws_cloudhsm_v2_hsm`

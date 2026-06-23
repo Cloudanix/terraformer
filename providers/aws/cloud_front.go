@@ -86,7 +86,118 @@ func (g *CloudFrontGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadVpcOrigins(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadAnycastIPLists(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadDistributionTenants(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadConnectionGroups(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadTrustStores(svc); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (g *CloudFrontGenerator) loadVpcOrigins(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListVpcOrigins(context.TODO(), &cloudfront.ListVpcOriginsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.VpcOriginList == nil {
+			return nil
+		}
+		for _, v := range out.VpcOriginList.Items {
+			g.addSimple(StringValue(v.Id), StringValue(v.Name), "aws_cloudfront_vpc_origin")
+		}
+		marker = out.VpcOriginList.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadAnycastIPLists(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListAnycastIpLists(context.TODO(), &cloudfront.ListAnycastIpListsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.AnycastIpLists == nil {
+			return nil
+		}
+		for _, a := range out.AnycastIpLists.Items {
+			g.addSimple(StringValue(a.Id), StringValue(a.Name), "aws_cloudfront_anycast_ip_list")
+		}
+		marker = out.AnycastIpLists.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadDistributionTenants(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListDistributionTenants(context.TODO(), &cloudfront.ListDistributionTenantsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, t := range out.DistributionTenantList {
+			g.addSimple(StringValue(t.Id), StringValue(t.Name), "aws_cloudfront_distribution_tenant")
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadConnectionGroups(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListConnectionGroups(context.TODO(), &cloudfront.ListConnectionGroupsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, c := range out.ConnectionGroups {
+			g.addSimple(StringValue(c.Id), StringValue(c.Name), "aws_cloudfront_connection_group")
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadTrustStores(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListTrustStores(context.TODO(), &cloudfront.ListTrustStoresInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, t := range out.TrustStoreList {
+			g.addSimple(StringValue(t.Id), StringValue(t.Name), "aws_cloudfront_trust_store")
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
 }
 
 func (g *CloudFrontGenerator) loadPublicKeys(svc *cloudfront.Client) error {
