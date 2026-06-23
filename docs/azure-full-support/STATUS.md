@@ -6,7 +6,7 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **229** types (+88). Phase 1 mgmt-plane complete (incl. app_service
+- Current: **231** types (+90). Phase 1 mgmt-plane complete (incl. app_service
   modern apps + service_plan); Phase 2 incl. policy; ~50 new Phase 2/3 Track 2
   services. azuread (P4) + Track-1 migration (P5) not started.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
@@ -92,14 +92,13 @@ single-resource services done:
 
 Also migrated: dns, private_dns, keyvault, analysis, databricks, purview, redis, eventhub, security_center (contact + subscription_pricing).
 
-**Remaining 11 files (heavy tail; each needs its own armXxx module):**
-storage_account/blob/container (armstorage), database (multi-engine
-armmysql/armpostgresql/armsql/armmariadb + flexible gaps), cosmosdb (armcosmos —
-has mongo/cassandra/gremlin gaps to convert), eventhub (armeventhub — has
-auth_rule/DR gaps), container (armcontainerinstance + armcontainerregistry — has
-registry gaps), data_factory (armdatafactory, ~40 resource types — largest),
-synapse (armsynapse — multiple resources), security_center_contact +
-security_center_subscription_pricing (armsecurity v0.15 preview).
+**Remaining 8 files (heaviest; each needs its own armXxx module):**
+storage_account/blob/container (armstorage; blob/container are partly data-plane),
+database (multi-engine armmysql/armpostgresql/armsql/armmariadb + flexible gaps),
+cosmosdb (armcosmos — has mongo/cassandra/gremlin gaps to convert), container
+(armcontainerinstance + armcontainerregistry — has registry gaps), data_factory
+(armdatafactory, ~40 resource types — largest), synapse (armsynapse — multiple
+resources).
 Done when `grep -rl "azure-sdk-for-go/services" providers/azure` is empty; then
 drop Track 1 + go-autorest/hamilton from go.mod.
 
