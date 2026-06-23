@@ -118,6 +118,8 @@ List of supported GCP services:
     * `google_monitoring_group`
     * `google_monitoring_notification_channel`
     * `google_monitoring_uptime_check_config`
+*   `notebooks`
+    * `google_notebooks_instance`
 *   `networks`
     * `google_compute_network`
 *   `nodeGroups`

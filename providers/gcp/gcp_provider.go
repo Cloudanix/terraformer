@@ -134,6 +134,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["eventarc"] = &GCPFacade{service: &EventarcGenerator{}}
 	services["vpcAccess"] = &GCPFacade{service: &VpcAccessGenerator{}}
 	services["composer"] = &GCPFacade{service: &ComposerGenerator{}}
+	services["notebooks"] = &GCPFacade{service: &NotebooksGenerator{}}
 	return services
 }
 
