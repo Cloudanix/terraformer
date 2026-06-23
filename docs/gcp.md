@@ -73,6 +73,8 @@ List of supported GCP services:
     * `google_eventarc_trigger`
 *   `filestore`
     * `google_filestore_instance`
+*   `firestore`
+    * `google_firestore_database`
 *   `forwardingRules`
     * `google_compute_forwarding_rule`
 *   `gcs`
