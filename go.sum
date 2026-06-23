@@ -350,6 +350,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources/v3 
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources/v3 v3.0.1/go.mod h1:8h8yhzh9o+0HeSIhUxYny+rEQajScrfIpNktvgYG3Q8=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/search/armsearch v1.4.0 h1:zBdabY8pMSMLPb1XJnFSEdJi9Bd0h+VMjh1uU8B6Yp8=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/search/armsearch v1.4.0/go.mod h1:Y2Q3nB3UfSnG9nALOpPAjflXPM3jL/n2ZmYIu2Occ9g=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity v0.15.0 h1:5tRv65ZzstkUCQYFAcw2XtXkqxJdJ0ut1T0gyU1JB34=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/security/armsecurity v0.15.0/go.mod h1:+ysYq16aHhv16EXlLgzTgbXvIQTCPdEblyyFad42JEo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus v1.2.0 h1:jngSeKBnzC7qIk3rvbWHsLI7eeasEucORHWr2CHX0Yg=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/servicebus/armservicebus v1.2.0/go.mod h1:1YXAxWw6baox+KafeQU2scy21/4IHvqXoIJuCpcvpMQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/signalr/armsignalr v1.2.0 h1:Y8CF7FyuVVDyX5W6Azwjj3PpwUZVbXBOCyQytv/0QEA=
