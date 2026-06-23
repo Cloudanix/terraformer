@@ -70,9 +70,37 @@ func (g *SecretManagerGenerator) InitResources() error {
 	}
 
 	secretsList := secretManagerService.Projects.Secrets.List("projects/" + g.GetArgs()["project"].(string))
-	g.Resources = append(g.Resources, g.createSecretsResources(ctx, secretsList)...)
+	secretResources := g.createSecretsResources(ctx, secretsList)
+	g.Resources = append(g.Resources, secretResources...)
 
 	g.Resources = append(g.Resources, g.createRegionalSecretsResources(ctx, secretManagerService)...)
+
+	// Per-secret IAM (member form).
+	for _, r := range secretResources {
+		secret := r.InstanceState.ID
+		policy, perr := secretManagerService.Projects.Secrets.GetIamPolicy(secret).Do()
+		if perr != nil {
+			continue
+		}
+		for _, b := range policy.Bindings {
+			for _, m := range b.Members {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					secret+" "+b.Role+" "+m,
+					secret+"_"+b.Role+"_"+m,
+					"google_secret_manager_secret_iam_member",
+					g.ProviderName,
+					map[string]string{
+						"secret_id": strings.Split(secret, "/")[len(strings.Split(secret, "/"))-1],
+						"role":      b.Role,
+						"member":    m,
+						"project":   g.GetArgs()["project"].(string),
+					},
+					secretManagerAllowEmptyValues,
+					secretManagerAdditionalFields,
+				))
+			}
+		}
+	}
 	return nil
 }
 
