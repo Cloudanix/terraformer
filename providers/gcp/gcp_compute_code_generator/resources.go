@@ -246,4 +246,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"vpnGateways": basicGCPResource{
 		terraformName: "google_compute_ha_vpn_gateway",
 	},
+	"crossSiteNetworks": basicGCPResource{
+		terraformName: "google_compute_cross_site_network",
+	},
 }

@@ -26,6 +26,7 @@ var ComputeServices = map[string]terraformutils.ServiceGenerator{
 	"autoscalers":                   &GCPFacade{service: &AutoscalersGenerator{}},
 	"backendBuckets":                &GCPFacade{service: &BackendBucketsGenerator{}},
 	"backendServices":               &GCPFacade{service: &BackendServicesGenerator{}},
+	"crossSiteNetworks":             &GCPFacade{service: &CrossSiteNetworksGenerator{}},
 	"disks":                         &GCPFacade{service: &DisksGenerator{}},
 	"externalVpnGateways":           &GCPFacade{service: &ExternalVpnGatewaysGenerator{}},
 	"firewall":                      &GCPFacade{service: &FirewallGenerator{}},
