@@ -16,126 +16,118 @@ package azure
 
 import (
 	"context"
-	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2020-03-01/network"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7"
 )
 
 type RouteTableGenerator struct {
 	AzureService
 }
 
-func (az *RouteTableGenerator) listResources() ([]network.RouteTable, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewRouteTablesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator network.RouteTableListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListAllComplete(ctx)
+// InitResources imports azurerm_route_table (+ nested azurerm_route) and
+// azurerm_route_filter. Migrated to the Track 2 armnetwork SDK; preserves the
+// duplicate-name handling of the Track 1 implementation.
+func (g *RouteTableGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []network.RouteTable
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *RouteTableGenerator) appendResource(resource *network.RouteTable) {
-	az.AppendSimpleResourceWithDuplicateCheck(*resource.ID, *resource.Name, "azurerm_route_table")
-}
-
-func (az *RouteTableGenerator) appendRoutes(parent *network.RouteTable, resourceGroupID *ResourceID) error {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewRoutesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	iterator, err := client.ListComplete(ctx, resourceGroupID.ResourceGroup, *parent.Name)
+	tablesClient, err := armnetwork.NewRouteTablesClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for iterator.NotDone() {
-		item := iterator.Value()
-		az.AppendSimpleResourceWithDuplicateCheck(*item.ID, *item.Name, "azurerm_route")
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
+	routesClient, err := armnetwork.NewRoutesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	filtersClient, err := armnetwork.NewRouteFiltersClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+
+	tables, err := g.listRouteTables(tablesClient)
+	if err != nil {
+		return err
+	}
+	for _, table := range tables {
+		tableID := valueOrEmpty(table.ID)
+		if tableID == "" {
+			continue
+		}
+		g.AppendSimpleResourceWithDuplicateCheck(tableID, valueOrEmpty(table.Name), "azurerm_route_table")
+		parsed, err := ParseAzureResourceID(tableID)
+		if err != nil {
 			return err
+		}
+		if err := g.appendRoutes(routesClient, parsed.ResourceGroup, valueOrEmpty(table.Name)); err != nil {
+			return err
+		}
+	}
+
+	return g.appendRouteFilters(filtersClient)
+}
+
+func (g *RouteTableGenerator) listRouteTables(client *armnetwork.RouteTablesClient) ([]*armnetwork.RouteTable, error) {
+	var tables []*armnetwork.RouteTable
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListAllPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			tables = append(tables, page.Value...)
+		}
+		return tables, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			tables = append(tables, page.Value...)
+		}
+	}
+	return tables, nil
+}
+
+func (g *RouteTableGenerator) appendRoutes(client *armnetwork.RoutesClient, resourceGroup, routeTableName string) error {
+	pager := client.NewListPager(resourceGroup, routeTableName, nil)
+	for pager.More() {
+		page, err := pager.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, route := range page.Value {
+			if route == nil {
+				continue
+			}
+			if id := valueOrEmpty(route.ID); id != "" {
+				g.AppendSimpleResourceWithDuplicateCheck(id, valueOrEmpty(route.Name), "azurerm_route")
+			}
 		}
 	}
 	return nil
 }
 
-func (az *RouteTableGenerator) listRouteFilters() ([]network.RouteFilter, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewRouteFiltersClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator network.RouteFilterListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListByResourceGroupComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListComplete(ctx)
+func (g *RouteTableGenerator) appendRouteFilters(client *armnetwork.RouteFiltersClient) error {
+	id := func(i *armnetwork.RouteFilter) string { return valueOrEmpty(i.ID) }
+	name := func(i *armnetwork.RouteFilter) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armnetwork.RouteFiltersClientListResponse) []*armnetwork.RouteFilter { return p.Value },
+			id, name, "azurerm_route_filter")
 	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []network.RouteFilter
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *RouteTableGenerator) appendRouteFilters(resource *network.RouteFilter) {
-	az.AppendSimpleResource(*resource.ID, *resource.Name, "azurerm_route_filter")
-}
-
-func (az *RouteTableGenerator) InitResources() error {
-
-	resources, err := az.listResources()
-	if err != nil {
-		return err
-	}
-	for _, resource := range resources {
-		az.appendResource(&resource)
-		resourceGroupID, err := ParseAzureResourceID(*resource.ID)
-		if err != nil {
-			return err
-		}
-		err = az.appendRoutes(&resource, resourceGroupID)
-		if err != nil {
-			return err
-		}
-	}
-
-	filters, err := az.listRouteFilters()
-	if err != nil {
-		return err
-	}
-	for _, resource := range filters {
-		az.appendRouteFilters(&resource)
-		if err != nil {
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armnetwork.RouteFiltersClientListByResourceGroupResponse) []*armnetwork.RouteFilter {
+				return p.Value
+			},
+			id, name, "azurerm_route_filter"); err != nil {
 			return err
 		}
 	}
