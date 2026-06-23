@@ -1049,6 +1049,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_opensearchserverless_collection`
     * `aws_opensearchserverless_security_config`
     * `aws_opensearchserverless_vpc_endpoint`
+    * `aws_opensearchserverless_collection_group`
     * `aws_opensearchserverless_access_policy`
     * `aws_opensearchserverless_security_policy`
     * `aws_opensearchserverless_lifecycle_policy`

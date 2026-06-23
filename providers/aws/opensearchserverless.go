@@ -135,5 +135,20 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 				id, StringValue(v.Name), "aws_opensearchserverless_vpc_endpoint", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for cg := opensearchserverless.NewListCollectionGroupsPaginator(svc, &opensearchserverless.ListCollectionGroupsInput{}); cg.HasMorePages(); {
+		page, err := cg.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, c := range page.CollectionGroupSummaries {
+			id := StringValue(c.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(c.Name), "aws_opensearchserverless_collection_group", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
