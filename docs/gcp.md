@@ -272,9 +272,15 @@ List of supported GCP services:
     * `google_logging_project_sink`
     * `google_logging_folder_sink` (requires GOOGLE_FOLDER)
     * `google_logging_organization_sink` (requires GOOGLE_ORGANIZATION)
+*   `beyondcorp`
+    * `google_beyondcorp_app_connection`, `_app_connector`, `_app_gateway`, `_security_gateway`, `_security_gateway_application`
+*   `containerAnalysis`
+    * `google_container_analysis_note`, `google_container_analysis_occurrence`
 *   `managedKafka`
-    * `google_managed_kafka_cluster`
+    * `google_managed_kafka_cluster`, `_topic`, `_acl`, `_connect_cluster`, `_connector`
 *   `memcache`
+*   `parameterManager`
+    * `google_parameter_manager_parameter`(`_version`), `google_parameter_manager_regional_parameter`(`_version`)
 *   `migrationCenter`
     * `google_migration_center_group`
     * `google_migration_center_source`
