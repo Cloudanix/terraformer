@@ -35,8 +35,8 @@ enumerations added to the existing generators):
   no mgmt-plane list: key_vault keys/secrets/certificates; storage
   queue/table/share/file/data_lake_gen2; synapse linked_service/role_assignment.
 - **Polymorphic/branching** — need a discriminator→tf-type map + a unit test:
-  synapse integration_runtime (Managed vs SelfHosted), hdinsight (per-kind
-  cluster). (app_service modern apps DONE via siteResourceType kind-branching.)
+  synapse integration_runtime (Managed vs SelfHosted) still deferred. (app_service
+  modern apps + hdinsight per-kind clusters DONE via tested mapping funcs.)
 - **Singletons without a list API** — storage management_policy (per-account
   `Get default`), most security_center settings.
 - **Preview-version-only** — container_registry token/scope_map (need a newer
