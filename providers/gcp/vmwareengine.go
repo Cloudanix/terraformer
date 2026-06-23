@@ -98,11 +98,13 @@ func (g *VmwareengineGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	npNames := []string{}
 	npList := vmwareengineService.Projects.Locations.NetworkPolicies.List("projects/" + project + "/locations/" + location)
 	if err := npList.Pages(ctx, func(page *vmwareengine.ListNetworkPoliciesResponse) error {
 		for _, obj := range page.NetworkPolicies {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
+			npNames = append(npNames, obj.Name)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_vmwareengine_network_policy", g.ProviderName,
 				map[string]string{"name": name, "project": project, "location": location},
@@ -114,6 +116,36 @@ func (g *VmwareengineGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	if err := vmwareengineService.Projects.Locations.Datastores.List("projects/"+project+"/locations/"+location).Pages(ctx, func(p *vmwareengine.ListDatastoresResponse) error {
+		for _, o := range p.Datastores {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_vmwareengine_datastore", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				vmwareengineAllowEmptyValues, vmwareengineAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	for _, np := range npNames {
+		if err := vmwareengineService.Projects.Locations.NetworkPolicies.ExternalAccessRules.List(np).Pages(ctx, func(p *vmwareengine.ListExternalAccessRulesResponse) error {
+			for _, o := range p.ExternalAccessRules {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_vmwareengine_external_access_rule", g.ProviderName,
+					map[string]string{"name": name, "parent": np, "project": project, "location": location},
+					vmwareengineAllowEmptyValues, vmwareengineAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
+
 	for _, pc := range pcNames {
 		pcParent := "projects/" + project + "/locations/" + location + "/privateClouds/" + pc
 		if err := vmwareengineService.Projects.Locations.PrivateClouds.ExternalAddresses.List(pcParent).Pages(ctx, func(p *vmwareengine.ListExternalAddressesResponse) error {
@@ -122,6 +154,20 @@ func (g *VmwareengineGenerator) InitResources() error {
 				name := t[len(t)-1]
 				g.Resources = append(g.Resources, terraformutils.NewResource(
 					o.Name, name, "google_vmwareengine_external_address", g.ProviderName,
+					map[string]string{"name": name, "parent": pcParent, "project": project, "location": location},
+					vmwareengineAllowEmptyValues, vmwareengineAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+
+		if err := vmwareengineService.Projects.Locations.PrivateClouds.Subnets.List(pcParent).Pages(ctx, func(p *vmwareengine.ListSubnetsResponse) error {
+			for _, o := range p.Subnets {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_vmwareengine_subnet", g.ProviderName,
 					map[string]string{"name": name, "parent": pcParent, "project": project, "location": location},
 					vmwareengineAllowEmptyValues, vmwareengineAdditionalFields))
 			}
