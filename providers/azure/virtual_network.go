@@ -18,6 +18,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7"
 	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2021-02-01/network"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -75,7 +76,43 @@ func (g *VirtualNetworkGenerator) InitResources() error {
 		return err
 	}
 	g.Resources, err = g.createResources(ctx, output)
-	return err
+	if err != nil {
+		return err
+	}
+
+	if err := g.initVirtualNetworkGateways(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// initVirtualNetworkGateways enumerates azurerm_virtual_network_gateway via the
+// Track 2 armnetwork SDK. Virtual network gateways are resource-group scoped
+// (the API has no subscription-wide list), so this requires -R and is skipped
+// when no Track 2 credential is available (dual SDK path).
+func (g *VirtualNetworkGenerator) initVirtualNetworkGateways() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	client, err := armnetwork.NewVirtualNetworkGatewaysClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	for _, rg := range g.resourceGroups() {
+		pager := client.NewListPager(rg, nil)
+		if err := appendFromPager(&g.AzureService, pager,
+			func(p armnetwork.VirtualNetworkGatewaysClientListResponse) []*armnetwork.VirtualNetworkGateway {
+				return p.Value
+			},
+			func(i *armnetwork.VirtualNetworkGateway) string { return valueOrEmpty(i.ID) },
+			func(i *armnetwork.VirtualNetworkGateway) string { return valueOrEmpty(i.Name) },
+			"azurerm_virtual_network_gateway"); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // NOTE on Virtual Networks and Subnet's:
