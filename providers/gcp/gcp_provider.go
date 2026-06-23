@@ -29,6 +29,8 @@ type GCPProvider struct { //nolint
 	projectName  string
 	region       compute.Region
 	providerType string
+	organization string
+	folder       string
 }
 
 func GetRegions(project string) []string {
@@ -77,6 +79,10 @@ func (p *GCPProvider) Init(args []string) error {
 	p.projectName = projectName
 	p.region = *getRegion(projectName, args[0])
 	p.providerType = args[2]
+	// Org/folder-scoped resources (scc, accessContextManager, …) read these from
+	// the environment; empty when not set (those services then no-op).
+	p.organization = os.Getenv("GOOGLE_ORGANIZATION")
+	p.folder = os.Getenv("GOOGLE_FOLDER")
 	return nil
 }
 
@@ -97,8 +103,10 @@ func (p *GCPProvider) InitService(serviceName string, verbose bool) error {
 	p.Service.SetVerbose(verbose)
 	p.Service.SetProviderName(p.GetName())
 	p.Service.SetArgs(map[string]interface{}{
-		"region":  p.region,
-		"project": p.projectName,
+		"region":       p.region,
+		"project":      p.projectName,
+		"organization": p.organization,
+		"folder":       p.folder,
 	})
 	return nil
 }
@@ -171,6 +179,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["orgPolicy"] = &GCPFacade{service: &OrgPolicyGenerator{}}
 	services["storageTransfer"] = &GCPFacade{service: &StorageTransferGenerator{}}
 	services["integrationConnectors"] = &GCPFacade{service: &IntegrationConnectorsGenerator{}}
+	services["securityCenter"] = &GCPFacade{service: &SecurityCenterGenerator{}}
 	return services
 }
 
