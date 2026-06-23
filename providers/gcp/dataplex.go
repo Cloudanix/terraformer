@@ -64,6 +64,19 @@ func (g *DataplexGenerator) InitResources() error {
 					}
 				}
 			}
+			entryGroupID := name
+			if eerr := dataplexService.Projects.Locations.EntryGroups.Entries.List(obj.Name).Pages(ctx, func(ep *dataplex.GoogleCloudDataplexV1ListEntriesResponse) error {
+				for _, e := range ep.Entries {
+					et := strings.Split(e.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						e.Name, et[len(et)-1], "google_dataplex_entry", g.ProviderName,
+						map[string]string{"entry_id": et[len(et)-1], "entry_group_id": entryGroupID, "project": project, "location": location},
+						dataplexAllowEmptyValues, dataplexAdditionalFields))
+				}
+				return nil
+			}); eerr != nil {
+				log.Println(eerr)
+			}
 		}
 		return nil
 	}); err != nil {
@@ -137,6 +150,31 @@ func (g *DataplexGenerator) InitResources() error {
 							dataplexAllowEmptyValues, dataplexAdditionalFields))
 					}
 				}
+			}
+			glossaryID := name
+			if cerr := dataplexService.Projects.Locations.Glossaries.Categories.List(o.Name).Pages(ctx, func(cp *dataplex.GoogleCloudDataplexV1ListGlossaryCategoriesResponse) error {
+				for _, c := range cp.Categories {
+					ct := strings.Split(c.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						c.Name, ct[len(ct)-1], "google_dataplex_glossary_category", g.ProviderName,
+						map[string]string{"category_id": ct[len(ct)-1], "glossary_id": glossaryID, "project": project, "location": location},
+						dataplexAllowEmptyValues, dataplexAdditionalFields))
+				}
+				return nil
+			}); cerr != nil {
+				log.Println(cerr)
+			}
+			if terr := dataplexService.Projects.Locations.Glossaries.Terms.List(o.Name).Pages(ctx, func(tp *dataplex.GoogleCloudDataplexV1ListGlossaryTermsResponse) error {
+				for _, tm := range tp.Terms {
+					tt := strings.Split(tm.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						tm.Name, tt[len(tt)-1], "google_dataplex_glossary_term", g.ProviderName,
+						map[string]string{"term_id": tt[len(tt)-1], "glossary_id": glossaryID, "project": project, "location": location},
+						dataplexAllowEmptyValues, dataplexAdditionalFields))
+				}
+				return nil
+			}); terr != nil {
+				log.Println(terr)
 			}
 		}
 		return nil
