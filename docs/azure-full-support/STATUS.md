@@ -6,8 +6,9 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **229** types (+88). Phase 1 mgmt-plane complete (incl. app_service modern apps + service_plan); Phase 2 incl. policy; ~50 new Phase 2/3 services. azuread (P4) + Track-1 migration (P5) not started.
-  ~45 new Phase 2/3 Track 2 services. azuread (P4) + Track-1 migration (P5) not started.
+- Current: **229** types (+88). Phase 1 mgmt-plane complete (incl. app_service
+  modern apps + service_plan); Phase 2 incl. policy; ~50 new Phase 2/3 Track 2
+  services. azuread (P4) + Track-1 migration (P5) not started.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
 
 ## Phase 0 — foundations (DONE)
@@ -34,8 +35,8 @@ enumerations added to the existing generators):
   no mgmt-plane list: key_vault keys/secrets/certificates; storage
   queue/table/share/file/data_lake_gen2; synapse linked_service/role_assignment.
 - **Polymorphic/branching** — need a discriminator→tf-type map + a unit test:
-  synapse integration_runtime (Managed vs SelfHosted), app_service modern apps
-  (linux/windows web/function via `kind`), hdinsight (per-kind cluster).
+  synapse integration_runtime (Managed vs SelfHosted), hdinsight (per-kind
+  cluster). (app_service modern apps DONE via siteResourceType kind-branching.)
 - **Singletons without a list API** — storage management_policy (per-account
   `Get default`), most security_center settings.
 - **Preview-version-only** — container_registry token/scope_map (need a newer
@@ -51,9 +52,9 @@ autoscale_setting, metric_alert), `cdn` (profile + endpoint), `role_assignment`
 (subscription-scoped), `policy` (definition/set_definition Custom-filtered +
 assignment, subscription-scoped, isCustomPolicy unit-tested).
 
-Not yet: `function_app` (kind-branching, see Phase 1 deferred), `automation`
-runbooks/schedules (account done), role_definition (composite import ID +
-built-in filtering).
+Not yet: `automation` runbooks/schedules (account done), role_definition
+(composite import ID + built-in filtering). (function_app DONE via app_service
+kind-branching.)
 
 ## Phase 3 — P2/P3 (largely done)
 
@@ -63,11 +64,12 @@ stream_analytics, machine_learning, container_app, netapp, mssql, powerbi,
 digital_twins, relay, web_pubsub, notification_hub, batch, dashboard (grafana),
 maps, private_dns_resolver, spring_cloud, data_share, healthcare, load_test,
 elastic_san, communication, dev_center, chaos_studio, confidential_ledger,
-fluid_relay, data_protection, attestation.
+fluid_relay, data_protection, attestation, vmware (AVS), nginx, storage_mover,
+app_service (modern web/function apps + service_plan).
 
 Not yet: sentinel, lighthouse, hdinsight (per-kind), spatial_anchors, orbital,
-automanage, workloads (SAP), vmware (AVS), and the remaining long-tail
-single-resource services + multi-resource sub-resource expansions.
+automanage, workloads (SAP), and the remaining long-tail single-resource
+services + multi-resource sub-resource expansions.
 
 ## Phase 4 — azuread (not started)
 
