@@ -1224,6 +1224,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_route53recoverycontrolconfig_safety_rule`
 *   `route53profiles`
     * `aws_route53profiles_profile`
+    * `aws_route53profiles_association`
+    * `aws_route53profiles_resource_association`
 *   `route53resolver`
     * `aws_route53_resolver_endpoint`
     * `aws_route53_resolver_rule`

@@ -47,6 +47,36 @@ func (g *Route53ProfilesGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(profile.Name), "aws_route53profiles_profile", "aws", defaultAllowEmptyValues))
+			profileID := id
+			for rp := route53profiles.NewListProfileResourceAssociationsPaginator(svc, &route53profiles.ListProfileResourceAssociationsInput{ProfileId: &profileID}); rp.HasMorePages(); {
+				rpage, err := rp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, ra := range rpage.ProfileResourceAssociations {
+					raID := StringValue(ra.Id)
+					if raID == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						raID, raID, "aws_route53profiles_resource_association", "aws", defaultAllowEmptyValues))
+				}
+			}
+		}
+	}
+
+	for ap := route53profiles.NewListProfileAssociationsPaginator(svc, &route53profiles.ListProfileAssociationsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, a := range page.ProfileAssociations {
+			id := StringValue(a.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_route53profiles_association", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil
