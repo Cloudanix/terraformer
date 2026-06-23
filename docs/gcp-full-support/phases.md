@@ -258,3 +258,22 @@ Exit (DONE): `comm -23` of GA list and current-coverage is empty modulo document
 
 ## Tracking
 Re-run §3 diff after each merged PR. The shrinking `missing-resources.txt` line count is the burndown metric (§10: expect 600–800 reachable of ~1000+ surface).
+
+---
+
+## Progress checkpoint — session 2 (400 commits)
+
+Coverage **88 → 430** emitted types; **93 services**; full repo green (`go build ./...` rc=0, `go vet`, `gofmt -l` empty, SA1019=0, `go test ./terraformutils/...` pass). GA gap 852, of which non-IAM 530.
+
+**Done this session:**
+- Resource-level IAM `_member` for every hand-written service whose SDK exposes `GetIamPolicy` (dataplex lake/zone/entry_group/entry_type/datascan/glossary/aspect_type, healthcare 4 stores, clouddeploy 3, dataproc cluster/autoscaling_policy, gkehub 3, datacatalog 3, bigquery routine, analyticshub 2, servicedirectory 2, ssm 2, privateca 2, iam service_account + workload_identity_pool, cloud_run worker_pool, metastore federation, spanner database, tags tag_key, pubsub schema, secret regional, bq connection/datapolicy, bigtable table, binauthz attestor, cloudtasks queue, cloudbuildv2 connection, datafusion, dns managed_zone, kms ekm_connection, netconn hub, netsec address_group, scc source, workstations config, workbench instance).
+- Non-IAM clusters: networksecurity (+16: authz_policy, backend_auth_config, dns_threat_detector, tls_inspection_policy, url_lists, firewall_endpoint_association, 8× intercept/mirroring, gateway_security_policy_rule, org-scoped security_profile/group + firewall_endpoint), networkconnectivity (+4: transport, multicloud_data_transfer_config, destination, group), monitoring (slo, dashboard), dataplex nested (asset, glossary_category, glossary_term, entry), vmwareengine (datastore, subnet, external_access_rule), containerAnalysis (note, occurrence — new service), firestore (index, field, user_creds).
+
+**Residual categories (the remaining ~852):**
+1. **No List API in pinned SDK** — bigquery_table/dataset IAM (only Routines/RowAccessPolicies expose GetIamPolicy in bigquery/v2), dataplex_task (no GetIamPolicy), dataproc_job (base not enumerated), cloudfunctions v1 IAM (file uses v2 client), firestore_document, storage object/acl, *_signed_url_key, network_peering, *_with_rules, *_settings singletons, attachment/membership sub-resources.
+2. **SDK module not in cache (needs `go get`)** — gkemulticloud (container_aws/azure/attached_cluster + node pools).
+3. **Bespoke / large** — apigee (39), firebase (15), chronicle (13), dialogflow (20), gemini (12), discoveryengine (15), vertex/aiplatform (13), scc v2 org-config (25).
+4. **Codegen-compute IAM** — compute disk/image/instance/snapshot/subnetwork/etc. `_iam_member` go through gcp_compute_code_generator, which has no IAM template.
+5. **Org/folder-scoped** — many logging_{folder,org,billing}_*, scc org configs; plumbed via GOOGLE_ORGANIZATION/GOOGLE_FOLDER where added.
+
+Cluster-by-cluster expansion continues; each new resource verified to have a real List API in the pinned SDK before adding (build-validated, no live-project refresh available in sandbox).
