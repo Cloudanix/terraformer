@@ -105,5 +105,18 @@ func (g *ServiceQuotasGenerator) InitResources() error {
 				id, id, "aws_servicequotas_template", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	// Template association is an account singleton (ASSOCIATED when the quota
+	// template is applied org-wide); imported by account id.
+	if assoc, err := svc.GetAssociationForServiceQuotaTemplate(context.TODO(), &servicequotas.GetAssociationForServiceQuotaTemplateInput{}); err == nil &&
+		assoc.ServiceQuotaTemplateAssociationStatus == types.ServiceQuotaTemplateAssociationStatusAssociated {
+		if account, err := g.getAccountNumber(config); err == nil {
+			id := StringValue(account)
+			if id != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_servicequotas_template_association", "aws", defaultAllowEmptyValues))
+			}
+		}
+	}
 	return nil
 }

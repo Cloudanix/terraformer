@@ -74,6 +74,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bedrockagent_agent`
     * `aws_bedrockagent_agent_alias`
     * `aws_bedrockagent_agent_action_group`
+    * `aws_bedrockagent_agent_knowledge_base_association`
     * `aws_bedrockagent_knowledge_base`
     * `aws_bedrockagent_data_source`
 *   `ce`
@@ -1329,6 +1330,7 @@ terraformer import aws --resources=sg --regions=us-east-1
 *   `servicequotas`
     * `aws_servicequotas_service_quota`
     * `aws_servicequotas_template`
+    * `aws_servicequotas_template_association`
 *   `ses`
     * `aws_ses_configuration_set`
     * `aws_ses_domain_identity`

@@ -82,6 +82,20 @@ func (g *BedrockAgentGenerator) InitResources() error {
 					id+","+agent+",DRAFT", agent+"_"+id, "aws_bedrockagent_agent_action_group", "aws", defaultAllowEmptyValues))
 			}
 		}
+		for kbp := bedrockagent.NewListAgentKnowledgeBasesPaginator(svc, &bedrockagent.ListAgentKnowledgeBasesInput{AgentId: &agent, AgentVersion: aws.String("DRAFT")}); kbp.HasMorePages(); {
+			page, err := kbp.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, kb := range page.AgentKnowledgeBaseSummaries {
+				kbID := StringValue(kb.KnowledgeBaseId)
+				if kbID == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					agent+","+kbID+",DRAFT", agent+"_"+kbID, "aws_bedrockagent_agent_knowledge_base_association", "aws", defaultAllowEmptyValues))
+			}
+		}
 	}
 
 	for kp := bedrockagent.NewListKnowledgeBasesPaginator(svc, &bedrockagent.ListKnowledgeBasesInput{}); kp.HasMorePages(); {
