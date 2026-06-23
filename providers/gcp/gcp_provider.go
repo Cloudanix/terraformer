@@ -204,6 +204,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["apiKeys"] = &GCPFacade{service: &APIKeysGenerator{}}
 	services["networkManagement"] = &GCPFacade{service: &NetworkManagementGenerator{}}
 	services["osConfig"] = &GCPFacade{service: &OsConfigGenerator{}}
+	services["securityPosture"] = &GCPFacade{service: &SecurityPostureGenerator{}}
 	return services
 }
 
