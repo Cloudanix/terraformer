@@ -81,6 +81,17 @@ func (g *AnalyticsHubGenerator) InitResources() error {
 					obj.Name, name, "google_bigquery_analytics_hub_listing", g.ProviderName,
 					map[string]string{"listing_id": name, "data_exchange_id": exID, "project": g.GetArgs()["project"].(string), "location": location},
 					analyticsHubAllowEmptyValues, analyticsHubAdditionalFields))
+				if policy, perr := svc.Projects.Locations.DataExchanges.Listings.GetIamPolicy(obj.Name, &analyticshub.GetIamPolicyRequest{}).Do(); perr == nil {
+					for _, b := range policy.Bindings {
+						for _, m := range b.Members {
+							g.Resources = append(g.Resources, terraformutils.NewResource(
+								obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+								"google_bigquery_analytics_hub_listing_iam_member", g.ProviderName,
+								map[string]string{"listing_id": name, "data_exchange_id": exID, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": location},
+								analyticsHubAllowEmptyValues, analyticsHubAdditionalFields))
+						}
+					}
+				}
 			}
 			return nil
 		}); err != nil {
