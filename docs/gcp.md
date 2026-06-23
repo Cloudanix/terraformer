@@ -72,6 +72,7 @@ List of supported GCP services:
 *   `dataProc`
     * `google_dataproc_cluster`
     * `google_dataproc_autoscaling_policy`
+    * `google_dataproc_workflow_template`
 *   `dataplex`
     * `google_dataplex_lake`
     * `google_dataplex_zone`

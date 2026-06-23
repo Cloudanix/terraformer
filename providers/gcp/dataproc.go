@@ -113,6 +113,32 @@ func (g DataprocGenerator) createAutoscalingPolicyResources(ctx context.Context,
 	return resources
 }
 
+// Run on workflowTemplateList and create for each TerraformResource
+func (g DataprocGenerator) createWorkflowTemplateResources(ctx context.Context, wftList *dataproc.ProjectsRegionsWorkflowTemplatesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	if err := wftList.Pages(ctx, func(page *dataproc.ListWorkflowTemplatesResponse) error {
+		for _, tmpl := range page.Templates {
+			resources = append(resources, terraformutils.NewResource(
+				tmpl.Name,
+				tmpl.Id,
+				"google_dataproc_workflow_template",
+				g.ProviderName,
+				map[string]string{
+					"name":     tmpl.Id,
+					"project":  g.GetArgs()["project"].(string),
+					"location": g.GetArgs()["region"].(compute.Region).Name,
+				},
+				dataprocAllowEmptyValues,
+				dataprocAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 // from each DataprocGenerator create 1 TerraformResource
 // Need DataprocGenerator name as ID for terraform resource
@@ -131,6 +157,9 @@ func (g *DataprocGenerator) InitResources() error {
 
 	policyList := dataprocService.Projects.Regions.AutoscalingPolicies.List("projects/" + project + "/regions/" + region)
 	g.Resources = append(g.Resources, g.createAutoscalingPolicyResources(ctx, policyList)...)
+
+	wftList := dataprocService.Projects.Regions.WorkflowTemplates.List("projects/" + project + "/regions/" + region)
+	g.Resources = append(g.Resources, g.createWorkflowTemplateResources(ctx, wftList)...)
 
 	// jobList := dataprocService.Projects.Regions.Jobs.List(g.GetArgs()["project"].(string), g.GetArgs()["region"])
 	// g.Resources = append(g.Resources, g.createJobResources(jobList, ctx)...)
