@@ -84,7 +84,11 @@ List of supported GCP services:
     * `google_sql_database`
     * `google_sql_database_instance`
     * `google_sql_user`
+*   `contactCenterInsights`
+    * `google_contact_center_insights_view`
 *   `datacatalog`
+*   `dataPipelines`
+    * `google_data_pipeline_pipeline`
     * `google_data_catalog_entry_group`
 *   `dataProc`
     * `google_dataproc_cluster`

@@ -191,6 +191,8 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["developerConnect"] = &GCPFacade{service: &DeveloperConnectGenerator{}}
 	services["bigQueryConnection"] = &GCPFacade{service: &BigQueryConnectionGenerator{}}
 	services["networkSecurity"] = &GCPFacade{service: &NetworkSecurityGenerator{}}
+	services["contactCenterInsights"] = &GCPFacade{service: &ContactCenterInsightsGenerator{}}
+	services["dataPipelines"] = &GCPFacade{service: &DataPipelinesGenerator{}}
 	return services
 }
 
