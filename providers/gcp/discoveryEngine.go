@@ -99,13 +99,7 @@ func (g *DiscoveryEngineGenerator) InitResources() error {
 	if err := discoveryEngineService.Projects.Locations.Collections.Engines.List(parent).Pages(ctx, func(page *discoveryengine.GoogleCloudDiscoveryengineV1ListEnginesResponse) error {
 		for _, e := range page.Engines {
 			name := lastSeg(e.Name)
-			tfType := "google_discovery_engine_search_engine"
-			switch e.SolutionType {
-			case "SOLUTION_TYPE_CHAT":
-				tfType = "google_discovery_engine_chat_engine"
-			case "SOLUTION_TYPE_RECOMMENDATION":
-				tfType = "google_discovery_engine_recommendation_engine"
-			}
+			tfType := discoveryEngineEngineType(e.SolutionType)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				e.Name, name, tfType, g.ProviderName,
 				map[string]string{"engine_id": name, "location": location, "project": project},
@@ -127,3 +121,16 @@ func (g *DiscoveryEngineGenerator) InitResources() error {
 }
 
 func lastSeg(s string) string { p := strings.Split(s, "/"); return p[len(p)-1] }
+
+// discoveryEngineEngineType maps a Discovery Engine solution type to its Terraform
+// engine resource type. Search is the default for unset/unknown solution types.
+func discoveryEngineEngineType(solutionType string) string {
+	switch solutionType {
+	case "SOLUTION_TYPE_CHAT":
+		return "google_discovery_engine_chat_engine"
+	case "SOLUTION_TYPE_RECOMMENDATION":
+		return "google_discovery_engine_recommendation_engine"
+	default:
+		return "google_discovery_engine_search_engine"
+	}
+}
