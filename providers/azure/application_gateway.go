@@ -15,58 +15,42 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2021-02-01/network"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7"
 )
 
 type ApplicationGatewayGenerator struct {
 	AzureService
 }
 
-func (g ApplicationGatewayGenerator) createResources(ctx context.Context, iterator network.ApplicationGatewayListResultIterator) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	for iterator.NotDone() {
-		applicationGateways := iterator.Value()
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*applicationGateways.ID,
-			*applicationGateways.Name,
-			"azurerm_application_gateway",
-			g.ProviderName,
-			[]string{}))
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
+// InitResources imports azurerm_application_gateway. Migrated to the Track 2
+// armnetwork SDK (was Track 1 services/network).
 func (g *ApplicationGatewayGenerator) InitResources() error {
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	applicationGatewaysClient := network.NewApplicationGatewaysClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	applicationGatewaysClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	var (
-		output network.ApplicationGatewayListResultIterator
-		err    error
-	)
-
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		output, err = applicationGatewaysClient.ListComplete(ctx, rg)
-	} else {
-		output, err = applicationGatewaysClient.ListAllComplete(ctx)
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
+	client, err := armnetwork.NewApplicationGatewaysClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	g.Resources, err = g.createResources(ctx, output)
-	return err
+	id := func(i *armnetwork.ApplicationGateway) string { return valueOrEmpty(i.ID) }
+	name := func(i *armnetwork.ApplicationGateway) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListAllPager(nil),
+			func(p armnetwork.ApplicationGatewaysClientListAllResponse) []*armnetwork.ApplicationGateway {
+				return p.Value
+			},
+			id, name, "azurerm_application_gateway")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListPager(rg, nil),
+			func(p armnetwork.ApplicationGatewaysClientListResponse) []*armnetwork.ApplicationGateway {
+				return p.Value
+			},
+			id, name, "azurerm_application_gateway"); err != nil {
+			return err
+		}
+	}
+	return nil
 }
