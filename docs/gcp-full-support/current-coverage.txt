@@ -5,6 +5,7 @@ google_biglake_catalog
 google_bigquery_dataset
 google_bigquery_table
 google_bigtable_instance
+google_bigtable_table
 google_binary_authorization_attestor
 google_certificate_manager_certificate
 google_cloud_run_v2_job
@@ -100,6 +101,7 @@ google_container_node_pool
 google_data_catalog_entry_group
 google_data_fusion_instance
 google_dataplex_lake
+google_dataplex_zone
 google_dataproc_autoscaling_policy
 google_dataproc_cluster
 google_dataproc_job
@@ -132,6 +134,7 @@ google_notebooks_instance
 google_oracle_database_cloud_exadata_infrastructure
 google_parallelstore_instance
 google_privateca_ca_pool
+google_privateca_certificate_authority
 google_project
 google_project_iam_custom_role
 google_project_iam_member
@@ -142,6 +145,7 @@ google_redis_instance
 google_secret_manager_secret
 google_service_account
 google_service_directory_namespace
+google_spanner_database
 google_spanner_instance
 google_sql_database
 google_sql_database_instance
