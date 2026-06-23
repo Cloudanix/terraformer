@@ -95,7 +95,23 @@ func (g *GkeHubGenerator) InitResources() error {
 	}
 
 	featuresList := gkeHubService.Projects.Locations.Features.List(parent)
-	g.Resources = append(g.Resources, g.createFeaturesResources(ctx, featuresList)...)
+	featureRes := g.createFeaturesResources(ctx, featuresList)
+	g.Resources = append(g.Resources, featureRes...)
+	for _, r := range featureRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := gkeHubService.Projects.Locations.Features.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_gke_hub_feature_iam_member", g.ProviderName,
+						map[string]string{"name": short, "role": b.Role, "member": m, "project": project, "location": loc},
+						gkeHubAllowEmptyValues, gkeHubAdditionalFields))
+				}
+			}
+		}
+	}
 
 	scopeNames := []string{}
 	scopesList := gkeHubService.Projects.Locations.Scopes.List(parent)
