@@ -813,6 +813,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_glue_catalog_table_optimizer`
     * `aws_glue_data_catalog_encryption_settings`
     * `aws_glue_resource_policy`
+    * `aws_glue_catalog`
     * `aws_glue_user_defined_function`
 *   `guardduty`
     * `aws_guardduty_detector`
@@ -1267,6 +1268,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sagemaker_endpoint`
     * `aws_sagemaker_endpoint_configuration`
     * `aws_sagemaker_code_repository`
+    * `aws_sagemaker_model_card`
+    * `aws_sagemaker_algorithm`
     * `aws_sagemaker_app_image_config`
     * `aws_sagemaker_device_fleet`
     * `aws_sagemaker_device`
@@ -1431,6 +1434,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_securityhub_product_subscription`
     * `aws_securityhub_organization_admin_account`
     * `aws_securityhub_organization_configuration`
+    * `aws_securityhub_automation_rule_v2`
     * `aws_securityhub_standards_control`
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
@@ -1571,6 +1575,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_transfer_connector`
     * `aws_transfer_profile`
     * `aws_transfer_workflow`
+    * `aws_transfer_web_app`
     * `aws_transfer_ssh_key`
     * `aws_transfer_user`
     * `aws_transfer_access`

@@ -272,6 +272,27 @@ func (g *GlueGenerator) InitResources() error {
 		}
 	}
 
+	// Federated/nested catalogs (imported by catalog name).
+	var catToken *string
+	for {
+		out, err := svc.GetCatalogs(context.TODO(), &glue.GetCatalogsInput{NextToken: catToken})
+		if err != nil {
+			break
+		}
+		for _, c := range out.CatalogList {
+			name := StringValue(c.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_glue_catalog", "aws", defaultAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		catToken = out.NextToken
+	}
+
 	return nil
 }
 

@@ -162,5 +162,17 @@ func (g *TransferGenerator) InitResources() error {
 			func(w types.ListedWorkflow) string { return StringValue(w.WorkflowId) },
 			func(w types.ListedWorkflow) string { return StringValue(w.WorkflowId) })
 	}
+
+	webApps := transfer.NewListWebAppsPaginator(svc, &transfer.ListWebAppsInput{})
+	for webApps.HasMorePages() {
+		page, err := webApps.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		g.Resources = appendSimpleResources(g.Resources, page.WebApps, "aws_transfer_web_app",
+			defaultAllowEmptyValues,
+			func(w types.ListedWebApp) string { return StringValue(w.WebAppId) },
+			func(w types.ListedWebApp) string { return StringValue(w.WebAppId) })
+	}
 	return nil
 }

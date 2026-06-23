@@ -123,6 +123,26 @@ func (g *SecurityhubGenerator) InitResources() error {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			*account, *account, "aws_securityhub_organization_configuration", "aws", securityhubAllowEmptyValues))
 	}
+
+	var arToken *string
+	for {
+		out, err := client.ListAutomationRulesV2(ctx, &securityhub.ListAutomationRulesV2Input{NextToken: arToken})
+		if err != nil {
+			break
+		}
+		for _, r := range out.Rules {
+			arn := StringValue(r.RuleArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, arn, "aws_securityhub_automation_rule_v2", "aws", securityhubAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		arToken = out.NextToken
+	}
 	return nil
 }
 

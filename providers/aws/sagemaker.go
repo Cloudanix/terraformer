@@ -134,6 +134,36 @@ func (g *SageMakerGenerator) InitResources() error {
 		}
 	}
 
+	for mc := sagemaker.NewListModelCardsPaginator(svc, &sagemaker.ListModelCardsInput{}); mc.HasMorePages(); {
+		page, err := mc.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, m := range page.ModelCardSummaries {
+			name := StringValue(m.ModelCardName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sagemaker_model_card", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for ap := sagemaker.NewListAlgorithmsPaginator(svc, &sagemaker.ListAlgorithmsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.AlgorithmSummaryList {
+			name := StringValue(a.AlgorithmName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sagemaker_algorithm", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	g.addMoreSageMaker(ctx, svc)
 	return nil
 }
