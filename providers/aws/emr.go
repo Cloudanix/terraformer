@@ -40,7 +40,29 @@ func (g *EmrGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	g.addBlockPublicAccess(client)
 	return g.addStudios(client)
+}
+
+// addBlockPublicAccess emits the region-level EMR block-public-access config
+// (aws_emr_block_public_access_configuration, imported by the literal "current")
+// only when it differs from the AWS default (block on, port 22 exempted) — so a
+// stock account doesn't produce spurious managed state.
+func (g *EmrGenerator) addBlockPublicAccess(client *emr.Client) {
+	out, err := client.GetBlockPublicAccessConfiguration(awsContext(), &emr.GetBlockPublicAccessConfigurationInput{})
+	if err != nil || out.BlockPublicAccessConfiguration == nil {
+		return
+	}
+	c := out.BlockPublicAccessConfiguration
+	blockOn := c.BlockPublicSecurityGroupRules != nil && *c.BlockPublicSecurityGroupRules
+	onlyPort22 := len(c.PermittedPublicSecurityGroupRuleRanges) == 1 &&
+		c.PermittedPublicSecurityGroupRuleRanges[0].MinRange != nil && *c.PermittedPublicSecurityGroupRuleRanges[0].MinRange == 22 &&
+		c.PermittedPublicSecurityGroupRuleRanges[0].MaxRange != nil && *c.PermittedPublicSecurityGroupRuleRanges[0].MaxRange == 22
+	if blockOn && onlyPort22 {
+		return // AWS default — not managed state
+	}
+	g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+		"current", "current", "aws_emr_block_public_access_configuration", "aws", emrAllowEmptyValues))
 }
 
 func (g *EmrGenerator) addStudios(client *emr.Client) error {

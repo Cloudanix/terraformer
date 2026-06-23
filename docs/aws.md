@@ -722,6 +722,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_emr_cluster`
     * `aws_emr_security_configuration`
     * `aws_emr_studio`
+    * `aws_emr_block_public_access_configuration`
     * `aws_emr_studio_session_mapping`
     * `aws_emr_instance_fleet`
     * `aws_emr_instance_group`
