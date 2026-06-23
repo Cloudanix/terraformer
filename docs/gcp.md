@@ -348,6 +348,7 @@ List of supported GCP services:
     * `google_compute_security_policy`
 *   `serviceDirectory`
     * `google_service_directory_namespace`
+    * `google_service_directory_service`
 *   `spanner`
 *   `storageTransfer`
     * `google_storage_transfer_job`

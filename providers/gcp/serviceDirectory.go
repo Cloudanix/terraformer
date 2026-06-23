@@ -33,35 +33,6 @@ type ServiceDirectoryGenerator struct {
 	GCPService
 }
 
-// Run on namespacesList and create for each TerraformResource
-func (g ServiceDirectoryGenerator) createResources(ctx context.Context, namespacesList *servicedirectory.ProjectsLocationsNamespacesListCall) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
-	location := g.GetArgs()["region"].(compute.Region).Name
-	if err := namespacesList.Pages(ctx, func(page *servicedirectory.ListNamespacesResponse) error {
-		for _, obj := range page.Namespaces {
-			t := strings.Split(obj.Name, "/")
-			name := t[len(t)-1]
-			resources = append(resources, terraformutils.NewResource(
-				obj.Name,
-				name,
-				"google_service_directory_namespace",
-				g.ProviderName,
-				map[string]string{
-					"name":     name,
-					"project":  g.GetArgs()["project"].(string),
-					"location": location,
-				},
-				serviceDirectoryAllowEmptyValues,
-				serviceDirectoryAdditionalFields,
-			))
-		}
-		return nil
-	}); err != nil {
-		log.Println(err)
-	}
-	return resources
-}
-
 // Generate TerraformResources from GCP API,
 func (g *ServiceDirectoryGenerator) InitResources() error {
 	ctx := context.Background()
@@ -70,8 +41,37 @@ func (g *ServiceDirectoryGenerator) InitResources() error {
 		return err
 	}
 
-	namespacesList := serviceDirectoryService.Projects.Locations.Namespaces.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, namespacesList)
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
+	nsNames := []string{}
+	namespacesList := serviceDirectoryService.Projects.Locations.Namespaces.List("projects/" + project + "/locations/" + location)
+	if err := namespacesList.Pages(ctx, func(page *servicedirectory.ListNamespacesResponse) error {
+		for _, obj := range page.Namespaces {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			nsNames = append(nsNames, obj.Name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_service_directory_namespace", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				serviceDirectoryAllowEmptyValues, serviceDirectoryAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	for _, ns := range nsNames {
+		if err := serviceDirectoryService.Projects.Locations.Namespaces.Services.List(ns).Pages(ctx, func(p *servicedirectory.ListServicesResponse) error {
+			for _, o := range p.Services {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_service_directory_service", g.ProviderName,
+					map[string]string{"namespace": ns, "project": project},
+					serviceDirectoryAllowEmptyValues, serviceDirectoryAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
 	return nil
 }
