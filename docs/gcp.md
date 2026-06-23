@@ -29,6 +29,8 @@ List of supported GCP services:
     * `google_compute_address`
 *   `autoscalers`
     * `google_compute_autoscaler`
+*   `accessContextManager`
+    * `google_access_context_manager_access_policy` (requires GOOGLE_ORGANIZATION)
 *   `apphub`
     * `google_apphub_application`
 *   `artifactRegistry`
