@@ -114,7 +114,76 @@ func (g *NetworkServicesGenerator) InitResources() error {
 
 	grpcRoutesList := networkServicesService.Projects.Locations.GrpcRoutes.List(parent)
 	g.Resources = append(g.Resources, g.createGRPCRoutesResources(ctx, grpcRoutesList)...)
+
+	tlsRoutesList := networkServicesService.Projects.Locations.TlsRoutes.List(parent)
+	g.Resources = append(g.Resources, g.createTLSRoutesResources(ctx, tlsRoutesList)...)
+
+	bindingsList := networkServicesService.Projects.Locations.ServiceBindings.List(parent)
+	g.Resources = append(g.Resources, g.createServiceBindingsResources(ctx, bindingsList)...)
+
+	endpointPoliciesList := networkServicesService.Projects.Locations.EndpointPolicies.List(parent)
+	g.Resources = append(g.Resources, g.createEndpointPoliciesResources(ctx, endpointPoliciesList)...)
 	return nil
+}
+
+func (g NetworkServicesGenerator) createTLSRoutesResources(ctx context.Context, list *networkservices.ProjectsLocationsTlsRoutesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *networkservices.ListTlsRoutesResponse) error {
+		for _, obj := range page.TlsRoutes {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_network_services_tls_route", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
+func (g NetworkServicesGenerator) createServiceBindingsResources(ctx context.Context, list *networkservices.ProjectsLocationsServiceBindingsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *networkservices.ListServiceBindingsResponse) error {
+		for _, obj := range page.ServiceBindings {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_network_services_service_binding", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
+func (g NetworkServicesGenerator) createEndpointPoliciesResources(ctx context.Context, list *networkservices.ProjectsLocationsEndpointPoliciesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *networkservices.ListEndpointPoliciesResponse) error {
+		for _, obj := range page.EndpointPolicies {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_network_services_endpoint_policy", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
 
 // Run on grpcRoutesList and create for each TerraformResource
