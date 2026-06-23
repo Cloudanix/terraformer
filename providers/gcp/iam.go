@@ -248,5 +248,37 @@ func (g *IamGenerator) InitResources() error {
 	g.Resources = append(g.Resources, g.createIamMemberResources(policyResponse, projectID)...)
 	g.Resources = append(g.Resources, g.createIamAuditConfigResources(policyResponse, projectID)...)
 	g.Resources = append(g.Resources, g.createWorkloadIdentityPoolResources(ctx, projectID)...)
+	g.loadOauthClients(ctx, projectID)
 	return nil
+}
+
+func (g *IamGenerator) loadOauthClients(ctx context.Context, project string) {
+	iamService, err := iamv1.NewService(ctx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	parent := "projects/" + project + "/locations/global"
+	if err := iamService.Projects.Locations.OauthClients.List(parent).Pages(ctx, func(p *iamv1.ListOauthClientsResponse) error {
+		for _, oc := range p.OauthClients {
+			t := strings.Split(oc.Name, "/")
+			ocID := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				oc.Name, ocID, "google_iam_oauth_client", g.ProviderName,
+				map[string]string{"oauth_client_id": ocID, "location": "global", "project": project},
+				IamAllowEmptyValues, IamAdditionalFields))
+			if cred, cerr := iamService.Projects.Locations.OauthClients.Credentials.List(oc.Name).Do(); cerr == nil {
+				for _, c := range cred.OauthClientCredentials {
+					ct := strings.Split(c.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						c.Name, ocID+"_"+ct[len(ct)-1], "google_iam_oauth_client_credential", g.ProviderName,
+						map[string]string{"oauth_client_credential_id": ct[len(ct)-1], "oauthclient": ocID, "location": "global", "project": project},
+						IamAllowEmptyValues, IamAdditionalFields))
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 }
