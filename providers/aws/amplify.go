@@ -68,6 +68,16 @@ func (g *AmplifyGenerator) InitResources() error {
 					appID+"/"+name, appID+"_"+name, "aws_amplify_branch", "aws", defaultAllowEmptyValues))
 			}
 		}
+		if da, err := svc.ListDomainAssociations(ctx, &amplify.ListDomainAssociationsInput{AppId: &appID}); err == nil {
+			for _, d := range da.DomainAssociations {
+				domain := StringValue(d.DomainName)
+				if domain == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					appID+"/"+domain, appID+"_"+domain, "aws_amplify_domain_association", "aws", defaultAllowEmptyValues))
+			}
+		}
 		if be, err := svc.ListBackendEnvironments(ctx, &amplify.ListBackendEnvironmentsInput{AppId: &appID}); err == nil {
 			for _, e := range be.BackendEnvironments {
 				name := StringValue(e.EnvironmentName)

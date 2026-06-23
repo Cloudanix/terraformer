@@ -120,5 +120,19 @@ func (g *RedshiftServerlessGenerator) InitResources() error {
 				name, name, "aws_redshiftserverless_endpoint_access", "aws", defaultAllowEmptyValues))
 		}
 	}
+	for cp := redshiftserverless.NewListCustomDomainAssociationsPaginator(svc, &redshiftserverless.ListCustomDomainAssociationsInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(ctx)
+		if err != nil {
+			break
+		}
+		for _, a := range page.Associations {
+			wg, domain := StringValue(a.WorkgroupName), StringValue(a.CustomDomainName)
+			if wg == "" || domain == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				wg+","+domain, wg+"_"+domain, "aws_redshiftserverless_custom_domain_association", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

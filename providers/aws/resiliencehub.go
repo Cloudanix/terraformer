@@ -47,5 +47,19 @@ func (g *ResilienceHubGenerator) InitResources() error {
 				id, StringValue(item.Name), "aws_resiliencehub_app", "aws", defaultAllowEmptyValues))
 		}
 	}
+	for pp := resiliencehub.NewListResiliencyPoliciesPaginator(svc, &resiliencehub.ListResiliencyPoliciesInput{}); pp.HasMorePages(); {
+		page, err := pp.NextPage(context.TODO())
+		if err != nil {
+			break
+		}
+		for _, pol := range page.ResiliencyPolicies {
+			arn := StringValue(pol.PolicyArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(pol.PolicyName), "aws_resiliencehub_resiliency_policy", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

@@ -121,9 +121,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_rekognition_project`
 *   `resiliencehub`
     * `aws_resiliencehub_app`
+    * `aws_resiliencehub_resiliency_policy`
 *   `amplify`
     * `aws_amplify_app`
     * `aws_amplify_branch`
+    * `aws_amplify_domain_association`
     * `aws_amplify_backend_environment`
     * `aws_amplify_webhook`
 *   `alb` (supports ALB and NLB)
@@ -1126,6 +1128,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshiftserverless_endpoint_access`
     * `aws_redshiftserverless_usage_limit`
     * `aws_redshiftserverless_resource_policy`
+    * `aws_redshiftserverless_custom_domain_association`
 *   `sagemaker`
     * `aws_sagemaker_domain`
     * `aws_sagemaker_user_profile`
