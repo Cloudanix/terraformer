@@ -219,6 +219,7 @@ google_kms_crypto_key_version
 google_kms_ekm_connection
 google_kms_key_handle
 google_kms_key_ring
+google_kms_key_ring_iam_member
 google_logging_folder_sink
 google_logging_metric
 google_logging_organization_sink
