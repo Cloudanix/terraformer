@@ -176,6 +176,21 @@ export ARM_USE_ADAL=true
     * `azurerm_kubernetes_cluster_node_pool`
 *   `application_insights`
     * `azurerm_application_insights`
+*   `automation`
+    * `azurerm_automation_account`
+*   `cognitive`
+    * `azurerm_cognitive_account`
+*   `eventgrid`
+    * `azurerm_eventgrid_domain`
+    * `azurerm_eventgrid_topic`
+*   `recovery_services`
+    * `azurerm_recovery_services_vault`
+*   `search`
+    * `azurerm_search_service`
+*   `servicebus`
+    * `azurerm_servicebus_namespace`
+*   `signalr`
+    * `azurerm_signalr_service`
 *   `load_balancer`
     * `azurerm_lb`
 *   `log_analytics`
