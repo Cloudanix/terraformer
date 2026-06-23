@@ -75,6 +75,27 @@ func (g *OpenSearchGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_opensearch_domain_saml_options", "aws", defaultAllowEmptyValues))
 		}
+		// Accounts authorized to access this domain's VPC endpoint.
+		// Import id is "<domain_name>,<account_id>".
+		var apToken *string
+		for {
+			acc, err := svc.ListVpcEndpointAccess(ctx, &opensearch.ListVpcEndpointAccessInput{DomainName: domain.DomainName, NextToken: apToken})
+			if err != nil {
+				break
+			}
+			for _, p := range acc.AuthorizedPrincipalList {
+				account := StringValue(p.Principal)
+				if account == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name+","+account, name+"_"+account, "aws_opensearch_authorize_vpc_endpoint_access", "aws", defaultAllowEmptyValues))
+			}
+			if acc.NextToken == nil {
+				break
+			}
+			apToken = acc.NextToken
+		}
 	}
 
 	if eps, err := svc.ListVpcEndpoints(ctx, &opensearch.ListVpcEndpointsInput{}); err == nil {

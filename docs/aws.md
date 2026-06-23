@@ -1044,6 +1044,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_opensearch_outbound_connection`
     * `aws_opensearch_package`
     * `aws_opensearch_application`
+    * `aws_opensearch_authorize_vpc_endpoint_access`
     * `aws_opensearch_package_association`
 *   `opensearchserverless`
     * `aws_opensearchserverless_collection`
