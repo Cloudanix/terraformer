@@ -291,6 +291,7 @@ List of supported GCP services:
 *   `vertexAI`
     * `google_vertex_ai_endpoint`
     * `google_vertex_ai_dataset`
+    * `google_vertex_ai_feature_online_store`
 *   `vmwareengine`
     * `google_vmwareengine_private_cloud`
     * `google_vmwareengine_cluster`

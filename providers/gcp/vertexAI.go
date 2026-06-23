@@ -105,5 +105,37 @@ func (g *VertexAIGenerator) InitResources() error {
 
 	datasetsList := vertexAIService.Projects.Locations.Datasets.List(parent)
 	g.Resources = append(g.Resources, g.createDatasetsResources(ctx, datasetsList)...)
+
+	fosList := vertexAIService.Projects.Locations.FeatureOnlineStores.List(parent)
+	g.Resources = append(g.Resources, g.createFeatureOnlineStoresResources(ctx, fosList)...)
 	return nil
+}
+
+// Run on featureOnlineStoresList and create for each TerraformResource
+func (g VertexAIGenerator) createFeatureOnlineStoresResources(ctx context.Context, list *aiplatform.ProjectsLocationsFeatureOnlineStoresListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *aiplatform.GoogleCloudAiplatformV1ListFeatureOnlineStoresResponse) error {
+		for _, obj := range page.FeatureOnlineStores {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_vertex_ai_feature_online_store",
+				g.ProviderName,
+				map[string]string{
+					"name":    name,
+					"project": g.GetArgs()["project"].(string),
+					"region":  location,
+				},
+				vertexAIAllowEmptyValues,
+				vertexAIAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
