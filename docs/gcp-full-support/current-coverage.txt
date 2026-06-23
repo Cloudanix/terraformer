@@ -125,6 +125,7 @@ google_eventarc_trigger
 google_filestore_backup
 google_filestore_instance
 google_firestore_database
+google_gke_hub_feature
 google_gke_hub_membership
 google_healthcare_dataset
 google_healthcare_dicom_store
@@ -183,6 +184,7 @@ google_storage_transfer_job
 google_tags_tag_key
 google_vertex_ai_dataset
 google_vertex_ai_endpoint
+google_vmwareengine_cluster
 google_vmwareengine_private_cloud
 google_vpc_access_connector
 google_workflows_workflow
