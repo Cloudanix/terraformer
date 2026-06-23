@@ -76,6 +76,8 @@ export ARM_USE_ADAL=true
     * `azurerm_container_registry_replication`
     * `azurerm_container_registry_task`
     * `azurerm_container_registry_webhook`
+*   `custom_provider`
+    * `azurerm_custom_provider`
 *   `cosmosdb`
     * `azurerm_cosmosdb_account`
     * `azurerm_cosmosdb_cassandra_keyspace`
@@ -367,6 +369,8 @@ export ARM_USE_ADAL=true
     * `azurerm_policy_assignment`
     * `azurerm_policy_definition`
     * `azurerm_policy_set_definition`
+*   `portal`
+    * `azurerm_portal_dashboard`
 *   `powerbi`
     * `azurerm_powerbi_embedded`
 *   `network_interface`

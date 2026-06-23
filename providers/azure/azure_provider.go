@@ -387,6 +387,8 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"confidential_ledger":                  &ConfidentialLedgerGenerator{},
 		"cosmosdb":                             &CosmosDBGenerator{},
 		"container":                            &ContainerGenerator{},
+		"custom_provider":                      &CustomProviderGenerator{},
+		"portal":                               &PortalGenerator{},
 		"container_app":                        &ContainerAppGenerator{},
 		"database":                             &DatabasesGenerator{},
 		"databricks":                           &DatabricksGenerator{},
