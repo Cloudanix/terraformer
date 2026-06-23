@@ -509,6 +509,7 @@ aws_globalaccelerator_endpoint_group
 aws_globalaccelerator_listener
 aws_glue_catalog_database
 aws_glue_catalog_table
+aws_glue_catalog_table_optimizer
 aws_glue_classifier
 aws_glue_connection
 aws_glue_crawler
@@ -517,6 +518,7 @@ aws_glue_data_quality_ruleset
 aws_glue_dev_endpoint
 aws_glue_job
 aws_glue_ml_transform
+aws_glue_partition
 aws_glue_partition_index
 aws_glue_registry
 aws_glue_resource_policy

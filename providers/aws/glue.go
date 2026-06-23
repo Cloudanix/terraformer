@@ -16,10 +16,12 @@ package aws
 
 import (
 	"context"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/glue"
+	gluetypes "github.com/aws/aws-sdk-go-v2/service/glue/types"
 )
 
 type GlueGenerator struct {
@@ -104,6 +106,35 @@ func (g *GlueGenerator) loadGlueCatalogTable(svc *glue.Client, account *string, 
 					// import: catalog:db:table:index
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						id+":"+indexName, databaseTable+"_"+indexName, "aws_glue_partition_index", "aws", GlueCatalogTableAllowEmptyValues))
+				}
+			}
+
+			// Partitions (import "catalog:db:table:val1#val2").
+			for pp := glue.NewGetPartitionsPaginator(svc, &glue.GetPartitionsInput{
+				CatalogId: account, DatabaseName: databaseName, TableName: catalogTable.Name,
+			}); pp.HasMorePages(); {
+				ppage, err := pp.NextPage(context.TODO())
+				if err != nil {
+					break
+				}
+				for _, part := range ppage.Partitions {
+					if len(part.Values) == 0 {
+						continue
+					}
+					vals := strings.Join(part.Values, "#")
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						id+":"+vals, databaseTable+"_"+vals, "aws_glue_partition", "aws", GlueCatalogTableAllowEmptyValues))
+				}
+			}
+
+			// Table optimizers (Iceberg compaction/retention/orphan-file-deletion).
+			for _, optType := range gluetypes.TableOptimizerType("").Values() {
+				if _, err := svc.GetTableOptimizer(context.TODO(), &glue.GetTableOptimizerInput{
+					CatalogId: account, DatabaseName: databaseName, TableName: catalogTable.Name, Type: optType,
+				}); err == nil {
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						*account+","+*databaseName+","+StringValue(catalogTable.Name)+","+string(optType),
+						databaseTable+"_"+string(optType), "aws_glue_catalog_table_optimizer", "aws", GlueCatalogTableAllowEmptyValues))
 				}
 			}
 		}

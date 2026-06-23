@@ -100,8 +100,6 @@ aws_emr_block_public_access_configuration
 aws_evidently_feature
 aws_evidently_launch
 aws_evidently_segment
-aws_glue_catalog_table_optimizer
-aws_glue_partition
 aws_grafana_workspace_api_key
 aws_guardduty_invite_accepter
 aws_iam_group_membership
