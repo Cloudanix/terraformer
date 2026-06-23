@@ -89,6 +89,34 @@ func (g HealthcareGenerator) createDicomStoresResources(ctx context.Context, lis
 	return resources
 }
 
+// Run on hl7V2StoresList and create for each TerraformResource (per-dataset walk)
+func (g HealthcareGenerator) createHl7V2StoresResources(ctx context.Context, list *healthcare.ProjectsLocationsDatasetsHl7V2StoresService, datasetName string) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	if err := list.List(datasetName).Pages(ctx, func(page *healthcare.ListHl7V2StoresResponse) error {
+		for _, obj := range page.Hl7V2Stores {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_healthcare_hl7_v2_store",
+				g.ProviderName,
+				map[string]string{
+					"name":    name,
+					"dataset": datasetName,
+					"project": g.GetArgs()["project"].(string),
+				},
+				healthcareAllowEmptyValues,
+				healthcareAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 func (g *HealthcareGenerator) InitResources() error {
 	ctx := context.Background()
@@ -124,6 +152,7 @@ func (g *HealthcareGenerator) InitResources() error {
 	for _, dataset := range datasetNames {
 		g.Resources = append(g.Resources, g.createFhirStoresResources(ctx, healthcareService.Projects.Locations.Datasets.FhirStores, dataset)...)
 		g.Resources = append(g.Resources, g.createDicomStoresResources(ctx, healthcareService.Projects.Locations.Datasets.DicomStores, dataset)...)
+		g.Resources = append(g.Resources, g.createHl7V2StoresResources(ctx, healthcareService.Projects.Locations.Datasets.Hl7V2Stores, dataset)...)
 	}
 	return nil
 }
