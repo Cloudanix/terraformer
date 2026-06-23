@@ -432,6 +432,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codestarnotifications_notification_rule`
 *   `controltower`
     * `aws_controltower_landing_zone`
+    * `aws_controltower_control`
 *   `chime-sdk-mediapipelines`
     * `aws_chimesdkmediapipelines_media_insights_pipeline_configuration`
 *   `chime-sdk-voice`
