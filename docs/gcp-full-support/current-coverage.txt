@@ -5,6 +5,7 @@ google_alloydb_backup
 google_alloydb_cluster
 google_alloydb_instance
 google_api_gateway_api
+google_api_source_id
 google_apphub_application
 google_apphub_service_project_attachment
 google_artifact_registry_repository
@@ -35,7 +36,9 @@ google_cloud_run_v2_worker_pool
 google_cloud_scheduler_job
 google_cloud_tasks_queue
 google_cloudbuild_trigger
+google_clouddeploy_custom_target_type
 google_clouddeploy_delivery_pipeline
+google_clouddeploy_deploy_policy
 google_clouddeploy_target
 google_cloudfunctions_function
 google_cloudfunctions2_function
@@ -154,6 +157,8 @@ google_dns_response_policy
 google_document_ai_processor
 google_essential_contacts_contact
 google_eventarc_channel
+google_eventarc_google_api_source
+google_eventarc_pipeline
 google_eventarc_trigger
 google_filestore_backup
 google_filestore_instance
