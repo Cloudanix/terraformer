@@ -73,6 +73,7 @@ var serviceScope = map[string]regionScope{
 	"chatbot":                      scopeRegional,
 	"dsql":                         scopeRegional,
 	"s3vectors":                    scopeRegional,
+	"bedrock-agentcore-control":    scopeRegional,
 	"arc-region-switch":            scopeRegional,
 	"arc-zonal-shift":              scopeRegional,
 	"workmail":                     scopeRegional,

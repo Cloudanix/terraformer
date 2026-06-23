@@ -336,6 +336,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"bedrock":                      &AwsFacade{service: &BedrockGenerator{}},
 		"account":                      &AwsFacade{service: &AccountGenerator{}},
 		"s3vectors":                    &AwsFacade{service: &S3VectorsGenerator{}},
+		"bedrock-agentcore-control":    &AwsFacade{service: &BedrockAgentCoreGenerator{}},
 		"arc-region-switch":            &AwsFacade{service: &ARCRegionSwitchGenerator{}},
 		"arc-zonal-shift":              &AwsFacade{service: &ARCZonalShiftGenerator{}},
 		"dsql":                         &AwsFacade{service: &DSQLGenerator{}},

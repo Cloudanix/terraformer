@@ -35,6 +35,19 @@ terraformer import aws --resources=sg --regions=us-east-1
 
 *   `dsql`
     * `aws_dsql_cluster`
+*   `bedrock-agentcore-control`
+    * `aws_bedrockagentcore_agent_runtime`
+    * `aws_bedrockagentcore_browser`
+    * `aws_bedrockagentcore_code_interpreter`
+    * `aws_bedrockagentcore_gateway`
+    * `aws_bedrockagentcore_memory`
+    * `aws_bedrockagentcore_workload_identity`
+    * `aws_bedrockagentcore_evaluator`
+    * `aws_bedrockagentcore_policy`
+    * `aws_bedrockagentcore_policy_engine`
+    * `aws_bedrockagentcore_harness`
+    * `aws_bedrockagentcore_api_key_credential_provider`
+    * `aws_bedrockagentcore_online_evaluation_config`
 *   `s3vectors`
     * `aws_s3vectors_vector_bucket`
     * `aws_s3vectors_index`
