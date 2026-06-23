@@ -21,10 +21,10 @@ import (
 	"strings"
 
 	admin "cloud.google.com/go/iam/admin/apiv1"
+	adminpb "cloud.google.com/go/iam/admin/apiv1/adminpb"
 	"google.golang.org/api/cloudresourcemanager/v1"
 	iamv1 "google.golang.org/api/iam/v1"
 	"google.golang.org/api/iterator"
-	adminpb "google.golang.org/genproto/googleapis/iam/admin/v1"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
