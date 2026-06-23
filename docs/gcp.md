@@ -167,6 +167,8 @@ List of supported GCP services:
     * `google_compute_managed_ssl_certificate`
 *   `sslPolicies`
     * `google_compute_ssl_policy`
+*   `workflows`
+    * `google_workflows_workflow`
 *   `subnetworks`
     * `google_compute_subnetwork`
 *   `targetHttpProxies`
