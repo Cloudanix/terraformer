@@ -282,6 +282,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/elasticsan/armelasticsan v
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/elasticsan/armelasticsan v1.2.0/go.mod h1:bXxc3uCnIUCh68pl4njcH45qUgRuR0kZfR6v06k18/A=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid v1.0.0 h1:w6b0+FygDpqM7g5cjbeyPoBzgxVHwwt2vCUvTz1oFY8=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventgrid/armeventgrid v1.0.0/go.mod h1:t8kRpcgm+RdImuJgHG6SfoQ0tpb9LGl7MF1E6u0yeeA=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub v1.3.0 h1:4hGvxD72TluuFIXVr8f4XkKZfqAa7Pj61t0jmQ7+kes=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/eventhub/armeventhub v1.3.0/go.mod h1:TSH7DcFItwAufy0Lz+Ft2cyopExCpxbOxI5SkH4dRNo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/fluidrelay/armfluidrelay v1.2.0 h1:JpVScLhDIZF7XIYLzN5RZjNbq94hBCh/z0pwSZhkEBs=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/fluidrelay/armfluidrelay v1.2.0/go.mod h1:v/pMJi3ZTXUHU3RXj2cNQ2FUpdyEYaewLSHJIm3EbQw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/healthcareapis/armhealthcareapis v1.2.0 h1:VnMkpOO24bEB9LsSXDG6iY+7QOUlvIGowh9vzQTbitY=
