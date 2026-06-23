@@ -43,6 +43,7 @@ List of supported GCP services:
     * `google_alloydb_user`
 *   `analyticsHub`
     * `google_bigquery_analytics_hub_data_exchange`
+    * `google_bigquery_analytics_hub_listing`
 *   `activeDirectory`
     * `google_active_directory_domain`
 *   `apiKeys`

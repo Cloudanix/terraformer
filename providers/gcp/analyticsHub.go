@@ -43,11 +43,13 @@ func (g *AnalyticsHubGenerator) InitResources() error {
 	location := g.GetArgs()["region"].(compute.Region).Name
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + location
 
+	exchangeNames := []string{}
 	list := svc.Projects.Locations.DataExchanges.List(parent)
 	if err := list.Pages(ctx, func(page *analyticshub.ListDataExchangesResponse) error {
 		for _, obj := range page.DataExchanges {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
+			exchangeNames = append(exchangeNames, obj.Name)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_bigquery_analytics_hub_data_exchange", g.ProviderName,
 				map[string]string{"data_exchange_id": name, "project": g.GetArgs()["project"].(string), "location": location},
@@ -57,6 +59,22 @@ func (g *AnalyticsHubGenerator) InitResources() error {
 		return nil
 	}); err != nil {
 		log.Println(err)
+	}
+	for _, ex := range exchangeNames {
+		exID := strings.Split(ex, "/")[len(strings.Split(ex, "/"))-1]
+		if err := svc.Projects.Locations.DataExchanges.Listings.List(ex).Pages(ctx, func(page *analyticshub.ListListingsResponse) error {
+			for _, obj := range page.Listings {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_bigquery_analytics_hub_listing", g.ProviderName,
+					map[string]string{"listing_id": name, "data_exchange_id": exID, "project": g.GetArgs()["project"].(string), "location": location},
+					analyticsHubAllowEmptyValues, analyticsHubAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
