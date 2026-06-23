@@ -66,6 +66,7 @@ var serviceScope = map[string]regionScope{
 	"appintegrations":              scopeRegional,
 	"bcmdataexports":               scopeRegional,
 	"chatbot":                      scopeRegional,
+	"devops-guru":                  scopeRegional,
 	"pinpointsmsvoicev2":           scopeRegional,
 	"route53recoverycontrolconfig": scopeRegional,
 	"verifiedaccess":               scopeRegional,
