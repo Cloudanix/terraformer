@@ -1,11 +1,14 @@
 azurerm_analysis_services_server
+azurerm_api_management
 azurerm_app_service
 azurerm_application_gateway
 azurerm_application_insights
 azurerm_automation_account
+azurerm_bastion_host
 azurerm_cdn_endpoint
 azurerm_cdn_profile
 azurerm_cognitive_account
+azurerm_container_app
 azurerm_container_group
 azurerm_container_registry
 azurerm_container_registry_webhook
@@ -78,9 +81,11 @@ azurerm_eventhub_consumer_group
 azurerm_eventhub_namespace
 azurerm_eventhub_namespace_authorization_rule
 azurerm_firewall
+azurerm_iothub
 azurerm_key_vault
 azurerm_kubernetes_cluster
 azurerm_kubernetes_cluster_node_pool
+azurerm_kusto_cluster
 azurerm_lb
 azurerm_lb_backend_address_pool
 azurerm_lb_nat_rule
@@ -88,7 +93,9 @@ azurerm_lb_probe
 azurerm_linux_virtual_machine
 azurerm_local_network_gateway
 azurerm_log_analytics_workspace
+azurerm_machine_learning_workspace
 azurerm_managed_disk
+azurerm_management_group
 azurerm_management_lock
 azurerm_mariadb_configuration
 azurerm_mariadb_database
@@ -109,6 +116,7 @@ azurerm_mysql_flexible_server
 azurerm_mysql_server
 azurerm_mysql_virtual_network_rule
 azurerm_nat_gateway
+azurerm_network_ddos_protection_plan
 azurerm_network_interface
 azurerm_network_packet_capture
 azurerm_network_security_group
@@ -157,6 +165,7 @@ azurerm_ssh_public_key
 azurerm_storage_account
 azurerm_storage_blob
 azurerm_storage_container
+azurerm_stream_analytics_job
 azurerm_subnet
 azurerm_subnet_nat_gateway_association
 azurerm_subnet_network_security_group_association

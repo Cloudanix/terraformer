@@ -6,7 +6,12 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **180** types (real; `azurerm_test` in helper test is not counted).
+- Current: **189** types (+48). New services registered: nat_gateway, kubernetes,
+  managed_identity, log_analytics, application_insights, traffic_manager,
+  firewall, virtual_wan, monitor, cdn, role_assignment, recovery_services,
+  automation, servicebus, cognitive, search, signalr, eventgrid, bastion, ddos,
+  kusto, iothub, stream_analytics, container_app, apim, management_group,
+  machine_learning. Plus gaps in virtual_network/database/cosmosdb/redis.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
 
 ## Phase 0 — foundations (DONE)
