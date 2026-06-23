@@ -264,6 +264,8 @@ List of supported GCP services:
 *   `pubsub`
 *   `pubsubLite`
     * `google_pubsub_lite_topic`
+    * `google_pubsub_lite_subscription`
+    * `google_pubsub_lite_reservation`
 *   `recaptchaEnterprise`
     * `google_recaptcha_enterprise_key`
     * `google_pubsub_subscription`

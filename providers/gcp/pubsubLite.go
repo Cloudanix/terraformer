@@ -43,6 +43,7 @@ func (g *PubsubLiteGenerator) InitResources() error {
 	location := g.GetArgs()["region"].(compute.Region).Name
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + location
 
+	project := g.GetArgs()["project"].(string)
 	topicsList := svc.Admin.Projects.Locations.Topics.List(parent)
 	if err := topicsList.Pages(ctx, func(page *pubsublite.ListTopicsResponse) error {
 		for _, obj := range page.Topics {
@@ -50,7 +51,39 @@ func (g *PubsubLiteGenerator) InitResources() error {
 			name := t[len(t)-1]
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_pubsub_lite_topic", g.ProviderName,
-				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "zone": location},
+				map[string]string{"name": name, "project": project, "zone": location},
+				pubsubLiteAllowEmptyValues, pubsubLiteAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	subsList := svc.Admin.Projects.Locations.Subscriptions.List(parent)
+	if err := subsList.Pages(ctx, func(page *pubsublite.ListSubscriptionsResponse) error {
+		for _, obj := range page.Subscriptions {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_pubsub_lite_subscription", g.ProviderName,
+				map[string]string{"name": name, "project": project, "zone": location},
+				pubsubLiteAllowEmptyValues, pubsubLiteAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	resList := svc.Admin.Projects.Locations.Reservations.List(parent)
+	if err := resList.Pages(ctx, func(page *pubsublite.ListReservationsResponse) error {
+		for _, obj := range page.Reservations {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_pubsub_lite_reservation", g.ProviderName,
+				map[string]string{"name": name, "project": project, "region": location},
 				pubsubLiteAllowEmptyValues, pubsubLiteAdditionalFields,
 			))
 		}
