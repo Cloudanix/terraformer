@@ -79,16 +79,23 @@ services + multi-resource sub-resource expansions.
 
 Behavior-preserving SDK swaps (same resource types + ARM import IDs), validated
 by build/vet/test (live no-diff `terraform plan` round-trip not available in the
-offline sandbox). **Migrated:** disk, public_ip (+prefix), ssh_public_key,
-resource_group, management_lock, route_table (+route/route_filter),
-network_security_group (+rule), app_service (also modernized).
+offline sandbox). **17 of 35 migrated** — the entire armnetwork networking
+cluster + compute are done:
+- compute/network: disk, public_ip (+prefix), ssh_public_key, network_interface,
+  route_table (+route/route_filter), network_security_group (+rule),
+  virtual_network, subnet (+associations), private_endpoint (+link_service),
+  network_watcher (+flow_log/packet_capture/connection_monitor), load_balancer
+  (+probe/nat_rule/backend_pool/lb_rule/outbound_rule), application_gateway,
+  virtual_machine (linux/windows), scaleset
+- other: resource_group (armresources), management_lock (armlocks),
+  app_service (armappservice, also modernized)
 
-**Remaining (~27 files still import `azure-sdk-for-go/services`):** networking
-(virtual_network, subnet, network_interface, network_watcher, dns, private_dns,
-private_endpoint, application_gateway, load_balancer), compute (virtual_machine,
-scaleset), storage_*, database, cosmosdb, eventhub, keyvault, redis, container,
-data_factory (largest), synapse, analysis, databricks, purview, security_center_*.
-Done when `grep -r "azure-sdk-for-go/services" providers/azure` is empty; then
+**Remaining 18 files (each needs its own armXxx module fetch):** dns, private_dns,
+storage_account, storage_blob, storage_container, database, cosmosdb, eventhub,
+keyvault, redis, container, data_factory (largest, ~40 types), synapse, analysis,
+databricks, purview, security_center_contact, security_center_subscription_pricing.
+Several already have Track 2 gap-additions; only their core list stays Track 1.
+Done when `grep -rl "azure-sdk-for-go/services" providers/azure` is empty; then
 drop Track 1 + go-autorest/hamilton from go.mod.
 
 ## How to build/test offline (sandbox)
