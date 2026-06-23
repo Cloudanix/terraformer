@@ -261,4 +261,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionHealthAggregationPolicies": basicGCPResource{
 		terraformName: "google_compute_region_health_aggregation_policy",
 	},
+	"regionHealthSources": basicGCPResource{
+		terraformName: "google_compute_region_health_source",
+	},
 }
