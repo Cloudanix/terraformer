@@ -188,8 +188,20 @@ export ARM_USE_ADAL=true
     * `azurerm_batch_account`
 *   `dashboard`
     * `azurerm_dashboard_grafana`
+*   `data_share`
+    * `azurerm_data_share_account`
 *   `digital_twins`
     * `azurerm_digital_twins_instance`
+*   `elastic_san`
+    * `azurerm_elastic_san`
+*   `healthcare`
+    * `azurerm_healthcare_service`
+*   `load_test`
+    * `azurerm_load_test`
+*   `private_dns_resolver`
+    * `azurerm_private_dns_resolver`
+*   `spring_cloud`
+    * `azurerm_spring_cloud_service`
 *   `cdn`
     * `azurerm_cdn_endpoint`
     * `azurerm_cdn_profile`
