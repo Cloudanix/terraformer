@@ -166,7 +166,25 @@ func (g *SageMakerGenerator) addMoreSageMaker(ctx context.Context, svc *sagemake
 			break
 		}
 		for _, x := range pg.DeviceFleetSummaries {
-			add(StringValue(x.DeviceFleetName), "aws_sagemaker_device_fleet")
+			fleetName := StringValue(x.DeviceFleetName)
+			add(fleetName, "aws_sagemaker_device_fleet")
+			if fleetName == "" {
+				continue
+			}
+			for dp := sagemaker.NewListDevicesPaginator(svc, &sagemaker.ListDevicesInput{DeviceFleetName: &fleetName}); dp.HasMorePages(); {
+				dpage, e := dp.NextPage(ctx)
+				if e != nil {
+					break
+				}
+				for _, d := range dpage.DeviceSummaries {
+					deviceName := StringValue(d.DeviceName)
+					if deviceName == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						fleetName+"/"+deviceName, fleetName+"_"+deviceName, "aws_sagemaker_device", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 	for p := sagemaker.NewListFeatureGroupsPaginator(svc, &sagemaker.ListFeatureGroupsInput{}); p.HasMorePages(); {
