@@ -51,6 +51,35 @@ Remaining sub-resources (healthcare_*_store, kms_crypto_key_version,
 sql_user, bigquery_routine, more dataplex/privateca/spanner children) follow the
 SAME parent-walk pattern — mechanical follow-ups.
 
+## Final session tally (2026-06-23) — 126 commits, coverage 88 → 188
+
+All Phase-One PATTERNS and CATEGORIES implemented + validated (build/vet/gofmt/test;
+SA1019 lint debt 18→0):
+- Sub-resources / expansions added (~30): spanner_database, bigtable_table,
+  bigtable_app_profile, privateca_certificate_authority, dataplex_zone,
+  healthcare_{fhir,dicom,hl7_v2}_store, sql_user, kms_crypto_key_version,
+  bigquery_routine, datastream_connection_profile, network_services_gateway,
+  network_connectivity_spoke, vertex_ai_dataset, cloud_run_v2_job,
+  dataproc_{autoscaling_policy,workflow_template}, dns_{policy,response_policy},
+  storage_hmac_key, pubsub_schema, eventarc_channel, redis_cluster,
+  logging_project_sink, iam_workload_identity_pool(_provider).
+- Special-signature services: tags, dlp, discoveryEngine, storageTransfer.
+- Project-scoped org: orgPolicy.
+- GAPIC deprecation migrations: iam, monitoring, cloudbuild, cloudtasks.
+
+REMAINING (~1091) is volume + tool-features, not new patterns:
+1. Hundreds more mechanical sub-resources — identical proven shape over different
+   parents (per-service second/third/Nth children).
+2. True org/folder-scoped (scc sources, access_context_manager perimeters) — emit
+   under org/folder; needs `--folder`/`--org` arg plumbing in
+   cmd/provider_cmd_google.go + Init + output-path logic (a TOOL FEATURE).
+3. beta-only (134) — need `--provider-type beta` round-trip validation.
+
+All compile-validated only; the `terraform plan` refresh round-trip (the §9
+correctness bar) needs a live GCP project the sandbox cannot provide. Import IDs
+follow provider-doc conventions but are unverified at refresh. Validate this
+session's batch on a real project before fanning out the mechanical remainder.
+
 Deferred (need special handling, not the simple project/region list pattern):
 - Org/folder-scoped: securityCenter (scc), accessContextManager, orgPolicy,
   apigee, tags (List uses query-param parent) — different arg model.
