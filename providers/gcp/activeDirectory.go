@@ -41,7 +41,7 @@ func (g *ActiveDirectoryGenerator) InitResources() error {
 	}
 	project := g.GetArgs()["project"].(string)
 
-	if err := svc.Projects.Locations.Global.Domains.List("projects/" + project + "/locations/global").Pages(ctx, func(page *managedidentities.ListDomainsResponse) error {
+	if err := svc.Projects.Locations.Global.Domains.List("projects/"+project+"/locations/global").Pages(ctx, func(page *managedidentities.ListDomainsResponse) error {
 		for _, obj := range page.Domains {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]

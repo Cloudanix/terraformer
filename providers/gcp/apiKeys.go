@@ -42,7 +42,7 @@ func (g *APIKeysGenerator) InitResources() error {
 	}
 	project := g.GetArgs()["project"].(string)
 
-	if err := svc.Projects.Locations.Keys.List("projects/" + project + "/locations/global").Pages(ctx, func(page *apikeys.V2ListKeysResponse) error {
+	if err := svc.Projects.Locations.Keys.List("projects/"+project+"/locations/global").Pages(ctx, func(page *apikeys.V2ListKeysResponse) error {
 		for _, obj := range page.Keys {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
