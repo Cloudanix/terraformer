@@ -128,6 +128,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["artifactRegistry"] = &GCPFacade{service: &ArtifactRegistryGenerator{}}
 	services["spanner"] = &GCPFacade{service: &SpannerGenerator{}}
 	services["bigtable"] = &GCPFacade{service: &BigtableGenerator{}}
+	services["cloudRun"] = &GCPFacade{service: &CloudRunGenerator{}}
 	return services
 }
 
