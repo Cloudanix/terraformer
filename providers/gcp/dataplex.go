@@ -65,8 +65,34 @@ func (g *DataplexGenerator) InitResources() error {
 		log.Println(err)
 	}
 
-	// Walk each lake for its zones.
+	// Walk each lake for its zones and tasks.
 	for _, lake := range lakeNames {
+		tasksList := dataplexService.Projects.Locations.Lakes.Tasks.List(
+			"projects/" + project + "/locations/" + location + "/lakes/" + lake)
+		if err := tasksList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListTasksResponse) error {
+			for _, obj := range page.Tasks {
+				tt := strings.Split(obj.Name, "/")
+				name := tt[len(tt)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name,
+					name,
+					"google_dataplex_task",
+					g.ProviderName,
+					map[string]string{
+						"task_id":  name,
+						"lake":     lake,
+						"project":  project,
+						"location": location,
+					},
+					dataplexAllowEmptyValues,
+					dataplexAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+
 		zonesList := dataplexService.Projects.Locations.Lakes.Zones.List(
 			"projects/" + project + "/locations/" + location + "/lakes/" + lake)
 		if err := zonesList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListZonesResponse) error {
