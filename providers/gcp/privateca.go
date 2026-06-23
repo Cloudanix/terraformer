@@ -65,6 +65,20 @@ func (g *PrivatecaGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	if err := privatecaService.Projects.Locations.CertificateTemplates.List("projects/"+project+"/locations/"+location).Pages(ctx, func(p *privateca.ListCertificateTemplatesResponse) error {
+		for _, o := range p.CertificateTemplates {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_privateca_certificate_template", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				privatecaAllowEmptyValues, privatecaAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	// Walk each CA pool for its certificate authorities.
 	for _, pool := range poolNames {
 		caList := privatecaService.Projects.Locations.CaPools.CertificateAuthorities.List(
