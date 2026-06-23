@@ -62,6 +62,35 @@ func (g CloudRunGenerator) createResources(ctx context.Context, servicesList *ru
 	return resources
 }
 
+// Run on jobsList and create for each TerraformResource
+func (g CloudRunGenerator) createJobsResources(ctx context.Context, jobsList *run.ProjectsLocationsJobsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := jobsList.Pages(ctx, func(page *run.GoogleCloudRunV2ListJobsResponse) error {
+		for _, obj := range page.Jobs {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_cloud_run_v2_job",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				cloudRunAllowEmptyValues,
+				cloudRunAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 func (g *CloudRunGenerator) InitResources() error {
 	ctx := context.Background()
@@ -70,8 +99,11 @@ func (g *CloudRunGenerator) InitResources() error {
 		return err
 	}
 
-	servicesList := runService.Projects.Locations.Services.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, servicesList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	servicesList := runService.Projects.Locations.Services.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, servicesList)...)
+
+	jobsList := runService.Projects.Locations.Jobs.List(parent)
+	g.Resources = append(g.Resources, g.createJobsResources(ctx, jobsList)...)
 	return nil
 }
