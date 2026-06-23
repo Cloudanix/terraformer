@@ -16,6 +16,7 @@ package gcp
 
 import (
 	"context"
+	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"google.golang.org/api/iterator"
@@ -102,8 +103,90 @@ func (g *LoggingGenerator) InitResources() error {
 		return err
 	}
 	g.loadScopedSinks(ctx)
+	g.loadProjectLogging(ctx, project)
 
 	return nil
+}
+
+// loadProjectLogging enumerates project-scoped logging resources via the loggingv2 REST API.
+func (g *LoggingGenerator) loadProjectLogging(ctx context.Context, project string) {
+	svc, err := loggingv2.NewService(ctx)
+	if err != nil {
+		return
+	}
+	projParent := "projects/" + project
+	locParent := projParent + "/locations/-"
+
+	if err := svc.Projects.Exclusions.List(projParent).Pages(ctx, func(p *loggingv2.ListExclusionsResponse) error {
+		for _, o := range p.Exclusions {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				projParent+"/exclusions/"+o.Name, o.Name, "google_logging_project_exclusion", g.ProviderName,
+				map[string]string{"name": o.Name, "project": project}, loggingAllowEmptyValues, loggingAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		_ = err
+	}
+	if err := svc.Projects.Locations.SavedQueries.List(locParent).Pages(ctx, func(p *loggingv2.ListSavedQueriesResponse) error {
+		for _, o := range p.SavedQueries {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_logging_saved_query", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "project": project}, loggingAllowEmptyValues, loggingAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		_ = err
+	}
+	if err := svc.Projects.Locations.LogScopes.List(locParent).Pages(ctx, func(p *loggingv2.ListLogScopesResponse) error {
+		for _, o := range p.LogScopes {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_logging_log_scope", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "project": project}, loggingAllowEmptyValues, loggingAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		_ = err
+	}
+	if err := svc.Projects.Locations.Buckets.List(locParent).Pages(ctx, func(p *loggingv2.ListBucketsResponse) error {
+		for _, b := range p.Buckets {
+			bt := strings.Split(b.Name, "/")
+			bucketID := bt[len(bt)-1]
+			loc := bt[len(bt)-3]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				b.Name, bucketID, "google_logging_project_bucket_config", g.ProviderName,
+				map[string]string{"bucket_id": bucketID, "location": loc, "project": project},
+				loggingAllowEmptyValues, loggingAdditionalFields))
+			if verr := svc.Projects.Locations.Buckets.Views.List(b.Name).Pages(ctx, func(vp *loggingv2.ListViewsResponse) error {
+				for _, v := range vp.Views {
+					vt := strings.Split(v.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						v.Name, vt[len(vt)-1], "google_logging_log_view", g.ProviderName,
+						map[string]string{"name": vt[len(vt)-1], "bucket": b.Name, "location": loc, "project": project},
+						loggingAllowEmptyValues, loggingAdditionalFields))
+				}
+				return nil
+			}); verr != nil {
+				_ = verr
+			}
+			if lerr := svc.Projects.Locations.Buckets.Links.List(b.Name).Pages(ctx, func(lp *loggingv2.ListLinksResponse) error {
+				for _, l := range lp.Links {
+					lt := strings.Split(l.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						l.Name, lt[len(lt)-1], "google_logging_linked_dataset", g.ProviderName,
+						map[string]string{"link_id": lt[len(lt)-1], "bucket": b.Name, "location": loc, "project": project},
+						loggingAllowEmptyValues, loggingAdditionalFields))
+				}
+				return nil
+			}); lerr != nil {
+				_ = lerr
+			}
+		}
+		return nil
+	}); err != nil {
+		_ = err
+	}
 }
 
 // loadScopedSinks enumerates folder/organization log sinks when GOOGLE_FOLDER /
