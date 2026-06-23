@@ -56,6 +56,12 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_s3files_mount_target`
 *   `uxc`
     * `aws_uxc_account_customizations`
+*   `vpc-route-server`
+    * `aws_vpc_route_server`
+    * `aws_vpc_route_server_endpoint`
+    * `aws_vpc_route_server_peer`
+    * `aws_vpc_route_server_vpc_association`
+    * `aws_vpc_route_server_propagation`
 *   `s3vectors`
     * `aws_s3vectors_vector_bucket`
     * `aws_s3vectors_index`
