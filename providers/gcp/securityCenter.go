@@ -67,5 +67,28 @@ func (g *SecurityCenterGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+
+	ncList := sccService.Organizations.NotificationConfigs.List("organizations/" + org)
+	if err := ncList.Pages(ctx, func(page *securitycenter.ListNotificationConfigsResponse) error {
+		for _, obj := range page.NotificationConfigs {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_scc_notification_config",
+				g.ProviderName,
+				map[string]string{
+					"organization": org,
+					"config_id":    name,
+				},
+				securityCenterAllowEmptyValues,
+				securityCenterAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

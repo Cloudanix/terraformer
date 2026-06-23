@@ -319,6 +319,7 @@ List of supported GCP services:
     * `google_secure_source_manager_instance`
 *   `securityCenter`
     * `google_scc_source` (requires GOOGLE_ORGANIZATION)
+    * `google_scc_notification_config` (requires GOOGLE_ORGANIZATION)
     * `google_secret_manager_secret`
 *   `securityPolicies`
     * `google_compute_security_policy`
