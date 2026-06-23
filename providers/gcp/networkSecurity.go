@@ -300,10 +300,67 @@ func (g *NetworkSecurityGenerator) InitResources() error {
 				o.Name, name, "google_network_security_gateway_security_policy", g.ProviderName,
 				map[string]string{"name": name, "project": proj, "location": loc},
 				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+			if rerr := nsService.Projects.Locations.GatewaySecurityPolicies.Rules.List(o.Name).Pages(ctx, func(rp *networksecurity.ListGatewaySecurityPolicyRulesResponse) error {
+				for _, r := range rp.GatewaySecurityPolicyRules {
+					rt := strings.Split(r.Name, "/")
+					rName := rt[len(rt)-1]
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						r.Name, rName, "google_network_security_gateway_security_policy_rule", g.ProviderName,
+						map[string]string{"name": rName, "gateway_security_policy": name, "project": proj, "location": loc},
+						networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+				}
+				return nil
+			}); rerr != nil {
+				log.Println(rerr)
+			}
 		}
 		return nil
 	}); err != nil {
 		log.Println(err)
+	}
+
+	// Organization-scoped network security resources (require GOOGLE_ORGANIZATION).
+	if org, _ := g.GetArgs()["organization"].(string); org != "" {
+		orgParent := "organizations/" + org + "/locations/" + loc
+		if err := nsService.Organizations.Locations.SecurityProfiles.List(orgParent).Pages(ctx, func(p *networksecurity.ListSecurityProfilesResponse) error {
+			for _, o := range p.SecurityProfiles {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_network_security_security_profile", g.ProviderName,
+					map[string]string{"name": name, "parent": "organizations/" + org, "location": loc},
+					networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+		if err := nsService.Organizations.Locations.SecurityProfileGroups.List(orgParent).Pages(ctx, func(p *networksecurity.ListSecurityProfileGroupsResponse) error {
+			for _, o := range p.SecurityProfileGroups {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_network_security_security_profile_group", g.ProviderName,
+					map[string]string{"name": name, "parent": "organizations/" + org, "location": loc},
+					networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+		if err := nsService.Organizations.Locations.FirewallEndpoints.List(orgParent).Pages(ctx, func(p *networksecurity.ListFirewallEndpointsResponse) error {
+			for _, o := range p.FirewallEndpoints {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_network_security_firewall_endpoint", g.ProviderName,
+					map[string]string{"name": name, "parent": "organizations/" + org, "location": loc},
+					networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
