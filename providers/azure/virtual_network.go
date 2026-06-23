@@ -88,6 +88,10 @@ func (g *VirtualNetworkGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.initVirtualNetworkGatewayConnections(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -139,6 +143,32 @@ func (g *VirtualNetworkGenerator) initLocalNetworkGateways() error {
 			func(i *armnetwork.LocalNetworkGateway) string { return valueOrEmpty(i.ID) },
 			func(i *armnetwork.LocalNetworkGateway) string { return valueOrEmpty(i.Name) },
 			"azurerm_local_network_gateway"); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// initVirtualNetworkGatewayConnections enumerates
+// azurerm_virtual_network_gateway_connection via Track 2. RG-scoped.
+func (g *VirtualNetworkGenerator) initVirtualNetworkGatewayConnections() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	client, err := armnetwork.NewVirtualNetworkGatewayConnectionsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	for _, rg := range g.resourceGroups() {
+		pager := client.NewListPager(rg, nil)
+		if err := appendFromPager(&g.AzureService, pager,
+			func(p armnetwork.VirtualNetworkGatewayConnectionsClientListResponse) []*armnetwork.VirtualNetworkGatewayConnection {
+				return p.Value
+			},
+			func(i *armnetwork.VirtualNetworkGatewayConnection) string { return valueOrEmpty(i.ID) },
+			func(i *armnetwork.VirtualNetworkGatewayConnection) string { return valueOrEmpty(i.Name) },
+			"azurerm_virtual_network_gateway_connection"); err != nil {
 			return err
 		}
 	}
