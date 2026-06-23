@@ -6,7 +6,7 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **205** types (+64). 50+ new services across networking, monitoring, data, AI, app platform, governance.
+- Current: **210** types (+69). 50+ new services; long-tail + sub-resource gaps + azuread + Track-1 migration remain.
   managed_identity, log_analytics, application_insights, traffic_manager,
   firewall, virtual_wan, monitor, cdn, role_assignment, recovery_services,
   automation, servicebus, cognitive, search, signalr, eventgrid, bastion, ddos,
