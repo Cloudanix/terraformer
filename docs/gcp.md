@@ -338,6 +338,8 @@ List of supported GCP services:
     * `google_vmwareengine_private_cloud`
     * `google_vmwareengine_cluster`
     * `google_vmwareengine_network_policy`
+    * `google_vmwareengine_network_peering`
+    * `google_vmwareengine_network`
 *   `vpcAccess`
     * `google_vpc_access_connector`
 *   `workstations`

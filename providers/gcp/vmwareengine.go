@@ -66,6 +66,38 @@ func (g *VmwareengineGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	peeringsList := vmwareengineService.Projects.Locations.NetworkPeerings.List("projects/" + project + "/locations/" + location)
+	if err := peeringsList.Pages(ctx, func(page *vmwareengine.ListNetworkPeeringsResponse) error {
+		for _, obj := range page.NetworkPeerings {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_vmwareengine_network_peering", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				vmwareengineAllowEmptyValues, vmwareengineAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	venList := vmwareengineService.Projects.Locations.VmwareEngineNetworks.List("projects/" + project + "/locations/" + location)
+	if err := venList.Pages(ctx, func(page *vmwareengine.ListVmwareEngineNetworksResponse) error {
+		for _, obj := range page.VmwareEngineNetworks {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_vmwareengine_network", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				vmwareengineAllowEmptyValues, vmwareengineAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	npList := vmwareengineService.Projects.Locations.NetworkPolicies.List("projects/" + project + "/locations/" + location)
 	if err := npList.Pages(ctx, func(page *vmwareengine.ListNetworkPoliciesResponse) error {
 		for _, obj := range page.NetworkPolicies {
