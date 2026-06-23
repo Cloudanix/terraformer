@@ -127,6 +127,7 @@ export ARM_USE_ADAL=true
     * `azurerm_mysql_configuration`
     * `azurerm_mysql_database`
     * `azurerm_mysql_firewall_rule`
+    * `azurerm_mysql_flexible_server`
     * `azurerm_mysql_server`
     * `azurerm_mysql_virtual_network_rule`
     * `azurerm_postgresql_configuration`

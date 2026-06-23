@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"strings"
 
+	armmysqlflex "github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/mysql/armmysqlflexibleservers"
 	"github.com/Azure/azure-sdk-for-go/services/mariadb/mgmt/2018-06-01/mariadb"
 	"github.com/Azure/azure-sdk-for-go/services/mysql/mgmt/2017-12-01/mysql"
 	"github.com/Azure/azure-sdk-for-go/services/postgresql/mgmt/2017-12-01/postgresql"
@@ -914,6 +915,40 @@ func (g *DatabasesGenerator) InitResources() error {
 		g.Resources = append(g.Resources, resources...)
 	}
 
+	if err := g.initMySQLFlexibleServers(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// initMySQLFlexibleServers enumerates azurerm_mysql_flexible_server via the
+// Track 2 SDK (the newer flexible tier; the Track 1 mysql module above only
+// covers the legacy single-server tier). Subscription-wide unless -R is set.
+func (g *DatabasesGenerator) initMySQLFlexibleServers() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	client, err := armmysqlflex.NewServersClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	id := func(i *armmysqlflex.Server) string { return valueOrEmpty(i.ID) }
+	name := func(i *armmysqlflex.Server) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armmysqlflex.ServersClientListResponse) []*armmysqlflex.Server { return p.Value },
+			id, name, "azurerm_mysql_flexible_server")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armmysqlflex.ServersClientListByResourceGroupResponse) []*armmysqlflex.Server { return p.Value },
+			id, name, "azurerm_mysql_flexible_server"); err != nil {
+			return err
+		}
+	}
 	return nil
 }
 
