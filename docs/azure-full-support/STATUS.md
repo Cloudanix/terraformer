@@ -6,7 +6,7 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **210** types (+69). 50+ new services; long-tail + sub-resource gaps + azuread + Track-1 migration remain.
+- Current: **217** types (+76). Phase 1 mgmt-plane gaps complete; data-plane/branching gaps deferred (see below).
   managed_identity, log_analytics, application_insights, traffic_manager,
   firewall, virtual_wan, monitor, cdn, role_assignment, recovery_services,
   automation, servicebus, cognitive, search, signalr, eventgrid, bastion, ddos,
@@ -20,22 +20,31 @@ by `providers/azure/*.go` (excluding test files).
 `valueOrEmpty`, `resourceGroups`, `defaultAllowEmptyValues`, helper unit tests,
 v4.78.0 floor. Track 1 untouched (migration deferred to Phase 5).
 
-## Phase 1 — partial-service gaps (in progress)
+## Phase 1 — partial-service gaps (mgmt-plane DONE; data-plane deferred)
 
-Done (Track 2 enumerations added to existing Track 1 generators):
+All tractable **mgmt-plane** §4b gaps are done (Track 2 or same-module Track 1
+enumerations added to the existing generators):
 - virtual_network: `_gateway`, `local_network_gateway`, `_gateway_connection`, `_peering`
 - database: `mysql_flexible_server`, `postgresql_flexible_server`
 - cosmosdb: mongo (db+collection), cassandra (keyspace+table), gremlin (db+graph)
 - redis: `firewall_rule`, `linked_server`
+- load_balancer: `lb_rule`, `lb_outbound_rule` (nat_pool is inline)
+- network_watcher: `network_connection_monitor`
+- eventhub: `authorization_rule`, `namespace_disaster_recovery_config`
+- container: `container_registry_replication`, `container_registry_task`
 
-Deferred / not yet done:
-- **key_vault keys/secrets/certificates** — data-plane (vault URI), separate API
-  + import-ID format. Needs data-plane client; tracked for later.
-- **storage queue/table/share/file** — data-plane. mgmt-plane subresources
-  (management_policy, network_rules, data_lake_gen2) still to do.
-- app_service modern apps (linux/windows web+function, service_plan) — armappservice,
-  needs kind-branching + tests.
-- data_factory v4 additions; security_center singletons (often no list API).
+**Deferred with technical reasons** (not tractable as simple list→import):
+- **Data-plane resources** — different API surface + auth scope + import-ID format,
+  no mgmt-plane list: key_vault keys/secrets/certificates; storage
+  queue/table/share/file/data_lake_gen2; synapse linked_service/role_assignment.
+- **Polymorphic/branching** — need a discriminator→tf-type map + a unit test:
+  synapse integration_runtime (Managed vs SelfHosted), app_service modern apps
+  (linux/windows web/function via `kind`), hdinsight (per-kind cluster).
+- **Singletons without a list API** — storage management_policy (per-account
+  `Get default`), most security_center settings.
+- **Preview-version-only** — container_registry token/scope_map (need a newer
+  containerregistry API version than the one the file imports).
+These are real follow-ups, not silent omissions; revisit per `no-list-api.md`.
 
 ## Phase 2 — P1 new services (in progress)
 
