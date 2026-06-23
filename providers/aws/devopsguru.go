@@ -18,6 +18,7 @@ import (
 	"context"
 
 	"github.com/aws/aws-sdk-go-v2/service/devopsguru"
+	devopsgurutypes "github.com/aws/aws-sdk-go-v2/service/devopsguru/types"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -66,6 +67,23 @@ func (g *DevOpsGuruGenerator) InitResources() error {
 	if _, err := svc.DescribeEventSourcesConfig(ctx, &devopsguru.DescribeEventSourcesConfigInput{}); err == nil {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			accountID, accountID, "aws_devopsguru_event_sources_config", "aws", defaultAllowEmptyValues))
+	}
+
+	// Resource collections, per type (import is the collection type).
+	for _, ct := range []devopsgurutypes.ResourceCollectionType{
+		devopsgurutypes.ResourceCollectionTypeAwsCloudFormation,
+		devopsgurutypes.ResourceCollectionTypeAwsTags,
+	} {
+		out, err := svc.GetResourceCollection(ctx, &devopsguru.GetResourceCollectionInput{ResourceCollectionType: ct})
+		if err != nil || out.ResourceCollection == nil {
+			continue
+		}
+		has := (ct == devopsgurutypes.ResourceCollectionTypeAwsCloudFormation && out.ResourceCollection.CloudFormation != nil) ||
+			(ct == devopsgurutypes.ResourceCollectionTypeAwsTags && len(out.ResourceCollection.Tags) > 0)
+		if has {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				string(ct), string(ct), "aws_devopsguru_resource_collection", "aws", defaultAllowEmptyValues))
+		}
 	}
 	return nil
 }

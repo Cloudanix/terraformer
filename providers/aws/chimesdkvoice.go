@@ -69,6 +69,9 @@ func (g *ChimeSDKVoiceGenerator) InitResources() error {
 			if c, err := svc.ListVoiceConnectorTerminationCredentials(ctx, &chimesdkvoice.ListVoiceConnectorTerminationCredentialsInput{VoiceConnectorId: vc.VoiceConnectorId}); err == nil && len(c.Usernames) > 0 {
 				add(id, name, "aws_chime_voice_connector_termination_credentials")
 			}
+			if l, err := svc.GetVoiceConnectorLoggingConfiguration(ctx, &chimesdkvoice.GetVoiceConnectorLoggingConfigurationInput{VoiceConnectorId: vc.VoiceConnectorId}); err == nil && l.LoggingConfiguration != nil {
+				add(id, name, "aws_chime_voice_connector_logging")
+			}
 		}
 	}
 

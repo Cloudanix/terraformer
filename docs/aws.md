@@ -46,6 +46,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_devopsguru_notification_channel`
     * `aws_devopsguru_service_integration`
     * `aws_devopsguru_event_sources_config`
+    * `aws_devopsguru_resource_collection`
 *   `accessanalyzer`
     * `aws_accessanalyzer_analyzer`
     * `aws_accessanalyzer_archive_rule`
@@ -362,6 +363,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_chime_voice_connector_streaming`
     * `aws_chime_voice_connector_termination`
     * `aws_chime_voice_connector_termination_credentials`
+    * `aws_chime_voice_connector_logging`
 *   `autoscaling-plans`
     * `aws_autoscalingplans_scaling_plan`
 *   `codestar-connections`
