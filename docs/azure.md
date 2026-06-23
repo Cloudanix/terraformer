@@ -70,6 +70,7 @@ export ARM_USE_ADAL=true
     * `azurerm_container_group`
     * `azurerm_container_registry`
     * `azurerm_container_registry_replication`
+    * `azurerm_container_registry_task`
     * `azurerm_container_registry_webhook`
 *   `cosmosdb`
     * `azurerm_cosmosdb_account`

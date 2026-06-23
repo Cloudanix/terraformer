@@ -125,6 +125,34 @@ func (g *ContainerGenerator) listRegistryReplications(resourceGroupName string, 
 	return resources, nil
 }
 
+func (g *ContainerGenerator) listRegistryTasks(resourceGroupName string, registryName string) ([]terraformutils.Resource, error) {
+	var resources []terraformutils.Resource
+	ctx := context.Background()
+	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
+	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
+	client := containerregistry.NewTasksClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
+
+	iterator, err := client.ListComplete(ctx, resourceGroupName, registryName)
+	if err != nil {
+		return nil, err
+	}
+	for iterator.NotDone() {
+		task := iterator.Value()
+		resources = append(resources, terraformutils.NewSimpleResource(
+			*task.ID,
+			*task.Name,
+			"azurerm_container_registry_task",
+			g.ProviderName,
+			[]string{}))
+		if err := iterator.Next(); err != nil {
+			log.Println(err)
+			break
+		}
+	}
+	return resources, nil
+}
+
 func (g *ContainerGenerator) listAndAddForContainerRegistry() ([]terraformutils.Resource, error) {
 	var resources []terraformutils.Resource
 	ctx := context.Background()
@@ -171,6 +199,12 @@ func (g *ContainerGenerator) listAndAddForContainerRegistry() ([]terraformutils.
 			return nil, err
 		}
 		resources = append(resources, replications...)
+
+		tasks, err := g.listRegistryTasks(id.ResourceGroup, *containerRegistry.Name)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, tasks...)
 
 		if err := containerRegistryIterator.Next(); err != nil {
 			log.Println(err)
