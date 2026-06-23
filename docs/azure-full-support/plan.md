@@ -1,5 +1,8 @@
 # Plan: Full Azure Service & Resource Coverage for Terraformer
 
+> **Execution order: see `PHASES.md`** (value-first; supersedes §7 migrate-first).
+> This file = reference for *how*: recipes §5/§6, constraints §1, gap method §3.
+
 Goal: import every Azure resource that is **importable** — i.e. every resource the
 `terraform-provider-azurerm` plugin supports **and** that Azure exposes a List/Get
 API for. Three work streams (one more than AWS — Azure carries an SDK debt AWS doesn't):
