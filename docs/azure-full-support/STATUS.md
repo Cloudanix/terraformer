@@ -6,7 +6,7 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **189** types (+48). New services registered: nat_gateway, kubernetes,
+- Current: **192** types (+51; added mssql, powerbi, netapp). New services registered: nat_gateway, kubernetes,
   managed_identity, log_analytics, application_insights, traffic_manager,
   firewall, virtual_wan, monitor, cdn, role_assignment, recovery_services,
   automation, servicebus, cognitive, search, signalr, eventgrid, bastion, ddos,

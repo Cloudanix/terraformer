@@ -108,6 +108,7 @@ azurerm_monitor_autoscale_setting
 azurerm_monitor_metric_alert
 azurerm_mssql_database
 azurerm_mssql_firewall_rule
+azurerm_mssql_managed_instance
 azurerm_mssql_server
 azurerm_mysql_configuration
 azurerm_mysql_database
@@ -116,6 +117,7 @@ azurerm_mysql_flexible_server
 azurerm_mysql_server
 azurerm_mysql_virtual_network_rule
 azurerm_nat_gateway
+azurerm_netapp_account
 azurerm_network_ddos_protection_plan
 azurerm_network_interface
 azurerm_network_packet_capture
@@ -129,6 +131,7 @@ azurerm_postgresql_firewall_rule
 azurerm_postgresql_flexible_server
 azurerm_postgresql_server
 azurerm_postgresql_virtual_network_rule
+azurerm_powerbi_embedded
 azurerm_private_dns_a_record
 azurerm_private_dns_aaaa_record
 azurerm_private_dns_cname_record
