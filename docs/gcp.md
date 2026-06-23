@@ -57,6 +57,10 @@ List of supported GCP services:
     * `google_biglake_database`
 *   `bigQueryConnection`
     * `google_bigquery_connection`
+*   `bigQueryReservation`
+    * `google_bigquery_reservation`
+*   `bigQueryDataTransfer`
+    * `google_bigquery_data_transfer_config`
 *   `bigtable`
     * `google_bigtable_instance`
     * `google_bigtable_table`
@@ -154,6 +158,8 @@ List of supported GCP services:
     * `google_container_cluster`
     * `google_container_node_pool`
 *   `gkeHub`
+*   `gkeOnPrem`
+    * `google_gkeonprem_vmware_cluster`
     * `google_gke_hub_membership`
     * `google_gke_hub_feature`
 *   `globalAddresses`
