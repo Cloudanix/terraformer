@@ -1,5 +1,13 @@
 # Use with Azure
 
+## Supported provider version (floor)
+
+Terraformer refreshes generated resources through the real
+`terraform-provider-azurerm` plugin you have installed. The resource coverage
+and gap list are measured against **azurerm v4.78.0** — treat this as the
+supported floor. Older providers may lack resources terraformer emits (refresh
+will fail); newer providers are a superset and work.
+
 ## Authentication
 
 ### Supported Methods

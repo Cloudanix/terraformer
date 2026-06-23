@@ -18,9 +18,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
 
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/go-azure-helpers/authentication"
 	"github.com/hashicorp/go-azure-helpers/sender"
@@ -34,6 +37,7 @@ type AzureProvider struct { //nolint
 	terraformutils.Provider
 	config        authentication.Config
 	authorizer    autorest.Authorizer
+	credential    azcore.TokenCredential
 	resourceGroup string
 }
 
@@ -117,6 +121,29 @@ func (p *AzureProvider) getAuthorizer() (autorest.Authorizer, error) {
 	return auth, nil
 }
 
+// getCredential builds the Track 2 azcore credential. DefaultAzureCredential
+// reads AZURE_* env vars / MSI / Azure CLI / workload identity. We bridge the
+// terraformer ARM_* vars onto AZURE_* first so a single set of credentials
+// drives both the Track 1 (autorest) and Track 2 (azcore) paths during the SDK
+// migration. Construction does not authenticate; tokens are fetched lazily.
+func (p *AzureProvider) getCredential() (azcore.TokenCredential, error) {
+	bridge := map[string]string{
+		"ARM_CLIENT_ID":                   "AZURE_CLIENT_ID",
+		"ARM_TENANT_ID":                   "AZURE_TENANT_ID",
+		"ARM_CLIENT_SECRET":               "AZURE_CLIENT_SECRET",
+		"ARM_CLIENT_CERTIFICATE_PATH":     "AZURE_CLIENT_CERTIFICATE_PATH",
+		"ARM_CLIENT_CERTIFICATE_PASSWORD": "AZURE_CLIENT_CERTIFICATE_PASSWORD",
+	}
+	for arm, azure := range bridge {
+		if os.Getenv(azure) == "" {
+			if v := os.Getenv(arm); v != "" {
+				os.Setenv(azure, v)
+			}
+		}
+	}
+	return azidentity.NewDefaultAzureCredential(nil)
+}
+
 func (p *AzureProvider) Init(args []string) error {
 	err := p.setEnvConfig()
 	if err != nil {
@@ -128,6 +155,17 @@ func (p *AzureProvider) Init(args []string) error {
 		return err
 	}
 	p.authorizer = authorizer
+
+	// Track 2 credential. Soft-fail: the Track 1 authorizer above still drives
+	// every currently-migrated service, so a credential-build failure must not
+	// abort the import. Track 2 generators surface the nil via getClientOptions.
+	credential, err := p.getCredential()
+	if err != nil {
+		log.Printf("azure: Track 2 credential unavailable (%v); azidentity-based services will be skipped", err)
+	} else {
+		p.credential = credential
+	}
+
 	p.resourceGroup = args[0]
 
 	return nil
@@ -397,9 +435,10 @@ func (p *AzureProvider) InitService(serviceName string, verbose bool) error {
 	p.Service.SetVerbose(verbose)
 	p.Service.SetProviderName(p.GetName())
 	p.Service.SetArgs(map[string]interface{}{
-		"config":         p.config,
-		"authorizer":     p.authorizer,
-		"resource_group": p.resourceGroup,
+		"config":           p.config,
+		"authorizer":       p.authorizer,
+		"token_credential": p.credential,
+		"resource_group":   p.resourceGroup,
 	})
 	return nil
 }
