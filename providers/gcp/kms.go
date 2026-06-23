@@ -159,6 +159,17 @@ func (g *KmsGenerator) InitResources() error {
 				o.Name, name, "google_kms_ekm_connection", g.ProviderName,
 				map[string]string{"name": name, "project": project, "location": region},
 				kmsAllowEmptyValues, kmsAdditionalFields))
+			if policy, perr := kmsService.Projects.Locations.EkmConnections.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_kms_ekm_connection_iam_member", g.ProviderName,
+							map[string]string{"name": name, "role": b.Role, "member": m, "project": project, "location": region},
+							kmsAllowEmptyValues, kmsAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
