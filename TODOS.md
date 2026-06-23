@@ -82,7 +82,30 @@ decision. Independent of the region-machinery work in T4.
 
 ---
 
-## T2 — Stream resources to disk per service (bound memory)
+## T2 — Stream resources to disk per service (bound memory) — PARTIAL
+
+> Landed (the safe part): `ImportFromPlan`'s per-service write loop now drops
+> each service's resource slice (`importedResource[serviceName] = nil`) right
+> after its files are written, so the refreshed state is GC'd during the write
+> phase instead of lingering to the end.
+>
+> **Why only partial — the peak is blocked by `--connect`:** the memory peak is
+> not during write, it's at the end of the refresh stage, when
+> `RefreshResourcesByProvider` has refreshed *every* service and
+> `ConnectServices` (run once, `--connect` defaults ON) needs *all* services'
+> resources resident simultaneously to build cross-service interpolation refs.
+> So the real peak-reducer — free each service right after *its refresh*, before
+> refreshing the next — cannot be done without either (a) a `--connect`-off fast
+> path that streams refresh→write→free per service, or (b) a two-pass connect
+> (first pass records the id→address map per service then frees the bodies;
+> second pass rewrites references from the map). Both are real pipeline reworks.
+>
+> **Blocked on validation:** correctness here (no dropped resources, `--connect`
+> refs still resolve, tfstate intact) can only be proven by running a real large
+> import, and the gRPC refresh plugin is bind-blocked in this sandbox (same wall
+> as STATUS.md's plan round-trip). Do the (a)/(b) rework in a networked env where
+> an end-to-end import validates it. Interim mitigation unchanged: scope
+> `--resources` instead of `*`.
 
 **What:** Free each service's resources from memory after its files are written,
 instead of holding every resource's fully-refreshed state in memory until the

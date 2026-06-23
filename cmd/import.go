@@ -274,6 +274,14 @@ func ImportFromPlan(provider terraformutils.ProviderGenerator, plan *ImportPlan)
 			if e != nil {
 				return e
 			}
+			// Release this service's resources once its files are written. Cross-
+			// service connections were already resolved by ConnectServices above
+			// (into interpolation strings), and nothing after this loop reads them,
+			// so dropping the slice lets the refreshed state be GC'd during the
+			// write phase instead of all of it lingering until the run ends.
+			// ponytail: trims the write-phase tail only; the refresh-phase peak
+			// stays resident because --connect needs every service at once (T2).
+			importedResource[serviceName] = nil
 		}
 	}
 	return nil
