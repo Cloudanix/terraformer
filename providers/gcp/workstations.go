@@ -34,7 +34,7 @@ type WorkstationsGenerator struct {
 }
 
 // Run on configsList and create for each TerraformResource (per-cluster walk)
-func (g WorkstationsGenerator) createConfigResources(ctx context.Context, list *workstations.ProjectsLocationsWorkstationClustersWorkstationConfigsListCall, clusterID string) []terraformutils.Resource {
+func (g WorkstationsGenerator) createConfigResources(ctx context.Context, svc *workstations.Service, list *workstations.ProjectsLocationsWorkstationClustersWorkstationConfigsListCall, clusterID string) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
 	location := g.GetArgs()["region"].(compute.Region).Name
 	if err := list.Pages(ctx, func(page *workstations.ListWorkstationConfigsResponse) error {
@@ -55,6 +55,17 @@ func (g WorkstationsGenerator) createConfigResources(ctx context.Context, list *
 				workstationsAllowEmptyValues,
 				workstationsAdditionalFields,
 			))
+			if policy, perr := svc.Projects.Locations.WorkstationClusters.WorkstationConfigs.GetIamPolicy(obj.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_workstations_workstation_config_iam_member", g.ProviderName,
+							map[string]string{"workstation_config_id": name, "workstation_cluster_id": clusterID, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": location},
+							workstationsAllowEmptyValues, workstationsAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
@@ -98,7 +109,7 @@ func (g *WorkstationsGenerator) InitResources() error {
 	for _, cluster := range clusterIDs {
 		configsList := workstationsService.Projects.Locations.WorkstationClusters.WorkstationConfigs.List(
 			"projects/" + project + "/locations/" + location + "/workstationClusters/" + cluster)
-		g.Resources = append(g.Resources, g.createConfigResources(ctx, configsList, cluster)...)
+		g.Resources = append(g.Resources, g.createConfigResources(ctx, workstationsService, configsList, cluster)...)
 	}
 	return nil
 }
