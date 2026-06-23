@@ -100,6 +100,8 @@ List of supported GCP services:
 *   `gke`
     * `google_container_cluster`
     * `google_container_node_pool`
+*   `gkeHub`
+    * `google_gke_hub_membership`
 *   `globalAddresses`
     * `google_compute_global_address`
 *   `globalForwardingRules`

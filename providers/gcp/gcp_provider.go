@@ -152,6 +152,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["clouddeploy"] = &GCPFacade{service: &ClouddeployGenerator{}}
 	services["dialogflow"] = &GCPFacade{service: &DialogflowGenerator{}}
 	services["vertexAI"] = &GCPFacade{service: &VertexAIGenerator{}}
+	services["gkeHub"] = &GCPFacade{service: &GkeHubGenerator{}}
 	return services
 }
 
