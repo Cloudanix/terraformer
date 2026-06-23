@@ -70,8 +70,40 @@ func (g *ClouddeployGenerator) InitResources() error {
 		return err
 	}
 
-	deliveryPipelinesList := clouddeployService.Projects.Locations.DeliveryPipelines.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, deliveryPipelinesList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	deliveryPipelinesList := clouddeployService.Projects.Locations.DeliveryPipelines.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, deliveryPipelinesList)...)
+
+	targetsList := clouddeployService.Projects.Locations.Targets.List(parent)
+	g.Resources = append(g.Resources, g.createTargetsResources(ctx, targetsList)...)
 	return nil
+}
+
+// Run on targetsList and create for each TerraformResource
+func (g ClouddeployGenerator) createTargetsResources(ctx context.Context, list *clouddeploy.ProjectsLocationsTargetsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *clouddeploy.ListTargetsResponse) error {
+		for _, obj := range page.Targets {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_clouddeploy_target",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				clouddeployAllowEmptyValues,
+				clouddeployAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
