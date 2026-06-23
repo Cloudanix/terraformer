@@ -98,6 +98,8 @@ List of supported GCP services:
     * `google_compute_global_forwarding_rule`
 *   `healthChecks`
     * `google_compute_health_check`
+*   `healthcare`
+    * `google_healthcare_dataset`
 *   `httpHealthChecks`
     * `google_compute_http_health_check`
 *   `httpsHealthChecks`
