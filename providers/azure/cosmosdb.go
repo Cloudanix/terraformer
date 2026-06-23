@@ -102,6 +102,43 @@ func (g *CosmosDBGenerator) listTables(resourceGroupName string, accountName str
 	return resources, nil
 }
 
+func (g *CosmosDBGenerator) listMongoDB(resourceGroupName string, accountName string) ([]terraformutils.Resource, error) {
+	var resources []terraformutils.Resource
+	ctx := context.Background()
+	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
+	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
+	client := documentdb.NewMongoDBResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
+
+	databases, err := client.ListMongoDBDatabases(ctx, resourceGroupName, accountName)
+	if err != nil {
+		return nil, err
+	}
+	for _, database := range *databases.Value {
+		resources = append(resources, terraformutils.NewSimpleResource(
+			*database.ID,
+			*database.Name,
+			"azurerm_cosmosdb_mongo_database",
+			g.ProviderName,
+			[]string{}))
+
+		collections, err := client.ListMongoDBCollections(ctx, resourceGroupName, accountName, *database.Name)
+		if err != nil {
+			return nil, err
+		}
+		for _, collection := range *collections.Value {
+			resources = append(resources, terraformutils.NewSimpleResource(
+				*collection.ID,
+				*collection.Name,
+				"azurerm_cosmosdb_mongo_collection",
+				g.ProviderName,
+				[]string{}))
+		}
+	}
+
+	return resources, nil
+}
+
 func (g *CosmosDBGenerator) listAndAddForDatabaseAccounts() ([]terraformutils.Resource, error) {
 	var resources []terraformutils.Resource
 	ctx := context.Background()
@@ -147,6 +184,12 @@ func (g *CosmosDBGenerator) listAndAddForDatabaseAccounts() ([]terraformutils.Re
 		}
 		resources = append(resources, sqlDatabases...)
 		resources = append(resources, sqlContainers...)
+
+		mongo, err := g.listMongoDB(id.ResourceGroup, *account.Name)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, mongo...)
 	}
 
 	return resources, nil
