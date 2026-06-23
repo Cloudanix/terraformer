@@ -200,6 +200,8 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["iap"] = &GCPFacade{service: &IapGenerator{}}
 	services["analyticsHub"] = &GCPFacade{service: &AnalyticsHubGenerator{}}
 	services["bigQueryDataPolicy"] = &GCPFacade{service: &BigQueryDataPolicyGenerator{}}
+	services["activeDirectory"] = &GCPFacade{service: &ActiveDirectoryGenerator{}}
+	services["apiKeys"] = &GCPFacade{service: &APIKeysGenerator{}}
 	return services
 }
 

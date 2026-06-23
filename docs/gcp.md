@@ -41,6 +41,10 @@ List of supported GCP services:
     * `google_alloydb_backup`
 *   `analyticsHub`
     * `google_bigquery_analytics_hub_data_exchange`
+*   `activeDirectory`
+    * `google_active_directory_domain`
+*   `apiKeys`
+    * `google_apikeys_key`
 *   `apphub`
     * `google_apphub_application`
     * `google_apphub_service_project_attachment`
