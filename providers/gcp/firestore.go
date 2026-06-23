@@ -62,10 +62,28 @@ func (g *FirestoreGenerator) InitResources() error {
 		return err
 	}
 
-	databasesList, err := firestoreService.Projects.Databases.List("projects/" + g.GetArgs()["project"].(string)).Do()
+	project := g.GetArgs()["project"].(string)
+	databasesList, err := firestoreService.Projects.Databases.List("projects/" + project).Do()
 	if err != nil {
 		return err
 	}
 	g.Resources = g.createResources(databasesList)
+
+	// Walk each database for its backup schedules.
+	for _, db := range databasesList.Databases {
+		bs, berr := firestoreService.Projects.Databases.BackupSchedules.List(db.Name).Do()
+		if berr != nil {
+			continue
+		}
+		for _, obj := range bs.BackupSchedules {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			dt := strings.Split(db.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_firestore_backup_schedule", g.ProviderName,
+				map[string]string{"name": name, "database": dt[len(dt)-1], "project": project},
+				firestoreAllowEmptyValues, firestoreAdditionalFields))
+		}
+	}
 	return nil
 }
