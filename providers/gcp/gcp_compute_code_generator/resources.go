@@ -210,4 +210,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"networkAttachments": basicGCPResource{
 		terraformName: "google_compute_network_attachment",
 	},
+	"networkFirewallPolicies": basicGCPResource{
+		terraformName: "google_compute_network_firewall_policy",
+	},
 }
