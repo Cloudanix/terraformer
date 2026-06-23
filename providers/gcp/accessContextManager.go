@@ -46,11 +46,13 @@ func (g *AccessContextManagerGenerator) InitResources() error {
 		return err
 	}
 
+	policyNames := []string{}
 	policiesList := acmService.AccessPolicies.List().Parent("organizations/" + org)
 	if err := policiesList.Pages(ctx, func(page *accesscontextmanager.ListAccessPoliciesResponse) error {
 		for _, obj := range page.AccessPolicies {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
+			policyNames = append(policyNames, obj.Name)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name,
 				name,
@@ -67,6 +69,31 @@ func (g *AccessContextManagerGenerator) InitResources() error {
 		return nil
 	}); err != nil {
 		log.Println(err)
+	}
+
+	for _, policy := range policyNames {
+		if err := acmService.AccessPolicies.ServicePerimeters.List(policy).Pages(ctx, func(page *accesscontextmanager.ListServicePerimetersResponse) error {
+			for _, obj := range page.ServicePerimeters {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, obj.Name, "google_access_context_manager_service_perimeter", g.ProviderName,
+					map[string]string{"name": obj.Name, "parent": policy},
+					accessContextManagerAllowEmptyValues, accessContextManagerAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+		if err := acmService.AccessPolicies.AccessLevels.List(policy).Pages(ctx, func(page *accesscontextmanager.ListAccessLevelsResponse) error {
+			for _, obj := range page.AccessLevels {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, obj.Name, "google_access_context_manager_access_level", g.ProviderName,
+					map[string]string{"name": obj.Name, "parent": policy},
+					accessContextManagerAllowEmptyValues, accessContextManagerAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }

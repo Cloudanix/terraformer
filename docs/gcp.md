@@ -31,6 +31,8 @@ List of supported GCP services:
     * `google_compute_autoscaler`
 *   `accessContextManager`
     * `google_access_context_manager_access_policy` (requires GOOGLE_ORGANIZATION)
+    * `google_access_context_manager_service_perimeter`
+    * `google_access_context_manager_access_level`
 *   `apiGateway`
     * `google_api_gateway_api` (beta-only; use --provider-type beta)
 *   `alloydb`
