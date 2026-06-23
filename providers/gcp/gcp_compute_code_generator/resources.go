@@ -237,4 +237,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"storagePools": basicGCPResource{
 		terraformName: "google_compute_storage_pool",
 	},
+	"targetGrpcProxies": basicGCPResource{
+		terraformName: "google_compute_target_grpc_proxy",
+	},
 }
