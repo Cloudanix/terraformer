@@ -70,8 +70,26 @@ func (g *WorkbenchGenerator) InitResources() error {
 		return err
 	}
 
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
 	instancesList := workbenchService.Projects.Locations.Instances.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, instancesList)
+		"projects/" + project + "/locations/" + location)
+	instanceRes := g.createResources(ctx, instancesList)
+	g.Resources = instanceRes
+	for _, r := range instanceRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := workbenchService.Projects.Locations.Instances.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_workbench_instance_iam_member", g.ProviderName,
+						map[string]string{"name": short, "role": b.Role, "member": m, "project": project, "location": location},
+						workbenchAllowEmptyValues, workbenchAdditionalFields))
+				}
+			}
+		}
+	}
 	return nil
 }
