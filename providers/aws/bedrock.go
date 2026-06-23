@@ -96,5 +96,25 @@ func (g *BedrockGenerator) InitResources() error {
 				arn, StringValue(m.ProvisionedModelName), "aws_bedrock_provisioned_model_throughput", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	profiles := bedrock.NewListInferenceProfilesPaginator(svc, &bedrock.ListInferenceProfilesInput{})
+	for profiles.HasMorePages() {
+		page, err := profiles.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, p := range page.InferenceProfileSummaries {
+			// Only application-defined profiles are manageable; skip AWS system profiles.
+			if string(p.Type) != "APPLICATION" {
+				continue
+			}
+			id := StringValue(p.InferenceProfileId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(p.InferenceProfileName), "aws_bedrock_inference_profile", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

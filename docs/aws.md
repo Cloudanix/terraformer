@@ -149,6 +149,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bedrock_guardrail`
     * `aws_bedrock_guardrail_version`
     * `aws_bedrock_provisioned_model_throughput`
+    * `aws_bedrock_inference_profile`
     * `aws_bedrock_model_invocation_logging_configuration`
 *   `bcmdataexports`
     * `aws_bcmdataexports_export`
@@ -159,6 +160,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bedrockagent_agent_knowledge_base_association`
     * `aws_bedrockagent_knowledge_base`
     * `aws_bedrockagent_data_source`
+    * `aws_bedrockagent_flow`
+    * `aws_bedrockagent_prompt`
 *   `ce`
     * `aws_ce_anomaly_monitor`
     * `aws_ce_anomaly_subscription`
@@ -305,6 +308,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appintegrations_event_integration`
 *   `appsync`
     * `aws_appsync_graphql_api`
+    * `aws_appsync_api`
     * `aws_appsync_datasource`
     * `aws_appsync_function`
     * `aws_appsync_api_key`
@@ -316,6 +320,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appsync_source_api_association`
 *   `athena`
     * `aws_athena_workgroup`
+    * `aws_athena_capacity_reservation`
     * `aws_athena_data_catalog`
     * `aws_athena_database`
     * `aws_athena_named_query`

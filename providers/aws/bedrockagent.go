@@ -126,5 +126,35 @@ func (g *BedrockAgentGenerator) InitResources() error {
 			}
 		}
 	}
+
+	for fp := bedrockagent.NewListFlowsPaginator(svc, &bedrockagent.ListFlowsInput{}); fp.HasMorePages(); {
+		page, err := fp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, f := range page.FlowSummaries {
+			id := StringValue(f.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(f.Name), "aws_bedrockagent_flow", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for pp := bedrockagent.NewListPromptsPaginator(svc, &bedrockagent.ListPromptsInput{}); pp.HasMorePages(); {
+		page, err := pp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, p := range page.PromptSummaries {
+			id := StringValue(p.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(p.Name), "aws_bedrockagent_prompt", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

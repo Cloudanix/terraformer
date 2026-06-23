@@ -115,5 +115,20 @@ func (g *AthenaGenerator) InitResources() error {
 			}
 		}
 	}
+
+	for cr := athena.NewListCapacityReservationsPaginator(svc, &athena.ListCapacityReservationsInput{}); cr.HasMorePages(); {
+		page, err := cr.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, c := range page.CapacityReservations {
+			name := StringValue(c.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_athena_capacity_reservation", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

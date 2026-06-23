@@ -68,6 +68,21 @@ func (g *AppSyncGenerator) InitResources() error {
 		}
 	}
 
+	for ap := appsync.NewListApisPaginator(svc, &appsync.ListApisInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, api := range page.Apis {
+			id := StringValue(api.ApiId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(api.Name), "aws_appsync_api", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	g.loadAppSyncDomainNames(svc)
 
 	return nil
