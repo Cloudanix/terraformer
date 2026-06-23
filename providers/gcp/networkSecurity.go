@@ -94,6 +94,17 @@ func (g *NetworkSecurityGenerator) InitResources() error {
 				o.Name, name, "google_network_security_address_group", g.ProviderName,
 				map[string]string{"name": name, "project": proj, "location": loc},
 				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+			if policy, perr := nsService.Projects.Locations.AddressGroups.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_network_security_address_group_iam_member", g.ProviderName,
+							map[string]string{"name": name, "role": b.Role, "member": m, "project": proj, "location": loc},
+							networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
