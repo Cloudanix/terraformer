@@ -252,4 +252,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"interconnectGroups": basicGCPResource{
 		terraformName: "google_compute_interconnect_group",
 	},
+	"interconnectAttachmentGroups": basicGCPResource{
+		terraformName: "google_compute_interconnect_attachment_group",
+	},
 }
