@@ -213,7 +213,25 @@ func (g *IamGenerator) InitResources() error {
 		return err
 	}
 
-	g.Resources = g.createServiceAccountResources(serviceAccountsIterator)
+	saResources := g.createServiceAccountResources(serviceAccountsIterator)
+	g.Resources = saResources
+	if iamService, ierr := iamv1.NewService(ctx); ierr == nil {
+		for _, r := range saResources {
+			res := r.InstanceState.ID
+			short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+			if policy, perr := iamService.Projects.ServiceAccounts.GetIamPolicy(res).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+							"google_service_account_iam_member", g.ProviderName,
+							map[string]string{"service_account_id": res, "role": b.Role, "member": m, "project": projectID},
+							IamAllowEmptyValues, IamAdditionalFields))
+					}
+				}
+			}
+		}
+	}
 	g.Resources = append(g.Resources, g.createIamCustomRoleResources(rolesResponse, projectID)...)
 	g.Resources = append(g.Resources, g.createIamMemberResources(policyResponse, projectID)...)
 	g.Resources = append(g.Resources, g.createIamAuditConfigResources(policyResponse, projectID)...)
