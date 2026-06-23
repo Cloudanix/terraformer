@@ -5,11 +5,18 @@
   emits today (`grep -rhoE '"azurerm_[a-z0-9_]+"' providers/azure/*.go`). Real,
   reproducible, committed.
 
-## Pending: provider schema dump (the (a) side of the §3 diff)
-Not yet generated. `terraform providers schema -json` needs the provider plugin
-to launch, and the command sandbox breaks the terraform↔provider go-plugin gRPC
-handshake ("Unrecognized remote plugin message" — the plugin never receives the
-magic cookie). Same plugin blocker recorded for the AWS full-support work.
+## DONE: provider schema dump (the (a) side of the §3 diff)
+Generated 2026-06-23 by running `gen-gap.sh` **outside** the command sandbox
+(`!`-prefix). Result: **1130** provider resources − **141** covered = **1003**
+gap. Files: `tf-azurerm-all-resources.txt`, `missing-resources.txt`,
+`missing-by-prefix.txt` (140 service buckets, e.g. api=55, sentinel=32,
+mssql=29, automation=29, storage=28, monitor=19, kusto=12).
+
+`terraform providers schema -json` needs the provider plugin to launch, and the
+command sandbox breaks the terraform↔provider go-plugin gRPC handshake
+("Unrecognized remote plugin message" — the plugin never receives the magic
+cookie). Same plugin blocker recorded for the AWS full-support work. Hence the
+schema step must run outside the sandbox; everything else works offline.
 
 What already works offline (no network):
 - terraform v1.5.7 + jq present.

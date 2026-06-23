@@ -61,8 +61,8 @@ Terraformer is **not** an Azure-API dumper. It is bounded on three sides:
   each resource through the real `terraform-provider-azurerm` plugin
   (`terraformutils/providerwrapper`). If the provider has **no resource** for a
   thing, terraformer **cannot** import it. The provider's resource set
-  (~1100 `azurerm_*` resources in v4.x), **not** an Azure REST catalog, is the
-  source of truth.
+  (**1130** `azurerm_*` resources, measured v4.78.0 — §3), **not** an Azure REST
+  catalog, is the source of truth.
 - **List-API bound.** Each generator's `InitResources()` must *enumerate* existing
   resources via a `List*`/`ListByResourceGroup*` pager. A TF resource with no
   list API (some singleton/sub-resource configs) cannot be auto-discovered.
@@ -154,6 +154,14 @@ across the whole migration.
 ---
 
 ## 3. Establish the authoritative gap list (do this once, after Phase 0 foundations)
+
+> **DONE 2026-06-23.** Measured against **v4.78.0** (nearest cached provider; the
+> 4.0.0 below is the documented floor — superset is fine for the gap):
+> **1130** provider resources − **141** covered = **1003** gap. Artifacts committed:
+> `tf-azurerm-all-resources.txt`, `current-coverage.txt`, `missing-resources.txt`,
+> `missing-by-prefix.txt` (140 service buckets). Re-run via the procedure below
+> after each PR to shrink the gap. The §4 tables are the high-value starter set;
+> `missing-resources.txt` is the complete backlog.
 
 Hand-maintaining a 1100-row list is error-prone. Generate it.
 
@@ -478,9 +486,10 @@ separate from new-feature PRs so reviews are small and bisectable.
   Phase 0 effort; `data_factory` (~40 resource types) is the single largest file.
 - Partial-service gaps (§4b): ~15 services touched, ~100 resource blocks.
 - New services with TF resources (§4a): ~60 services (P1–P4).
-- Total new `azurerm_*` resource types reachable: the §3 diff gives the exact count
-  (expect the gap to be **700–900** of the provider's ~1100, since terraformer
-  currently covers 141 and some provider resources have no list API).
+- Total new `azurerm_*` resource types reachable: **measured gap = 1003** of the
+  provider's **1130** (terraformer covers 141). Some of the 1003 have no list API
+  and drop out (track in `no-list-api.md`), so the *reachable* count is somewhat
+  below 1003 — but the backlog is concrete, not estimated.
 
 Track progress by re-running §3 after each PR and shrinking
 `missing-resources.txt`. Done = diff is empty modulo the documented "no list API"
