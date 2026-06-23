@@ -272,10 +272,15 @@ List of supported GCP services:
     * `google_logging_project_sink`
     * `google_logging_folder_sink` (requires GOOGLE_FOLDER)
     * `google_logging_organization_sink` (requires GOOGLE_ORGANIZATION)
+*   `apigee` — `google_apigee_api_product`, `_developer`, `_data_collector`, `_envgroup`, `_instance`, `_endpoint_attachment`, `_dns_zone`, `_app_group` (org == project)
 *   `beyondcorp`
     * `google_beyondcorp_app_connection`, `_app_connector`, `_app_gateway`, `_security_gateway`, `_security_gateway_application`
 *   `containerAnalysis`
     * `google_container_analysis_note`, `google_container_analysis_occurrence`
+*   `dialogflowCx` — `google_dialogflow_cx_security_settings`, `_environment`, `_generator`, `_playbook`, `_test_case`, `_tool`, `_tool_version`, `_page`, `_version`
+*   `dialogflowEs` — `google_dialogflow_agent`, `_entity_type`, `_intent`, `_version`, `_environment`, `_conversation_profile`, `_generator`
+*   `discoveryengine` — `google_discovery_engine_data_store`, `_schema`, `_control`, `_target_site`, `_search_engine`, `_chat_engine`, `_recommendation_engine`, `_assistant`
+*   `identityPlatform` — `google_identity_platform_config`, `_tenant`, `_default_supported_idp_config`, `_inbound_saml_config`, `_oauth_idp_config` (+ tenant variants)
 *   `managedKafka`
     * `google_managed_kafka_cluster`, `_topic`, `_acl`, `_connect_cluster`, `_connector`
 *   `memcache`

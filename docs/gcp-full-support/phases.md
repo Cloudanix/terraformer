@@ -277,3 +277,21 @@ Coverage **88 → 430** emitted types; **93 services**; full repo green (`go bui
 5. **Org/folder-scoped** — many logging_{folder,org,billing}_*, scc org configs; plumbed via GOOGLE_ORGANIZATION/GOOGLE_FOLDER where added.
 
 Cluster-by-cluster expansion continues; each new resource verified to have a real List API in the pinned SDK before adding (build-validated, no live-project refresh available in sandbox).
+
+---
+
+## Progress checkpoint — session 2 final (436 commits)
+
+Coverage **88 → 547** emitted types; **100 services**; full repo green (build/vet/`gofmt -l` empty/SA1019=0/`go test ./terraformutils/...` pass). GA gap 735.
+
+**New services this session:** beyondcorp, containerAnalysis, parameterManager, identityPlatform, apihub, apigee, dialogflowCx, dialogflowEs, discoveryengine (expanded), contactCenterInsights (expanded).
+
+**Major cluster expansions:** networksecurity (+16), networkconnectivity (+4), vertexAI (+10 incl colab), netapp (+6), managedKafka (+4), oracleDatabase (+8), dataplex nested (+4), vmwareengine (+3), monitoring (+2), firestore (+3), logging (+12 incl folder/org scoped), scc (+7 project/org), iam (+4), accessContextManager (+4), plus resource-level IAM `_member` for ~40 services.
+
+**Remaining ~735 — why not yet covered (the genuine residual):**
+1. **SDK module not in the pinned `google.golang.org/api@v0.286.0` cache** (need `go get`): chronicle (~13), gemini/cloudaicompanion (~12), ces (~9). Sandbox has no network → cannot fetch; deferred to an online run.
+2. **No standalone List API** (cannot be enumerated, only created/attached): all `*_iam_binding`/`*_iam_policy` (member form chosen instead), `*_signed_url_key`, `*_network_peering`, `*_with_rules`, `*_settings` singletons, `*_access_control`/`*_acl`, attachment/membership/association sub-blocks, `firestore_document`, `storage_bucket_object`. These match the AWS effort's documented `no-list-api` exclusion class — importing them would require synthesising IDs, not listing.
+3. **Codegen-compute IAM** (~30): `google_compute_{disk,image,instance,snapshot,subnetwork,...}_iam_member` flow through `gcp_compute_code_generator`, which has no IAM template. Needs a codegen enhancement, not a hand file.
+4. **Bespoke deep per-env / org-provisioned** (firebase config singletons, apigee per-environment keyvaluemaps/targetservers/keystores, scc folder/v2/management variants) — large, low-value-without-live-project surface.
+
+Build-validated only; no live-project refresh available in sandbox to confirm P4 diff-empty.
