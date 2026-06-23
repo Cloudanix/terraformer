@@ -172,6 +172,8 @@ export ARM_USE_ADAL=true
 *   `kubernetes`
     * `azurerm_kubernetes_cluster`
     * `azurerm_kubernetes_cluster_node_pool`
+*   `application_insights`
+    * `azurerm_application_insights`
 *   `load_balancer`
     * `azurerm_lb`
 *   `log_analytics`
