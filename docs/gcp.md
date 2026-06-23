@@ -110,6 +110,7 @@ List of supported GCP services:
     * `google_dataproc_autoscaling_policy`
     * `google_dataproc_workflow_template`
     * `google_dataproc_batch`
+    * `google_dataproc_session_template`
 *   `dataplex`
     * `google_dataplex_lake`
     * `google_dataplex_zone`

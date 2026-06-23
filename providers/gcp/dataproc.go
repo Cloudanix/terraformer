@@ -193,6 +193,20 @@ func (g *DataprocGenerator) InitResources() error {
 	batchesList := dataprocService.Projects.Locations.Batches.List("projects/" + project + "/locations/" + region)
 	g.Resources = append(g.Resources, g.createBatchResources(ctx, batchesList)...)
 
+	if err := dataprocService.Projects.Locations.SessionTemplates.List("projects/"+project+"/locations/"+region).Pages(ctx, func(p *dataproc.ListSessionTemplatesResponse) error {
+		for _, o := range p.SessionTemplates {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_dataproc_session_template", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": region},
+				dataprocAllowEmptyValues, dataprocAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	// jobList := dataprocService.Projects.Regions.Jobs.List(g.GetArgs()["project"].(string), g.GetArgs()["region"])
 	// g.Resources = append(g.Resources, g.createJobResources(jobList, ctx)...)
 
