@@ -330,6 +330,8 @@ func (g *RDSGenerator) InitResources() error {
 	}
 	svc := rds.NewFromConfig(config)
 
+	g.loadRDSCertificate(svc, config.Region)
+
 	if err := g.loadDBClusters(svc); err != nil {
 		return err
 	}
@@ -426,6 +428,34 @@ func (g *RDSGenerator) loadCustomDBEngineVersions(svc *rds.Client) error {
 		}
 	}
 	return nil
+}
+
+// loadRDSCertificate emits the account/region default-CA override
+// (aws_rds_certificate, a per-region singleton imported by region) only when the
+// account has actually overridden the AWS default — otherwise it's just the
+// stock default and not managed infrastructure.
+func (g *RDSGenerator) loadRDSCertificate(svc *rds.Client, region string) {
+	if region == "" {
+		return
+	}
+	var marker *string
+	for {
+		out, err := svc.DescribeCertificates(awsContext(), &rds.DescribeCertificatesInput{Marker: marker})
+		if err != nil {
+			return
+		}
+		for _, c := range out.Certificates {
+			if c.CustomerOverride != nil && *c.CustomerOverride {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					region, region, "aws_rds_certificate", "aws", RDSAllowEmptyValues))
+				return
+			}
+		}
+		if out.Marker == nil {
+			return
+		}
+		marker = out.Marker
+	}
 }
 
 // loadDBShardGroups emits Aurora Limitless DB shard groups (imported by identifier).
