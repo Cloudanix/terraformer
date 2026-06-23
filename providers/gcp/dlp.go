@@ -19,6 +19,7 @@ import (
 	"log"
 	"strings"
 
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/dlp/v2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -58,6 +59,50 @@ func (g *DlpGenerator) InitResources() error {
 				dlpAllowEmptyValues,
 				dlpAdditionalFields,
 			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	location := g.GetArgs()["region"].(compute.Region).Name
+	locParent := "projects/" + project + "/locations/" + location
+	tail := func(s string) string { p := strings.Split(s, "/"); return p[len(p)-1] }
+	if err := dlpService.Projects.Locations.DeidentifyTemplates.List(locParent).Pages(ctx, func(p *dlp.GooglePrivacyDlpV2ListDeidentifyTemplatesResponse) error {
+		for _, o := range p.DeidentifyTemplates {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_data_loss_prevention_deidentify_template", g.ProviderName,
+				map[string]string{"parent": locParent}, dlpAllowEmptyValues, dlpAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := dlpService.Projects.Locations.JobTriggers.List(locParent).Pages(ctx, func(p *dlp.GooglePrivacyDlpV2ListJobTriggersResponse) error {
+		for _, o := range p.JobTriggers {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_data_loss_prevention_job_trigger", g.ProviderName,
+				map[string]string{"parent": locParent}, dlpAllowEmptyValues, dlpAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := dlpService.Projects.Locations.StoredInfoTypes.List(locParent).Pages(ctx, func(p *dlp.GooglePrivacyDlpV2ListStoredInfoTypesResponse) error {
+		for _, o := range p.StoredInfoTypes {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_data_loss_prevention_stored_info_type", g.ProviderName,
+				map[string]string{"parent": locParent}, dlpAllowEmptyValues, dlpAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := dlpService.Projects.Locations.DiscoveryConfigs.List(locParent).Pages(ctx, func(p *dlp.GooglePrivacyDlpV2ListDiscoveryConfigsResponse) error {
+		for _, o := range p.DiscoveryConfigs {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_data_loss_prevention_discovery_config", g.ProviderName,
+				map[string]string{"parent": locParent, "location": location}, dlpAllowEmptyValues, dlpAdditionalFields))
 		}
 		return nil
 	}); err != nil {
