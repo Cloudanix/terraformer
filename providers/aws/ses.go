@@ -97,6 +97,17 @@ func (g *SesGenerator) loadDomainIdentities(svc *ses.Client) error {
 				identity, identity, "aws_ses_domain_dkim", "aws", sesAllowEmptyValues))
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				identity, identity, "aws_ses_domain_identity_verification", "aws", sesAllowEmptyValues))
+			// Authorization policies attached to this identity (separate resource,
+			// not inlined on the identity). Import id "<identity>|<policy_name>".
+			if pol, err := svc.ListIdentityPolicies(awsContext(), &ses.ListIdentityPoliciesInput{Identity: &identity}); err == nil {
+				for _, pn := range pol.PolicyNames {
+					if pn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						identity+"|"+pn, identity+"_"+pn, "aws_ses_identity_policy", "aws", sesAllowEmptyValues))
+				}
+			}
 			if attrs, err := svc.GetIdentityMailFromDomainAttributes(awsContext(), &ses.GetIdentityMailFromDomainAttributesInput{Identities: []string{identity}}); err == nil {
 				if a, ok := attrs.MailFromDomainAttributes[identity]; ok && StringValue(a.MailFromDomain) != "" {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

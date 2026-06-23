@@ -1483,6 +1483,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ses_template`
     * `aws_ses_domain_dkim`
     * `aws_ses_domain_identity_verification`
+    * `aws_ses_identity_policy`
     * `aws_ses_domain_mail_from`
     * `aws_ses_receipt_filter`
     * `aws_ses_active_receipt_rule_set`
@@ -1492,6 +1493,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sesv2_email_identity`
     * `aws_sesv2_email_identity_feedback_attributes`
     * `aws_sesv2_email_identity_mail_from_attributes`
+    * `aws_sesv2_email_identity_policy`
     * `aws_sesv2_configuration_set`
     * `aws_sesv2_contact_list`
     * `aws_sesv2_dedicated_ip_pool`

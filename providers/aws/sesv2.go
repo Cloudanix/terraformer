@@ -55,6 +55,17 @@ func (g *SESv2Generator) InitResources() error {
 				name, name, "aws_sesv2_email_identity_feedback_attributes", "aws", defaultAllowEmptyValues))
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_sesv2_email_identity_mail_from_attributes", "aws", defaultAllowEmptyValues))
+			// Authorization policies on the identity (separate resource).
+			// Import id "<email_identity>|<policy_name>".
+			if pol, err := svc.GetEmailIdentityPolicies(awsContext(), &sesv2.GetEmailIdentityPoliciesInput{EmailIdentity: i.IdentityName}); err == nil {
+				for pn := range pol.Policies {
+					if pn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						name+"|"+pn, name+"_"+pn, "aws_sesv2_email_identity_policy", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
