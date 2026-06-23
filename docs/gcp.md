@@ -92,6 +92,7 @@ List of supported GCP services:
     * `google_cloud_run_v2_service`
     * `google_cloud_run_v2_job`
     * `google_cloud_run_v2_worker_pool`
+    * `google_cloud_run_v2_service_iam_member`
 *   `composer`
     * `google_composer_environment`
 *   `certificateManager`

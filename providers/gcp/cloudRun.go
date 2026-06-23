@@ -101,7 +101,36 @@ func (g *CloudRunGenerator) InitResources() error {
 
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
 	servicesList := runService.Projects.Locations.Services.List(parent)
-	g.Resources = append(g.Resources, g.createResources(ctx, servicesList)...)
+	serviceResources := g.createResources(ctx, servicesList)
+	g.Resources = append(g.Resources, serviceResources...)
+
+	// Per-service IAM (member form).
+	for _, r := range serviceResources {
+		res := r.InstanceState.ID
+		policy, perr := runService.Projects.Locations.Services.GetIamPolicy(res).Do()
+		if perr != nil {
+			continue
+		}
+		for _, b := range policy.Bindings {
+			for _, m := range b.Members {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					res+" "+b.Role+" "+m,
+					res+"_"+b.Role+"_"+m,
+					"google_cloud_run_v2_service_iam_member",
+					g.ProviderName,
+					map[string]string{
+						"name":     strings.Split(res, "/")[len(strings.Split(res, "/"))-1],
+						"role":     b.Role,
+						"member":   m,
+						"project":  g.GetArgs()["project"].(string),
+						"location": g.GetArgs()["region"].(compute.Region).Name,
+					},
+					cloudRunAllowEmptyValues,
+					cloudRunAdditionalFields,
+				))
+			}
+		}
+	}
 
 	jobsList := runService.Projects.Locations.Jobs.List(parent)
 	g.Resources = append(g.Resources, g.createJobsResources(ctx, jobsList)...)
