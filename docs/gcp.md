@@ -58,6 +58,8 @@ List of supported GCP services:
     * `google_composer_environment`
 *   `certificateManager`
     * `google_certificate_manager_certificate`
+    * `google_certificate_manager_certificate_map`
+    * `google_certificate_manager_dns_authorization`
 *   `cloudFunctions`
     * `google_cloudfunctions_function`
     * `google_cloudfunctions2_function`
