@@ -1274,6 +1274,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sagemaker_code_repository`
     * `aws_sagemaker_model_card`
     * `aws_sagemaker_algorithm`
+    * `aws_sagemaker_mlflow_app`
     * `aws_sagemaker_app_image_config`
     * `aws_sagemaker_device_fleet`
     * `aws_sagemaker_device`

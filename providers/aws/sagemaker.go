@@ -164,6 +164,21 @@ func (g *SageMakerGenerator) InitResources() error {
 		}
 	}
 
+	for mp := sagemaker.NewListMlflowAppsPaginator(svc, &sagemaker.ListMlflowAppsInput{}); mp.HasMorePages(); {
+		page, err := mp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, m := range page.Summaries {
+			arn := StringValue(m.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(m.Name), "aws_sagemaker_mlflow_app", "aws", defaultAllowEmptyValues))
+		}
+	}
+
 	g.addMoreSageMaker(ctx, svc)
 	return nil
 }
