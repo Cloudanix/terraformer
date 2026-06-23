@@ -216,6 +216,7 @@ google_pubsub_topic
 google_recaptcha_enterprise_key
 google_redis_cluster
 google_redis_instance
+google_scc_notification_config
 google_scc_source
 google_secret_manager_regional_secret
 google_secret_manager_secret
@@ -239,7 +240,10 @@ google_storage_transfer_job
 google_tags_tag_key
 google_vertex_ai_dataset
 google_vertex_ai_endpoint
+google_vertex_ai_feature_group
 google_vertex_ai_feature_online_store
+google_vertex_ai_featurestore
+google_vertex_ai_tensorboard
 google_vmwareengine_cluster
 google_vmwareengine_network
 google_vmwareengine_network_peering
