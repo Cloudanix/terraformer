@@ -123,6 +123,21 @@ func (g *NetworkServicesGenerator) InitResources() error {
 
 	endpointPoliciesList := networkServicesService.Projects.Locations.EndpointPolicies.List(parent)
 	g.Resources = append(g.Resources, g.createEndpointPoliciesResources(ctx, endpointPoliciesList)...)
+
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	if err := networkServicesService.Projects.Locations.WasmPlugins.List(parent).Pages(ctx, func(p *networkservices.ListWasmPluginsResponse) error {
+		for _, o := range p.WasmPlugins {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_services_wasm_plugin", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": loc},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 

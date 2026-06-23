@@ -281,6 +281,7 @@ List of supported GCP services:
     * `google_network_services_tls_route`
     * `google_network_services_service_binding`
     * `google_network_services_endpoint_policy`
+    * `google_network_services_wasm_plugin`
 *   `networks`
     * `google_compute_network`
 *   `nodeGroups`
