@@ -3,6 +3,7 @@ azurerm_api_management
 azurerm_app_service
 azurerm_application_gateway
 azurerm_application_insights
+azurerm_attestation_provider
 azurerm_automation_account
 azurerm_bastion_host
 azurerm_batch_account
@@ -70,6 +71,7 @@ azurerm_data_factory_pipeline
 azurerm_data_factory_trigger_blob_event
 azurerm_data_factory_trigger_schedule
 azurerm_data_factory_trigger_tumbling_window
+azurerm_data_protection_backup_vault
 azurerm_data_share_account
 azurerm_databricks_workspace
 azurerm_dev_center
@@ -146,6 +148,9 @@ azurerm_network_security_rule
 azurerm_network_watcher
 azurerm_network_watcher_flow_log
 azurerm_notification_hub_namespace
+azurerm_policy_assignment
+azurerm_policy_definition
+azurerm_policy_set_definition
 azurerm_postgresql_configuration
 azurerm_postgresql_database
 azurerm_postgresql_firewall_rule
