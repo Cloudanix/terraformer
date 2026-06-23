@@ -106,6 +106,7 @@ List of supported GCP services:
 *   `cloudFunctions`
     * `google_cloudfunctions_function`
     * `google_cloudfunctions2_function`
+    * `google_cloudfunctions2_function_iam_member`
 *   `cloudbuild`
     * `google_cloudbuild_trigger`
 *   `cloudBuildV2`

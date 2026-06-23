@@ -107,5 +107,29 @@ func (g *CloudFunctionsGenerator) InitResources() error {
 	g.Resources = append(g.Resources, g.createCloudFunctionsResources(ctx, functionsList)...)
 	g.Resources = append(g.Resources, g.createCloudFunctions2ndGenResources(ctx, functionsList)...)
 
+	// Per-function IAM (member form).
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	if err := cloudfunctionsService.Projects.Locations.Functions.List(parent).Pages(ctx, func(page *cloudfunctions.ListFunctionsResponse) error {
+		for _, fn := range page.Functions {
+			policy, perr := cloudfunctionsService.Projects.Locations.Functions.GetIamPolicy(fn.Name).Do()
+			if perr != nil {
+				continue
+			}
+			short := strings.Split(fn.Name, "/")[len(strings.Split(fn.Name, "/"))-1]
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						fn.Name+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_cloudfunctions2_function_iam_member", g.ProviderName,
+						map[string]string{"cloud_function": short, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+						[]string{""}, map[string]interface{}{}))
+				}
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	return nil
 }
