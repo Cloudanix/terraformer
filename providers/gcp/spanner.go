@@ -111,6 +111,20 @@ func (g *SpannerGenerator) InitResources() error {
 	for _, instanceName := range instanceNames {
 		databasesList := spannerService.Projects.Instances.Databases.List("projects/" + project + "/instances/" + instanceName)
 		g.Resources = append(g.Resources, g.createDatabasesResources(ctx, spannerService, databasesList, instanceName)...)
+
+		if err := spannerService.Projects.Instances.InstancePartitions.List("projects/"+project+"/instances/"+instanceName).Pages(ctx, func(p *spanner.ListInstancePartitionsResponse) error {
+			for _, o := range p.InstancePartitions {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					project+"/"+instanceName+"/"+name, name, "google_spanner_instance_partition", g.ProviderName,
+					map[string]string{"name": name, "instance": instanceName, "project": project},
+					spannerAllowEmptyValues, spannerAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
