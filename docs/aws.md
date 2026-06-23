@@ -105,6 +105,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_account_primary_contact`
 *   `compute-optimizer`
     * `aws_computeoptimizer_enrollment_status`
+    * `aws_computeoptimizer_recommendation_preferences`
 *   `cost-optimization-hub`
     * `aws_costoptimizationhub_enrollment_status`
     * `aws_costoptimizationhub_preferences`
