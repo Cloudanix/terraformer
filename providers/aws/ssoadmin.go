@@ -87,6 +87,39 @@ func (g *SSOAdminGenerator) InitResources() error {
 						psArn+","+instanceArn, psArn, "aws_ssoadmin_permission_set_inline_policy", "aws", defaultAllowEmptyValues))
 				}
 
+				// Account assignments: for each account the permission set is
+				// provisioned to, enumerate principal assignments.
+				for ap := ssoadmin.NewListAccountsForProvisionedPermissionSetPaginator(svc, &ssoadmin.ListAccountsForProvisionedPermissionSetInput{
+					InstanceArn: aws.String(instanceArn), PermissionSetArn: aws.String(psArn),
+				}); ap.HasMorePages(); {
+					apPage, err := ap.NextPage(ctx)
+					if err != nil {
+						break
+					}
+					for _, acctID := range apPage.AccountIds {
+						if acctID == "" {
+							continue
+						}
+						for aa := ssoadmin.NewListAccountAssignmentsPaginator(svc, &ssoadmin.ListAccountAssignmentsInput{
+							InstanceArn: aws.String(instanceArn), AccountId: aws.String(acctID), PermissionSetArn: aws.String(psArn),
+						}); aa.HasMorePages(); {
+							aaPage, err := aa.NextPage(ctx)
+							if err != nil {
+								break
+							}
+							for _, a := range aaPage.AccountAssignments {
+								pid := StringValue(a.PrincipalId)
+								if pid == "" {
+									continue
+								}
+								id := pid + "," + string(a.PrincipalType) + "," + acctID + ",AWS_ACCOUNT," + psArn + "," + instanceArn
+								g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+									id, acctID+"_"+pid, "aws_ssoadmin_account_assignment", "aws", defaultAllowEmptyValues))
+							}
+						}
+					}
+				}
+
 				for cmp := ssoadmin.NewListCustomerManagedPolicyReferencesInPermissionSetPaginator(svc, &ssoadmin.ListCustomerManagedPolicyReferencesInPermissionSetInput{
 					InstanceArn: aws.String(instanceArn), PermissionSetArn: aws.String(psArn),
 				}); cmp.HasMorePages(); {

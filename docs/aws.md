@@ -1367,6 +1367,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sqs_queue`
 *   `sso-admin`
     * `aws_ssoadmin_permission_set`
+    * `aws_ssoadmin_account_assignment`
     * `aws_ssoadmin_managed_policy_attachment`
     * `aws_ssoadmin_customer_managed_policy_attachment`
     * `aws_ssoadmin_permissions_boundary_attachment`
