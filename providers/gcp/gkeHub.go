@@ -72,8 +72,27 @@ func (g *GkeHubGenerator) InitResources() error {
 	}
 
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	project := g.GetArgs()["project"].(string)
+	loc := g.GetArgs()["region"].(compute.Region).Name
+
 	membershipsList := gkeHubService.Projects.Locations.Memberships.List(parent)
-	g.Resources = append(g.Resources, g.createResources(ctx, membershipsList)...)
+	membershipRes := g.createResources(ctx, membershipsList)
+	g.Resources = append(g.Resources, membershipRes...)
+	for _, r := range membershipRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := gkeHubService.Projects.Locations.Memberships.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_gke_hub_membership_iam_member", g.ProviderName,
+						map[string]string{"membership_id": short, "role": b.Role, "member": m, "project": project, "location": loc},
+						gkeHubAllowEmptyValues, gkeHubAdditionalFields))
+				}
+			}
+		}
+	}
 
 	featuresList := gkeHubService.Projects.Locations.Features.List(parent)
 	g.Resources = append(g.Resources, g.createFeaturesResources(ctx, featuresList)...)
