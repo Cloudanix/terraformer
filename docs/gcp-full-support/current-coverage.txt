@@ -18,6 +18,7 @@ google_cloud_scheduler_job
 google_cloud_tasks_queue
 google_cloudbuild_trigger
 google_clouddeploy_delivery_pipeline
+google_clouddeploy_target
 google_cloudfunctions_function
 google_cloudfunctions2_function
 google_composer_environment
@@ -106,6 +107,7 @@ google_data_catalog_entry_group
 google_data_fusion_instance
 google_data_loss_prevention_inspect_template
 google_dataplex_lake
+google_dataplex_task
 google_dataplex_zone
 google_dataproc_autoscaling_policy
 google_dataproc_cluster
@@ -136,6 +138,7 @@ google_healthcare_fhir_store
 google_healthcare_hl7_v2_store
 google_iam_workload_identity_pool
 google_iam_workload_identity_pool_provider
+google_integration_connectors_connection
 google_kms_crypto_key
 google_kms_crypto_key_version
 google_kms_key_ring
