@@ -127,6 +127,7 @@ List of supported GCP services:
     * `google_compute_health_check`
 *   `healthcare`
     * `google_healthcare_dataset`
+    * `google_healthcare_fhir_store`
 *   `httpHealthChecks`
     * `google_compute_http_health_check`
 *   `httpsHealthChecks`

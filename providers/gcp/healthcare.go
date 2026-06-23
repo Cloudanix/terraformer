@@ -33,23 +33,22 @@ type HealthcareGenerator struct {
 	GCPService
 }
 
-// Run on datasetsList and create for each TerraformResource
-func (g HealthcareGenerator) createResources(ctx context.Context, datasetsList *healthcare.ProjectsLocationsDatasetsListCall) []terraformutils.Resource {
+// Run on fhirStoresList and create for each TerraformResource (per-dataset walk)
+func (g HealthcareGenerator) createFhirStoresResources(ctx context.Context, list *healthcare.ProjectsLocationsDatasetsFhirStoresService, datasetName string) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
-	location := g.GetArgs()["region"].(compute.Region).Name
-	if err := datasetsList.Pages(ctx, func(page *healthcare.ListDatasetsResponse) error {
-		for _, obj := range page.Datasets {
+	if err := list.List(datasetName).Pages(ctx, func(page *healthcare.ListFhirStoresResponse) error {
+		for _, obj := range page.FhirStores {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
 			resources = append(resources, terraformutils.NewResource(
 				obj.Name,
 				name,
-				"google_healthcare_dataset",
+				"google_healthcare_fhir_store",
 				g.ProviderName,
 				map[string]string{
-					"name":     name,
-					"project":  g.GetArgs()["project"].(string),
-					"location": location,
+					"name":    name,
+					"dataset": datasetName,
+					"project": g.GetArgs()["project"].(string),
 				},
 				healthcareAllowEmptyValues,
 				healthcareAdditionalFields,
@@ -69,9 +68,33 @@ func (g *HealthcareGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
 
-	datasetsList := healthcareService.Projects.Locations.Datasets.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, datasetsList)
+	datasetNames := []string{}
+	datasetsList := healthcareService.Projects.Locations.Datasets.List("projects/" + project + "/locations/" + location)
+	if err := datasetsList.Pages(ctx, func(page *healthcare.ListDatasetsResponse) error {
+		for _, obj := range page.Datasets {
+			datasetNames = append(datasetNames, obj.Name)
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_healthcare_dataset",
+				g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				healthcareAllowEmptyValues,
+				healthcareAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	for _, dataset := range datasetNames {
+		g.Resources = append(g.Resources, g.createFhirStoresResources(ctx, healthcareService.Projects.Locations.Datasets.FhirStores, dataset)...)
+	}
 	return nil
 }
