@@ -35,6 +35,15 @@ terraformer import aws --resources=sg --regions=us-east-1
 
 *   `dsql`
     * `aws_dsql_cluster`
+*   `s3vectors`
+    * `aws_s3vectors_vector_bucket`
+    * `aws_s3vectors_index`
+    * `aws_s3vectors_vector_bucket_policy`
+*   `arc-region-switch`
+    * `aws_arcregionswitch_plan`
+*   `arc-zonal-shift`
+    * `aws_arczonalshift_zonal_autoshift_configuration`
+    * `aws_arczonalshift_autoshift_observer_notification_status`
 *   `workmail`
     * `aws_workmail_organization`
     * `aws_workmail_group`

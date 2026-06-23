@@ -441,6 +441,8 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/appmesh v1.36.4
 	github.com/aws/aws-sdk-go-v2/service/apprunner v1.40.6
 	github.com/aws/aws-sdk-go-v2/service/appstream v1.61.0
+	github.com/aws/aws-sdk-go-v2/service/arcregionswitch v1.9.3
+	github.com/aws/aws-sdk-go-v2/service/arczonalshift v1.23.5
 	github.com/aws/aws-sdk-go-v2/service/athena v1.58.4
 	github.com/aws/aws-sdk-go-v2/service/auditmanager v1.47.1
 	github.com/aws/aws-sdk-go-v2/service/autoscalingplans v1.31.5
@@ -560,6 +562,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5
 	github.com/aws/aws-sdk-go-v2/service/s3outposts v1.35.2
 	github.com/aws/aws-sdk-go-v2/service/s3tables v1.16.6
+	github.com/aws/aws-sdk-go-v2/service/s3vectors v1.8.0
 	github.com/aws/aws-sdk-go-v2/service/sagemaker v1.256.0
 	github.com/aws/aws-sdk-go-v2/service/savingsplans v1.33.7
 	github.com/aws/aws-sdk-go-v2/service/scheduler v1.18.7
