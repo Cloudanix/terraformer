@@ -127,6 +127,17 @@ func (g *DataplexGenerator) InitResources() error {
 				o.Name, name, "google_dataplex_glossary", g.ProviderName,
 				map[string]string{"glossary_id": name, "project": project, "location": location},
 				dataplexAllowEmptyValues, dataplexAdditionalFields))
+			if policy, perr := dataplexService.Projects.Locations.Glossaries.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_dataplex_glossary_iam_member", g.ProviderName,
+							map[string]string{"glossary_id": name, "role": b.Role, "member": m, "project": project, "location": location},
+							dataplexAllowEmptyValues, dataplexAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
