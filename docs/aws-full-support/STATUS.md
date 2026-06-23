@@ -110,8 +110,11 @@ on already-registered services — not net-new services, which were already done
 
 ## Coverage tally
 
-Current coverage: 234 services / **1239** `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = **232** — the clean-import buildable tail is now empty
+Current coverage: 234 services / **1256** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **215** — a full per-resource buildability audit
+([resource-review.md](resource-review.md)) found and built ~20 more (incl. several
+earlier mis-marked "absent SDK" that were really pinned-version-gated); the
+clean-import buildable tail is now empty
 (incl. the high-cardinality per-parent leaves §9 named: glue_partition,
 cloudwatch_log_stream, sagemaker_device, glue_catalog_table_optimizer);
 every remaining entry maps to a documented exclusion class in
