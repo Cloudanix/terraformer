@@ -204,4 +204,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"publicDelegatedPrefixes": basicGCPResource{
 		terraformName: "google_compute_public_delegated_prefix",
 	},
+	"machineImages": basicGCPResource{
+		terraformName: "google_compute_machine_image",
+	},
 }
