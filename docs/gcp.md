@@ -71,6 +71,7 @@ List of supported GCP services:
 *   `biglake`
     * `google_biglake_catalog`
     * `google_biglake_database`
+    * `google_biglake_table`
 *   `bigQueryConnection`
     * `google_bigquery_connection`
 *   `bigQueryReservation`

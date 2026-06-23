@@ -64,10 +64,12 @@ func (g *BiglakeGenerator) InitResources() error {
 	for _, catalog := range catalogIDs {
 		dbList := biglakeService.Projects.Locations.Catalogs.Databases.List(
 			"projects/" + project + "/locations/" + location + "/catalogs/" + catalog)
+		dbNames := []string{}
 		if err := dbList.Pages(ctx, func(page *biglake.ListDatabasesResponse) error {
 			for _, obj := range page.Databases {
 				t := strings.Split(obj.Name, "/")
 				name := t[len(t)-1]
+				dbNames = append(dbNames, name)
 				g.Resources = append(g.Resources, terraformutils.NewResource(
 					obj.Name, name, "google_biglake_database", g.ProviderName,
 					map[string]string{"name": name, "catalog": catalog, "project": project, "location": location},
@@ -77,6 +79,22 @@ func (g *BiglakeGenerator) InitResources() error {
 			return nil
 		}); err != nil {
 			log.Println(err)
+		}
+		for _, db := range dbNames {
+			if err := biglakeService.Projects.Locations.Catalogs.Databases.Tables.List(
+				"projects/"+project+"/locations/"+location+"/catalogs/"+catalog+"/databases/"+db).Pages(ctx, func(page *biglake.ListTablesResponse) error {
+				for _, obj := range page.Tables {
+					t := strings.Split(obj.Name, "/")
+					name := t[len(t)-1]
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						obj.Name, name, "google_biglake_table", g.ProviderName,
+						map[string]string{"name": name, "database": db, "catalog": catalog, "project": project, "location": location},
+						biglakeAllowEmptyValues, biglakeAdditionalFields))
+				}
+				return nil
+			}); err != nil {
+				log.Println(err)
+			}
 		}
 	}
 	return nil
