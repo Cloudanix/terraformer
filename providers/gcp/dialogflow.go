@@ -85,6 +85,30 @@ func (g *DialogflowGenerator) InitResources() error {
 		}); err != nil {
 			log.Println(err)
 		}
+		if err := dialogflowService.Projects.Locations.Agents.EntityTypes.List(agent).Pages(ctx, func(p *dialogflow.GoogleCloudDialogflowCxV3ListEntityTypesResponse) error {
+			for _, o := range p.EntityTypes {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_dialogflow_cx_entity_type", g.ProviderName,
+					map[string]string{"parent": agent, "project": project},
+					dialogflowAllowEmptyValues, dialogflowAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+		if err := dialogflowService.Projects.Locations.Agents.Webhooks.List(agent).Pages(ctx, func(p *dialogflow.GoogleCloudDialogflowCxV3ListWebhooksResponse) error {
+			for _, o := range p.Webhooks {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_dialogflow_cx_webhook", g.ProviderName,
+					map[string]string{"parent": agent, "project": project},
+					dialogflowAllowEmptyValues, dialogflowAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
