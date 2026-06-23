@@ -60,25 +60,46 @@ func (g *BigtableGenerator) InitResources() error {
 
 		// Walk the instance for its tables.
 		tablesList, terr := bigtableService.Projects.Instances.Tables.List(obj.Name).Do()
-		if terr != nil {
-			continue
+		if terr == nil {
+			for _, tbl := range tablesList.Tables {
+				tt := strings.Split(tbl.Name, "/")
+				tableName := tt[len(tt)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					project+"/"+instanceName+"/"+tableName,
+					tableName,
+					"google_bigtable_table",
+					g.ProviderName,
+					map[string]string{
+						"name":          tableName,
+						"instance_name": instanceName,
+						"project":       project,
+					},
+					bigtableAllowEmptyValues,
+					bigtableAdditionalFields,
+				))
+			}
 		}
-		for _, tbl := range tablesList.Tables {
-			tt := strings.Split(tbl.Name, "/")
-			tableName := tt[len(tt)-1]
-			g.Resources = append(g.Resources, terraformutils.NewResource(
-				project+"/"+instanceName+"/"+tableName,
-				tableName,
-				"google_bigtable_table",
-				g.ProviderName,
-				map[string]string{
-					"name":          tableName,
-					"instance_name": instanceName,
-					"project":       project,
-				},
-				bigtableAllowEmptyValues,
-				bigtableAdditionalFields,
-			))
+
+		// Walk the instance for its app profiles.
+		profilesList, perr := bigtableService.Projects.Instances.AppProfiles.List(obj.Name).Do()
+		if perr == nil {
+			for _, prof := range profilesList.AppProfiles {
+				pt := strings.Split(prof.Name, "/")
+				profName := pt[len(pt)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					project+"/"+instanceName+"/"+profName,
+					profName,
+					"google_bigtable_app_profile",
+					g.ProviderName,
+					map[string]string{
+						"app_profile_id": profName,
+						"instance":       instanceName,
+						"project":        project,
+					},
+					bigtableAllowEmptyValues,
+					bigtableAdditionalFields,
+				))
+			}
 		}
 	}
 	return nil
