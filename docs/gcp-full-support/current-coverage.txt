@@ -7,6 +7,7 @@ google_alloydb_cluster
 google_alloydb_instance
 google_alloydb_user
 google_api_gateway_api
+google_api_gateway_gateway
 google_api_source_id
 google_apikeys_key
 google_apphub_application
