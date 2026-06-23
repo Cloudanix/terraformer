@@ -54,6 +54,17 @@ func (g *ServiceDirectoryGenerator) InitResources() error {
 				obj.Name, name, "google_service_directory_namespace", g.ProviderName,
 				map[string]string{"name": name, "project": project, "location": location},
 				serviceDirectoryAllowEmptyValues, serviceDirectoryAdditionalFields))
+			if policy, perr := serviceDirectoryService.Projects.Locations.Namespaces.GetIamPolicy(obj.Name, &servicedirectory.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_service_directory_namespace_iam_member", g.ProviderName,
+							map[string]string{"name": obj.Name, "role": b.Role, "member": m, "project": project, "location": location},
+							serviceDirectoryAllowEmptyValues, serviceDirectoryAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
