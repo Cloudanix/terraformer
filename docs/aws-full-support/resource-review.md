@@ -73,10 +73,11 @@ buildable against the pinned SDKs, now implemented (one commit each):
   (consumer-side composite not reliably reconstructable),
   `aws_sagemaker_servicecatalog_portfolio_status` (region/account-derived id),
   `aws_opensearch_authorize_vpc_endpoint_access` (domain+account composite).
-- **Deferred — multi-level / cross-service fan-out, low value:** datazone
-  (asset_type/form_type/glossary/glossary_term/user_profile need
-  domain+owning-project context), `aws_controltower_control` (ListEnabledControls
-  needs per-OU target enumeration from Organizations).
+- **Deferred — multi-level / cross-service fan-out:** `aws_controltower_control`
+  (ListEnabledControls needs per-OU target enumeration from Organizations,
+  mgmt-account only). datazone asset_type/form_type/user_profile are now BUILT
+  (SearchTypes/SearchUserProfiles); only datazone glossary/glossary_term remain
+  out (no list API — project-scoped Get by id only).
 - **No `terraform import` / data-plane / singleton-without-identity / would
   double-manage an inlined attribute / cross-account handshake / `aws_default_*`
   adopt-existing / tag-per-parent:** the large structural majority — fully
@@ -127,8 +128,8 @@ could now be added. Findings:
 
 ## Result
 
-`missing-resources.txt` = **189**, every entry mapped to one of the verdicts
-above. Coverage **1282** `aws_*` types. After the aws-sdk-go-v2 upgrade resolved
+`missing-resources.txt` = **184**, every entry mapped to one of the verdicts
+above. Coverage **1287** `aws_*` types. After the aws-sdk-go-v2 upgrade resolved
 the "op absent" group, the buildable frontier is exhausted: remaining gains need
 an SDK module that is **entirely unvendored** (codecatalyst, drs, evidently, lex
 v1, paymentcryptography, computeoptimizer, costoptimizationhub, simpledb,
