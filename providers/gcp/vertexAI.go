@@ -266,6 +266,56 @@ func (g *VertexAIGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+
+	// Colab Enterprise resources (Vertex AI Notebook* APIs).
+	if err := vertexAIService.Projects.Locations.NotebookRuntimeTemplates.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListNotebookRuntimeTemplatesResponse) error {
+		for _, o := range p.NotebookRuntimeTemplates {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_colab_runtime_template", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "location": loc, "project": proj},
+				vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.NotebookRuntimes.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListNotebookRuntimesResponse) error {
+		for _, o := range p.NotebookRuntimes {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_colab_runtime", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "location": loc, "project": proj},
+				vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.NotebookExecutionJobs.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListNotebookExecutionJobsResponse) error {
+		for _, o := range p.NotebookExecutionJobs {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_colab_notebook_execution", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "location": loc, "project": proj},
+				vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := vertexAIService.Projects.Locations.Schedules.List(parent).Pages(ctx, func(p *aiplatform.GoogleCloudAiplatformV1ListSchedulesResponse) error {
+		for _, o := range p.Schedules {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_colab_schedule", g.ProviderName,
+				map[string]string{"name": t[len(t)-1], "location": loc, "project": proj},
+				vertexAIAllowEmptyValues, vertexAIAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
