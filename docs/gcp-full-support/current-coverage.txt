@@ -1,3 +1,5 @@
+google_access_context_manager_access_policy
+google_api_gateway_api
 google_apphub_application
 google_artifact_registry_repository
 google_backup_dr_management_server
