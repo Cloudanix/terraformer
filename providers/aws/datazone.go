@@ -17,7 +17,9 @@ package aws
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/datazone"
+	datazonetypes "github.com/aws/aws-sdk-go-v2/service/datazone/types"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -100,6 +102,54 @@ func (g *DataZoneGenerator) InitResources() error {
 				}
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					dom+":"+pfid, dom+"_"+pfid, "aws_datazone_environment_profile", "aws", defaultAllowEmptyValues))
+			}
+		}
+		// Custom (non-managed) asset & form types via SearchTypes.
+		for _, scope := range []datazonetypes.TypesSearchScope{datazonetypes.TypesSearchScopeAssetType, datazonetypes.TypesSearchScopeFormType} {
+			for sp := datazone.NewSearchTypesPaginator(svc, &datazone.SearchTypesInput{
+				DomainIdentifier: &dom, SearchScope: scope, Managed: aws.Bool(false),
+			}); sp.HasMorePages(); {
+				page, err := sp.NextPage(ctx)
+				if err != nil {
+					break
+				}
+				for _, item := range page.Items {
+					switch v := item.(type) {
+					case *datazonetypes.SearchTypesResultItemMemberAssetTypeItem:
+						name := StringValue(v.Value.Name)
+						if name != "" {
+							g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+								dom+","+name, dom+"_"+name, "aws_datazone_asset_type", "aws", defaultAllowEmptyValues))
+						}
+					case *datazonetypes.SearchTypesResultItemMemberFormTypeItem:
+						name := StringValue(v.Value.Name)
+						if name != "" {
+							g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+								dom+","+name, dom+"_"+name, "aws_datazone_form_type", "aws", defaultAllowEmptyValues))
+						}
+					}
+				}
+			}
+		}
+		// User profiles.
+		for up := datazone.NewSearchUserProfilesPaginator(svc, &datazone.SearchUserProfilesInput{
+			DomainIdentifier: &dom, UserType: datazonetypes.UserSearchTypeDatazoneUser,
+		}); up.HasMorePages(); {
+			page, err := up.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, u := range page.Items {
+				uid := StringValue(u.Id)
+				if uid == "" {
+					continue
+				}
+				utype := "IAM"
+				if u.Type == datazonetypes.UserProfileTypeSso {
+					utype = "SSO"
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					uid+","+dom+","+utype, dom+"_"+uid, "aws_datazone_user_profile", "aws", defaultAllowEmptyValues))
 			}
 		}
 		for bp := datazone.NewListEnvironmentBlueprintConfigurationsPaginator(svc, &datazone.ListEnvironmentBlueprintConfigurationsInput{DomainIdentifier: &dom}); bp.HasMorePages(); {

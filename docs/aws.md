@@ -412,6 +412,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_datazone_environment`
     * `aws_datazone_environment_profile`
     * `aws_datazone_environment_blueprint_configuration`
+    * `aws_datazone_asset_type`
+    * `aws_datazone_form_type`
+    * `aws_datazone_user_profile`
 *   `config`
     * `aws_config_config_rule`
     * `aws_config_remediation_configuration`
