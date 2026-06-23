@@ -19,6 +19,7 @@ import (
 	"log"
 	"strings"
 
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/networkmanagement/v1"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -54,6 +55,23 @@ func (g *NetworkManagementGenerator) InitResources() error {
 		return nil
 	}); err != nil {
 		log.Println(err)
+	}
+
+	for _, loc := range []string{"global", g.GetArgs()["region"].(compute.Region).Name} {
+		locParent := "projects/" + project + "/locations/" + loc
+		if err := svc.Projects.Locations.VpcFlowLogsConfigs.List(locParent).Pages(ctx, func(page *networkmanagement.ListVpcFlowLogsConfigsResponse) error {
+			for _, obj := range page.VpcFlowLogsConfigs {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_network_management_vpc_flow_logs_config", g.ProviderName,
+					map[string]string{"vpc_flow_logs_config_id": name, "location": loc, "project": project},
+					networkManagementAllowEmptyValues, networkManagementAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
