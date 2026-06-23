@@ -62,6 +62,35 @@ func (g VertexAIGenerator) createResources(ctx context.Context, endpointsList *a
 	return resources
 }
 
+// Run on datasetsList and create for each TerraformResource
+func (g VertexAIGenerator) createDatasetsResources(ctx context.Context, datasetsList *aiplatform.ProjectsLocationsDatasetsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := datasetsList.Pages(ctx, func(page *aiplatform.GoogleCloudAiplatformV1ListDatasetsResponse) error {
+		for _, obj := range page.Datasets {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_vertex_ai_dataset",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				vertexAIAllowEmptyValues,
+				vertexAIAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 // Generate TerraformResources from GCP API,
 func (g *VertexAIGenerator) InitResources() error {
 	ctx := context.Background()
@@ -70,8 +99,11 @@ func (g *VertexAIGenerator) InitResources() error {
 		return err
 	}
 
-	endpointsList := vertexAIService.Projects.Locations.Endpoints.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, endpointsList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	endpointsList := vertexAIService.Projects.Locations.Endpoints.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, endpointsList)...)
+
+	datasetsList := vertexAIService.Projects.Locations.Datasets.List(parent)
+	g.Resources = append(g.Resources, g.createDatasetsResources(ctx, datasetsList)...)
 	return nil
 }
