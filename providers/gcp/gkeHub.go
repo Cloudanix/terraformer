@@ -125,6 +125,17 @@ func (g *GkeHubGenerator) InitResources() error {
 				map[string]string{"scope_id": name, "project": g.GetArgs()["project"].(string)},
 				gkeHubAllowEmptyValues, gkeHubAdditionalFields,
 			))
+			if policy, perr := gkeHubService.Projects.Locations.Scopes.GetIamPolicy(obj.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_gke_hub_scope_iam_member", g.ProviderName,
+							map[string]string{"scope_id": name, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string)},
+							gkeHubAllowEmptyValues, gkeHubAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
