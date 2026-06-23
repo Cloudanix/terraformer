@@ -20,6 +20,7 @@ import (
 	"go/format"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 	"text/template"
 )
@@ -150,8 +151,26 @@ var ComputeServices = map[string]terraformutils.ServiceGenerator{
 
 `
 
+// computeAPIJSONPath resolves the Compute discovery doc. Honors COMPUTE_API_JSON
+// when set; otherwise locates it in the Go module cache via `go list` (read-only,
+// works offline once the module is downloaded). Replaces the old GOPATH hack.
+func computeAPIJSONPath() (string, error) {
+	if p := os.Getenv("COMPUTE_API_JSON"); p != "" {
+		return p, nil
+	}
+	out, err := exec.Command("go", "list", "-m", "-f", "{{.Dir}}", "google.golang.org/api").Output()
+	if err != nil {
+		return "", err
+	}
+	return strings.TrimSpace(string(out)) + "/compute/v1/compute-api.json", nil
+}
+
 func main() {
-	computeAPIData, err := os.ReadFile(os.Getenv("GOPATH") + "/src/google.golang.org/api/compute/v1/compute-api.json") // TODO delete this hack
+	jsonPath, err := computeAPIJSONPath()
+	if err != nil {
+		log.Fatal(err)
+	}
+	computeAPIData, err := os.ReadFile(jsonPath)
 	if err != nil {
 		log.Fatal(err)
 	}

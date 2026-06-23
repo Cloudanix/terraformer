@@ -48,6 +48,11 @@ fmt: ## Format code with gofmt + goimports-style ordering
 fmt-check: ## List files that are not gofmt-clean (repo has pre-existing debt)
 	@gofmt -l .
 
+.PHONY: gcp-codegen
+gcp-codegen: ## Regenerate GCP compute *_gen.go + compute.go from the Compute discovery doc (module cache)
+	$(GO) run ./providers/gcp/gcp_compute_code_generator
+	gofmt -w providers/gcp/*_gen.go providers/gcp/compute.go
+
 .PHONY: vet
 vet: ## Run go vet (note: `go test` also runs vet)
 	$(GO) vet $(PKG)
