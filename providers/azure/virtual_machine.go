@@ -16,86 +16,78 @@ package azure
 
 import (
 	"context"
-	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-03-01/compute"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v6"
 )
 
 type VirtualMachineGenerator struct {
 	AzureService
 }
 
-func (g VirtualMachineGenerator) createResources(virtualMachineListResultIterator compute.VirtualMachineListResultIterator) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	for virtualMachineListResultIterator.NotDone() {
-		vm := virtualMachineListResultIterator.Value()
-		var newResource terraformutils.Resource
-		if vm.VirtualMachineProperties.OsProfile == nil {
-			if vm.VirtualMachineProperties.StorageProfile.OsDisk.OsType == "Windows" {
-				newResource = terraformutils.NewSimpleResource(
-					*vm.ID,
-					*vm.Name,
-					"azurerm_windows_virtual_machine",
-					"azurerm",
-					[]string{})
-			} else {
-				newResource = terraformutils.NewSimpleResource(
-					*vm.ID,
-					*vm.Name,
-					"azurerm_linux_virtual_machine",
-					"azurerm",
-					[]string{})
-			}
-		} else {
-			if vm.VirtualMachineProperties.OsProfile.WindowsConfiguration != nil {
-				newResource = terraformutils.NewSimpleResource(
-					*vm.ID,
-					*vm.Name,
-					"azurerm_windows_virtual_machine",
-					"azurerm",
-					[]string{})
-			} else {
-				newResource = terraformutils.NewSimpleResource(
-					*vm.ID,
-					*vm.Name,
-					"azurerm_linux_virtual_machine",
-					"azurerm",
-					[]string{})
-			}
-		}
-
-		resources = append(resources, newResource)
-		if err := virtualMachineListResultIterator.Next(); err != nil {
-			log.Println(err)
-			return resources, err
+// vmResourceType picks the azurerm resource type for a VM by OS. It mirrors the
+// original heuristic: prefer the OS profile's WindowsConfiguration; if there is
+// no OS profile, fall back to the OS disk's OSType.
+func vmResourceType(vm *armcompute.VirtualMachine) string {
+	windows := false
+	if props := vm.Properties; props != nil {
+		switch {
+		case props.OSProfile != nil:
+			windows = props.OSProfile.WindowsConfiguration != nil
+		case props.StorageProfile != nil && props.StorageProfile.OSDisk != nil && props.StorageProfile.OSDisk.OSType != nil:
+			windows = *props.StorageProfile.OSDisk.OSType == armcompute.OperatingSystemTypesWindows
 		}
 	}
-	return resources, nil
+	if windows {
+		return "azurerm_windows_virtual_machine"
+	}
+	return "azurerm_linux_virtual_machine"
 }
 
+// InitResources imports azurerm_linux_virtual_machine / _windows_virtual_machine.
+// Migrated to the Track 2 armcompute SDK (was Track 1 services/compute).
 func (g *VirtualMachineGenerator) InitResources() error {
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	vmClient := compute.NewVirtualMachinesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	vmClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	var (
-		output compute.VirtualMachineListResultIterator
-		err    error
-	)
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		output, err = vmClient.ListComplete(ctx, rg)
-	} else {
-		output, err = vmClient.ListAllComplete(ctx)
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
+	client, err := armcompute.NewVirtualMachinesClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	g.Resources, err = g.createResources(output)
-	return err
+
+	var vms []*armcompute.VirtualMachine
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListAllPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			vms = append(vms, page.Value...)
+		}
+	} else {
+		for _, rg := range rgs {
+			pager := client.NewListPager(rg, nil)
+			for pager.More() {
+				page, err := pager.NextPage(context.TODO())
+				if err != nil {
+					return err
+				}
+				vms = append(vms, page.Value...)
+			}
+		}
+	}
+
+	for _, vm := range vms {
+		if vm == nil {
+			continue
+		}
+		id := valueOrEmpty(vm.ID)
+		if id == "" {
+			continue
+		}
+		g.AppendSimpleResource(id, valueOrEmpty(vm.Name), vmResourceType(vm))
+	}
+	return nil
 }
