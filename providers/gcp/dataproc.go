@@ -201,7 +201,23 @@ func (g *DataprocGenerator) InitResources() error {
 	}
 
 	policyList := dataprocService.Projects.Regions.AutoscalingPolicies.List("projects/" + project + "/regions/" + region)
-	g.Resources = append(g.Resources, g.createAutoscalingPolicyResources(ctx, policyList)...)
+	autoscalingResources := g.createAutoscalingPolicyResources(ctx, policyList)
+	g.Resources = append(g.Resources, autoscalingResources...)
+	for _, r := range autoscalingResources {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := dataprocService.Projects.Regions.AutoscalingPolicies.GetIamPolicy(res, &dataproc.GetIamPolicyRequest{}).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_dataproc_autoscaling_policy_iam_member", g.ProviderName,
+						map[string]string{"policy_id": short, "role": b.Role, "member": m, "project": project, "location": region},
+						dataprocAllowEmptyValues, dataprocAdditionalFields))
+				}
+			}
+		}
+	}
 
 	wftList := dataprocService.Projects.Regions.WorkflowTemplates.List("projects/" + project + "/regions/" + region)
 	g.Resources = append(g.Resources, g.createWorkflowTemplateResources(ctx, wftList)...)
