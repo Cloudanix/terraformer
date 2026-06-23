@@ -230,6 +230,7 @@ export ARM_USE_ADAL=true
 *   `virtual_network`
     * `azurerm_virtual_network`
     * `azurerm_virtual_network_gateway`
+    * `azurerm_local_network_gateway`
 
 ## Notes
 
