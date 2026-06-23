@@ -19,6 +19,7 @@ import (
 	"log"
 	"strings"
 
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/secretmanager/v1"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -71,5 +72,37 @@ func (g *SecretManagerGenerator) InitResources() error {
 	secretsList := secretManagerService.Projects.Secrets.List("projects/" + g.GetArgs()["project"].(string))
 	g.Resources = append(g.Resources, g.createSecretsResources(ctx, secretsList)...)
 
+	g.Resources = append(g.Resources, g.createRegionalSecretsResources(ctx, secretManagerService)...)
 	return nil
+}
+
+// Run on regional secrets and create for each TerraformResource
+func (g SecretManagerGenerator) createRegionalSecretsResources(ctx context.Context, svc *secretmanager.Service) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
+	list := svc.Projects.Locations.Secrets.List("projects/" + project + "/locations/" + location)
+	if err := list.Pages(ctx, func(page *secretmanager.ListSecretsResponse) error {
+		for _, obj := range page.Secrets {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_secret_manager_regional_secret",
+				g.ProviderName,
+				map[string]string{
+					"secret_id": name,
+					"location":  location,
+					"project":   project,
+				},
+				secretManagerAllowEmptyValues,
+				secretManagerAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
