@@ -70,8 +70,22 @@ func (g *MigrationCenterGenerator) InitResources() error {
 		return err
 	}
 
-	groupsList := mcService.Projects.Locations.Groups.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, groupsList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	groupsList := mcService.Projects.Locations.Groups.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, groupsList)...)
+
+	if err := mcService.Projects.Locations.Sources.List(parent).Pages(ctx, func(p *migrationcenter.ListSourcesResponse) error {
+		for _, o := range p.Sources {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_migration_center_source", g.ProviderName,
+				map[string]string{"source_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				migrationCenterAllowEmptyValues, migrationCenterAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

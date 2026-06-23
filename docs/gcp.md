@@ -258,6 +258,7 @@ List of supported GCP services:
 *   `memcache`
 *   `migrationCenter`
     * `google_migration_center_group`
+    * `google_migration_center_source`
     * `google_memcache_instance`
 *   `memoryStore`
     * `google_redis_instance`
