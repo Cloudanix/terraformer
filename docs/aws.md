@@ -440,6 +440,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_chimesdkvoice_sip_media_application`
     * `aws_chimesdkvoice_sip_rule`
     * `aws_chimesdkvoice_voice_profile_domain`
+    * `aws_chimesdkvoice_global_settings`
     * `aws_chime_voice_connector`
     * `aws_chime_voice_connector_group`
     * `aws_chime_voice_connector_origination`
