@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"google.golang.org/api/cloudkms/v1"
+	"google.golang.org/api/compute/v1"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -124,6 +125,36 @@ func (g *KmsGenerator) InitResources() error {
 	keyRingList := kmsService.Projects.Locations.KeyRings.List("projects/" + g.GetArgs()["project"].(string) + "/locations/global")
 
 	g.Resources = g.createKmsRingResources(ctx, keyRingList, kmsService)
+
+	project := g.GetArgs()["project"].(string)
+	region := g.GetArgs()["region"].(compute.Region).Name
+	regionParent := "projects/" + project + "/locations/" + region
+	if err := kmsService.Projects.Locations.EkmConnections.List(regionParent).Pages(ctx, func(p *cloudkms.ListEkmConnectionsResponse) error {
+		for _, o := range p.EkmConnections {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_kms_ekm_connection", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": region},
+				kmsAllowEmptyValues, kmsAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := kmsService.Projects.Locations.KeyHandles.List(regionParent).Pages(ctx, func(p *cloudkms.ListKeyHandlesResponse) error {
+		for _, o := range p.KeyHandles {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_kms_key_handle", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": region},
+				kmsAllowEmptyValues, kmsAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 

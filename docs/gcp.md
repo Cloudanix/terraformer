@@ -220,6 +220,8 @@ List of supported GCP services:
 *   `kms`
     * `google_kms_crypto_key`
     * `google_kms_crypto_key_version`
+    * `google_kms_ekm_connection`
+    * `google_kms_key_handle`
     * `google_kms_key_ring`
 *   `looker`
     * `google_looker_instance`
