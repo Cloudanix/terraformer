@@ -75,6 +75,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_workmail_organization`
     * `aws_workmail_group`
     * `aws_workmail_user`
+    * `aws_workmail_domain`
 *   `odb`
     * `aws_odb_network`
     * `aws_odb_cloud_vm_cluster`

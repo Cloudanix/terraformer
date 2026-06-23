@@ -82,6 +82,20 @@ func (g *WorkMailGenerator) InitResources() error {
 					oid+"/"+uid, oid+"_"+uid, "aws_workmail_user", "aws", defaultAllowEmptyValues))
 			}
 		}
+		for p := workmail.NewListMailDomainsPaginator(svc, &workmail.ListMailDomainsInput{OrganizationId: aws.String(oid)}); p.HasMorePages(); {
+			page, err := p.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, d := range page.MailDomains {
+				domain := StringValue(d.DomainName)
+				if domain == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					oid+","+domain, oid+"_"+domain, "aws_workmail_domain", "aws", defaultAllowEmptyValues))
+			}
+		}
 	}
 	return nil
 }
