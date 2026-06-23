@@ -74,10 +74,22 @@ func (g *ServiceDirectoryGenerator) InitResources() error {
 		if err := serviceDirectoryService.Projects.Locations.Namespaces.Services.List(ns).Pages(ctx, func(p *servicedirectory.ListServicesResponse) error {
 			for _, o := range p.Services {
 				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
 				g.Resources = append(g.Resources, terraformutils.NewResource(
-					o.Name, t[len(t)-1], "google_service_directory_service", g.ProviderName,
+					o.Name, name, "google_service_directory_service", g.ProviderName,
 					map[string]string{"namespace": ns, "project": project},
 					serviceDirectoryAllowEmptyValues, serviceDirectoryAdditionalFields))
+				if policy, perr := serviceDirectoryService.Projects.Locations.Namespaces.Services.GetIamPolicy(o.Name, &servicedirectory.GetIamPolicyRequest{}).Do(); perr == nil {
+					for _, b := range policy.Bindings {
+						for _, m := range b.Members {
+							g.Resources = append(g.Resources, terraformutils.NewResource(
+								o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+								"google_service_directory_service_iam_member", g.ProviderName,
+								map[string]string{"name": o.Name, "role": b.Role, "member": m, "project": project},
+								serviceDirectoryAllowEmptyValues, serviceDirectoryAdditionalFields))
+						}
+					}
+				}
 			}
 			return nil
 		}); err != nil {
