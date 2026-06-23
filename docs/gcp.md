@@ -88,6 +88,8 @@ List of supported GCP services:
     * `google_compute_disk`
 *   `dlp`
     * `google_data_loss_prevention_inspect_template`
+*   `discoveryEngine`
+    * `google_discovery_engine_data_store`
 *   `dns`
     * `google_dns_managed_zone`
     * `google_dns_record_set`
