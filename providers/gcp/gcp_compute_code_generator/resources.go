@@ -255,4 +255,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"interconnectAttachmentGroups": basicGCPResource{
 		terraformName: "google_compute_interconnect_attachment_group",
 	},
+	"regionCompositeHealthChecks": basicGCPResource{
+		terraformName: "google_compute_region_composite_health_check",
+	},
 }
