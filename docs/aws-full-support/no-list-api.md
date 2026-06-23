@@ -119,6 +119,17 @@ Specifically excluded (verified individually against the SDK):
 - `aws_servicecatalog_organizations_access` — org-access enable/disable singleton.
 - `aws_vpc_block_public_access_options` — region singleton
   (DescribeVpcBlockPublicAccessOptions); no per-resource import identity.
+- `aws_securityhub_standards_control_association` /
+  `aws_securityhub_configuration_policy_association` — the enable/disable *state*
+  of every control in every enabled standard; `aws_securityhub_standards_control`
+  (already built, via DescribeStandardsControls) captures the same control state,
+  so emitting the association too would double-manage it.
+- `aws_opensearch_authorize_vpc_endpoint_access` — ListVpcEndpointAccess lists the
+  authorized principals, but the resource's `terraform import` identity (domain +
+  account composite) is not reliably documented; left out rather than emit an
+  un-refreshable import.
+- `aws_vpc_endpoint_service_allowed_principal` — no `terraform import` support
+  (provider docs); the allow-list is managed via ModifyVpcEndpointServicePermissions.
 
 Also intentionally skipped: `aws_elastictranscoder_preset` — Elastic Transcoder's
 SDK is AWS-deprecated ("no longer available for use"); adding new generator code
