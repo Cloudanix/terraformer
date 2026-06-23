@@ -15,19 +15,14 @@
 package azure
 
 import (
-	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"strings"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
-	"github.com/Azure/go-autorest/autorest"
 	"github.com/hashicorp/go-azure-helpers/authentication"
-	"github.com/hashicorp/go-azure-helpers/sender"
-	"github.com/manicminer/hamilton/environments"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils/providerwrapper"
@@ -36,7 +31,6 @@ import (
 type AzureProvider struct { //nolint
 	terraformutils.Provider
 	config        authentication.Config
-	authorizer    autorest.Authorizer
 	credential    azcore.TokenCredential
 	resourceGroup string
 }
@@ -88,44 +82,11 @@ func (p *AzureProvider) setEnvConfig() error {
 	return nil
 }
 
-func (p *AzureProvider) getAuthorizer() (autorest.Authorizer, error) {
-	env, err := authentication.DetermineEnvironment(p.config.Environment)
-	if err != nil {
-		return nil, err
-	}
-	p.config.CustomResourceManagerEndpoint = env.ResourceManagerEndpoint
-	oauthConfig, err := p.config.BuildOAuthConfig(env.ActiveDirectoryEndpoint)
-	if err != nil {
-		return nil, err
-	}
-	if oauthConfig == nil {
-		return nil, fmt.Errorf("unable to configure OAuthConfig for tenant %s", p.config.TenantID)
-	}
-	sender := sender.BuildSender("terraformer")
-	ctx := context.Background()
-	var auth autorest.Authorizer
-
-	if p.config.UseMicrosoftGraph {
-		hamiltonEnv, ero := environments.EnvironmentFromString(p.config.Environment)
-		if ero != nil {
-			return nil, ero
-		}
-		auth, err = p.config.GetMSALToken(ctx, hamiltonEnv.ResourceManager, sender, oauthConfig, env.TokenAudience)
-	} else {
-		// Deprecated
-		auth, err = p.config.GetADALToken(ctx, sender, oauthConfig, env.ResourceManagerEndpoint)
-	}
-	if err != nil {
-		return nil, err
-	}
-	return auth, nil
-}
-
-// getCredential builds the Track 2 azcore credential. DefaultAzureCredential
-// reads AZURE_* env vars / MSI / Azure CLI / workload identity. We bridge the
-// terraformer ARM_* vars onto AZURE_* first so a single set of credentials
-// drives both the Track 1 (autorest) and Track 2 (azcore) paths during the SDK
-// migration. Construction does not authenticate; tokens are fetched lazily.
+// getCredential builds the azcore credential used by every (Track 2) generator.
+// DefaultAzureCredential reads AZURE_* env vars / MSI / Azure CLI / workload
+// identity. We bridge the terraformer ARM_* vars onto AZURE_* first so the
+// existing ARM_* credentials keep working. Construction does not authenticate;
+// tokens are fetched lazily on first use.
 func (p *AzureProvider) getCredential() (azcore.TokenCredential, error) {
 	bridge := map[string]string{
 		"ARM_CLIENT_ID":                   "AZURE_CLIENT_ID",
@@ -150,21 +111,11 @@ func (p *AzureProvider) Init(args []string) error {
 		return err
 	}
 
-	authorizer, err := p.getAuthorizer()
+	credential, err := p.getCredential()
 	if err != nil {
 		return err
 	}
-	p.authorizer = authorizer
-
-	// Track 2 credential. Soft-fail: the Track 1 authorizer above still drives
-	// every currently-migrated service, so a credential-build failure must not
-	// abort the import. Track 2 generators surface the nil via getClientOptions.
-	credential, err := p.getCredential()
-	if err != nil {
-		log.Printf("azure: Track 2 credential unavailable (%v); azidentity-based services will be skipped", err)
-	} else {
-		p.credential = credential
-	}
+	p.credential = credential
 
 	p.resourceGroup = args[0]
 
@@ -492,7 +443,6 @@ func (p *AzureProvider) InitService(serviceName string, verbose bool) error {
 	p.Service.SetProviderName(p.GetName())
 	p.Service.SetArgs(map[string]interface{}{
 		"config":           p.config,
-		"authorizer":       p.authorizer,
 		"token_credential": p.credential,
 		"resource_group":   p.resourceGroup,
 	})

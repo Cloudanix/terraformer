@@ -21,7 +21,6 @@ import (
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
-	"github.com/Azure/go-autorest/autorest"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/hashicorp/go-azure-helpers/authentication"
 )
@@ -35,21 +34,9 @@ type AzureService struct { //nolint
 	terraformutils.Service
 }
 
-// --- Track 1 (deprecated, kept during migration) ---
-
-func (az *AzureService) getClientArgs() (subscriptionID string, resourceGroup string, authorizer autorest.Authorizer, resourceManagerEndpoint string) {
-	subs := az.Args["config"].(authentication.Config).SubscriptionID
-	auth := az.Args["authorizer"].(autorest.Authorizer)
-	resg := az.Args["resource_group"].(string)
-	rEndpoint := az.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	return subs, resg, auth, rEndpoint
-}
-
-// --- Track 2 (azidentity / azcore / armXxx) ---
-
-// getClientOptions is the Track 2 analogue of getClientArgs. It returns the
-// subscription ID, the azcore credential, and *arm.ClientOptions (sovereign
-// cloud + retry preconfigured) for constructing armXxx clients.
+// getClientOptions returns the subscription ID, the azcore credential, and
+// *arm.ClientOptions (sovereign cloud + retry preconfigured) for constructing
+// armXxx clients. All Azure generators are now Track 2.
 func (az *AzureService) getClientOptions() (subscriptionID string, cred azcore.TokenCredential, opts *arm.ClientOptions) {
 	cfg := az.Args["config"].(authentication.Config)
 	subscriptionID = cfg.SubscriptionID
