@@ -1,6 +1,5 @@
 azurerm_analysis_services_server
 azurerm_api_management
-azurerm_app_service
 azurerm_application_gateway
 azurerm_application_insights
 azurerm_attestation_provider
@@ -109,7 +108,9 @@ azurerm_lb_nat_rule
 azurerm_lb_outbound_rule
 azurerm_lb_probe
 azurerm_lb_rule
+azurerm_linux_function_app
 azurerm_linux_virtual_machine
+azurerm_linux_web_app
 azurerm_load_test
 azurerm_local_network_gateway
 azurerm_log_analytics_workspace
@@ -147,6 +148,7 @@ azurerm_network_security_group
 azurerm_network_security_rule
 azurerm_network_watcher
 azurerm_network_watcher_flow_log
+azurerm_nginx_deployment
 azurerm_notification_hub_namespace
 azurerm_policy_assignment
 azurerm_policy_definition
@@ -186,6 +188,7 @@ azurerm_route_table
 azurerm_search_service
 azurerm_security_center_contact
 azurerm_security_center_subscription_pricing
+azurerm_service_plan
 azurerm_servicebus_namespace
 azurerm_signalr_service
 azurerm_spring_cloud_service
@@ -197,6 +200,7 @@ azurerm_ssh_public_key
 azurerm_storage_account
 azurerm_storage_blob
 azurerm_storage_container
+azurerm_storage_mover
 azurerm_stream_analytics_job
 azurerm_subnet
 azurerm_subnet_nat_gateway_association
@@ -218,5 +222,8 @@ azurerm_virtual_network_gateway
 azurerm_virtual_network_gateway_connection
 azurerm_virtual_network_peering
 azurerm_virtual_wan
+azurerm_vmware_private_cloud
 azurerm_web_pubsub
+azurerm_windows_function_app
 azurerm_windows_virtual_machine
+azurerm_windows_web_app
