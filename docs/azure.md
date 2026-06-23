@@ -184,6 +184,12 @@ export ARM_USE_ADAL=true
     * `azurerm_api_management`
 *   `bastion`
     * `azurerm_bastion_host`
+*   `batch`
+    * `azurerm_batch_account`
+*   `dashboard`
+    * `azurerm_dashboard_grafana`
+*   `digital_twins`
+    * `azurerm_digital_twins_instance`
 *   `cdn`
     * `azurerm_cdn_endpoint`
     * `azurerm_cdn_profile`
@@ -237,8 +243,16 @@ export ARM_USE_ADAL=true
     * `azurerm_mssql_managed_instance`
 *   `nat_gateway`
     * `azurerm_nat_gateway`
+*   `maps`
+    * `azurerm_maps_account`
 *   `netapp`
     * `azurerm_netapp_account`
+*   `notification_hub`
+    * `azurerm_notification_hub_namespace`
+*   `relay`
+    * `azurerm_relay_namespace`
+*   `web_pubsub`
+    * `azurerm_web_pubsub`
 *   `powerbi`
     * `azurerm_powerbi_embedded`
 *   `network_interface`
