@@ -32,6 +32,16 @@ type AppEngineGenerator struct {
 	GCPService
 }
 
+// appEngineVersionType maps an App Engine version's environment to the Terraform
+// version resource type. The default (standard) covers env values "standard"/"" ;
+// only the flexible environment uses the flexible resource.
+func appEngineVersionType(env string) string {
+	if env == "flexible" || env == "flex" {
+		return "google_app_engine_flexible_app_version"
+	}
+	return "google_app_engine_standard_app_version"
+}
+
 // Generate TerraformResources from GCP App Engine Admin API (appsId == project).
 func (g *AppEngineGenerator) InitResources() error {
 	ctx := context.Background()
@@ -76,10 +86,7 @@ func (g *AppEngineGenerator) InitResources() error {
 		for _, s := range sp.Services {
 			if e := svc.Apps.Services.Versions.List(project, s.Id).Pages(ctx, func(vp *appengine.ListVersionsResponse) error {
 				for _, v := range vp.Versions {
-					tfType := "google_app_engine_standard_app_version"
-					if v.Env == "flexible" || v.Env == "flex" {
-						tfType = "google_app_engine_flexible_app_version"
-					}
+					tfType := appEngineVersionType(v.Env)
 					g.Resources = append(g.Resources, terraformutils.NewResource(
 						"apps/"+project+"/services/"+s.Id+"/versions/"+v.Id, s.Id+"_"+v.Id, tfType, g.ProviderName,
 						map[string]string{"version_id": v.Id, "service": s.Id, "project": project},
