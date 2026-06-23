@@ -73,7 +73,22 @@ func (g *DataprocMetastoreGenerator) InitResources() error {
 
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
 	servicesList := metastoreService.Projects.Locations.Services.List(parent)
-	g.Resources = append(g.Resources, g.createResources(ctx, servicesList)...)
+	svcResources := g.createResources(ctx, servicesList)
+	g.Resources = append(g.Resources, svcResources...)
+	for _, r := range svcResources {
+		res := r.InstanceState.ID
+		if policy, perr := metastoreService.Projects.Locations.Services.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, strings.Split(res, "/")[len(strings.Split(res, "/"))-1]+"_"+b.Role+"_"+m,
+						"google_dataproc_metastore_service_iam_member", g.ProviderName,
+						map[string]string{"service_id": strings.Split(res, "/")[len(strings.Split(res, "/"))-1], "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+						dataprocMetastoreAllowEmptyValues, dataprocMetastoreAdditionalFields))
+				}
+			}
+		}
+	}
 
 	if err := metastoreService.Projects.Locations.Federations.List(parent).Pages(ctx, func(p *metastore.ListFederationsResponse) error {
 		for _, o := range p.Federations {
