@@ -138,14 +138,9 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"securityPolicies": basicGCPResource{
 		terraformName: "google_compute_security_policy",
 	},
-	/*"snapshots": {
+	"snapshots": basicGCPResource{
 		terraformName: "google_compute_snapshot",
-		ignoreKeys: []string{
-			"snapshot_encryption_key_sha256",
-			"source_disk_encryption_key_sha256",
-			"source_disk_link",
-		},
-	},*/
+	},
 	"sslCertificates": basicGCPResource{
 		terraformName: "google_compute_managed_ssl_certificate",
 	},
