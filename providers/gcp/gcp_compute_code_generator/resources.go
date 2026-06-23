@@ -231,4 +231,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionInstantSnapshots": basicGCPResource{
 		terraformName: "google_compute_region_instant_snapshot",
 	},
+	"regionCommitments": basicGCPResource{
+		terraformName: "google_compute_region_commitment",
+	},
 }
