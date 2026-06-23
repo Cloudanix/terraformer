@@ -120,6 +120,61 @@ func (g *NetworkConnectivityGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	project := g.GetArgs()["project"].(string)
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	if err := networkConnectivityService.Projects.Locations.Transports.List(regionalParent).Pages(ctx, func(p *networkconnectivity.ListTransportsResponse) error {
+		for _, o := range p.Transports {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_connectivity_transport", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": loc},
+				networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := networkConnectivityService.Projects.Locations.MulticloudDataTransferConfigs.List(regionalParent).Pages(ctx, func(p *networkconnectivity.ListMulticloudDataTransferConfigsResponse) error {
+		for _, o := range p.MulticloudDataTransferConfigs {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_connectivity_multicloud_data_transfer_config", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": loc},
+				networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields))
+			if derr := networkConnectivityService.Projects.Locations.MulticloudDataTransferConfigs.Destinations.List(o.Name).Pages(ctx, func(dp *networkconnectivity.ListDestinationsResponse) error {
+				for _, d := range dp.Destinations {
+					dt := strings.Split(d.Name, "/")
+					dName := dt[len(dt)-1]
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						d.Name, dName, "google_network_connectivity_destination", g.ProviderName,
+						map[string]string{"name": dName, "multicloud_data_transfer_config": name, "project": project, "location": loc},
+						networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields))
+				}
+				return nil
+			}); derr != nil {
+				log.Println(derr)
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := networkConnectivityService.Projects.Locations.Global.Hubs.Groups.List("projects/"+project+"/locations/global/hubs/-").Pages(ctx, func(p *networkconnectivity.ListGroupsResponse) error {
+		for _, o := range p.Groups {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_connectivity_group", g.ProviderName,
+				map[string]string{"name": name, "project": project},
+				networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	irList := networkConnectivityService.Projects.Locations.InternalRanges.List("projects/" + g.GetArgs()["project"].(string) + "/locations/global")
 	if err := irList.Pages(ctx, func(page *networkconnectivity.ListInternalRangesResponse) error {
 		for _, obj := range page.InternalRanges {
