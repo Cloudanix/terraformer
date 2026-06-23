@@ -83,6 +83,35 @@ validation (the §9 bar the sandbox cannot run).
 
 Coverage 88 → 202 emitted, 68 hand-wired services, SA1019 lint debt 0.
 
+## Residual characterization (after ~286 emitted, ~995 GA gap)
+
+The cleanly-importable GA surface (single project/region/location List, plus
+parent-walk sub-resources) is **exhausted**. The remaining ~995 GA resources are
+NOT simple list-and-emit and each needs a specific enabler, verified by sampling:
+
+1. **IAM `*_iam_member/binding/policy` (~hundreds)** — mutually exclusive in TF;
+   importing all three per parent yields conflicting config. The repo imports ONE
+   form (project_iam_member) + we added project_iam_audit_config + workload
+   identity. Importing the rest is a POLICY decision (which form, which parents),
+   not missing mechanics. Document the chosen policy before bulk-adding.
+2. **NO-GA / beta-only (~130)** — e.g. bigtable_cluster/backup, api_gateway_*,
+   network_security_authorization_policy, dataform_repository. Exist only in
+   google-beta; need `--provider-type beta` + round-trip validation.
+3. **Missing SDK packages** — cloudquotas, gemini, modelarmor,
+   privilegedaccessmanager: absent from google.golang.org/api@v0.286.0; need an
+   SDK bump.
+4. **Bespoke service models** — apigee (org-attached, environments returned as
+   bare strings, OrganizationProjectMapping); firebase (separate provider surface);
+   chronicle (instance-scoped). Each needs custom enumeration, not the standard pattern.
+5. **Deep 3rd/4th-level walks** — firestore index (→ collection groups),
+   spanner backup (→ instance → database), etc.
+6. **`no-list-api.md` exclusions** — singletons, data-plane, project config.
+
+Every category needs either a live-project refresh validation, an SDK bump, the
+beta provider, or an explicit policy decision — none is safely doable blind in a
+single offline session. The reproducible backlog (`missing-resources.txt`) plus
+this breakdown is the authoritative continuation plan.
+
 All compile-validated only; the `terraform plan` refresh round-trip (the §9
 correctness bar) needs a live GCP project the sandbox cannot provide. Import IDs
 follow provider-doc conventions but are unverified at refresh. Validate this
