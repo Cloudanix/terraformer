@@ -198,6 +198,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["gkeOnPrem"] = &GCPFacade{service: &GkeOnPremGenerator{}}
 	services["pubsubLite"] = &GCPFacade{service: &PubsubLiteGenerator{}}
 	services["iap"] = &GCPFacade{service: &IapGenerator{}}
+	services["analyticsHub"] = &GCPFacade{service: &AnalyticsHubGenerator{}}
 	return services
 }
 
