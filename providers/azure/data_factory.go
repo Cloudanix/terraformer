@@ -16,371 +16,267 @@ package azure
 
 import (
 	"context"
-	"fmt"
 	"log"
-	"reflect"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/services/datafactory/mgmt/2018-06-01/datafactory"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/datafactory/armdatafactory"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
+
+// SupportedResources maps the Data Factory polymorphic Type discriminator
+// (dataset / linked-service / trigger) to the azurerm resource type.
+var SupportedResources = map[string]string{
+	"AzureBlob":                "azurerm_data_factory_dataset_azure_blob",
+	"Binary":                   "azurerm_data_factory_dataset_binary",
+	"CosmosDbSqlApiCollection": "azurerm_data_factory_dataset_cosmosdb_sqlapi",
+	"CustomDataset":            "azurerm_data_factory_custom_dataset",
+	"DelimitedText":            "azurerm_data_factory_dataset_delimited_text",
+	"HttpFile":                 "azurerm_data_factory_dataset_http",
+	"Json":                     "azurerm_data_factory_dataset_json",
+	"MySqlTable":               "azurerm_data_factory_dataset_mysql",
+	"Parquet":                  "azurerm_data_factory_dataset_parquet",
+	"PostgreSqlTable":          "azurerm_data_factory_dataset_postgresql",
+	"SnowflakeTable":           "azurerm_data_factory_dataset_snowflake",
+	"SqlServerTable":           "azurerm_data_factory_dataset_sql_server_table",
+	"AzureBlobStorage":         "azurerm_data_factory_linked_service_azure_blob_storage",
+	"AzureDatabricks":          "azurerm_data_factory_linked_service_azure_databricks",
+	"AzureFileStorage":         "azurerm_data_factory_linked_service_azure_file_storage",
+	"AzureFunction":            "azurerm_data_factory_linked_service_azure_function",
+	"AzureSearch":              "azurerm_data_factory_linked_service_azure_search",
+	"AzureSqlDatabase":         "azurerm_data_factory_linked_service_azure_sql_database",
+	"AzureTableStorage":        "azurerm_data_factory_linked_service_azure_table_storage",
+	"CosmosDb":                 "azurerm_data_factory_linked_service_cosmosdb",
+	"CustomDataSource":         "azurerm_data_factory_linked_custom_service",
+	"AzureBlobFS":              "azurerm_data_factory_linked_service_data_lake_storage_gen2",
+	"AzureKeyVault":            "azurerm_data_factory_linked_service_key_vault",
+	"AzureDataExplore":         "azurerm_data_factory_linked_service_kusto",
+	"MySql":                    "azurerm_data_factory_linked_service_mysql",
+	"OData":                    "azurerm_data_factory_linked_service_odata",
+	"PostgreSql":               "azurerm_data_factory_linked_service_postgresql",
+	"Sftp":                     "azurerm_data_factory_linked_service_sftp",
+	"Snowflake":                "azurerm_data_factory_linked_service_snowflake",
+	"SqlServer":                "azurerm_data_factory_linked_service_sql_server",
+	"AzureSqlDW":               "azurerm_data_factory_linked_service_synapse",
+	"Web":                      "azurerm_data_factory_linked_service_web",
+	"BlobEventsTrigger":        "azurerm_data_factory_trigger_blob_event",
+	"ScheduleTrigger":          "azurerm_data_factory_trigger_schedule",
+	"TumblingWindowTrigger":    "azurerm_data_factory_trigger_tumbling_window",
+}
 
 type DataFactoryGenerator struct {
 	AzureService
 }
 
-// Maps item.Properties.Type -> terraform.ResoruceType
-// Information extracted from
-//   SupportedResources are in:
-//   @ github.com/azure/azure-sdk-for-go@v42.3.0+incompatible/services/datafactory/mgmt/2018-06-01/datafactory/models.go
-//   PossibleTypeBasicDatasetValues, PossibleTypeBasicIntegrationRuntimeValues, PossibleTypeBasicLinkedServiceValues, PossibleTypeBasicTriggerValues
-//   TypeBasicDataset,TypeBasicIntegrationRuntime, TypeBasicLinkedService, TypeBasicTrigger, TypeBasicDataFlow
-
-var (
-	SupportedResources = map[string]string{
-		"AzureBlob":                "azurerm_data_factory_dataset_azure_blob",
-		"Binary":                   "azurerm_data_factory_dataset_binary",
-		"CosmosDbSqlApiCollection": "azurerm_data_factory_dataset_cosmosdb_sqlapi",
-		"CustomDataset":            "azurerm_data_factory_custom_dataset",
-		"DelimitedText":            "azurerm_data_factory_dataset_delimited_text",
-		"HttpFile":                 "azurerm_data_factory_dataset_http",
-		"Json":                     "azurerm_data_factory_dataset_json",
-		"MySqlTable":               "azurerm_data_factory_dataset_mysql",
-		"Parquet":                  "azurerm_data_factory_dataset_parquet",
-		"PostgreSqlTable":          "azurerm_data_factory_dataset_postgresql",
-		"SnowflakeTable":           "azurerm_data_factory_dataset_snowflake",
-		"SqlServerTable":           "azurerm_data_factory_dataset_sql_server_table",
-		"IntegrationRuntime":       "azurerm_data_factory_integration_runtime_azure",
-		"Managed":                  "azurerm_data_factory_integration_runtime_azure_ssis",
-		"SelfHosted":               "azurerm_data_factory_integration_runtime_self_hosted",
-		"AzureBlobStorage":         "azurerm_data_factory_linked_service_azure_blob_storage",
-		"AzureDatabricks":          "azurerm_data_factory_linked_service_azure_databricks",
-		"AzureFileStorage":         "azurerm_data_factory_linked_service_azure_file_storage",
-		"AzureFunction":            "azurerm_data_factory_linked_service_azure_function",
-		"AzureSearch":              "azurerm_data_factory_linked_service_azure_search",
-		"AzureSqlDatabase":         "azurerm_data_factory_linked_service_azure_sql_database",
-		"AzureTableStorage":        "azurerm_data_factory_linked_service_azure_table_storage",
-		"CosmosDb":                 "azurerm_data_factory_linked_service_cosmosdb",
-		"CustomDataSource":         "azurerm_data_factory_linked_custom_service",
-		"AzureBlobFS":              "azurerm_data_factory_linked_service_data_lake_storage_gen2",
-		"AzureKeyVault":            "azurerm_data_factory_linked_service_key_vault",
-		"AzureDataExplore":         "azurerm_data_factory_linked_service_kusto",
-		"MySql":                    "azurerm_data_factory_linked_service_mysql",
-		"OData":                    "azurerm_data_factory_linked_service_odata",
-		"PostgreSql":               "azurerm_data_factory_linked_service_postgresql",
-		"Sftp":                     "azurerm_data_factory_linked_service_sftp",
-		"Snowflake":                "azurerm_data_factory_linked_service_snowflake",
-		"SqlServer":                "azurerm_data_factory_linked_service_sql_server",
-		"AzureSqlDW":               "azurerm_data_factory_linked_service_synapse",
-		"Web":                      "azurerm_data_factory_linked_service_web",
-		"BlobEventsTrigger":        "azurerm_data_factory_trigger_blob_event",
-		"ScheduleTrigger":          "azurerm_data_factory_trigger_schedule",
-		"TumblingWindowTrigger":    "azurerm_data_factory_trigger_tumbling_window",
-	}
-)
-
-func getResourceTypeFrom(azureResourceName string) string {
-	return SupportedResources[azureResourceName]
+func (g *AzureService) appendResourceAs(itemID, itemName, resourceType, abbreviation string) {
+	resourceName := abbreviation + "_" + strings.ReplaceAll(itemName, "-", "_")
+	g.Resources = append(g.Resources, terraformutils.NewSimpleResource(itemID, resourceName, resourceType, g.ProviderName, []string{}))
 }
 
-func getFieldFrom(v interface{}, field string) reflect.Value {
-	reflected := reflect.ValueOf(v)
-	if reflected.IsValid() {
-		indirected := reflect.Indirect(reflected)
-		if indirected.Kind() == reflect.Struct {
-			fieldValue := indirected.FieldByName(field)
-			return fieldValue
+// appendByType maps a polymorphic Type discriminator to an azurerm resource and
+// appends it; unknown types are logged and skipped (same as Track 1).
+func (g *DataFactoryGenerator) appendByType(id, name, azureType string) {
+	if azureType == "" {
+		return
+	}
+	resourceType := SupportedResources[azureType]
+	if resourceType == "" {
+		log.Printf(`azurerm_data_factory: resource "%s" id: %s type: %s not handled yet by terraform or terraformer`, name, id, azureType)
+		return
+	}
+	g.appendResourceAs(id, name, resourceType, "adf")
+}
+
+func (g *DataFactoryGenerator) listFactories(client *armdatafactory.FactoriesClient) ([]*armdatafactory.Factory, error) {
+	var factories []*armdatafactory.Factory
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			factories = append(factories, page.Value...)
+		}
+		return factories, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListByResourceGroupPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			factories = append(factories, page.Value...)
 		}
 	}
-	return reflect.Value{}
+	return factories, nil
 }
 
-func getFieldAsString(v interface{}, field string) string {
-	fieldValue := getFieldFrom(v, field)
-	if fieldValue.IsValid() {
-		return fieldValue.String()
+// integrationRuntimeType resolves the azurerm type for an integration runtime,
+// distinguishing Managed (Azure) vs Managed-SSIS vs SelfHosted.
+func integrationRuntimeType(props armdatafactory.IntegrationRuntimeClassification) string {
+	if props == nil {
+		return ""
 	}
-	return ""
-}
-
-func (az *AzureService) appendResourceAs(resources []terraformutils.Resource, itemID string, itemName string, resourceType string, abbreviation string) []terraformutils.Resource {
-	prefix := strings.ReplaceAll(resourceType, resourceType, abbreviation)
-	suffix := strings.ReplaceAll(itemName, "-", "_")
-	resourceName := prefix + "_" + suffix
-	res := terraformutils.NewSimpleResource(itemID, resourceName, resourceType, az.ProviderName, []string{})
-	resources = append(resources, res)
-	return resources
-}
-
-func (az *DataFactoryGenerator) appendResourceFrom(resources []terraformutils.Resource, id string, name string, properties interface{}) []terraformutils.Resource {
-	azureType := getFieldAsString(properties, "Type")
-	if azureType != "" {
-		resourceType := getResourceTypeFrom(azureType)
-		if resourceType == "" {
-			msg := fmt.Sprintf(`azurerm_data_factory: resource "%s" id: %s type: %s not handled yet by terraform or terraformer`, name, id, azureType)
-			log.Println(msg)
-		} else {
-			resources = az.appendResourceAs(resources, id, name, resourceType, "adf")
+	if managed, ok := props.(*armdatafactory.ManagedIntegrationRuntime); ok {
+		if managed.TypeProperties != nil && managed.TypeProperties.SsisProperties != nil {
+			return "azurerm_data_factory_integration_runtime_azure_ssis"
 		}
+		return "azurerm_data_factory_integration_runtime_azure"
 	}
-	return resources
-}
-
-func (az *DataFactoryGenerator) listFactories() ([]datafactory.Factory, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := datafactory.NewFactoriesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator datafactory.FactoryListResponseIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListByResourceGroupComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListComplete(ctx)
-	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []datafactory.Factory
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *DataFactoryGenerator) createDataFactoryResources(dataFactories []datafactory.Factory) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	for _, item := range dataFactories {
-		resources = az.appendResourceAs(resources, *item.ID, *item.Name, "azurerm_data_factory", "adf")
-	}
-	return resources, nil
-}
-
-func getIntegrationRuntimeType(properties interface{}) string {
-	azureType := getFieldAsString(properties, "Type")
-	if azureType == "SelfHosted" {
+	if _, ok := props.(*armdatafactory.SelfHostedIntegrationRuntime); ok {
 		return "azurerm_data_factory_integration_runtime_self_hosted"
 	}
-	// item.Properties.ManagedIntegrationRuntimeTypeProperties.SsisProperties
-	if typeProperties := getFieldFrom(properties, "ManagedIntegrationRuntimeTypeProperties"); typeProperties.IsValid() {
-		managedRuntime := typeProperties.Interface()
-		SsisProperties := getFieldFrom(managedRuntime, "SsisProperties")
-		if SsisProperties.IsNil() {
-			return "azurerm_data_factory_integration_runtime_azure"
-		}
-	}
-	return "azurerm_data_factory_integration_runtime_azure_ssis"
+	return "azurerm_data_factory_integration_runtime_azure"
 }
 
-func (az *DataFactoryGenerator) createIntegrationRuntimesResources(dataFactories []datafactory.Factory) ([]terraformutils.Resource, error) {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := datafactory.NewIntegrationRuntimesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	var resources []terraformutils.Resource
-	for _, factory := range dataFactories {
-		id, err := ParseAzureResourceID(*factory.ID)
-		if err != nil {
-			return nil, err
-		}
-		iterator, err := client.ListByFactoryComplete(ctx, id.ResourceGroup, *factory.Name)
-		if err != nil {
-			return nil, err
-		}
-		for iterator.NotDone() {
-			item := iterator.Value()
-			resourceType := getIntegrationRuntimeType(item.Properties)
-			resources = az.appendResourceAs(resources, *item.ID, *item.Name, resourceType, "adfr")
-			if err := iterator.NextWithContext(ctx); err != nil {
-				log.Println(err)
-				return resources, err
-			}
-		}
+func (g *DataFactoryGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	return resources, nil
-}
-
-func (az *DataFactoryGenerator) createLinkedServiceResources(dataFactories []datafactory.Factory) ([]terraformutils.Resource, error) {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := datafactory.NewLinkedServicesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	var resources []terraformutils.Resource
-	for _, factory := range dataFactories {
-		id, err := ParseAzureResourceID(*factory.ID)
-		if err != nil {
-			return nil, err
-		}
-		iterator, err := client.ListByFactoryComplete(ctx, id.ResourceGroup, *factory.Name)
-		if err != nil {
-			return nil, err
-		}
-		for iterator.NotDone() {
-			item := iterator.Value()
-			resources = az.appendResourceFrom(resources, *item.ID, *item.Name, item.Properties)
-			if err = iterator.NextWithContext(ctx); err != nil {
-				log.Println(err)
-				return resources, err
-			}
-		}
+	factoriesClient, err := armdatafactory.NewFactoriesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
-	return resources, nil
-}
-
-func (az *DataFactoryGenerator) createPipelineResources(dataFactories []datafactory.Factory) ([]terraformutils.Resource, error) {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := datafactory.NewPipelinesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	var resources []terraformutils.Resource
-	for _, factory := range dataFactories {
-		id, err := ParseAzureResourceID(*factory.ID)
-		if err != nil {
-			return nil, err
-		}
-		iterator, err := client.ListByFactoryComplete(ctx, id.ResourceGroup, *factory.Name)
-		if err != nil {
-			return nil, err
-		}
-		for iterator.NotDone() {
-			item := iterator.Value()
-			resources = az.appendResourceAs(resources, *item.ID, *item.Name, "azurerm_data_factory_pipeline", "adfp")
-			if err := iterator.NextWithContext(ctx); err != nil {
-				log.Println(err)
-				return resources, err
-			}
-		}
+	datasetsClient, err := armdatafactory.NewDatasetsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
-	return resources, nil
-}
-
-func (az *DataFactoryGenerator) createPipelineTriggerScheduleResources(dataFactories []datafactory.Factory) ([]terraformutils.Resource, error) {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := datafactory.NewTriggersClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	var resources []terraformutils.Resource
-	for _, factory := range dataFactories {
-		id, err := ParseAzureResourceID(*factory.ID)
-		if err != nil {
-			return nil, err
-		}
-		iterator, err := client.ListByFactoryComplete(ctx, id.ResourceGroup, *factory.Name)
-		if err != nil {
-			return nil, err
-		}
-		for iterator.NotDone() {
-			item := iterator.Value()
-			resources = az.appendResourceFrom(resources, *item.ID, *item.Name, item.Properties)
-			if err := iterator.NextWithContext(ctx); err != nil {
-				log.Println(err)
-				return resources, err
-			}
-		}
+	linkedClient, err := armdatafactory.NewLinkedServicesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
-	return resources, nil
-}
-
-func (az *DataFactoryGenerator) createDataFlowResources(dataFactories []datafactory.Factory) ([]terraformutils.Resource, error) {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := datafactory.NewDataFlowsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	var resources []terraformutils.Resource
-	for _, factory := range dataFactories {
-		id, err := ParseAzureResourceID(*factory.ID)
-		if err != nil {
-			return nil, err
-		}
-		iterator, err := client.ListByFactoryComplete(ctx, id.ResourceGroup, *factory.Name)
-		if err != nil {
-			return nil, err
-		}
-		for iterator.NotDone() {
-			item := iterator.Value()
-			resources = az.appendResourceAs(resources, *item.ID, *item.Name, "azurerm_data_factory_data_flow", "adfl")
-			if err := iterator.NextWithContext(ctx); err != nil {
-				log.Println(err)
-				return resources, err
-			}
-		}
+	pipelinesClient, err := armdatafactory.NewPipelinesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
-	return resources, nil
-}
-
-func (az *DataFactoryGenerator) createPipelineDatasetResources(dataFactories []datafactory.Factory) ([]terraformutils.Resource, error) {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := datafactory.NewDatasetsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	var resources []terraformutils.Resource
-	for _, factory := range dataFactories {
-		id, err := ParseAzureResourceID(*factory.ID)
-		if err != nil {
-			return nil, err
-		}
-		iterator, err := client.ListByFactoryComplete(ctx, id.ResourceGroup, *factory.Name)
-		if err != nil {
-			return nil, err
-		}
-		for iterator.NotDone() {
-			item := iterator.Value()
-			resources = az.appendResourceFrom(resources, *item.ID, *item.Name, item.Properties)
-			if err := iterator.NextWithContext(ctx); err != nil {
-				log.Println(err)
-				return resources, err
-			}
-		}
+	triggersClient, err := armdatafactory.NewTriggersClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
-	return resources, nil
-}
-
-func (az *DataFactoryGenerator) InitResources() error {
-
-	dataFactories, err := az.listFactories()
+	dataflowsClient, err := armdatafactory.NewDataFlowsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	irClient, err := armdatafactory.NewIntegrationRuntimesClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
 
-	factoriesFunctions := []func([]datafactory.Factory) ([]terraformutils.Resource, error){
-		az.createDataFactoryResources,
-		az.createIntegrationRuntimesResources,
-		az.createLinkedServiceResources,
-		az.createPipelineResources,
-		az.createPipelineTriggerScheduleResources,
-		az.createPipelineDatasetResources,
-		az.createDataFlowResources,
+	factories, err := g.listFactories(factoriesClient)
+	if err != nil {
+		return err
 	}
-
-	for _, f := range factoriesFunctions {
-		resources, ero := f(dataFactories)
-		if ero != nil {
-			return ero
+	for _, factory := range factories {
+		factoryID := valueOrEmpty(factory.ID)
+		if factoryID == "" {
+			continue
 		}
-		az.Resources = append(az.Resources, resources...)
+		g.appendResourceAs(factoryID, valueOrEmpty(factory.Name), "azurerm_data_factory", "adf")
+		parsed, err := ParseAzureResourceID(factoryID)
+		if err != nil {
+			return err
+		}
+		rg, name := parsed.ResourceGroup, valueOrEmpty(factory.Name)
+
+		// datasets
+		dsPager := datasetsClient.NewListByFactoryPager(rg, name, nil)
+		for dsPager.More() {
+			page, err := dsPager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, ds := range page.Value {
+				if ds == nil || ds.Properties == nil {
+					continue
+				}
+				g.appendByType(valueOrEmpty(ds.ID), valueOrEmpty(ds.Name), valueOrEmpty(ds.Properties.GetDataset().Type))
+			}
+		}
+		// linked services
+		lsPager := linkedClient.NewListByFactoryPager(rg, name, nil)
+		for lsPager.More() {
+			page, err := lsPager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, ls := range page.Value {
+				if ls == nil || ls.Properties == nil {
+					continue
+				}
+				g.appendByType(valueOrEmpty(ls.ID), valueOrEmpty(ls.Name), valueOrEmpty(ls.Properties.GetLinkedService().Type))
+			}
+		}
+		// triggers
+		trPager := triggersClient.NewListByFactoryPager(rg, name, nil)
+		for trPager.More() {
+			page, err := trPager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, tr := range page.Value {
+				if tr == nil || tr.Properties == nil {
+					continue
+				}
+				g.appendByType(valueOrEmpty(tr.ID), valueOrEmpty(tr.Name), valueOrEmpty(tr.Properties.GetTrigger().Type))
+			}
+		}
+		// integration runtimes
+		irPager := irClient.NewListByFactoryPager(rg, name, nil)
+		for irPager.More() {
+			page, err := irPager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, ir := range page.Value {
+				if ir == nil || ir.Properties == nil {
+					continue
+				}
+				if rt := integrationRuntimeType(ir.Properties); rt != "" {
+					g.appendResourceAs(valueOrEmpty(ir.ID), valueOrEmpty(ir.Name), rt, "adfr")
+				}
+			}
+		}
+		// pipelines
+		plPager := pipelinesClient.NewListByFactoryPager(rg, name, nil)
+		for plPager.More() {
+			page, err := plPager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, pl := range page.Value {
+				if pl == nil {
+					continue
+				}
+				g.appendResourceAs(valueOrEmpty(pl.ID), valueOrEmpty(pl.Name), "azurerm_data_factory_pipeline", "adfp")
+			}
+		}
+		// data flows
+		dfPager := dataflowsClient.NewListByFactoryPager(rg, name, nil)
+		for dfPager.More() {
+			page, err := dfPager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, df := range page.Value {
+				if df == nil {
+					continue
+				}
+				g.appendResourceAs(valueOrEmpty(df.ID), valueOrEmpty(df.Name), "azurerm_data_factory_data_flow", "adfl")
+			}
+		}
 	}
 	return nil
 }
 
-// PostGenerateHook for formatting json properties as heredoc
-// - azurerm_data_factory_pipeline property activities_json
-func (az *DataFactoryGenerator) PostConvertHook() error {
-	for i, resource := range az.Resources {
+// PostConvertHook formats the pipeline activities_json property as a heredoc.
+func (g *DataFactoryGenerator) PostConvertHook() error {
+	for i, resource := range g.Resources {
 		if resource.InstanceInfo.Type == "azurerm_data_factory_pipeline" {
-			if val, ok := az.Resources[i].Item["activities_json"]; ok {
-				if val != nil {
-					json := val.(string)
-					// json := asJson(val)
-					hereDoc := asHereDoc(json)
-					az.Resources[i].Item["activities_json"] = hereDoc
-				}
+			if val, ok := g.Resources[i].Item["activities_json"]; ok && val != nil {
+				g.Resources[i].Item["activities_json"] = asHereDoc(val.(string))
 			}
 		}
 	}
