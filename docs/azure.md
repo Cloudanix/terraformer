@@ -281,6 +281,10 @@ export ARM_USE_ADAL=true
     * `azurerm_relay_namespace`
 *   `web_pubsub`
     * `azurerm_web_pubsub`
+*   `policy`
+    * `azurerm_policy_assignment`
+    * `azurerm_policy_definition`
+    * `azurerm_policy_set_definition`
 *   `powerbi`
     * `azurerm_powerbi_embedded`
 *   `network_interface`

@@ -443,6 +443,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"network_interface":                    &NetworkInterfaceGenerator{},
 		"network_security_group":               &NetworkSecurityGroupGenerator{},
 		"network_watcher":                      &NetworkWatcherGenerator{},
+		"policy":                               &PolicyGenerator{},
 		"private_dns":                          &PrivateDNSGenerator{},
 		"private_endpoint":                     &PrivateEndpointGenerator{},
 		"powerbi":                              &PowerBIGenerator{},
