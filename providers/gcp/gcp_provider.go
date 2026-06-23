@@ -185,6 +185,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["alloydb"] = &GCPFacade{service: &AlloydbGenerator{}}
 	services["gkebackup"] = &GCPFacade{service: &GkebackupGenerator{}}
 	services["secureSourceManager"] = &GCPFacade{service: &SecureSourceManagerGenerator{}}
+	services["migrationCenter"] = &GCPFacade{service: &MigrationCenterGenerator{}}
 	return services
 }
 

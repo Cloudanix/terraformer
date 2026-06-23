@@ -191,6 +191,8 @@ List of supported GCP services:
 *   `managedKafka`
     * `google_managed_kafka_cluster`
 *   `memcache`
+*   `migrationCenter`
+    * `google_migration_center_group`
     * `google_memcache_instance`
 *   `memoryStore`
     * `google_redis_instance`
