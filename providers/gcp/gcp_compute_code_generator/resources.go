@@ -207,4 +207,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"machineImages": basicGCPResource{
 		terraformName: "google_compute_machine_image",
 	},
+	"networkAttachments": basicGCPResource{
+		terraformName: "google_compute_network_attachment",
+	},
 }
