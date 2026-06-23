@@ -79,7 +79,7 @@ services + multi-resource sub-resource expansions.
 
 Behavior-preserving SDK swaps (same resource types + ARM import IDs), validated
 by build/vet/test (live no-diff `terraform plan` round-trip not available in the
-offline sandbox). **24 of 35 migrated** — networking + compute + dns + several
+offline sandbox). **27 of 35 migrated** — networking + compute + dns + several
 single-resource services done:
 - compute/network: disk, public_ip (+prefix), ssh_public_key, network_interface,
   route_table (+route/route_filter), network_security_group (+rule),
@@ -90,7 +90,7 @@ single-resource services done:
 - other: resource_group (armresources), management_lock (armlocks),
   app_service (armappservice, also modernized)
 
-Also migrated: dns, private_dns, keyvault, analysis, databricks, purview, redis.
+Also migrated: dns, private_dns, keyvault, analysis, databricks, purview, redis, eventhub, security_center (contact + subscription_pricing).
 
 **Remaining 11 files (heavy tail; each needs its own armXxx module):**
 storage_account/blob/container (armstorage), database (multi-engine
