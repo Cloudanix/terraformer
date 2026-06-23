@@ -135,7 +135,7 @@ large resource set.
 
 ---
 
-## T3 — Replace `context.TODO()` with a timeout/cancellable context — FOUNDATION DONE
+## T3 — Replace `context.TODO()` with a timeout/cancellable context — DONE
 
 > Landed: the orchestration foundation + adoption API.
 > - `--timeout <seconds>` flag (0 = off) on every provider import command
@@ -161,10 +161,18 @@ large resource set.
 > `awsImportCtx`). `g.Context()` (the embedded-Service accessor) is the
 > equivalent for code that prefers a receiver; both read the same run context.
 >
-> **Remaining:** the other ~30 providers (~300 `context.TODO()` sites) still use
-> `context.TODO()`. Same recipe applies per provider (add a `SetContext` override
-> + package accessor, or convert to the embedded `Context()`), each as its own
-> commit. No design left — pure mechanical follow-up.
+> **All providers swept.** Beyond AWS, the other providers carrying
+> `context.TODO()` were converted, one commit each, via the same recipe (a
+> per-package `runContext()` accessor + `SetContext` override on the base service,
+> or the embedded `g.Context()` for single sites): ionoscloud (incl. the
+> `helpers.GetAllDatacenters` ctx param), digitalocean, honeycombio, opal,
+> heroku, keycloak. Each builds green.
+>
+> **Intentionally left:** `commercetools/connectivity/client.go` — its lone
+> `context.TODO()` is in the oauth2 *client construction* helper (a sub-package
+> with no `Service`), a one-time connection-setup call, not a generator discovery
+> call that could hang the import. Not worth threading context through a separate
+> package for. Revisit only if it ever blocks.
 
 **What:** Sweep every generator's `context.TODO()` and give the import run a
 real context with a timeout (and Ctrl-C cancellation), threaded from the CLI.
