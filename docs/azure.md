@@ -166,6 +166,7 @@ export ARM_USE_ADAL=true
     * `azurerm_dns_zone`
 *   `eventhub`
     * `azurerm_eventhub`
+    * `azurerm_eventhub_authorization_rule`
     * `azurerm_eventhub_consumer_group`
     * `azurerm_eventhub_namespace`
     * `azurerm_eventhub_namespace_authorization_rule`

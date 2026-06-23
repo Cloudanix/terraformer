@@ -75,6 +75,10 @@ func (az *EventHubGenerator) appendEventHubs(namespace *eventhub.EHNamespace, na
 		if err != nil {
 			return err
 		}
+		err = az.appendEventHubAuthorizationRules(namespace, namespaceRg, *item.Name)
+		if err != nil {
+			return err
+		}
 		if err := iterator.NextWithContext(ctx); err != nil {
 			log.Println(err)
 			return err
@@ -116,6 +120,26 @@ func (az *EventHubGenerator) appendAuthorizationRules(namespace *eventhub.EHName
 		item := iterator.Value()
 
 		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_eventhub_namespace_authorization_rule")
+		if err := iterator.NextWithContext(ctx); err != nil {
+			log.Println(err)
+			return err
+		}
+	}
+	return nil
+}
+
+func (az *EventHubGenerator) appendEventHubAuthorizationRules(namespace *eventhub.EHNamespace, namespaceRg *ResourceID, eventHubName string) error {
+	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
+	client := eventhub.NewEventHubsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = authorizer
+	ctx := context.Background()
+	iterator, err := client.ListAuthorizationRulesComplete(ctx, namespaceRg.ResourceGroup, *namespace.Name, eventHubName)
+	if err != nil {
+		return err
+	}
+	for iterator.NotDone() {
+		item := iterator.Value()
+		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_eventhub_authorization_rule")
 		if err := iterator.NextWithContext(ctx); err != nil {
 			log.Println(err)
 			return err
