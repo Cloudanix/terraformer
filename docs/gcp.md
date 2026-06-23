@@ -81,6 +81,8 @@ List of supported GCP services:
     * `google_compute_firewall`
 *   `essentialContacts`
     * `google_essential_contacts_contact`
+*   `documentAI`
+    * `google_document_ai_processor`
 *   `eventarc`
     * `google_eventarc_trigger`
 *   `filestore`

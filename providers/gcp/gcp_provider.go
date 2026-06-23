@@ -156,6 +156,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["vmwareengine"] = &GCPFacade{service: &VmwareengineGenerator{}}
 	services["workstations"] = &GCPFacade{service: &WorkstationsGenerator{}}
 	services["netapp"] = &GCPFacade{service: &NetappGenerator{}}
+	services["documentAI"] = &GCPFacade{service: &DocumentAIGenerator{}}
 	return services
 }
 
