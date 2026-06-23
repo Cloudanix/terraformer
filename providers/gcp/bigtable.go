@@ -77,6 +77,17 @@ func (g *BigtableGenerator) InitResources() error {
 					bigtableAllowEmptyValues,
 					bigtableAdditionalFields,
 				))
+				if policy, perr := bigtableService.Projects.Instances.Tables.GetIamPolicy(tbl.Name, &bigtableadmin.GetIamPolicyRequest{}).Do(); perr == nil {
+					for _, b := range policy.Bindings {
+						for _, m := range b.Members {
+							g.Resources = append(g.Resources, terraformutils.NewResource(
+								tbl.Name+" "+b.Role+" "+m, tableName+"_"+b.Role+"_"+m,
+								"google_bigtable_table_iam_member", g.ProviderName,
+								map[string]string{"instance": instanceName, "table": tableName, "role": b.Role, "member": m, "project": project},
+								bigtableAllowEmptyValues, bigtableAdditionalFields))
+						}
+					}
+				}
 			}
 		}
 
