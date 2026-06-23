@@ -42,6 +42,8 @@ List of supported GCP services:
     * `google_bigtable_instance`
 *   `cloudRun`
     * `google_cloud_run_v2_service`
+*   `composer`
+    * `google_composer_environment`
 *   `cloudFunctions`
     * `google_cloudfunctions_function`
     * `google_cloudfunctions2_function`

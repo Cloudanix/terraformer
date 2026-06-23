@@ -133,6 +133,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["workflows"] = &GCPFacade{service: &WorkflowsGenerator{}}
 	services["eventarc"] = &GCPFacade{service: &EventarcGenerator{}}
 	services["vpcAccess"] = &GCPFacade{service: &VpcAccessGenerator{}}
+	services["composer"] = &GCPFacade{service: &ComposerGenerator{}}
 	return services
 }
 
