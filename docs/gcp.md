@@ -153,6 +153,7 @@ List of supported GCP services:
     * `google_compute_interconnect_attachment`
 *   `kms`
     * `google_kms_crypto_key`
+    * `google_kms_crypto_key_version`
     * `google_kms_key_ring`
 *   `looker`
     * `google_looker_instance`

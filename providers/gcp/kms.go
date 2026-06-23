@@ -78,6 +78,33 @@ func (g *KmsGenerator) createKmsKeyResources(ctx context.Context, keyRingName st
 				kmsAllowEmptyValues,
 				kmsAdditionalFields,
 			))
+			resources = append(resources, g.createKmsKeyVersionResources(ctx, key.Name, kmsService)...)
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
+func (g *KmsGenerator) createKmsKeyVersionResources(ctx context.Context, keyName string, kmsService *cloudkms.Service) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	versionList := kmsService.Projects.Locations.KeyRings.CryptoKeys.CryptoKeyVersions.List(keyName)
+	if err := versionList.Pages(ctx, func(page *cloudkms.ListCryptoKeyVersionsResponse) error {
+		for _, version := range page.CryptoKeyVersions {
+			tm := strings.Split(version.Name, "/")
+			resources = append(resources, terraformutils.NewResource(
+				version.Name,
+				tm[5]+"_"+tm[7]+"_"+tm[len(tm)-1],
+				"google_kms_crypto_key_version",
+				g.ProviderName,
+				map[string]string{
+					"project":    g.GetArgs()["project"].(string),
+					"crypto_key": keyName,
+				},
+				kmsAllowEmptyValues,
+				kmsAdditionalFields,
+			))
 		}
 		return nil
 	}); err != nil {
