@@ -169,6 +169,8 @@ List of supported GCP services:
     * `google_compute_node_template`
 *   `packetMirrorings`
     * `google_compute_packet_mirroring`
+*   `parallelstore`
+    * `google_parallelstore_instance`
 *   `privateca`
     * `google_privateca_ca_pool`
 *   `project`
