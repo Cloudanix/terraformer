@@ -38,6 +38,8 @@ List of supported GCP services:
 *   `bigQuery`
     * `google_bigquery_dataset`
     * `google_bigquery_table`
+*   `bigtable`
+    * `google_bigtable_instance`
 *   `cloudFunctions`
     * `google_cloudfunctions_function`
     * `google_cloudfunctions2_function`
