@@ -86,6 +86,7 @@ var serviceScope = map[string]regionScope{
 	"observabilityadmin":           scopeRegional,
 	"compute-optimizer":            scopeRegional,
 	"cost-optimization-hub":        scopeRegional,
+	"drs":                          scopeRegional,
 	"devops-guru":                  scopeRegional,
 	"pinpointsmsvoicev2":           scopeRegional,
 	"route53recoverycontrolconfig": scopeRegional,

@@ -362,6 +362,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"compute-optimizer":            &AwsFacade{service: &ComputeOptimizerGenerator{}},
 		"cost-optimization-hub":        &AwsFacade{service: &CostOptimizationHubGenerator{}},
 		"cur":                          &AwsFacade{service: &CURGenerator{}},
+		"drs":                          &AwsFacade{service: &DrsGenerator{}},
 		"devops-guru":                  &AwsFacade{service: &DevOpsGuruGenerator{}},
 		"cloudsearch":                  &AwsFacade{service: &CloudSearchGenerator{}},
 		"elastictranscoder":            &AwsFacade{service: &ElasticTranscoderGenerator{}},

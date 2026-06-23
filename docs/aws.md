@@ -175,6 +175,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_comprehend_entity_recognizer`
 *   `cur`
     * `aws_cur_report_definition`
+*   `drs`
+    * `aws_drs_replication_configuration_template`
 *   `cloudsearch`
     * `aws_cloudsearch_domain`
     * `aws_cloudsearch_domain_service_access_policy`
