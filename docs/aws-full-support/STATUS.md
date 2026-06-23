@@ -110,7 +110,7 @@ on already-registered services — not net-new services, which were already done
 
 ## Coverage tally
 
-Current coverage: 239 services / **1287** `aws_*` resource types (baseline 90 / 250). §3 gap
+Current coverage: 250 services / **1306** `aws_*` resource types (baseline 90 / 250). §3 gap
 `missing-resources.txt` = **184** — a full per-resource buildability audit
 ([resource-review.md](resource-review.md)) found and built ~20 more, then an
 aws-sdk-go-v2 upgrade (84 service modules to latest) vendored the previously-
