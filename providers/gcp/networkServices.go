@@ -138,6 +138,53 @@ func (g *NetworkServicesGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+
+	project := g.GetArgs()["project"].(string)
+	tail := func(s string) string { p := strings.Split(s, "/"); return p[len(p)-1] }
+	if err := networkServicesService.Projects.Locations.AgentGateways.List(parent).Pages(ctx, func(p *networkservices.ListAgentGatewaysResponse) error {
+		for _, o := range p.AgentGateways {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_network_services_agent_gateway", g.ProviderName,
+				map[string]string{"name": tail(o.Name), "project": project, "location": loc},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := networkServicesService.Projects.Locations.AuthzExtensions.List(parent).Pages(ctx, func(p *networkservices.ListAuthzExtensionsResponse) error {
+		for _, o := range p.AuthzExtensions {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_network_services_authz_extension", g.ProviderName,
+				map[string]string{"name": tail(o.Name), "project": project, "location": loc},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := networkServicesService.Projects.Locations.LbRouteExtensions.List(parent).Pages(ctx, func(p *networkservices.ListLbRouteExtensionsResponse) error {
+		for _, o := range p.LbRouteExtensions {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_network_services_lb_route_extension", g.ProviderName,
+				map[string]string{"name": tail(o.Name), "project": project, "location": loc},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := networkServicesService.Projects.Locations.LbTrafficExtensions.List(parent).Pages(ctx, func(p *networkservices.ListLbTrafficExtensionsResponse) error {
+		for _, o := range p.LbTrafficExtensions {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_network_services_lb_traffic_extension", g.ProviderName,
+				map[string]string{"name": tail(o.Name), "project": project, "location": loc},
+				networkServicesAllowEmptyValues, networkServicesAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
