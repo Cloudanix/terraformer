@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"google.golang.org/api/apigateway/v1"
+	"google.golang.org/api/compute/v1"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -71,6 +72,22 @@ func (g *APIGatewayGenerator) InitResources() error {
 	// APIs are global (locations/global).
 	apisList := apiGatewayService.Projects.Locations.Apis.List(
 		"projects/" + g.GetArgs()["project"].(string) + "/locations/global")
-	g.Resources = g.createResources(ctx, apisList)
+	g.Resources = append(g.Resources, g.createResources(ctx, apisList)...)
+
+	// Gateways are regional.
+	gwParent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	if err := apiGatewayService.Projects.Locations.Gateways.List(gwParent).Pages(ctx, func(p *apigateway.ApigatewayListGatewaysResponse) error {
+		for _, o := range p.Gateways {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_api_gateway_gateway", g.ProviderName,
+				map[string]string{"gateway_id": name, "project": g.GetArgs()["project"].(string), "region": g.GetArgs()["region"].(compute.Region).Name},
+				apiGatewayAllowEmptyValues, apiGatewayAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
