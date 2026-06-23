@@ -215,6 +215,7 @@ google_monitoring_service
 google_monitoring_uptime_check_config
 google_netapp_active_directory
 google_netapp_backup_vault
+google_netapp_kmsconfig
 google_netapp_storage_pool
 google_netapp_volume
 google_network_connectivity_hub
@@ -243,6 +244,7 @@ google_org_policy_policy
 google_parallelstore_instance
 google_privateca_ca_pool
 google_privateca_certificate_authority
+google_privateca_certificate_template
 google_project
 google_project_iam_audit_config
 google_project_iam_custom_role
