@@ -31,29 +31,6 @@ type BigtableGenerator struct {
 	GCPService
 }
 
-// Run on instancesList and create for each TerraformResource
-func (g BigtableGenerator) createResources(instancesList *bigtableadmin.ListInstancesResponse) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
-	project := g.GetArgs()["project"].(string)
-	for _, obj := range instancesList.Instances {
-		t := strings.Split(obj.Name, "/")
-		name := t[len(t)-1]
-		resources = append(resources, terraformutils.NewResource(
-			project+"/"+name,
-			name,
-			"google_bigtable_instance",
-			g.ProviderName,
-			map[string]string{
-				"name":    name,
-				"project": project,
-			},
-			bigtableAllowEmptyValues,
-			bigtableAdditionalFields,
-		))
-	}
-	return resources
-}
-
 // Generate TerraformResources from GCP API,
 func (g *BigtableGenerator) InitResources() error {
 	ctx := context.Background()
@@ -61,11 +38,48 @@ func (g *BigtableGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	project := g.GetArgs()["project"].(string)
 
-	instancesList, err := bigtableService.Projects.Instances.List("projects/" + g.GetArgs()["project"].(string)).Do()
+	instancesList, err := bigtableService.Projects.Instances.List("projects/" + project).Do()
 	if err != nil {
 		return err
 	}
-	g.Resources = g.createResources(instancesList)
+
+	for _, obj := range instancesList.Instances {
+		t := strings.Split(obj.Name, "/")
+		instanceName := t[len(t)-1]
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			project+"/"+instanceName,
+			instanceName,
+			"google_bigtable_instance",
+			g.ProviderName,
+			map[string]string{"name": instanceName, "project": project},
+			bigtableAllowEmptyValues,
+			bigtableAdditionalFields,
+		))
+
+		// Walk the instance for its tables.
+		tablesList, terr := bigtableService.Projects.Instances.Tables.List(obj.Name).Do()
+		if terr != nil {
+			continue
+		}
+		for _, tbl := range tablesList.Tables {
+			tt := strings.Split(tbl.Name, "/")
+			tableName := tt[len(tt)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				project+"/"+instanceName+"/"+tableName,
+				tableName,
+				"google_bigtable_table",
+				g.ProviderName,
+				map[string]string{
+					"name":          tableName,
+					"instance_name": instanceName,
+					"project":       project,
+				},
+				bigtableAllowEmptyValues,
+				bigtableAdditionalFields,
+			))
+		}
+	}
 	return nil
 }

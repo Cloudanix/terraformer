@@ -48,6 +48,7 @@ List of supported GCP services:
     * `google_biglake_catalog`
 *   `bigtable`
     * `google_bigtable_instance`
+    * `google_bigtable_table`
 *   `cloudRun`
     * `google_cloud_run_v2_service`
     * `google_cloud_run_v2_job`
