@@ -71,14 +71,31 @@ func (g *ClouddeployGenerator) InitResources() error {
 	}
 
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
+
 	deliveryPipelinesList := clouddeployService.Projects.Locations.DeliveryPipelines.List(parent)
-	g.Resources = append(g.Resources, g.createResources(ctx, deliveryPipelinesList)...)
+	pipelineRes := g.createResources(ctx, deliveryPipelinesList)
+	g.Resources = append(g.Resources, pipelineRes...)
+	for _, r := range pipelineRes {
+		res := r.InstanceState.ID
+		if policy, perr := clouddeployService.Projects.Locations.DeliveryPipelines.GetIamPolicy(res).Do(); perr == nil {
+			short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_clouddeploy_delivery_pipeline_iam_member", g.ProviderName,
+						map[string]string{"name": short, "role": b.Role, "member": m, "project": proj, "location": loc},
+						clouddeployAllowEmptyValues, clouddeployAdditionalFields))
+				}
+			}
+		}
+	}
 
 	targetsList := clouddeployService.Projects.Locations.Targets.List(parent)
 	g.Resources = append(g.Resources, g.createTargetsResources(ctx, targetsList)...)
 
-	loc := g.GetArgs()["region"].(compute.Region).Name
-	proj := g.GetArgs()["project"].(string)
 	if err := clouddeployService.Projects.Locations.CustomTargetTypes.List(parent).Pages(ctx, func(p *clouddeploy.ListCustomTargetTypesResponse) error {
 		for _, o := range p.CustomTargetTypes {
 			t := strings.Split(o.Name, "/")
