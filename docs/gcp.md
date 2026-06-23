@@ -29,6 +29,8 @@ List of supported GCP services:
     * `google_compute_address`
 *   `autoscalers`
     * `google_compute_autoscaler`
+*   `apphub`
+    * `google_apphub_application`
 *   `artifactRegistry`
     * `google_artifact_registry_repository`
 *   `binaryAuthorization`
