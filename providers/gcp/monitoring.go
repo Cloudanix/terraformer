@@ -236,5 +236,22 @@ func (g *MonitoringGenerator) loadServices(ctx context.Context, project string) 
 			monitoringAllowEmptyValues,
 			monitoringAdditionalFields,
 		))
+		sloIt := client.ListServiceLevelObjectives(ctx, &monitoringpb.ListServiceLevelObjectivesRequest{Parent: svc.Name})
+		for {
+			slo, serr := sloIt.Next()
+			if serr == iterator.Done {
+				break
+			}
+			if serr != nil {
+				log.Println("error with slo:", serr)
+				break
+			}
+			st := strings.Split(slo.Name, "/")
+			sloName := st[len(st)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				slo.Name, sloName, "google_monitoring_slo", g.ProviderName,
+				map[string]string{"slo_id": sloName, "service": name, "project": project},
+				monitoringAllowEmptyValues, monitoringAdditionalFields))
+		}
 	}
 }
