@@ -102,5 +102,102 @@ func (g *OracleDatabaseGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	if err := oracleDatabaseService.Projects.Locations.DbSystems.List(parent).Pages(ctx, func(p *oracledatabase.ListDbSystemsResponse) error {
+		for _, o := range p.DbSystems {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_oracle_database_db_system", g.ProviderName,
+				map[string]string{"db_system_id": t[len(t)-1], "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := oracleDatabaseService.Projects.Locations.ExadbVmClusters.List(parent).Pages(ctx, func(p *oracledatabase.ListExadbVmClustersResponse) error {
+		for _, o := range p.ExadbVmClusters {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_oracle_database_exadb_vm_cluster", g.ProviderName,
+				map[string]string{"exadb_vm_cluster_id": t[len(t)-1], "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := oracleDatabaseService.Projects.Locations.ExascaleDbStorageVaults.List(parent).Pages(ctx, func(p *oracledatabase.ListExascaleDbStorageVaultsResponse) error {
+		for _, o := range p.ExascaleDbStorageVaults {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_oracle_database_exascale_db_storage_vault", g.ProviderName,
+				map[string]string{"exascale_db_storage_vault_id": t[len(t)-1], "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := oracleDatabaseService.Projects.Locations.GoldengateConnections.List(parent).Pages(ctx, func(p *oracledatabase.ListGoldengateConnectionsResponse) error {
+		for _, o := range p.GoldengateConnections {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_oracle_database_goldengate_connection", g.ProviderName,
+				map[string]string{"goldengate_connection_id": t[len(t)-1], "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := oracleDatabaseService.Projects.Locations.GoldengateConnectionAssignments.List(parent).Pages(ctx, func(p *oracledatabase.ListGoldengateConnectionAssignmentsResponse) error {
+		for _, o := range p.GoldengateConnectionAssignments {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_oracle_database_goldengate_connection_assignment", g.ProviderName,
+				map[string]string{"goldengate_connection_assignment_id": t[len(t)-1], "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := oracleDatabaseService.Projects.Locations.GoldengateDeployments.List(parent).Pages(ctx, func(p *oracledatabase.ListGoldengateDeploymentsResponse) error {
+		for _, o := range p.GoldengateDeployments {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_oracle_database_goldengate_deployment", g.ProviderName,
+				map[string]string{"goldengate_deployment_id": t[len(t)-1], "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := oracleDatabaseService.Projects.Locations.OdbNetworks.List(parent).Pages(ctx, func(p *oracledatabase.ListOdbNetworksResponse) error {
+		for _, o := range p.OdbNetworks {
+			t := strings.Split(o.Name, "/")
+			odbName := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, odbName, "google_oracle_database_odb_network", g.ProviderName,
+				map[string]string{"odb_network_id": odbName, "project": proj, "location": loc},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+			if serr := oracleDatabaseService.Projects.Locations.OdbNetworks.OdbSubnets.List(o.Name).Pages(ctx, func(sp *oracledatabase.ListOdbSubnetsResponse) error {
+				for _, s := range sp.OdbSubnets {
+					st := strings.Split(s.Name, "/")
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						s.Name, odbName+"_"+st[len(st)-1], "google_oracle_database_odb_subnet", g.ProviderName,
+						map[string]string{"odb_subnet_id": st[len(st)-1], "odb_network": odbName, "project": proj, "location": loc},
+						oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+				}
+				return nil
+			}); serr != nil {
+				log.Println(serr)
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
