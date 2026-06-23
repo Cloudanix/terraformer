@@ -187,6 +187,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["secureSourceManager"] = &GCPFacade{service: &SecureSourceManagerGenerator{}}
 	services["migrationCenter"] = &GCPFacade{service: &MigrationCenterGenerator{}}
 	services["recaptchaEnterprise"] = &GCPFacade{service: &RecaptchaEnterpriseGenerator{}}
+	services["workbench"] = &GCPFacade{service: &WorkbenchGenerator{}}
 	return services
 }
 

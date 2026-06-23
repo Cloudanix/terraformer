@@ -298,6 +298,8 @@ List of supported GCP services:
     * `google_workstations_workstation_cluster`
     * `google_workstations_workstation_config`
 *   `workflows`
+*   `workbench`
+    * `google_workbench_instance`
     * `google_workflows_workflow`
 *   `subnetworks`
     * `google_compute_subnetwork`
