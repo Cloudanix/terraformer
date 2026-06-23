@@ -50,14 +50,15 @@ buildable against the pinned SDKs, now implemented (one commit each):
 
 ## Confirmed NOT buildable (verdicts → see no-list-api.md for the catalogue)
 
-- **Op absent in pinned SDK** (would not compile; no dep bump per plan §11):
-  `aws_ecr_repository_creation_template` (ecr v1.24.5 lacks
-  DescribeRepositoryCreationTemplates), `aws_eks_access_entry` /
-  `aws_eks_access_policy_association` (eks v1.35.5 lacks ListAccessEntries),
-  `aws_lambda_function_recursion_config` (lambda v1.49.5 lacks
-  GetFunctionRecursionConfig), `aws_iam_organizations_features` (iam v1.28.5
-  lacks ListOrganizationsFeatures). These become buildable only after the
-  respective module is bumped.
+- **Op absent in pinned SDK** — **RESOLVED by the aws-sdk-go-v2 upgrade.** The
+  84-module bump (eks v1.35.5→v1.87.0, ecr v1.24.5→v1.58.4, lambda
+  v1.49.5→v1.93.0, iam v1.28.5→v1.54.5, codebuild→v1.69.4, dynamodb→v1.59.0,
+  ec2→v1.307.1, s3tables) vendored the missing ops, so all of these are now
+  BUILT: `aws_ecr_repository_creation_template`, `aws_eks_access_entry`,
+  `aws_eks_access_policy_association`, `aws_lambda_function_recursion_config`,
+  `aws_iam_organizations_features`, `aws_codebuild_fleet`,
+  `aws_dynamodb_resource_policy`, `aws_vpc_security_group_vpc_association`,
+  `aws_s3tables_table_bucket_policy`, `aws_s3tables_table_policy`.
 - **Unvendored SDK entirely:** codecatalyst, drs, evidently, lex (v1),
   paymentcryptography, computeoptimizer, costoptimizationhub, simpledb, worklink,
   customerprofiles, dataexchange.
@@ -81,8 +82,11 @@ buildable against the pinned SDKs, now implemented (one commit each):
 
 ## Result
 
-`missing-resources.txt` = **215**, every entry mapped to one of the verdicts
-above (the classifier in the build scripts reports 0 unclassified). Coverage
-**1256** `aws_*` types. The buildable frontier is now genuinely exhausted for the
-pinned SDK set; further gains require a deliberate `aws-sdk-go-v2` bump (the
-"op absent in pinned SDK" group) or accepting the ambiguous-import risk above.
+`missing-resources.txt` = **205**, every entry mapped to one of the verdicts
+above. Coverage **1266** `aws_*` types. After the aws-sdk-go-v2 upgrade resolved
+the "op absent" group, the buildable frontier is exhausted: remaining gains need
+an SDK module that is **entirely unvendored** (codecatalyst, drs, evidently, lex
+v1, paymentcryptography, computeoptimizer, costoptimizationhub, simpledb,
+worklink, customerprofiles, dataexchange — adding those is a larger, separate
+dependency decision) or accepting the documented ambiguous-import / redundant /
+data-plane exclusions.

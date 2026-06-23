@@ -110,11 +110,14 @@ on already-registered services — not net-new services, which were already done
 
 ## Coverage tally
 
-Current coverage: 234 services / **1256** `aws_*` resource types (baseline 90 / 250). §3 gap
-`missing-resources.txt` = **215** — a full per-resource buildability audit
-([resource-review.md](resource-review.md)) found and built ~20 more (incl. several
-earlier mis-marked "absent SDK" that were really pinned-version-gated); the
-clean-import buildable tail is now empty
+Current coverage: 234 services / **1266** `aws_*` resource types (baseline 90 / 250). §3 gap
+`missing-resources.txt` = **205** — a full per-resource buildability audit
+([resource-review.md](resource-review.md)) found and built ~20 more, then an
+aws-sdk-go-v2 upgrade (84 service modules to latest) vendored the previously-
+missing List/Get ops and unblocked 10 more (eks_access_entry, ecr_repository_
+creation_template, lambda_function_recursion_config, iam_organizations_features,
+codebuild_fleet, dynamodb_resource_policy, vpc_security_group_vpc_association,
+s3tables policies). The clean-import buildable tail is now empty
 (incl. the high-cardinality per-parent leaves §9 named: glue_partition,
 cloudwatch_log_stream, sagemaker_device, glue_catalog_table_optimizer);
 every remaining entry maps to a documented exclusion class in
