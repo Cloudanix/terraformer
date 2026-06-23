@@ -6,12 +6,8 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **217** types (+76). Phase 1 mgmt-plane gaps complete; data-plane/branching gaps deferred (see below).
-  managed_identity, log_analytics, application_insights, traffic_manager,
-  firewall, virtual_wan, monitor, cdn, role_assignment, recovery_services,
-  automation, servicebus, cognitive, search, signalr, eventgrid, bastion, ddos,
-  kusto, iothub, stream_analytics, container_app, apim, management_group,
-  machine_learning. Plus gaps in virtual_network/database/cosmosdb/redis.
+- Current: **217** types (+76). Phase 1 mgmt-plane gaps complete; data-plane /
+  branching gaps deferred (see Phase 1 below). ~50 new Track 2 services added.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
 
 ## Phase 0 — foundations (DONE)
@@ -54,18 +50,22 @@ Done: `nat_gateway`, `kubernetes` (cluster + node_pool, User-mode filter tested)
 autoscale_setting, metric_alert), `cdn` (profile + endpoint), `role_assignment`
 (subscription-scoped).
 
-Not yet: `policy`, `function_app`, `automation` runbooks/schedules (only account
-done), role_definition (composite import ID + built-in filtering).
+Not yet: `policy`, `function_app`, `automation` runbooks/schedules (account done),
+role_definition (composite import ID + built-in filtering).
 
-## Phase 3 — P2/P3 (partly started)
+## Phase 3 — P2/P3 (largely done)
 
-Done: `recovery_services` (vault), `servicebus` (namespace), `cognitive` (account),
-`search` (service), `signalr` (service), `eventgrid` (topic + domain), `automation`
-(account).
+Done: recovery_services, servicebus, cognitive, search, signalr, eventgrid,
+automation, bastion, ddos, management_group, apim, kusto, iothub,
+stream_analytics, machine_learning, container_app, netapp, mssql, powerbi,
+digital_twins, relay, web_pubsub, notification_hub, batch, dashboard (grafana),
+maps, private_dns_resolver, spring_cloud, data_share, healthcare, load_test,
+elastic_san, communication, dev_center, chaos_studio, confidential_ledger,
+fluid_relay.
 
-Not yet: sentinel, ddos, bastion, management_group, lighthouse,
-private_dns_resolver, apim, kusto, iothub, stream_analytics, machine_learning,
-hdinsight, container_app, eventhub gaps, synapse gaps, storage gaps.
+Not yet: sentinel, lighthouse, hdinsight (per-kind), spatial_anchors, orbital,
+automanage, workloads (SAP), vmware (AVS), data_protection, and the remaining
+long-tail single-resource services + multi-resource sub-resource expansions.
 
 ## Phase 4 — azuread (not started)
 
