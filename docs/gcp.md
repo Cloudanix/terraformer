@@ -155,6 +155,8 @@ List of supported GCP services:
     * `google_secret_manager_secret`
 *   `securityPolicies`
     * `google_compute_security_policy`
+*   `spanner`
+    * `google_spanner_instance`
 *   `sslCertificates`
     * `google_compute_managed_ssl_certificate`
 *   `sslPolicies`
