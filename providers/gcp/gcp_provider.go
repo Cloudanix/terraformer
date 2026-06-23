@@ -140,6 +140,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["essentialContacts"] = &GCPFacade{service: &EssentialContactsGenerator{}}
 	services["networkConnectivity"] = &GCPFacade{service: &NetworkConnectivityGenerator{}}
 	services["firestore"] = &GCPFacade{service: &FirestoreGenerator{}}
+	services["datafusion"] = &GCPFacade{service: &DatafusionGenerator{}}
 	return services
 }
 
