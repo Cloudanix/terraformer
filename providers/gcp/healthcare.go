@@ -179,7 +179,23 @@ func (g *HealthcareGenerator) InitResources() error {
 				}
 			}
 		}
-		g.Resources = append(g.Resources, g.createDicomStoresResources(ctx, healthcareService.Projects.Locations.Datasets.DicomStores, dataset)...)
+		dicomRes := g.createDicomStoresResources(ctx, healthcareService.Projects.Locations.Datasets.DicomStores, dataset)
+		g.Resources = append(g.Resources, dicomRes...)
+		for _, r := range dicomRes {
+			res := r.InstanceState.ID
+			if policy, perr := healthcareService.Projects.Locations.Datasets.DicomStores.GetIamPolicy(res).Do(); perr == nil {
+				short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+							"google_healthcare_dicom_store_iam_member", g.ProviderName,
+							map[string]string{"dicom_store_id": res, "role": b.Role, "member": m, "project": project},
+							healthcareAllowEmptyValues, healthcareAdditionalFields))
+					}
+				}
+			}
+		}
 		g.Resources = append(g.Resources, g.createHl7V2StoresResources(ctx, healthcareService.Projects.Locations.Datasets.Hl7V2Stores, dataset)...)
 		if err := healthcareService.Projects.Locations.Datasets.ConsentStores.List(dataset).Pages(ctx, func(page *healthcare.ListConsentStoresResponse) error {
 			for _, obj := range page.ConsentStores {
