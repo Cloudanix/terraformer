@@ -105,5 +105,37 @@ func (g *CloudRunGenerator) InitResources() error {
 
 	jobsList := runService.Projects.Locations.Jobs.List(parent)
 	g.Resources = append(g.Resources, g.createJobsResources(ctx, jobsList)...)
+
+	workerPoolsList := runService.Projects.Locations.WorkerPools.List(parent)
+	g.Resources = append(g.Resources, g.createWorkerPoolsResources(ctx, workerPoolsList)...)
 	return nil
+}
+
+// Run on workerPoolsList and create for each TerraformResource
+func (g CloudRunGenerator) createWorkerPoolsResources(ctx context.Context, list *run.ProjectsLocationsWorkerPoolsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *run.GoogleCloudRunV2ListWorkerPoolsResponse) error {
+		for _, obj := range page.WorkerPools {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_cloud_run_v2_worker_pool",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				cloudRunAllowEmptyValues,
+				cloudRunAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }

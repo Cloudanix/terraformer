@@ -61,6 +61,7 @@ List of supported GCP services:
 *   `cloudRun`
     * `google_cloud_run_v2_service`
     * `google_cloud_run_v2_job`
+    * `google_cloud_run_v2_worker_pool`
 *   `composer`
     * `google_composer_environment`
 *   `certificateManager`
