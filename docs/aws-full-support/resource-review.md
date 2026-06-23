@@ -188,6 +188,54 @@ Note: these additions are **beyond** the pinned 5.80.0 gap list, so they don't
 change `missing-resources.txt` (still measured against the floor); they raise the
 coverage count and forward-support newer runtime providers.
 
+## Latest-provider deep review (resources within registered services)
+
+Beyond the 19 new *service* prefixes, diffing the latest provider's 1668
+resources against coverage surfaced **~190 new resources that are gaps within
+ALREADY-registered services** (the SDK upgrade vendored their ops). Added a large
+batch this round:
+
+- **New services** (SDK fetched + generator): dsql, workmail, odb,
+  networkflowmonitor, notifications, notificationscontacts, savingsplans,
+  timestream-query, billing, invoicing, observabilityadmin, s3vectors,
+  arc-region-switch, arc-zonal-shift, bedrock-agentcore-control (12 resources),
+  s3files, uxc, vpc-route-server (5), account, devops-guru, compute-optimizer,
+  cost-optimization-hub.
+- **Service expansions**: workspaces-web +9 (browser/network/ip-access/user/
+  data-protection/user-access-logging settings, trust_store, session_logger,
+  identity_provider).
+
+**Remaining latest-provider backlog (not yet added, ~150)** — resource gaps in
+registered services, each a clean List/Get add when prioritized; grouped:
+- cloudwatch: log_delivery(+source/destination/destination_policy),
+  log_anomaly_detector, log_transformer, log_index_policy,
+  contributor_insight_rule, alarm_mute_rule
+- sagemaker: algorithm, model_card, training_job, labeling_job,
+  hyper_parameter_tuning_job, mlflow_app, hub_content_reference
+- quicksight: account_settings, ip_restriction, role_membership,
+  custom_permissions, key_registration, role/user_custom_permission
+- securityhub v2: account_v2, aggregator_v2, automation_rule_v2, connector_v2
+- observabilityadmin org-variants (centralization_rule_for_organization,
+  telemetry_rule_for_organization, telemetry_pipeline, s3_table_integration…)
+- notifications associations (channel_association, event_rule, org-unit/account-
+  contact associations, organizations_access)
+- cloudfront: vpc_origin, anycast_ip_list, connection_group, distribution_tenant,
+  trust_store, multitenant_distribution
+- bedrockagent: flow, prompt, agent_collaborator; bedrock: inference_profile
+- lakeformation: opt_in, lf_tag_expression, identity_center_configuration
+- networkfirewall: vpc_endpoint_association, firewall_transit_gateway_attachment_accepter
+- transfer: web_app(+customization), host_key; rds: shard_group, integration,
+  cluster_snapshot_copy; redshift: integration, idc_application,
+  namespace_registration; prometheus: workspace_configuration, resource_policy,
+  query_logging_configuration; ecr: account_setting; ecs: daemon(+task_def);
+  msk: topic, single_scram_secret_association; memorydb: multi_region_cluster;
+  plus assorted *_v2 / *_exclusive / tag / data-plane (excluded per the usual
+  rules), and brand-new preview resources with unstable import IDs.
+
+These are the deepening tail for the *latest* provider; the pinned-5.80.0 gap
+(missing-resources.txt) is unaffected. Add in prioritized batches; each follows
+the §5/§6 recipe (List/Get → NewSimpleResource, import ID per resource doc).
+
 ## Result
 
 `missing-resources.txt` = **184**, every entry mapped to one of the verdicts
