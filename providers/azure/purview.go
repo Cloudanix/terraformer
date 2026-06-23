@@ -1,4 +1,4 @@
-// Copyright 2021 The Terraformer Authors.
+// Copyright 2019 The Terraformer Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,57 +15,38 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/purview/mgmt/2021-07-01/purview"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/purview/armpurview"
 )
 
 type PurviewGenerator struct {
 	AzureService
 }
 
-func (az *PurviewGenerator) listAccounts() ([]purview.Account, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := purview.NewAccountsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator purview.AccountListIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListByResourceGroupComplete(ctx, resourceGroup, "")
-	} else {
-		iterator, err = client.ListBySubscriptionComplete(ctx, "")
+// InitResources imports azurerm_purview_account. Migrated to the Track 2
+// armpurview SDK (was Track 1 services/purview).
+func (g *PurviewGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []purview.Account
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *PurviewGenerator) AppendAccount(account *purview.Account) {
-	az.AppendSimpleResource(*account.ID, *account.Name, "azurerm_purview_account")
-}
-
-func (az *PurviewGenerator) InitResources() error {
-
-	accounts, err := az.listAccounts()
+	client, err := armpurview.NewAccountsClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for _, account := range accounts {
-		az.AppendAccount(&account)
+	id := func(i *armpurview.Account) string { return valueOrEmpty(i.ID) }
+	name := func(i *armpurview.Account) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListBySubscriptionPager(nil),
+			func(p armpurview.AccountsClientListBySubscriptionResponse) []*armpurview.Account { return p.Value },
+			id, name, "azurerm_purview_account")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armpurview.AccountsClientListByResourceGroupResponse) []*armpurview.Account { return p.Value },
+			id, name, "azurerm_purview_account"); err != nil {
+			return err
+		}
 	}
 	return nil
 }

@@ -1,4 +1,4 @@
-// Copyright 2021 The Terraformer Authors.
+// Copyright 2019 The Terraformer Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,57 +15,42 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/databricks/mgmt/2018-04-01/databricks"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/databricks/armdatabricks"
 )
 
 type DatabricksGenerator struct {
 	AzureService
 }
 
-func (az *DatabricksGenerator) listWorkspaces() ([]databricks.Workspace, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := databricks.NewWorkspacesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator databricks.WorkspaceListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListByResourceGroupComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListBySubscriptionComplete(ctx)
+// InitResources imports azurerm_databricks_workspace. Migrated to the Track 2
+// armdatabricks SDK (was Track 1 services/databricks).
+func (g *DatabricksGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []databricks.Workspace
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *DatabricksGenerator) AppendWorkspace(workspace *databricks.Workspace) {
-	az.AppendSimpleResource(*workspace.ID, *workspace.Name, "azurerm_databricks_workspace")
-}
-
-func (az *DatabricksGenerator) InitResources() error {
-
-	workspaces, err := az.listWorkspaces()
+	client, err := armdatabricks.NewWorkspacesClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for _, workspace := range workspaces {
-		az.AppendWorkspace(&workspace)
+	id := func(i *armdatabricks.Workspace) string { return valueOrEmpty(i.ID) }
+	name := func(i *armdatabricks.Workspace) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListBySubscriptionPager(nil),
+			func(p armdatabricks.WorkspacesClientListBySubscriptionResponse) []*armdatabricks.Workspace {
+				return p.Value
+			},
+			id, name, "azurerm_databricks_workspace")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armdatabricks.WorkspacesClientListByResourceGroupResponse) []*armdatabricks.Workspace {
+				return p.Value
+			},
+			id, name, "azurerm_databricks_workspace"); err != nil {
+			return err
+		}
 	}
 	return nil
 }

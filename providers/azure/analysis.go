@@ -15,65 +15,40 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/analysisservices/mgmt/2017-08-01/analysisservices"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/analysisservices/armanalysisservices"
 )
 
 type AnalysisGenerator struct {
 	AzureService
 }
 
-func (g *AnalysisGenerator) listServiceServers() ([]terraformutils.Resource, error) {
-	log.Println("\tImporting Service Servers")
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	AnalysisClient := analysisservices.NewServersClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	AnalysisClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	var (
-		servers analysisservices.Servers
-		err     error
-	)
-
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		servers, err = AnalysisClient.ListByResourceGroup(ctx, rg)
-	} else {
-		servers, err = AnalysisClient.List(ctx)
-	}
-	if err != nil {
-		return nil, err
-	}
-	for _, svr := range *servers.Value {
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*svr.ID,
-			*svr.Name,
-			"azurerm_analysis_services_server",
-			g.ProviderName,
-			[]string{}))
-	}
-
-	return resources, nil
-}
-
+// InitResources imports azurerm_analysis_services_server. Migrated to the Track 2
+// armanalysisservices SDK (was Track 1 services/analysisservices).
 func (g *AnalysisGenerator) InitResources() error {
-	functions := []func() ([]terraformutils.Resource, error){
-		g.listServiceServers,
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-
-	for _, f := range functions {
-		resources, err := f()
-		if err != nil {
+	client, err := armanalysisservices.NewServersClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	id := func(i *armanalysisservices.Server) string { return valueOrEmpty(i.ID) }
+	name := func(i *armanalysisservices.Server) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armanalysisservices.ServersClientListResponse) []*armanalysisservices.Server { return p.Value },
+			id, name, "azurerm_analysis_services_server")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armanalysisservices.ServersClientListByResourceGroupResponse) []*armanalysisservices.Server {
+				return p.Value
+			},
+			id, name, "azurerm_analysis_services_server"); err != nil {
 			return err
 		}
-		g.Resources = append(g.Resources, resources...)
 	}
-
 	return nil
 }
