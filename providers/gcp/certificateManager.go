@@ -79,7 +79,30 @@ func (g *CertificateManagerGenerator) InitResources() error {
 
 	authsList := certificateManagerService.Projects.Locations.DnsAuthorizations.List(parent)
 	g.Resources = append(g.Resources, g.createDNSAuthResources(ctx, authsList)...)
+
+	trustList := certificateManagerService.Projects.Locations.TrustConfigs.List(parent)
+	g.Resources = append(g.Resources, g.createTrustConfigResources(ctx, trustList)...)
 	return nil
+}
+
+func (g CertificateManagerGenerator) createTrustConfigResources(ctx context.Context, list *certificatemanager.ProjectsLocationsTrustConfigsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *certificatemanager.ListTrustConfigsResponse) error {
+		for _, obj := range page.TrustConfigs {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_certificate_manager_trust_config", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				certificateManagerAllowEmptyValues, certificateManagerAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
 
 func (g CertificateManagerGenerator) createMapsResources(ctx context.Context, list *certificatemanager.ProjectsLocationsCertificateMapsListCall) []terraformutils.Resource {
