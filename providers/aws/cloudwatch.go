@@ -130,6 +130,12 @@ func (g *CloudWatchGenerator) createEventBuses(svc *cloudwatchevents.Client) err
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_cloudwatch_event_bus", "aws", cloudwatchAllowEmptyValues))
+			// Resource-based policy is a separate resource (not inlined on the bus),
+			// imported by bus name. Emit only when a policy is attached.
+			if StringValue(bus.Policy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name, name, "aws_cloudwatch_event_bus_policy", "aws", cloudwatchAllowEmptyValues))
+			}
 		}
 		nextToken = output.NextToken
 		if nextToken == nil {
