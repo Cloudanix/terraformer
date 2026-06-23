@@ -74,6 +74,8 @@ List of supported GCP services:
     * `google_dataplex_lake`
 *   `datafusion`
     * `google_data_fusion_instance`
+*   `dataprocMetastore`
+    * `google_dataproc_metastore_service`
 *   `datastream`
     * `google_datastream_stream`
 *   `dialogflow`

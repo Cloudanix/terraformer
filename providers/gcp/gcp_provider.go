@@ -162,6 +162,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["apphub"] = &GCPFacade{service: &ApphubGenerator{}}
 	services["parallelstore"] = &GCPFacade{service: &ParallelstoreGenerator{}}
 	services["networkServices"] = &GCPFacade{service: &NetworkServicesGenerator{}}
+	services["dataprocMetastore"] = &GCPFacade{service: &DataprocMetastoreGenerator{}}
 	return services
 }
 
