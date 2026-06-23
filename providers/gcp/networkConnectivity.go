@@ -34,7 +34,7 @@ type NetworkConnectivityGenerator struct {
 }
 
 // Run on hubsList and create for each TerraformResource
-func (g NetworkConnectivityGenerator) createResources(ctx context.Context, hubsList *networkconnectivity.ProjectsLocationsGlobalHubsListCall) []terraformutils.Resource {
+func (g NetworkConnectivityGenerator) createResources(ctx context.Context, svc *networkconnectivity.Service, hubsList *networkconnectivity.ProjectsLocationsGlobalHubsListCall) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
 	if err := hubsList.Pages(ctx, func(page *networkconnectivity.ListHubsResponse) error {
 		for _, obj := range page.Hubs {
@@ -52,6 +52,17 @@ func (g NetworkConnectivityGenerator) createResources(ctx context.Context, hubsL
 				networkConnectivityAllowEmptyValues,
 				networkConnectivityAdditionalFields,
 			))
+			if policy, perr := svc.Projects.Locations.Global.Hubs.GetIamPolicy(obj.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_network_connectivity_hub_iam_member", g.ProviderName,
+							map[string]string{"name": name, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string)},
+							networkConnectivityAllowEmptyValues, networkConnectivityAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
@@ -70,7 +81,7 @@ func (g *NetworkConnectivityGenerator) InitResources() error {
 
 	hubsList := networkConnectivityService.Projects.Locations.Global.Hubs.List(
 		"projects/" + g.GetArgs()["project"].(string) + "/locations/global")
-	g.Resources = append(g.Resources, g.createResources(ctx, hubsList)...)
+	g.Resources = append(g.Resources, g.createResources(ctx, networkConnectivityService, hubsList)...)
 
 	regionalParent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
 	spokesList := networkConnectivityService.Projects.Locations.Spokes.List(regionalParent)
