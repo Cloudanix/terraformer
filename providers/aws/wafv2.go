@@ -59,8 +59,39 @@ func (g *Wafv2Generator) InitResources() error {
 	if err := g.loadWebACLLoggingConfiguration(svc); err != nil {
 		return err
 	}
+	if err := g.loadAPIKeys(svc); err != nil {
+		return err
+	}
 
 	return nil
+}
+
+// wafv2APIKeyID builds the aws_wafv2_api_key import id ("<api_key>,<scope>").
+func wafv2APIKeyID(apiKey, scope string) string {
+	return apiKey + "," + scope
+}
+
+func (g *Wafv2Generator) loadAPIKeys(svc *wafv2.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListAPIKeys(context.TODO(), &wafv2.ListAPIKeysInput{Scope: g.scope, NextMarker: marker})
+		if err != nil {
+			return err
+		}
+		for _, k := range out.APIKeySummaries {
+			apiKey := StringValue(k.APIKey)
+			if apiKey == "" {
+				continue
+			}
+			id := wafv2APIKeyID(apiKey, string(g.scope))
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_wafv2_api_key", "aws", wafv2AllowEmptyValues))
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
 }
 
 func (g *Wafv2Generator) loadWebACL(svc *wafv2.Client) error {
