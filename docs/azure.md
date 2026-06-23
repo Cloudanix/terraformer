@@ -193,6 +193,8 @@ export ARM_USE_ADAL=true
     * `azurerm_eventgrid_topic`
 *   `recovery_services`
     * `azurerm_recovery_services_vault`
+*   `role_assignment`
+    * `azurerm_role_assignment`
 *   `search`
     * `azurerm_search_service`
 *   `servicebus`

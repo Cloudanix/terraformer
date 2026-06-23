@@ -422,6 +422,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"recovery_services":                    &RecoveryServicesGenerator{},
 		"redis":                                &RedisGenerator{},
 		"resource_group":                       &ResourceGroupGenerator{},
+		"role_assignment":                      &RoleAssignmentGenerator{},
 		"route_table":                          &RouteTableGenerator{},
 		"scaleset":                             &ScaleSetGenerator{},
 		"search":                               &SearchGenerator{},
