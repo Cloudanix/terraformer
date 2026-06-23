@@ -55,4 +55,8 @@ func TestP3ServicesRegistered(t *testing.T) {
 	assertRegistered(t, "virtual_desktop", &VirtualDesktopGenerator{})
 	assertRegistered(t, "kubernetes_fleet", &KubernetesFleetGenerator{})
 	assertRegistered(t, "device_update", &DeviceUpdateGenerator{})
+	assertRegistered(t, "arc_kubernetes", &ArcKubernetesGenerator{})
+	assertRegistered(t, "database_migration", &DatabaseMigrationGenerator{})
+	assertRegistered(t, "dev_test_lab", &DevTestLabGenerator{})
+	assertRegistered(t, "lab_service", &LabServiceGenerator{})
 }

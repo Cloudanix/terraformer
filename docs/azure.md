@@ -155,10 +155,14 @@ export ARM_USE_ADAL=true
     * `azurerm_sql_firewall_rule`
     * `azurerm_sql_server`
     * `azurerm_sql_virtual_network_rule`
+*   `database_migration`
+    * `azurerm_database_migration_service`
 *   `databricks`
     * `azurerm_databricks_workspace`
 *   `device_update`
     * `azurerm_iothub_device_update_account`
+*   `dev_test_lab`
+    * `azurerm_dev_test_lab`
 *   `disk`
     * `azurerm_managed_disk`
 *   `dns`
@@ -190,6 +194,8 @@ export ARM_USE_ADAL=true
     * `azurerm_kubernetes_cluster_node_pool`
 *   `application_insights`
     * `azurerm_application_insights`
+*   `arc_kubernetes`
+    * `azurerm_arc_kubernetes_cluster`
 *   `arc`
     * `azurerm_arc_machine`
 *   `attestation`
@@ -295,6 +301,8 @@ export ARM_USE_ADAL=true
 *   `lighthouse`
     * `azurerm_lighthouse_assignment`
     * `azurerm_lighthouse_definition`
+*   `lab_service`
+    * `azurerm_lab_service_lab`
 *   `load_balancer`
     * `azurerm_lb`
 *   `log_analytics`
