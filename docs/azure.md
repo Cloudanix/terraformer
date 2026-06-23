@@ -232,6 +232,7 @@ export ARM_USE_ADAL=true
     * `azurerm_virtual_network_gateway`
     * `azurerm_local_network_gateway`
     * `azurerm_virtual_network_gateway_connection`
+    * `azurerm_virtual_network_peering`
 
 ## Notes
 

@@ -92,6 +92,10 @@ func (g *VirtualNetworkGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.initVirtualNetworkPeerings(); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -173,6 +177,62 @@ func (g *VirtualNetworkGenerator) initVirtualNetworkGatewayConnections() error {
 		}
 	}
 	return nil
+}
+
+// initVirtualNetworkPeerings enumerates azurerm_virtual_network_peering via
+// Track 2. Peerings are nested under each virtual network, so this lists the
+// VNets per resource group first, then the peerings per VNet. RG-scoped.
+func (g *VirtualNetworkGenerator) initVirtualNetworkPeerings() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	vnetClient, err := armnetwork.NewVirtualNetworksClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	peerClient, err := armnetwork.NewVirtualNetworkPeeringsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	for _, rg := range g.resourceGroups() {
+		vnetNames, err := g.listVNetNames(vnetClient, rg)
+		if err != nil {
+			return err
+		}
+		for _, vnet := range vnetNames {
+			pager := peerClient.NewListPager(rg, vnet, nil)
+			if err := appendFromPager(&g.AzureService, pager,
+				func(p armnetwork.VirtualNetworkPeeringsClientListResponse) []*armnetwork.VirtualNetworkPeering {
+					return p.Value
+				},
+				func(i *armnetwork.VirtualNetworkPeering) string { return valueOrEmpty(i.ID) },
+				func(i *armnetwork.VirtualNetworkPeering) string { return valueOrEmpty(i.Name) },
+				"azurerm_virtual_network_peering"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// listVNetNames returns the virtual-network names in a resource group (Track 2),
+// used to scope nested sub-resource enumeration (peerings).
+func (g *VirtualNetworkGenerator) listVNetNames(client *armnetwork.VirtualNetworksClient, rg string) ([]string, error) {
+	var names []string
+	pager := client.NewListPager(rg, nil)
+	for pager.More() {
+		page, err := pager.NextPage(context.TODO())
+		if err != nil {
+			return nil, err
+		}
+		for _, v := range page.Value {
+			if v != nil && valueOrEmpty(v.Name) != "" {
+				names = append(names, *v.Name)
+			}
+		}
+	}
+	return names, nil
 }
 
 // NOTE on Virtual Networks and Subnet's:
