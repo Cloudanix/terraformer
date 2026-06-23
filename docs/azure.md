@@ -180,6 +180,8 @@ export ARM_USE_ADAL=true
     * `azurerm_application_insights`
 *   `automation`
     * `azurerm_automation_account`
+*   `apim`
+    * `azurerm_api_management`
 *   `bastion`
     * `azurerm_bastion_host`
 *   `cdn`
@@ -187,6 +189,16 @@ export ARM_USE_ADAL=true
     * `azurerm_cdn_profile`
 *   `cognitive`
     * `azurerm_cognitive_account`
+*   `container_app`
+    * `azurerm_container_app`
+*   `iothub`
+    * `azurerm_iothub`
+*   `kusto`
+    * `azurerm_kusto_cluster`
+*   `management_group`
+    * `azurerm_management_group`
+*   `stream_analytics`
+    * `azurerm_stream_analytics_job`
 *   `monitor`
     * `azurerm_monitor_action_group`
     * `azurerm_monitor_activity_log_alert`
