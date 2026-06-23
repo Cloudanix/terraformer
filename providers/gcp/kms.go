@@ -80,6 +80,17 @@ func (g *KmsGenerator) createKmsKeyResources(ctx context.Context, keyRingName st
 				kmsAdditionalFields,
 			))
 			resources = append(resources, g.createKmsKeyVersionResources(ctx, key.Name, kmsService)...)
+			if policy, perr := kmsService.Projects.Locations.KeyRings.CryptoKeys.GetIamPolicy(key.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							key.Name+" "+b.Role+" "+m, tm[len(tm)-1]+"_"+b.Role+"_"+m,
+							"google_kms_crypto_key_iam_member", g.ProviderName,
+							map[string]string{"crypto_key_id": key.Name, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string)},
+							kmsAllowEmptyValues, kmsAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
