@@ -120,6 +120,35 @@ Documented classes in [no-list-api.md](no-list-api.md):
 - evidently feature/launch/segment — DROPPED (SDK marks service AWS-EOL).
 - codecatalyst — SKIPPED (not cleanly importable).
 
+## Pass 3 — backlog implemented (2026-06-23)
+
+The "addable now" backlog was built out. Emitted `aws_*` types **1346 → 1375**.
+One commit per service file:
+
+| Commit | Resources added |
+|---|---|
+| cloudfront | vpc_origin, anycast_ip_list, distribution_tenant, connection_group, trust_store |
+| logs | log_anomaly_detector, log_delivery, log_delivery_destination, log_delivery_source |
+| cloudwatch | contributor_insight_rule |
+| bedrock/bedrockagent/appsync/athena | bedrock_inference_profile (application-only), bedrockagent_flow, bedrockagent_prompt, appsync_api, athena_capacity_reservation |
+| opensearch/memorydb/timestreaminfluxdb/vpclattice | opensearch_application, memorydb_multi_region_cluster, timestreaminfluxdb_db_cluster, vpclattice_resource_gateway |
+| lakeformation/rds/redshift | lakeformation_lf_tag_expression, rds_shard_group, redshift_integration |
+| sagemaker/transfer/glue/securityhub | sagemaker_model_card, sagemaker_algorithm, transfer_web_app, glue_catalog, securityhub_automation_rule_v2 |
+
+**Dropped during build (with reason):**
+- `route53domains_domain` — would double-emit domains already covered by
+  `aws_route53domains_registered_domain` (same `ListDomains`).
+- `sagemaker_mlflow_app` — no matching list op (`ListMlflowTrackingServers` is a
+  different resource).
+- `opensearchserverless_collection_group` — list op for the *group* not confirmed.
+- `rds_custom_db_engine_version`, `elastictranscoder_preset` — deferred (need a
+  customer-owned/system filter to avoid emitting AWS-managed entries).
+- Per-parent leaves (appsync_channel_namespace, wafv2_api_key, workmail_domain,
+  transfer_host_key) — deferred; need a parent loop, lower value.
+
+All builds + `TestServiceScope`/`TestEveryServiceDocumented`/
+`TestAllServicesInstantiable` green; gofmt clean.
+
 ## Recommendation
 
 The ~30 "addable now" rows are the real post-upgrade backlog: clean
