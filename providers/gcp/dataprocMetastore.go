@@ -98,6 +98,17 @@ func (g *DataprocMetastoreGenerator) InitResources() error {
 				o.Name, name, "google_dataproc_metastore_federation", g.ProviderName,
 				map[string]string{"federation_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
 				dataprocMetastoreAllowEmptyValues, dataprocMetastoreAdditionalFields))
+			if policy, perr := metastoreService.Projects.Locations.Federations.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_dataproc_metastore_federation_iam_member", g.ProviderName,
+							map[string]string{"federation_id": name, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+							dataprocMetastoreAllowEmptyValues, dataprocMetastoreAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
