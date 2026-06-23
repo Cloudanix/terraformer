@@ -253,6 +253,8 @@ List of supported GCP services:
 *   `networkSecurity`
     * `google_network_security_server_tls_policy`
     * `google_network_security_client_tls_policy`
+    * `google_network_security_address_group`
+    * `google_network_security_gateway_security_policy`
 *   `networkServices`
     * `google_network_services_mesh`
     * `google_network_services_gateway`

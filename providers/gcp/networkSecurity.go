@@ -83,5 +83,34 @@ func (g *NetworkSecurityGenerator) InitResources() error {
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
 	g.Resources = append(g.Resources, g.createServerTLSResources(ctx, nsService.Projects.Locations.ServerTlsPolicies.List(parent))...)
 	g.Resources = append(g.Resources, g.createClientTLSResources(ctx, nsService.Projects.Locations.ClientTlsPolicies.List(parent))...)
+
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
+	if err := nsService.Projects.Locations.AddressGroups.List(parent).Pages(ctx, func(p *networksecurity.ListAddressGroupsResponse) error {
+		for _, o := range p.AddressGroups {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_address_group", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := nsService.Projects.Locations.GatewaySecurityPolicies.List(parent).Pages(ctx, func(p *networksecurity.ListGatewaySecurityPoliciesResponse) error {
+		for _, o := range p.GatewaySecurityPolicies {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_network_security_gateway_security_policy", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				networkSecurityAllowEmptyValues, networkSecurityAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
