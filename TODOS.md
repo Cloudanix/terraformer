@@ -4,7 +4,20 @@ Deferred work captured during reviews. Each entry: What / Why / Context / Depend
 
 ---
 
-## T4 — Add a fixed-region scope and the globalaccelerator service
+## T4 — Add a fixed-region scope and the globalaccelerator service — DONE
+
+> Resolved: `globalaccelerator` ships as `scopeGlobal` (registered + generator in
+> `providers/aws/globalaccelerator.go`), emitting accelerator / listener /
+> endpoint_group / custom-routing-* / cross_account_attachment. Its control plane
+> only answers in us-west-2, so the generator pins `config.Region = "us-west-2"`
+> after the aws-global pass hands it region "aws-global" (value copy — does not
+> touch the per-region config cache). The general `scopeFixed` machinery below is
+> **intentionally not built** (YAGNI): the SDK's partition-global endpoint ruleset
+> already routes the aws-global pass for shield (us-east-1), networkmanager,
+> route53, and globalaccelerator, and the per-generator region pin covers the one
+> service whose single-region API needed certainty. Build `scopeFixed` only if a
+> future service's API is single-region AND the aws-global pass demonstrably
+> fails for it — none does today.
 
 **What:** Support AWS services whose control plane lives in a single fixed
 region that is neither us-east-1 nor "global" — starting with

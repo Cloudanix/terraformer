@@ -36,6 +36,11 @@ func (g *GlobalAcceleratorGenerator) InitResources() error {
 	if e != nil {
 		return e
 	}
+	// Global Accelerator's control plane only answers in us-west-2. The aws-global
+	// pass hands us region "aws-global"; pin us-west-2 explicitly so the call signs
+	// for and reaches the right endpoint regardless of SDK global-region resolution.
+	// config is a value copy, so this does not mutate the per-region config cache.
+	config.Region = "us-west-2"
 	svc := globalaccelerator.NewFromConfig(config)
 	ctx := context.TODO()
 
