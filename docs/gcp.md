@@ -244,6 +244,8 @@ List of supported GCP services:
 *   `serviceDirectory`
     * `google_service_directory_namespace`
 *   `spanner`
+*   `storageTransfer`
+    * `google_storage_transfer_job`
     * `google_spanner_instance`
     * `google_spanner_database`
 *   `sslCertificates`
