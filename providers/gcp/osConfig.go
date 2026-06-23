@@ -43,13 +43,27 @@ func (g *OsConfigGenerator) InitResources() error {
 	location := g.GetArgs()["region"].(compute.Region).Name
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + location
 
+	project := g.GetArgs()["project"].(string)
 	if err := svc.Projects.Locations.OsPolicyAssignments.List(parent).Pages(ctx, func(page *osconfig.ListOSPolicyAssignmentsResponse) error {
 		for _, obj := range page.OsPolicyAssignments {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_os_config_os_policy_assignment", g.ProviderName,
-				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				map[string]string{"name": name, "project": project, "location": location},
+				osConfigAllowEmptyValues, osConfigAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := svc.Projects.PatchDeployments.List("projects/"+project).Pages(ctx, func(page *osconfig.ListPatchDeploymentsResponse) error {
+		for _, obj := range page.PatchDeployments {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_os_config_patch_deployment", g.ProviderName,
+				map[string]string{"patch_deployment_id": name, "project": project},
 				osConfigAllowEmptyValues, osConfigAdditionalFields))
 		}
 		return nil
