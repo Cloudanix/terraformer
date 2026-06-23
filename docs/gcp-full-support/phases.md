@@ -28,12 +28,28 @@ Done & committed (build + vet + gofmt clean; one resource/service per commit):
   - P4/long-tail: serviceDirectory, memcache, privateca, clouddeploy, dialogflow,
     gkeHub, vmwareengine, workstations, netapp
 
-Coverage 88 → 149 emitted `google_*` types. GA gap 1177 → 1130.
+Coverage 88 → 167 emitted `google_*` types. GA gap 1177 → 1112.
 
-Each new service emits ONE top-level resource (the primary list-able collection).
-Sub-resources (e.g. spanner_database, vertex_ai_dataset, dataplex_zone,
-healthcare_*_store, privateca_certificate_authority) are follow-up expansions
-of these services, not yet added.
+Additional new services (P4 long-tail, regional list pattern): apphub,
+parallelstore, networkServices, dataprocMetastore, managedKafka, oracleDatabase,
+documentAI, biglake, backupdr.
+
+Sub-resource expansions added (parent-walk over already-enumerated parents,
+demonstrating the pattern for the rest of the long tail):
+- spanner → google_spanner_database (walk instances)
+- bigtable → google_bigtable_table (walk instances)
+- privateca → google_privateca_certificate_authority (walk CA pools)
+- dataplex → google_dataplex_zone (walk lakes)
+- vertexAI → google_vertex_ai_dataset; cloudRun → google_cloud_run_v2_job;
+  dataProc → google_dataproc_autoscaling_policy; dns → google_dns_policy;
+  gcs → google_storage_hmac_key; pubsub → google_pubsub_schema
+
+~46 new services + ~10 sub-resource expansions + 28 compute resources this
+session, ~92 commits, each build/vet/gofmt/test-clean.
+
+Remaining sub-resources (healthcare_*_store, kms_crypto_key_version,
+sql_user, bigquery_routine, more dataplex/privateca/spanner children) follow the
+SAME parent-walk pattern — mechanical follow-ups.
 
 Deferred (need special handling, not the simple project/region list pattern):
 - Org/folder-scoped: securityCenter (scc), accessContextManager, orgPolicy,
