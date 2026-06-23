@@ -265,8 +265,12 @@ export ARM_USE_ADAL=true
     * `azurerm_machine_learning_workspace`
 *   `managed_identity`
     * `azurerm_user_assigned_identity`
+*   `storage_mover`
+    * `azurerm_storage_mover`
 *   `traffic_manager`
     * `azurerm_traffic_manager_profile`
+*   `vmware`
+    * `azurerm_vmware_private_cloud`
 *   `virtual_wan`
     * `azurerm_virtual_hub`
     * `azurerm_virtual_wan`
@@ -283,6 +287,8 @@ export ARM_USE_ADAL=true
     * `azurerm_maps_account`
 *   `netapp`
     * `azurerm_netapp_account`
+*   `nginx`
+    * `azurerm_nginx_deployment`
 *   `notification_hub`
     * `azurerm_notification_hub_namespace`
 *   `relay`
