@@ -118,6 +118,32 @@ func (g *NetappGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+	if err := netappService.Projects.Locations.BackupPolicies.List(parent).Pages(ctx, func(p *netapp.ListBackupPoliciesResponse) error {
+		for _, o := range p.BackupPolicies {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_netapp_backup_policy", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				netappAllowEmptyValues, netappAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := netappService.Projects.Locations.HostGroups.List(parent).Pages(ctx, func(p *netapp.ListHostGroupsResponse) error {
+		for _, o := range p.HostGroups {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_netapp_host_group", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				netappAllowEmptyValues, netappAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
