@@ -196,7 +196,23 @@ func (g *HealthcareGenerator) InitResources() error {
 				}
 			}
 		}
-		g.Resources = append(g.Resources, g.createHl7V2StoresResources(ctx, healthcareService.Projects.Locations.Datasets.Hl7V2Stores, dataset)...)
+		hl7Res := g.createHl7V2StoresResources(ctx, healthcareService.Projects.Locations.Datasets.Hl7V2Stores, dataset)
+		g.Resources = append(g.Resources, hl7Res...)
+		for _, r := range hl7Res {
+			res := r.InstanceState.ID
+			if policy, perr := healthcareService.Projects.Locations.Datasets.Hl7V2Stores.GetIamPolicy(res).Do(); perr == nil {
+				short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+							"google_healthcare_hl7_v2_store_iam_member", g.ProviderName,
+							map[string]string{"hl7_v2_store_id": res, "role": b.Role, "member": m, "project": project},
+							healthcareAllowEmptyValues, healthcareAdditionalFields))
+					}
+				}
+			}
+		}
 		if err := healthcareService.Projects.Locations.Datasets.ConsentStores.List(dataset).Pages(ctx, func(page *healthcare.ListConsentStoresResponse) error {
 			for _, obj := range page.ConsentStores {
 				ct := strings.Split(obj.Name, "/")
@@ -206,6 +222,17 @@ func (g *HealthcareGenerator) InitResources() error {
 					map[string]string{"name": name, "dataset": dataset, "project": project},
 					healthcareAllowEmptyValues, healthcareAdditionalFields,
 				))
+				if policy, perr := healthcareService.Projects.Locations.Datasets.ConsentStores.GetIamPolicy(obj.Name).Do(); perr == nil {
+					for _, b := range policy.Bindings {
+						for _, m := range b.Members {
+							g.Resources = append(g.Resources, terraformutils.NewResource(
+								obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+								"google_healthcare_consent_store_iam_member", g.ProviderName,
+								map[string]string{"consent_store_id": obj.Name, "dataset": dataset, "role": b.Role, "member": m, "project": project},
+								healthcareAllowEmptyValues, healthcareAdditionalFields))
+						}
+					}
+				}
 			}
 			return nil
 		}); err != nil {
