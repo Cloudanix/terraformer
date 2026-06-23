@@ -82,6 +82,22 @@ func (g *CertificateManagerGenerator) InitResources() error {
 
 	trustList := certificateManagerService.Projects.Locations.TrustConfigs.List(parent)
 	g.Resources = append(g.Resources, g.createTrustConfigResources(ctx, trustList)...)
+
+	cicList := certificateManagerService.Projects.Locations.CertificateIssuanceConfigs.List(parent)
+	if err := cicList.Pages(ctx, func(page *certificatemanager.ListCertificateIssuanceConfigsResponse) error {
+		for _, obj := range page.CertificateIssuanceConfigs {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_certificate_manager_certificate_issuance_config", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				certificateManagerAllowEmptyValues, certificateManagerAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 

@@ -81,6 +81,7 @@ List of supported GCP services:
     * `google_certificate_manager_certificate_map`
     * `google_certificate_manager_dns_authorization`
     * `google_certificate_manager_trust_config`
+    * `google_certificate_manager_certificate_issuance_config`
 *   `cloudFunctions`
     * `google_cloudfunctions_function`
     * `google_cloudfunctions2_function`
