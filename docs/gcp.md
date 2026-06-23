@@ -281,6 +281,8 @@ List of supported GCP services:
     * `google_network_connectivity_regional_endpoint`
     * `google_network_connectivity_internal_range`
     * `google_network_connectivity_policy_based_route`
+*   `networkManagement`
+    * `google_network_management_connectivity_test`
 *   `networkSecurity`
     * `google_network_security_server_tls_policy`
     * `google_network_security_client_tls_policy`
