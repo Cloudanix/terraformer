@@ -31,6 +31,8 @@ List of supported GCP services:
     * `google_compute_autoscaler`
 *   `artifactRegistry`
     * `google_artifact_registry_repository`
+*   `binaryAuthorization`
+    * `google_binary_authorization_attestor`
 *   `backendBuckets`
     * `google_compute_backend_bucket`
 *   `backendServices`
