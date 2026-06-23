@@ -25,6 +25,8 @@ import (
 
 	monitoring "cloud.google.com/go/monitoring/apiv3/v2"
 	monitoringpb "cloud.google.com/go/monitoring/apiv3/v2/monitoringpb"
+	dashboard "cloud.google.com/go/monitoring/dashboard/apiv1"
+	dashboardpb "cloud.google.com/go/monitoring/dashboard/apiv1/dashboardpb"
 )
 
 var monitoringAllowEmptyValues = []string{}
@@ -203,7 +205,34 @@ func (g *MonitoringGenerator) InitResources() error {
 	}
 
 	g.loadServices(ctx, project)
+	g.loadDashboards(ctx, project)
 	return nil
+}
+
+func (g *MonitoringGenerator) loadDashboards(ctx context.Context, project string) {
+	client, err := dashboard.NewDashboardsClient(ctx)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	defer client.Close()
+	it := client.ListDashboards(ctx, &dashboardpb.ListDashboardsRequest{Parent: "projects/" + project})
+	for {
+		d, derr := it.Next()
+		if derr == iterator.Done {
+			break
+		}
+		if derr != nil {
+			log.Println("error with dashboard:", derr)
+			break
+		}
+		t := strings.Split(d.Name, "/")
+		name := t[len(t)-1]
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			d.Name, name, "google_monitoring_dashboard", g.ProviderName,
+			map[string]string{"project": project},
+			monitoringAllowEmptyValues, monitoringAdditionalFields))
+	}
 }
 
 func (g *MonitoringGenerator) loadServices(ctx context.Context, project string) {
