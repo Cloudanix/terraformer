@@ -157,6 +157,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["workstations"] = &GCPFacade{service: &WorkstationsGenerator{}}
 	services["netapp"] = &GCPFacade{service: &NetappGenerator{}}
 	services["documentAI"] = &GCPFacade{service: &DocumentAIGenerator{}}
+	services["biglake"] = &GCPFacade{service: &BiglakeGenerator{}}
 	return services
 }
 
