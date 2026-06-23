@@ -70,9 +70,27 @@ func (g *SecureSourceManagerGenerator) InitResources() error {
 		return err
 	}
 
-	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
+	parent := "projects/" + project + "/locations/" + location
 	instancesList := ssmService.Projects.Locations.Instances.List(parent)
-	g.Resources = append(g.Resources, g.createResources(ctx, instancesList)...)
+	instanceRes := g.createResources(ctx, instancesList)
+	g.Resources = append(g.Resources, instanceRes...)
+	for _, r := range instanceRes {
+		res := r.InstanceState.ID
+		short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+		if policy, perr := ssmService.Projects.Locations.Instances.GetIamPolicy(res).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_secure_source_manager_instance_iam_member", g.ProviderName,
+						map[string]string{"instance_id": short, "role": b.Role, "member": m, "project": project, "location": location},
+						secureSourceManagerAllowEmptyValues, secureSourceManagerAdditionalFields))
+				}
+			}
+		}
+	}
 
 	if err := ssmService.Projects.Locations.Repositories.List(parent).Pages(ctx, func(p *securesourcemanager.ListRepositoriesResponse) error {
 		for _, o := range p.Repositories {
