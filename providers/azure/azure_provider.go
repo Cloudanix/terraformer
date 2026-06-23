@@ -429,6 +429,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"traffic_manager":                      &TrafficManagerGenerator{},
 		"virtual_machine":                      &VirtualMachineGenerator{},
 		"virtual_network":                      &VirtualNetworkGenerator{},
+		"virtual_wan":                          &VirtualWanGenerator{},
 	}
 }
 

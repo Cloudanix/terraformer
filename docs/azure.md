@@ -184,6 +184,9 @@ export ARM_USE_ADAL=true
     * `azurerm_user_assigned_identity`
 *   `traffic_manager`
     * `azurerm_traffic_manager_profile`
+*   `virtual_wan`
+    * `azurerm_virtual_hub`
+    * `azurerm_virtual_wan`
     * `azurerm_lb_backend_address_pool`
     * `azurerm_lb_nat_rule`
     * `azurerm_lb_probe`
