@@ -227,6 +227,8 @@ export ARM_USE_ADAL=true
     * `azurerm_hdinsight_storm_cluster`
 *   `healthcare`
     * `azurerm_healthcare_service`
+*   `hpc_cache`
+    * `azurerm_hpc_cache`
 *   `load_test`
     * `azurerm_load_test`
 *   `private_dns_resolver`
