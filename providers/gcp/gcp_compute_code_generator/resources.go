@@ -264,4 +264,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionHealthSources": basicGCPResource{
 		terraformName: "google_compute_region_health_source",
 	},
+	"previewFeatures": basicGCPResource{
+		terraformName: "google_compute_preview_feature",
+	},
 }

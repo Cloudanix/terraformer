@@ -54,6 +54,7 @@ var ComputeServices = map[string]terraformutils.ServiceGenerator{
 	"nodeGroups":                      &GCPFacade{service: &NodeGroupsGenerator{}},
 	"nodeTemplates":                   &GCPFacade{service: &NodeTemplatesGenerator{}},
 	"packetMirrorings":                &GCPFacade{service: &PacketMirroringsGenerator{}},
+	"previewFeatures":                 &GCPFacade{service: &PreviewFeaturesGenerator{}},
 	"publicAdvertisedPrefixes":        &GCPFacade{service: &PublicAdvertisedPrefixesGenerator{}},
 	"publicDelegatedPrefixes":         &GCPFacade{service: &PublicDelegatedPrefixesGenerator{}},
 	"regionAutoscalers":               &GCPFacade{service: &RegionAutoscalersGenerator{}},
