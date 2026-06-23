@@ -221,6 +221,7 @@ List of supported GCP services:
     * `google_compute_health_check`
 *   `healthcare`
     * `google_healthcare_dataset`
+    * `google_healthcare_dataset_iam_member`
     * `google_healthcare_fhir_store`
     * `google_healthcare_dicom_store`
     * `google_healthcare_hl7_v2_store`

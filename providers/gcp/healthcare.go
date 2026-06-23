@@ -150,6 +150,18 @@ func (g *HealthcareGenerator) InitResources() error {
 	}
 
 	for _, dataset := range datasetNames {
+		if policy, perr := healthcareService.Projects.Locations.Datasets.GetIamPolicy(dataset).Do(); perr == nil {
+			dn := strings.Split(dataset, "/")
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						dataset+" "+b.Role+" "+m, dn[len(dn)-1]+"_"+b.Role+"_"+m,
+						"google_healthcare_dataset_iam_member", g.ProviderName,
+						map[string]string{"dataset_id": dataset, "role": b.Role, "member": m, "project": project},
+						healthcareAllowEmptyValues, healthcareAdditionalFields))
+				}
+			}
+		}
 		g.Resources = append(g.Resources, g.createFhirStoresResources(ctx, healthcareService.Projects.Locations.Datasets.FhirStores, dataset)...)
 		g.Resources = append(g.Resources, g.createDicomStoresResources(ctx, healthcareService.Projects.Locations.Datasets.DicomStores, dataset)...)
 		g.Resources = append(g.Resources, g.createHl7V2StoresResources(ctx, healthcareService.Projects.Locations.Datasets.Hl7V2Stores, dataset)...)
