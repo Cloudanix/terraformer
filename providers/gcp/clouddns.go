@@ -92,6 +92,31 @@ func (g CloudDNSGenerator) createRecordsResources(ctx context.Context, svc *dns.
 
 // Generate TerraformResources from GCP API,
 // create terraform resource for each zone + each record
+func (g CloudDNSGenerator) createPoliciesResources(ctx context.Context, svc *dns.Service, project string) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	policiesListCall := svc.Policies.List(project)
+	if err := policiesListCall.Pages(ctx, func(page *dns.PoliciesListResponse) error {
+		for _, obj := range page.Policies {
+			resources = append(resources, terraformutils.NewResource(
+				project+"/"+obj.Name,
+				obj.Name,
+				"google_dns_policy",
+				g.ProviderName,
+				map[string]string{
+					"name":    obj.Name,
+					"project": project,
+				},
+				[]string{""},
+				map[string]interface{}{},
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
 func (g *CloudDNSGenerator) InitResources() error {
 	project := g.GetArgs()["project"].(string)
 	ctx := context.Background()
@@ -101,6 +126,7 @@ func (g *CloudDNSGenerator) InitResources() error {
 	}
 
 	g.Resources = g.createZonesResources(ctx, svc, project)
+	g.Resources = append(g.Resources, g.createPoliciesResources(ctx, svc, project)...)
 	return nil
 }
 
