@@ -260,6 +260,7 @@ export ARM_USE_ADAL=true
     * `azurerm_virtual_wan`
     * `azurerm_lb_backend_address_pool`
     * `azurerm_lb_nat_rule`
+    * `azurerm_lb_outbound_rule`
     * `azurerm_lb_probe`
     * `azurerm_lb_rule`
 *   `mssql`
