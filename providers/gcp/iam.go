@@ -169,6 +169,33 @@ func (g *IamGenerator) createWorkloadIdentityPoolResources(ctx context.Context, 
 				}
 			}
 
+			// Walk the pool for its namespaces (+ managed identities).
+			if nerr := iamService.Projects.Locations.WorkloadIdentityPools.Namespaces.List(pool.Name).Pages(ctx, func(np *iamv1.ListWorkloadIdentityPoolNamespacesResponse) error {
+				for _, ns := range np.WorkloadIdentityPoolNamespaces {
+					nt := strings.Split(ns.Name, "/")
+					nsID := nt[len(nt)-1]
+					resources = append(resources, terraformutils.NewResource(
+						ns.Name, id+"_"+nsID, "google_iam_workload_identity_pool_namespace", g.ProviderName,
+						map[string]string{"workload_identity_pool_id": id, "workload_identity_pool_namespace_id": nsID, "project": project},
+						IamAllowEmptyValues, IamAdditionalFields))
+					if merr := iamService.Projects.Locations.WorkloadIdentityPools.Namespaces.ManagedIdentities.List(ns.Name).Pages(ctx, func(mp *iamv1.ListWorkloadIdentityPoolManagedIdentitiesResponse) error {
+						for _, mi := range mp.WorkloadIdentityPoolManagedIdentities {
+							mt := strings.Split(mi.Name, "/")
+							resources = append(resources, terraformutils.NewResource(
+								mi.Name, nsID+"_"+mt[len(mt)-1], "google_iam_workload_identity_pool_managed_identity", g.ProviderName,
+								map[string]string{"workload_identity_pool_id": id, "workload_identity_pool_namespace_id": nsID, "workload_identity_pool_managed_identity_id": mt[len(mt)-1], "project": project},
+								IamAllowEmptyValues, IamAdditionalFields))
+						}
+						return nil
+					}); merr != nil {
+						log.Println(merr)
+					}
+				}
+				return nil
+			}); nerr != nil {
+				log.Println(nerr)
+			}
+
 			// Walk the pool for its providers.
 			provList := iamService.Projects.Locations.WorkloadIdentityPools.Providers.List(pool.Name)
 			if perr := provList.Pages(ctx, func(pp *iamv1.ListWorkloadIdentityPoolProvidersResponse) error {
