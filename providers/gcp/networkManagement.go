@@ -42,7 +42,7 @@ func (g *NetworkManagementGenerator) InitResources() error {
 	}
 	project := g.GetArgs()["project"].(string)
 
-	if err := svc.Projects.Locations.Global.ConnectivityTests.List("projects/" + project + "/locations/global").Pages(ctx, func(page *networkmanagement.ListConnectivityTestsResponse) error {
+	if err := svc.Projects.Locations.Global.ConnectivityTests.List("projects/"+project+"/locations/global").Pages(ctx, func(page *networkmanagement.ListConnectivityTestsResponse) error {
 		for _, obj := range page.Resources {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
