@@ -96,5 +96,22 @@ func (g *VpcGenerator) InitResources() error {
 				id, id, "aws_vpc_network_performance_metric_subscription", "aws", VpcAllowEmptyValues))
 		}
 	}
+
+	// Region-level VPC Block Public Access — only when actually turned on
+	// (default is "off", which is not managed state). Imported by region.
+	if opt, err := svc.DescribeVpcBlockPublicAccessOptions(awsContext(),
+		&ec2.DescribeVpcBlockPublicAccessOptionsInput{}); err == nil &&
+		opt.VpcBlockPublicAccessOptions != nil &&
+		opt.VpcBlockPublicAccessOptions.InternetGatewayBlockMode != "" &&
+		opt.VpcBlockPublicAccessOptions.InternetGatewayBlockMode != "off" {
+		region := StringValue(opt.VpcBlockPublicAccessOptions.AwsRegion)
+		if region == "" {
+			region = config.Region
+		}
+		if region != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				region, region, "aws_vpc_block_public_access_options", "aws", VpcAllowEmptyValues))
+		}
+	}
 	return nil
 }
