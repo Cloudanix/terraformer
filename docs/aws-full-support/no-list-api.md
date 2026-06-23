@@ -28,6 +28,11 @@ resource to import into, so a generator would emit un-refreshable HCL:
 ## AWS-deprecated services
 - **iotanalytics** — AWS has deprecated the service ("no longer available for
   use"); the SDK package itself is marked deprecated. Removed from the registry.
+- **evidently** (CloudWatch Evidently) — AWS EOL'd the service; the vendored
+  `aws-sdk-go-v2/service/evidently` is marked deprecated ("no longer available
+  for use"). `aws_evidently_project` is still registered (historical), but the
+  `feature`/`launch`/`segment` sub-resources were deliberately NOT added — no
+  point enumerating a dead service.
 
 ## Structurally not independently listable (the bulk of current missing-resources.txt)
 Per the §3 diff (`missing-resources.txt`, currently **240** entries after the
@@ -66,27 +71,23 @@ non-conflicting buildable tail of plan §9 has been ground down to empty —
 every remaining entry maps to one of these documented exclusion classes.
 
 ## SDK not vendored in the pinned aws-sdk-go-v2 module set
-Generators cannot be written against SDKs absent from `go.mod`'s pinned
-versions, so these provider resources are not buildable in this tree until the
-dependency is added (deliberately out of scope to avoid an unrequested dep bump):
-- **cloudwatchevidently** (`aws_evidently_feature`, `aws_evidently_launch`, `aws_evidently_segment`)
-- **lexmodelbuildingservice** v1 (`aws_lex_bot`, `aws_lex_intent`, `aws_lex_slot_type`, `aws_lex_bot_alias`) — note the v2 `aws_lexv2models_*` set IS built
-- **devopsguru** (`aws_devopsguru_*` — notification_channel, resource_collection, service_integration, event_sources_config)
-- **drs** (`aws_drs_replication_configuration_template`)
+The aws-sdk-go-v2 upgrade (84 service modules to latest) vendored most of what
+this section used to list, and those generators are now BUILT: **devopsguru**,
+**paymentcryptography** (key + key_alias), **computeoptimizer** (enrollment_status
++ recommendation_preferences), **costoptimizationhub** (enrollment_status +
+preferences), **customerprofiles** (domain), and **drs**
+(`aws_drs_replication_configuration_template`, dep added via the curl→file-proxy
+workflow). The SDK-operation gaps formerly noted here are also built:
+`aws_ecr_repository_creation_template`, `aws_eks_access_entry` /
+`aws_eks_access_policy_association`, `aws_lambda_function_recursion_config`,
+`aws_dynamodb_resource_policy`, `aws_codebuild_fleet`.
+
+Still not buildable against the pinned SDK set:
+- **lexmodelbuildingservice** v1 (`aws_lex_bot`, `aws_lex_intent`, `aws_lex_slot_type`, `aws_lex_bot_alias`) — v1 API, superseded; the v2 `aws_lexv2models_*` set IS built.
 - **eventbridge** `ListEndpoints` (`aws_cloudwatch_event_endpoint`) — the pinned
-  `cloudwatchevents` v1 SDK has no global-endpoints API
-- **paymentcryptography** (`aws_paymentcryptography_key_alias`)
-- **codecatalyst** (`aws_codecatalyst_project`, `aws_codecatalyst_dev_environment`, `aws_codecatalyst_source_repository`)
-- **computeoptimizer** (`aws_computeoptimizer_enrollment_status`, `aws_computeoptimizer_recommendation_preferences`)
-- **costoptimizationhub** (`aws_costoptimizationhub_enrollment_status`, `aws_costoptimizationhub_preferences`)
-- **simpledb** (`aws_simpledb_domain`), **worklink** (`aws_worklink_fleet`, `aws_worklink_website_certificate_authority_association`)
-- **customerprofiles** (`aws_customerprofiles_profile` — data-plane), **dataexchange** revisions (data-plane)
-- Operations absent from pinned SDKs: `aws_ecr_repository_creation_template`
-  (ECR `ListRepositoryCreationTemplates`), `aws_eks_access_entry` /
-  `aws_eks_access_policy_association` (`ListAccessEntries`),
-  `aws_lambda_function_recursion_config` (`GetFunctionRecursionConfig`),
-  `aws_dynamodb_resource_policy` (`GetResourcePolicy`),
-  `aws_codebuild_fleet` (`ListFleets`)
+  `cloudwatchevents` v1 SDK has no global-endpoints API.
+- **simpledb** (`aws_simpledb_domain`), **worklink** — AWS-deprecated, SDK absent.
+- **customerprofiles** (`aws_customerprofiles_profile` — data-plane), **dataexchange** revisions (data-plane).
 
 ## No import / data-plane object resources (not reverse-importable)
 Provider resources that either have no `terraform import` support or represent
@@ -98,6 +99,14 @@ cannot reverse them: `aws_s3_object`, `aws_s3_bucket_object`, `aws_s3_object_cop
 `aws_iot_indexing_configuration` / `aws_iot_event_configurations` (no import),
 and the dx hosted-VIF / accepter / confirmation / proposal handshake resources
 (the *accepting*/*requesting* side of a two-account flow, with no list API).
+
+**codecatalyst** (SDK now vendorable, but not cleanly reverse-importable):
+`aws_codecatalyst_dev_environment` has no `terraform import` support;
+`aws_codecatalyst_project` and `aws_codecatalyst_source_repository` import by a
+bare name id, yet are space-/project-scoped (`space_name` / `project_name` are
+required attributes absent from the import id) — so a generated import would not
+round-trip on refresh. Skipped deliberately; enumeration would be
+ListSpaces→ListProjects→ListSourceRepositories.
 
 Specifically excluded (verified individually against the SDK):
 - `aws_acmpca_certificate` — IssueCertificate is an action; issued certs are not
