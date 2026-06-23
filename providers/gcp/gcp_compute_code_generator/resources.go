@@ -222,4 +222,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"interconnects": basicGCPResource{
 		terraformName: "google_compute_interconnect",
 	},
+	"instantSnapshots": basicGCPResource{
+		terraformName: "google_compute_instant_snapshot",
+	},
 }
