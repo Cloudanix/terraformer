@@ -8,7 +8,9 @@ google_backup_dr_management_server
 google_biglake_catalog
 google_biglake_database
 google_bigquery_connection
+google_bigquery_data_transfer_config
 google_bigquery_dataset
+google_bigquery_reservation
 google_bigquery_routine
 google_bigquery_table
 google_bigtable_app_profile
@@ -144,6 +146,7 @@ google_firestore_database
 google_gke_backup_backup_plan
 google_gke_hub_feature
 google_gke_hub_membership
+google_gkeonprem_vmware_cluster
 google_healthcare_dataset
 google_healthcare_dicom_store
 google_healthcare_fhir_store
