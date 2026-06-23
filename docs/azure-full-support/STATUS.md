@@ -8,7 +8,7 @@ by `providers/azure/*.go` (excluding test files).
 - Baseline: **141** types (35 services), measured 2026-06-23.
 - Current: **231** types (+90). Phase 1 mgmt-plane complete (incl. app_service
   modern apps + service_plan); Phase 2 incl. policy; ~50 new Phase 2/3 Track 2
-  services. azuread (P4) + Track-1 migration (P5) not started.
+  services. Phase 5 migration 27/35 done. azuread (P4) not started.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.
 
 ## Phase 0 — foundations (DONE)
