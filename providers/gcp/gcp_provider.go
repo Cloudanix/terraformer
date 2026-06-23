@@ -165,6 +165,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["dataprocMetastore"] = &GCPFacade{service: &DataprocMetastoreGenerator{}}
 	services["managedKafka"] = &GCPFacade{service: &ManagedKafkaGenerator{}}
 	services["oracleDatabase"] = &GCPFacade{service: &OracleDatabaseGenerator{}}
+	services["tags"] = &GCPFacade{service: &TagsGenerator{}}
 	return services
 }
 

@@ -257,6 +257,8 @@ List of supported GCP services:
     * `google_workflows_workflow`
 *   `subnetworks`
     * `google_compute_subnetwork`
+*   `tags`
+    * `google_tags_tag_key`
 *   `targetHttpProxies`
     * `google_compute_target_http_proxy`
 *   `targetHttpsProxies`
