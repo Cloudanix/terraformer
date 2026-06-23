@@ -272,6 +272,7 @@ List of supported GCP services:
     * `google_netapp_volume`
     * `google_netapp_active_directory`
     * `google_netapp_backup_vault`
+    * `google_netapp_kmsconfig`
 *   `networkConnectivity`
     * `google_network_connectivity_hub`
     * `google_network_connectivity_spoke`
