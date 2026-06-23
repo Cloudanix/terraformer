@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -36,7 +35,7 @@ func (g *VPCLatticeGenerator) InitResources() error {
 		return e
 	}
 	svc := vpclattice.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	// authPolicy emits aws_vpclattice_auth_policy (import resource id) and
 	// resourcePolicy emits aws_vpclattice_resource_policy (import resource ARN)
@@ -213,7 +212,7 @@ func (g *VPCLatticeGenerator) InitResources() error {
 	}
 
 	for rg := vpclattice.NewListResourceGatewaysPaginator(svc, &vpclattice.ListResourceGatewaysInput{}); rg.HasMorePages(); {
-		page, err := rg.NextPage(context.TODO())
+		page, err := rg.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -84,7 +83,7 @@ func (g *IamGenerator) InitResources() error {
 // Errors are logged, not fatal — a missing password policy (NoSuchEntity) or a
 // permission gap on one list shouldn't abort the whole IAM import.
 func (g *IamGenerator) getAccountResources(svc *iam.Client) {
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	if feats, err := svc.ListOrganizationsFeatures(ctx, &iam.ListOrganizationsFeaturesInput{}); err == nil && len(feats.EnabledFeatures) > 0 {
 		orgID := StringValue(feats.OrganizationId)
@@ -181,7 +180,7 @@ func (g *IamGenerator) getAccountResources(svc *iam.Client) {
 func (g *IamGenerator) getRoles(svc *iam.Client) error {
 	p := iam.NewListRolesPaginator(svc, &iam.ListRolesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -202,7 +201,7 @@ func (g *IamGenerator) getRoles(svc *iam.Client) error {
 				IamAllowEmptyValues))
 			rolePoliciesPage := iam.NewListRolePoliciesPaginator(svc, &iam.ListRolePoliciesInput{RoleName: role.RoleName})
 			for rolePoliciesPage.HasMorePages() {
-				rolePoliciesNextPage, err := rolePoliciesPage.NextPage(context.TODO())
+				rolePoliciesNextPage, err := rolePoliciesPage.NextPage(awsContext())
 				if err != nil {
 					log.Println(err)
 					continue
@@ -220,7 +219,7 @@ func (g *IamGenerator) getRoles(svc *iam.Client) error {
 				RoleName: &roleName,
 			})
 			for roleAttachedPoliciesPage.HasMorePages() {
-				roleAttachedPoliciesNextPage, err := roleAttachedPoliciesPage.NextPage(context.TODO())
+				roleAttachedPoliciesNextPage, err := roleAttachedPoliciesPage.NextPage(awsContext())
 				if err != nil {
 					log.Println(err)
 					continue
@@ -247,7 +246,7 @@ func (g *IamGenerator) getRoles(svc *iam.Client) error {
 func (g *IamGenerator) getUsers(svc *iam.Client) error {
 	p := iam.NewListUsersPaginator(svc, &iam.ListUsersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -291,7 +290,7 @@ func (g *IamGenerator) getUserCredentials(svc *iam.Client, userName string) {
 	if userName == "" {
 		return
 	}
-	ctx := context.TODO()
+	ctx := awsContext()
 	if out, err := svc.ListSSHPublicKeys(ctx, &iam.ListSSHPublicKeysInput{UserName: &userName}); err == nil {
 		for _, k := range out.SSHPublicKeys {
 			id := StringValue(k.SSHPublicKeyId)
@@ -328,7 +327,7 @@ func (g *IamGenerator) getUserCredentials(svc *iam.Client, userName string) {
 func (g *IamGenerator) getUserGroup(svc *iam.Client, userName *string) error {
 	p := iam.NewListGroupsForUserPaginator(svc, &iam.ListGroupsForUserInput{UserName: userName})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -355,7 +354,7 @@ func (g *IamGenerator) getUserGroup(svc *iam.Client, userName *string) error {
 func (g *IamGenerator) getUserPolices(svc *iam.Client, userName *string) error {
 	p := iam.NewListUserPoliciesPaginator(svc, &iam.ListUserPoliciesInput{UserName: userName})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -379,7 +378,7 @@ func (g *IamGenerator) getUserPolicyAttachment(svc *iam.Client, userName *string
 		UserName: userName,
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -403,7 +402,7 @@ func (g *IamGenerator) getUserPolicyAttachment(svc *iam.Client, userName *string
 func (g *IamGenerator) getPolicies(svc *iam.Client) error {
 	p := iam.NewListPoliciesPaginator(svc, &iam.ListPoliciesInput{Scope: types.PolicyScopeTypeLocal})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -425,7 +424,7 @@ func (g *IamGenerator) getPolicies(svc *iam.Client) error {
 func (g *IamGenerator) getGroups(svc *iam.Client) error {
 	p := iam.NewListGroupsPaginator(svc, &iam.ListGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -447,7 +446,7 @@ func (g *IamGenerator) getGroups(svc *iam.Client) error {
 func (g *IamGenerator) getGroupPolicies(svc *iam.Client, group types.Group) {
 	groupPoliciesPage := iam.NewListGroupPoliciesPaginator(svc, &iam.ListGroupPoliciesInput{GroupName: group.GroupName})
 	for groupPoliciesPage.HasMorePages() {
-		groupPoliciesNextPage, err := groupPoliciesPage.NextPage(context.TODO())
+		groupPoliciesNextPage, err := groupPoliciesPage.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			continue
@@ -471,7 +470,7 @@ func (g *IamGenerator) getAttachedGroupPolicies(svc *iam.Client, group types.Gro
 	groupAttachedPoliciesPage := iam.NewListAttachedGroupPoliciesPaginator(svc,
 		&iam.ListAttachedGroupPoliciesInput{GroupName: group.GroupName})
 	for groupAttachedPoliciesPage.HasMorePages() {
-		groupAttachedPoliciesNextPage, err := groupAttachedPoliciesPage.NextPage(context.TODO())
+		groupAttachedPoliciesNextPage, err := groupAttachedPoliciesPage.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			continue
@@ -499,7 +498,7 @@ func (g *IamGenerator) getAttachedGroupPolicies(svc *iam.Client, group types.Gro
 func (g *IamGenerator) getInstanceProfiles(svc *iam.Client) error {
 	p := iam.NewListInstanceProfilesPaginator(svc, &iam.ListInstanceProfilesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -524,7 +523,7 @@ func (g *IamGenerator) getInstanceProfiles(svc *iam.Client) error {
 func (g *IamGenerator) getUserAccessKey(svc *iam.Client, userName *string, userID string) error {
 	p := iam.NewListAccessKeysPaginator(svc, &iam.ListAccessKeysInput{UserName: userName})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

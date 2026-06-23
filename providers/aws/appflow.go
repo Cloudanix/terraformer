@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/appflow"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *AppFlowGenerator) InitResources() error {
 
 	p := appflow.NewListFlowsPaginator(svc, &appflow.ListFlowsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +49,7 @@ func (g *AppFlowGenerator) InitResources() error {
 	}
 
 	for cp := appflow.NewDescribeConnectorProfilesPaginator(svc, &appflow.DescribeConnectorProfilesInput{}); cp.HasMorePages(); {
-		page, err := cp.NextPage(context.TODO())
+		page, err := cp.NextPage(awsContext())
 		if err != nil {
 			break
 		}

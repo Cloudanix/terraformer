@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -55,7 +54,7 @@ func (g *DocDBGenerator) InitResources() error {
 }
 
 func (g *DocDBGenerator) getDocDBExtras(svc *docdb.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := docdb.NewDescribeGlobalClustersPaginator(svc, &docdb.DescribeGlobalClustersInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {
@@ -90,7 +89,7 @@ func (g *DocDBGenerator) getDocDBExtras(svc *docdb.Client) error {
 func (g *DocDBGenerator) getClusters(svc *docdb.Client) error {
 	clusterPaginator := docdb.NewDescribeDBClustersPaginator(svc, &docdb.DescribeDBClustersInput{})
 	for clusterPaginator.HasMorePages() {
-		page, err := clusterPaginator.NextPage(context.TODO())
+		page, err := clusterPaginator.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -126,7 +125,7 @@ func (g *DocDBGenerator) getSubnetGroups(svc *docdb.Client) error {
 	subnetGroupPaginator := docdb.NewDescribeDBSubnetGroupsPaginator(svc, &docdb.DescribeDBSubnetGroupsInput{})
 
 	for subnetGroupPaginator.HasMorePages() {
-		page, err := subnetGroupPaginator.NextPage(context.TODO())
+		page, err := subnetGroupPaginator.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -151,7 +150,7 @@ func (g *DocDBGenerator) getParameterGroups(svc *docdb.Client) error {
 	parameterGroupPaginator := docdb.NewDescribeDBClusterParameterGroupsPaginator(svc, &docdb.DescribeDBClusterParameterGroupsInput{})
 
 	for parameterGroupPaginator.HasMorePages() {
-		page, err := parameterGroupPaginator.NextPage(context.TODO())
+		page, err := parameterGroupPaginator.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -171,7 +170,7 @@ func (g *DocDBGenerator) getParameterGroups(svc *docdb.Client) error {
 
 	snapshotPaginator := docdb.NewDescribeDBClusterSnapshotsPaginator(svc, &docdb.DescribeDBClusterSnapshotsInput{})
 	for snapshotPaginator.HasMorePages() {
-		page, err := snapshotPaginator.NextPage(context.TODO())
+		page, err := snapshotPaginator.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

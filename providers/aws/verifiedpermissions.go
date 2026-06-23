@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/verifiedpermissions"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *VerifiedPermissionsGenerator) InitResources() error {
 	}
 	svc := verifiedpermissions.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var storeIDs []string
 	p := verifiedpermissions.NewListPolicyStoresPaginator(svc, &verifiedpermissions.ListPolicyStoresInput{})
 	for p.HasMorePages() {

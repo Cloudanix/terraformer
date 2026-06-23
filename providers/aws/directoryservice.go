@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/directoryservice"
 	"github.com/aws/aws-sdk-go-v2/service/directoryservice/types"
@@ -35,7 +33,7 @@ func (g *DirectoryServiceGenerator) InitResources() error {
 	}
 	svc := directoryservice.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var directoryIDs []string
 	p := directoryservice.NewDescribeDirectoriesPaginator(svc, &directoryservice.DescribeDirectoriesInput{})
 	for p.HasMorePages() {

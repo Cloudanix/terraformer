@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/athena"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *AthenaGenerator) InitResources() error {
 		return e
 	}
 	svc := athena.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	var workgroupNames []string
 	workgroups := athena.NewListWorkGroupsPaginator(svc, &athena.ListWorkGroupsInput{})
@@ -117,7 +115,7 @@ func (g *AthenaGenerator) InitResources() error {
 	}
 
 	for cr := athena.NewListCapacityReservationsPaginator(svc, &athena.ListCapacityReservationsInput{}); cr.HasMorePages(); {
-		page, err := cr.NextPage(context.TODO())
+		page, err := cr.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

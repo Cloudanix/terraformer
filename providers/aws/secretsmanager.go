@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/secretsmanager"
 )
@@ -36,7 +34,7 @@ func (g *SecretsManagerGenerator) InitResources() error {
 	p := secretsmanager.NewListSecretsPaginator(svc, &secretsmanager.ListSecretsInput{})
 	var resources []terraformutils.Resource
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -54,7 +52,7 @@ func (g *SecretsManagerGenerator) InitResources() error {
 				resources = append(resources, terraformutils.NewSimpleResource(
 					secretArn, secretName, "aws_secretsmanager_secret_rotation", "aws", secretsmanagerAllowEmptyValues))
 			}
-			if rp, err := svc.GetResourcePolicy(context.TODO(), &secretsmanager.GetResourcePolicyInput{SecretId: secret.ARN}); err == nil && StringValue(rp.ResourcePolicy) != "" {
+			if rp, err := svc.GetResourcePolicy(awsContext(), &secretsmanager.GetResourcePolicyInput{SecretId: secret.ARN}); err == nil && StringValue(rp.ResourcePolicy) != "" {
 				resources = append(resources, terraformutils.NewSimpleResource(
 					secretArn, secretName, "aws_secretsmanager_secret_policy", "aws", secretsmanagerAllowEmptyValues))
 			}

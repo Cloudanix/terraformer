@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/costoptimizationhub"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *CostOptimizationHubGenerator) InitResources() error {
 		return e
 	}
 	svc := costoptimizationhub.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	account, err := g.getAccountNumber(config)
 	if err != nil {

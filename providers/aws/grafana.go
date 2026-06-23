@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/grafana"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *GrafanaGenerator) InitResources() error {
 
 	p := grafana.NewListWorkspacesPaginator(svc, &grafana.ListWorkspacesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -59,7 +57,7 @@ func (g *GrafanaGenerator) InitResources() error {
 
 // loadWorkspaceChildren enumerates a workspace's SAML config and service accounts.
 func (g *GrafanaGenerator) loadWorkspaceChildren(svc *grafana.Client, workspaceID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	if auth, err := svc.DescribeWorkspaceAuthentication(ctx, &grafana.DescribeWorkspaceAuthenticationInput{WorkspaceId: &workspaceID}); err == nil &&
 		auth.Authentication != nil && auth.Authentication.Saml != nil {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

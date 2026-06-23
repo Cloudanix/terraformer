@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/chimesdkvoice"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ChimeSDKVoiceGenerator) InitResources() error {
 	}
 	svc := chimesdkvoice.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(id, name, tfType string) {
 		if id != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

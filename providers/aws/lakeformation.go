@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/lakeformation"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *LakeFormationGenerator) InitResources() error {
 	}
 	svc := lakeformation.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	p := lakeformation.NewListResourcesPaginator(svc, &lakeformation.ListResourcesInput{})
 	for p.HasMorePages() {
 		page, err := p.NextPage(ctx)

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/computeoptimizer"
 	"github.com/aws/aws-sdk-go-v2/service/computeoptimizer/types"
 
@@ -35,7 +33,7 @@ func (g *ComputeOptimizerGenerator) InitResources() error {
 		return e
 	}
 	svc := computeoptimizer.NewFromConfig(config)
-	out, err := svc.GetEnrollmentStatus(context.TODO(), &computeoptimizer.GetEnrollmentStatusInput{})
+	out, err := svc.GetEnrollmentStatus(awsContext(), &computeoptimizer.GetEnrollmentStatusInput{})
 	if err != nil {
 		return err
 	}
@@ -64,7 +62,7 @@ func (g *ComputeOptimizerGenerator) loadRecommendationPreferences(svc *computeop
 		}
 		var token *string
 		for {
-			out, err := svc.GetRecommendationPreferences(context.TODO(), &computeoptimizer.GetRecommendationPreferencesInput{
+			out, err := svc.GetRecommendationPreferences(awsContext(), &computeoptimizer.GetRecommendationPreferencesInput{
 				ResourceType: rt,
 				NextToken:    token,
 			})

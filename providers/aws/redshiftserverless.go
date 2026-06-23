@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/redshiftserverless"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *RedshiftServerlessGenerator) InitResources() error {
 		return e
 	}
 	svc := redshiftserverless.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	namespaces := redshiftserverless.NewListNamespacesPaginator(svc, &redshiftserverless.ListNamespacesInput{})
 	for namespaces.HasMorePages() {

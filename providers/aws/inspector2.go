@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/inspector2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *Inspector2Generator) InitResources() error {
 		return e
 	}
 	svc := inspector2.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	admins := inspector2.NewListDelegatedAdminAccountsPaginator(svc, &inspector2.ListDelegatedAdminAccountsInput{})
 	for admins.HasMorePages() {

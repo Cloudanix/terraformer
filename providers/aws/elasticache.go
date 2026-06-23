@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,7 +31,7 @@ type ElastiCacheGenerator struct {
 func (g *ElastiCacheGenerator) loadCacheClusters(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeCacheClustersPaginator(svc, &elasticache.DescribeCacheClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -79,7 +78,7 @@ func (g *ElastiCacheGenerator) loadCacheClusters(svc *elasticache.Client) error 
 func (g *ElastiCacheGenerator) loadParameterGroups(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeCacheParameterGroupsPaginator(svc, &elasticache.DescribeCacheParameterGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -103,7 +102,7 @@ func (g *ElastiCacheGenerator) loadParameterGroups(svc *elasticache.Client) erro
 func (g *ElastiCacheGenerator) loadSubnetGroups(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeCacheSubnetGroupsPaginator(svc, &elasticache.DescribeCacheSubnetGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -124,7 +123,7 @@ func (g *ElastiCacheGenerator) loadSubnetGroups(svc *elasticache.Client) error {
 func (g *ElastiCacheGenerator) loadReplicationGroups(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeReplicationGroupsPaginator(svc, &elasticache.DescribeReplicationGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -187,7 +186,7 @@ func (g *ElastiCacheGenerator) InitResources() error {
 func (g *ElastiCacheGenerator) loadServerlessCaches(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeServerlessCachesPaginator(svc, &elasticache.DescribeServerlessCachesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -206,7 +205,7 @@ func (g *ElastiCacheGenerator) loadServerlessCaches(svc *elasticache.Client) err
 func (g *ElastiCacheGenerator) loadGlobalReplicationGroups(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeGlobalReplicationGroupsPaginator(svc, &elasticache.DescribeGlobalReplicationGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -225,7 +224,7 @@ func (g *ElastiCacheGenerator) loadGlobalReplicationGroups(svc *elasticache.Clie
 func (g *ElastiCacheGenerator) loadUsers(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeUsersPaginator(svc, &elasticache.DescribeUsersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -244,7 +243,7 @@ func (g *ElastiCacheGenerator) loadUsers(svc *elasticache.Client) error {
 func (g *ElastiCacheGenerator) loadUserGroups(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeUserGroupsPaginator(svc, &elasticache.DescribeUserGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -270,7 +269,7 @@ func (g *ElastiCacheGenerator) loadUserGroups(svc *elasticache.Client) error {
 func (g *ElastiCacheGenerator) loadReservedCacheNodes(svc *elasticache.Client) error {
 	p := elasticache.NewDescribeReservedCacheNodesPaginator(svc, &elasticache.DescribeReservedCacheNodesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

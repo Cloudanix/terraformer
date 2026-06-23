@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/xray"
 )
@@ -22,7 +20,7 @@ func (g *XrayGenerator) InitResources() error {
 
 	p := xray.NewGetSamplingRulesPaginator(svc, &xray.GetSamplingRulesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -40,7 +38,7 @@ func (g *XrayGenerator) InitResources() error {
 	}
 
 	for gp := xray.NewGetGroupsPaginator(svc, &xray.GetGroupsInput{}); gp.HasMorePages(); {
-		page, err := gp.NextPage(context.TODO())
+		page, err := gp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -56,7 +54,7 @@ func (g *XrayGenerator) InitResources() error {
 
 	// Encryption config is a region-level singleton; import ID is the region.
 	if region := config.Region; region != "" {
-		if _, err := svc.GetEncryptionConfig(context.TODO(), &xray.GetEncryptionConfigInput{}); err == nil {
+		if _, err := svc.GetEncryptionConfig(awsContext(), &xray.GetEncryptionConfigInput{}); err == nil {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				region, region, "aws_xray_encryption_config", "aws", xrayAllowEmptyValues))
 		}

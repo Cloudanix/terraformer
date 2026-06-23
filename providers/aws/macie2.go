@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/macie2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *Macie2Generator) InitResources() error {
 		return e
 	}
 	svc := macie2.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	jobs := macie2.NewListClassificationJobsPaginator(svc, &macie2.ListClassificationJobsInput{})
 	for jobs.HasMorePages() {

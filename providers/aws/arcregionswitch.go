@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/arcregionswitch"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ARCRegionSwitchGenerator) InitResources() error {
 	}
 	svc := arcregionswitch.NewFromConfig(config)
 	for p := arcregionswitch.NewListPlansPaginator(svc, &arcregionswitch.ListPlansInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

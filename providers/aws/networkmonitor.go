@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/networkmonitor"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *NetworkMonitorGenerator) InitResources() error {
 
 	p := networkmonitor.NewListMonitorsPaginator(svc, &networkmonitor.ListMonitorsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func (g *NetworkMonitorGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_networkmonitor_monitor", "aws", defaultAllowEmptyValues))
 
-			if mon, err := svc.GetMonitor(context.TODO(), &networkmonitor.GetMonitorInput{MonitorName: monitor.MonitorName}); err == nil {
+			if mon, err := svc.GetMonitor(awsContext(), &networkmonitor.GetMonitorInput{MonitorName: monitor.MonitorName}); err == nil {
 				for _, probe := range mon.Probes {
 					probeID := StringValue(probe.ProbeId)
 					if probeID == "" {

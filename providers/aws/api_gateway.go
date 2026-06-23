@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"log"
 	"strings"
 
@@ -58,7 +57,7 @@ func (g *APIGatewayGenerator) InitResources() error {
 }
 
 func (g *APIGatewayGenerator) loadClientCertificatesAndDomains(svc *apigateway.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := apigateway.NewGetClientCertificatesPaginator(svc, &apigateway.GetClientCertificatesInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {
@@ -107,7 +106,7 @@ func (g *APIGatewayGenerator) loadClientCertificatesAndDomains(svc *apigateway.C
 func (g *APIGatewayGenerator) loadRestApis(svc *apigateway.Client) error {
 	p := apigateway.NewGetRestApisPaginator(svc, &apigateway.GetRestApisInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -150,7 +149,7 @@ func (g *APIGatewayGenerator) loadRestApis(svc *apigateway.Client) error {
 func (g *APIGatewayGenerator) loadDeploymentsAndValidators(svc *apigateway.Client, restAPIID *string) error {
 	apiID := StringValue(restAPIID)
 	for p := apigateway.NewGetDeploymentsPaginator(svc, &apigateway.GetDeploymentsInput{RestApiId: restAPIID}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -163,7 +162,7 @@ func (g *APIGatewayGenerator) loadDeploymentsAndValidators(svc *apigateway.Clien
 				apiID+"/"+id, apiID+"_"+id, "aws_api_gateway_deployment", "aws", apiGatewayAllowEmptyValues))
 		}
 	}
-	if validators, err := svc.GetRequestValidators(context.TODO(), &apigateway.GetRequestValidatorsInput{RestApiId: restAPIID}); err == nil {
+	if validators, err := svc.GetRequestValidators(awsContext(), &apigateway.GetRequestValidatorsInput{RestApiId: restAPIID}); err == nil {
 		for _, v := range validators.Items {
 			id := StringValue(v.Id)
 			if id == "" {
@@ -173,7 +172,7 @@ func (g *APIGatewayGenerator) loadDeploymentsAndValidators(svc *apigateway.Clien
 				apiID+"/"+id, apiID+"_"+id, "aws_api_gateway_request_validator", "aws", apiGatewayAllowEmptyValues))
 		}
 	}
-	if docVers, err := svc.GetDocumentationVersions(context.TODO(), &apigateway.GetDocumentationVersionsInput{RestApiId: restAPIID}); err == nil {
+	if docVers, err := svc.GetDocumentationVersions(awsContext(), &apigateway.GetDocumentationVersionsInput{RestApiId: restAPIID}); err == nil {
 		for _, v := range docVers.Items {
 			ver := StringValue(v.Version)
 			if ver == "" {
@@ -200,7 +199,7 @@ func (g *APIGatewayGenerator) shouldFilterRestAPI(tags map[string]string) bool {
 }
 
 func (g *APIGatewayGenerator) loadStages(svc *apigateway.Client, restAPIID *string) error {
-	output, err := svc.GetStages(context.TODO(), &apigateway.GetStagesInput{
+	output, err := svc.GetStages(awsContext(), &apigateway.GetStagesInput{
 		RestApiId: restAPIID,
 	})
 	if err != nil {
@@ -229,7 +228,7 @@ func (g *APIGatewayGenerator) loadResources(svc *apigateway.Client, restAPIID *s
 		RestApiId: restAPIID,
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -263,7 +262,7 @@ func (g *APIGatewayGenerator) loadModels(svc *apigateway.Client, restAPIID *stri
 		RestApiId: restAPIID,
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return nil
 		}
@@ -311,7 +310,7 @@ func (g *APIGatewayGenerator) loadResourceMethods(svc *apigateway.Client, restAP
 			map[string]interface{}{},
 		))
 
-		methodDetails, err := svc.GetMethod(context.TODO(), &apigateway.GetMethodInput{
+		methodDetails, err := svc.GetMethod(awsContext(), &apigateway.GetMethodInput{
 			HttpMethod: &httpMethod,
 			ResourceId: resource.Id,
 			RestApiId:  restAPIID,
@@ -336,7 +335,7 @@ func (g *APIGatewayGenerator) loadResourceMethods(svc *apigateway.Client, restAP
 				apiGatewayAllowEmptyValues,
 				map[string]interface{}{},
 			))
-			integrationDetails, err := svc.GetIntegration(context.TODO(), &apigateway.GetIntegrationInput{
+			integrationDetails, err := svc.GetIntegration(awsContext(), &apigateway.GetIntegrationInput{
 				HttpMethod: &httpMethod,
 				ResourceId: resource.Id,
 				RestApiId:  restAPIID,
@@ -388,7 +387,7 @@ func (g *APIGatewayGenerator) loadResourceMethods(svc *apigateway.Client, restAP
 func (g *APIGatewayGenerator) loadResponses(svc *apigateway.Client, restAPIID *string) error {
 	var position *string
 	for {
-		response, err := svc.GetGatewayResponses(context.TODO(), &apigateway.GetGatewayResponsesInput{
+		response, err := svc.GetGatewayResponses(awsContext(), &apigateway.GetGatewayResponsesInput{
 			RestApiId: restAPIID,
 			Position:  position,
 		})
@@ -425,7 +424,7 @@ func (g *APIGatewayGenerator) loadResponses(svc *apigateway.Client, restAPIID *s
 func (g *APIGatewayGenerator) loadDocumentationParts(svc *apigateway.Client, restAPIID *string) error {
 	var position *string
 	for {
-		response, err := svc.GetDocumentationParts(context.TODO(), &apigateway.GetDocumentationPartsInput{
+		response, err := svc.GetDocumentationParts(awsContext(), &apigateway.GetDocumentationPartsInput{
 			RestApiId: restAPIID,
 			Position:  position,
 		})
@@ -453,7 +452,7 @@ func (g *APIGatewayGenerator) loadDocumentationParts(svc *apigateway.Client, res
 func (g *APIGatewayGenerator) loadAuthorizers(svc *apigateway.Client, restAPIID *string) error {
 	var position *string
 	for {
-		response, err := svc.GetAuthorizers(context.TODO(), &apigateway.GetAuthorizersInput{
+		response, err := svc.GetAuthorizers(awsContext(), &apigateway.GetAuthorizersInput{
 			RestApiId: restAPIID,
 			Position:  position,
 		})
@@ -485,7 +484,7 @@ func (g *APIGatewayGenerator) loadAuthorizers(svc *apigateway.Client, restAPIID 
 func (g *APIGatewayGenerator) loadVpcLinks(svc *apigateway.Client) error {
 	p := apigateway.NewGetVpcLinksPaginator(svc, &apigateway.GetVpcLinksInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -504,7 +503,7 @@ func (g *APIGatewayGenerator) loadVpcLinks(svc *apigateway.Client) error {
 func (g *APIGatewayGenerator) loadUsagePlans(svc *apigateway.Client) error {
 	p := apigateway.NewGetUsagePlansPaginator(svc, &apigateway.GetUsagePlansInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -517,7 +516,7 @@ func (g *APIGatewayGenerator) loadUsagePlans(svc *apigateway.Client) error {
 				"aws",
 				apiGatewayAllowEmptyValues))
 			for kp := apigateway.NewGetUsagePlanKeysPaginator(svc, &apigateway.GetUsagePlanKeysInput{UsagePlanId: usagePlan.Id}); kp.HasMorePages(); {
-				kpage, err := kp.NextPage(context.TODO())
+				kpage, err := kp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -538,7 +537,7 @@ func (g *APIGatewayGenerator) loadUsagePlans(svc *apigateway.Client) error {
 func (g *APIGatewayGenerator) loadAPIKeys(svc *apigateway.Client) error {
 	p := apigateway.NewGetApiKeysPaginator(svc, &apigateway.GetApiKeysInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

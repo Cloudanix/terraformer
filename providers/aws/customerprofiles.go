@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/customerprofiles"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *CustomerProfilesGenerator) InitResources() error {
 
 	var token *string
 	for {
-		out, err := svc.ListDomains(context.TODO(), &customerprofiles.ListDomainsInput{NextToken: token})
+		out, err := svc.ListDomains(awsContext(), &customerprofiles.ListDomainsInput{NextToken: token})
 		if err != nil {
 			return err
 		}

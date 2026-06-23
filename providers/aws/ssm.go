@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -38,7 +36,7 @@ func (g *SsmGenerator) InitResources() error {
 	svc := ssm.NewFromConfig(config)
 	p := ssm.NewDescribeParametersPaginator(svc, &ssm.DescribeParametersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -73,7 +71,7 @@ func (g *SsmGenerator) InitResources() error {
 }
 
 func (g *SsmGenerator) addActivationsAndSyncs(svc *ssm.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := ssm.NewDescribeActivationsPaginator(svc, &ssm.DescribeActivationsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {
@@ -135,7 +133,7 @@ func (g *SsmGenerator) addDocuments(svc *ssm.Client) error {
 		Filters: []types.DocumentKeyValuesFilter{{Key: aws.String("Owner"), Values: []string{"Self"}}},
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -154,7 +152,7 @@ func (g *SsmGenerator) addDocuments(svc *ssm.Client) error {
 func (g *SsmGenerator) addMaintenanceWindows(svc *ssm.Client) error {
 	p := ssm.NewDescribeMaintenanceWindowsPaginator(svc, &ssm.DescribeMaintenanceWindowsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -172,7 +170,7 @@ func (g *SsmGenerator) addMaintenanceWindows(svc *ssm.Client) error {
 }
 
 func (g *SsmGenerator) addMaintenanceWindowChildren(svc *ssm.Client, windowID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	wid := windowID
 	for p := ssm.NewDescribeMaintenanceWindowTargetsPaginator(svc, &ssm.DescribeMaintenanceWindowTargetsInput{WindowId: &wid}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
@@ -211,7 +209,7 @@ func (g *SsmGenerator) addPatchBaselines(svc *ssm.Client) error {
 		Filters: []types.PatchOrchestratorFilter{{Key: aws.String("OWNER"), Values: []string{"Self"}}},
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -227,7 +225,7 @@ func (g *SsmGenerator) addPatchBaselines(svc *ssm.Client) error {
 	}
 	// A custom default baseline (set per OS) maps to aws_ssm_default_patch_baseline.
 	for _, os := range types.OperatingSystem("").Values() {
-		out, err := svc.GetDefaultPatchBaseline(context.TODO(), &ssm.GetDefaultPatchBaselineInput{OperatingSystem: os})
+		out, err := svc.GetDefaultPatchBaseline(awsContext(), &ssm.GetDefaultPatchBaselineInput{OperatingSystem: os})
 		if err != nil {
 			continue
 		}
@@ -243,7 +241,7 @@ func (g *SsmGenerator) addPatchBaselines(svc *ssm.Client) error {
 func (g *SsmGenerator) addAssociations(svc *ssm.Client) error {
 	p := ssm.NewListAssociationsPaginator(svc, &ssm.ListAssociationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

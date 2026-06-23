@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -64,7 +63,7 @@ func (g *SecurityhubGenerator) InitResources() error {
 	if err := g.addFindingAggregators(client); err != nil {
 		return err
 	}
-	if rules, err := client.ListAutomationRules(context.TODO(), &securityhub.ListAutomationRulesInput{}); err == nil {
+	if rules, err := client.ListAutomationRules(awsContext(), &securityhub.ListAutomationRulesInput{}); err == nil {
 		for _, r := range rules.AutomationRulesMetadata {
 			arn := StringValue(r.RuleArn)
 			if arn == "" {
@@ -75,7 +74,7 @@ func (g *SecurityhubGenerator) InitResources() error {
 		}
 	}
 	for p := securityhub.NewListConfigurationPoliciesPaginator(client, &securityhub.ListConfigurationPoliciesInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			break
 		}
@@ -89,7 +88,7 @@ func (g *SecurityhubGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := securityhub.NewListEnabledProductsForImportPaginator(client, &securityhub.ListEnabledProductsForImportInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {
@@ -149,7 +148,7 @@ func (g *SecurityhubGenerator) InitResources() error {
 func (g *SecurityhubGenerator) addActionTargets(svc *securityhub.Client) error {
 	p := securityhub.NewDescribeActionTargetsPaginator(svc, &securityhub.DescribeActionTargetsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -168,7 +167,7 @@ func (g *SecurityhubGenerator) addActionTargets(svc *securityhub.Client) error {
 func (g *SecurityhubGenerator) addInsights(svc *securityhub.Client) error {
 	p := securityhub.NewGetInsightsPaginator(svc, &securityhub.GetInsightsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -187,7 +186,7 @@ func (g *SecurityhubGenerator) addInsights(svc *securityhub.Client) error {
 func (g *SecurityhubGenerator) addFindingAggregators(svc *securityhub.Client) error {
 	p := securityhub.NewListFindingAggregatorsPaginator(svc, &securityhub.ListFindingAggregatorsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -204,7 +203,7 @@ func (g *SecurityhubGenerator) addFindingAggregators(svc *securityhub.Client) er
 }
 
 func (g *SecurityhubGenerator) addAccount(client *securityhub.Client, accountNumber string) (bool, error) {
-	_, err := client.GetEnabledStandards(context.TODO(), &securityhub.GetEnabledStandardsInput{})
+	_, err := client.GetEnabledStandards(awsContext(), &securityhub.GetEnabledStandardsInput{})
 
 	if err != nil {
 		errorMsg := err.Error()
@@ -227,7 +226,7 @@ func (g *SecurityhubGenerator) addMembers(svc *securityhub.Client, accountNumber
 	p := securityhub.NewListMembersPaginator(svc, &securityhub.ListMembersInput{})
 
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -259,7 +258,7 @@ func (g *SecurityhubGenerator) addStandardsSubscription(svc *securityhub.Client,
 	p := securityhub.NewGetEnabledStandardsPaginator(svc, &securityhub.GetEnabledStandardsInput{})
 
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -280,7 +279,7 @@ func (g *SecurityhubGenerator) addStandardsSubscription(svc *securityhub.Client,
 			))
 			subArn := id
 			for cp := securityhub.NewDescribeStandardsControlsPaginator(svc, &securityhub.DescribeStandardsControlsInput{StandardsSubscriptionArn: &subArn}); cp.HasMorePages(); {
-				cpage, err := cp.NextPage(context.TODO())
+				cpage, err := cp.NextPage(awsContext())
 				if err != nil {
 					break
 				}

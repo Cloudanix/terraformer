@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/appstream"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *AppStreamGenerator) InitResources() error {
 
 	var token *string
 	for {
-		out, err := svc.DescribeFleets(context.TODO(), &appstream.DescribeFleetsInput{NextToken: token})
+		out, err := svc.DescribeFleets(awsContext(), &appstream.DescribeFleetsInput{NextToken: token})
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func (g *AppStreamGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_appstream_fleet", "aws", defaultAllowEmptyValues))
 			fleetName := name
-			if assoc, err := svc.ListAssociatedStacks(context.TODO(), &appstream.ListAssociatedStacksInput{FleetName: &fleetName}); err == nil {
+			if assoc, err := svc.ListAssociatedStacks(awsContext(), &appstream.ListAssociatedStacksInput{FleetName: &fleetName}); err == nil {
 				for _, stackName := range assoc.Names {
 					if stackName == "" {
 						continue
@@ -64,7 +62,7 @@ func (g *AppStreamGenerator) InitResources() error {
 		token = out.NextToken
 	}
 
-	if stacks, err := svc.DescribeStacks(context.TODO(), &appstream.DescribeStacksInput{}); err == nil {
+	if stacks, err := svc.DescribeStacks(awsContext(), &appstream.DescribeStacksInput{}); err == nil {
 		for _, s := range stacks.Stacks {
 			name := StringValue(s.Name)
 			if name == "" {
@@ -74,7 +72,7 @@ func (g *AppStreamGenerator) InitResources() error {
 				name, name, "aws_appstream_stack", "aws", defaultAllowEmptyValues))
 		}
 	}
-	if builders, err := svc.DescribeImageBuilders(context.TODO(), &appstream.DescribeImageBuildersInput{}); err == nil {
+	if builders, err := svc.DescribeImageBuilders(awsContext(), &appstream.DescribeImageBuildersInput{}); err == nil {
 		for _, b := range builders.ImageBuilders {
 			name := StringValue(b.Name)
 			if name == "" {
@@ -84,7 +82,7 @@ func (g *AppStreamGenerator) InitResources() error {
 				name, name, "aws_appstream_image_builder", "aws", defaultAllowEmptyValues))
 		}
 	}
-	if dcs, err := svc.DescribeDirectoryConfigs(context.TODO(), &appstream.DescribeDirectoryConfigsInput{}); err == nil {
+	if dcs, err := svc.DescribeDirectoryConfigs(awsContext(), &appstream.DescribeDirectoryConfigsInput{}); err == nil {
 		for _, dc := range dcs.DirectoryConfigs {
 			name := StringValue(dc.DirectoryName)
 			if name == "" {
@@ -94,7 +92,7 @@ func (g *AppStreamGenerator) InitResources() error {
 				name, name, "aws_appstream_directory_config", "aws", defaultAllowEmptyValues))
 		}
 	}
-	if users, err := svc.DescribeUsers(context.TODO(), &appstream.DescribeUsersInput{AuthenticationType: "USERPOOL"}); err == nil {
+	if users, err := svc.DescribeUsers(awsContext(), &appstream.DescribeUsersInput{AuthenticationType: "USERPOOL"}); err == nil {
 		for _, u := range users.Users {
 			name := StringValue(u.UserName)
 			if name == "" {
@@ -104,7 +102,7 @@ func (g *AppStreamGenerator) InitResources() error {
 				name+"/USERPOOL", name, "aws_appstream_user", "aws", defaultAllowEmptyValues))
 		}
 	}
-	if usa, err := svc.DescribeUserStackAssociations(context.TODO(), &appstream.DescribeUserStackAssociationsInput{}); err == nil {
+	if usa, err := svc.DescribeUserStackAssociations(awsContext(), &appstream.DescribeUserStackAssociationsInput{}); err == nil {
 		for _, a := range usa.UserStackAssociations {
 			userName, stackName := StringValue(a.UserName), StringValue(a.StackName)
 			if userName == "" || stackName == "" {

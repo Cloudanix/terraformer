@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3vectors"
 
@@ -35,7 +33,7 @@ func (g *S3VectorsGenerator) InitResources() error {
 		return e
 	}
 	svc := s3vectors.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := s3vectors.NewListVectorBucketsPaginator(svc, &s3vectors.ListVectorBucketsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {

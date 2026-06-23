@@ -1,7 +1,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -23,7 +22,7 @@ func (g *AppSyncGenerator) InitResources() error {
 
 	var nextToken *string
 	for {
-		apis, err := svc.ListGraphqlApis(context.TODO(), &appsync.ListGraphqlApisInput{
+		apis, err := svc.ListGraphqlApis(awsContext(), &appsync.ListGraphqlApisInput{
 			NextToken: nextToken,
 		})
 		if err != nil {
@@ -44,7 +43,7 @@ func (g *AppSyncGenerator) InitResources() error {
 			g.loadAppSyncAPICache(svc, id)
 			saInput := &appsync.ListSourceApiAssociationsInput{ApiId: aws.String(id)}
 			for {
-				saOut, err := svc.ListSourceApiAssociations(context.TODO(), saInput)
+				saOut, err := svc.ListSourceApiAssociations(awsContext(), saInput)
 				if err != nil {
 					break
 				}
@@ -69,7 +68,7 @@ func (g *AppSyncGenerator) InitResources() error {
 	}
 
 	for ap := appsync.NewListApisPaginator(svc, &appsync.ListApisInput{}); ap.HasMorePages(); {
-		page, err := ap.NextPage(context.TODO())
+		page, err := ap.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -81,7 +80,7 @@ func (g *AppSyncGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(api.Name), "aws_appsync_api", "aws", defaultAllowEmptyValues))
 			for cn := appsync.NewListChannelNamespacesPaginator(svc, &appsync.ListChannelNamespacesInput{ApiId: aws.String(id)}); cn.HasMorePages(); {
-				cnPage, err := cn.NextPage(context.TODO())
+				cnPage, err := cn.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -105,7 +104,7 @@ func (g *AppSyncGenerator) InitResources() error {
 // loadAppSyncTypesAndResolvers enumerates an API's SDL types and their resolvers.
 // Import IDs: "<api-id>:SDL:<type>" for types, "<api-id>-<type>-<field>" for resolvers.
 func (g *AppSyncGenerator) loadAppSyncTypesAndResolvers(svc *appsync.Client, apiID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	out, err := svc.ListTypes(ctx, &appsync.ListTypesInput{ApiId: aws.String(apiID), Format: "SDL"})
 	if err != nil {
 		return
@@ -136,7 +135,7 @@ func (g *AppSyncGenerator) loadAppSyncTypesAndResolvers(svc *appsync.Client, api
 
 // loadAppSyncAPICache emits the per-API cache (import ID is the API ID).
 func (g *AppSyncGenerator) loadAppSyncAPICache(svc *appsync.Client, apiID string) {
-	if out, err := svc.GetApiCache(context.TODO(), &appsync.GetApiCacheInput{ApiId: aws.String(apiID)}); err == nil && out.ApiCache != nil {
+	if out, err := svc.GetApiCache(awsContext(), &appsync.GetApiCacheInput{ApiId: aws.String(apiID)}); err == nil && out.ApiCache != nil {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			apiID, apiID, "aws_appsync_api_cache", "aws", defaultAllowEmptyValues))
 	}
@@ -144,7 +143,7 @@ func (g *AppSyncGenerator) loadAppSyncAPICache(svc *appsync.Client, apiID string
 
 // loadAppSyncDomainNames enumerates custom domain names (import ID is the domain).
 func (g *AppSyncGenerator) loadAppSyncDomainNames(svc *appsync.Client) {
-	out, err := svc.ListDomainNames(context.TODO(), &appsync.ListDomainNamesInput{})
+	out, err := svc.ListDomainNames(awsContext(), &appsync.ListDomainNamesInput{})
 	if err != nil {
 		return
 	}
@@ -155,7 +154,7 @@ func (g *AppSyncGenerator) loadAppSyncDomainNames(svc *appsync.Client) {
 		}
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			name, name, "aws_appsync_domain_name", "aws", defaultAllowEmptyValues))
-		if assoc, err := svc.GetApiAssociation(context.TODO(), &appsync.GetApiAssociationInput{DomainName: d.DomainName}); err == nil &&
+		if assoc, err := svc.GetApiAssociation(awsContext(), &appsync.GetApiAssociationInput{DomainName: d.DomainName}); err == nil &&
 			assoc.ApiAssociation != nil && StringValue(assoc.ApiAssociation.ApiId) != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_appsync_domain_name_api_association", "aws", defaultAllowEmptyValues))
@@ -167,7 +166,7 @@ func (g *AppSyncGenerator) loadAppSyncDomainNames(svc *appsync.Client) {
 // Import IDs: "<api-id>-<datasource-name>", "<api-id>-<function-id>",
 // "<api-id>:<key-id>".
 func (g *AppSyncGenerator) loadAppSyncChildren(svc *appsync.Client, apiID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	if out, err := svc.ListDataSources(ctx, &appsync.ListDataSourcesInput{ApiId: aws.String(apiID)}); err == nil {
 		for _, ds := range out.DataSources {
 			name := StringValue(ds.Name)

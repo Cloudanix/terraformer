@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/ram"
 	"github.com/aws/aws-sdk-go-v2/service/ram/types"
 
@@ -40,7 +38,7 @@ func (g *RamGenerator) InitResources() error {
 		ResourceOwner: types.ResourceOwnerSelf,
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -62,7 +60,7 @@ func (g *RamGenerator) InitResources() error {
 	for at, tfType := range assocTypes {
 		ap := ram.NewGetResourceShareAssociationsPaginator(svc, &ram.GetResourceShareAssociationsInput{AssociationType: at})
 		for ap.HasMorePages() {
-			page, err := ap.NextPage(context.TODO())
+			page, err := ap.NextPage(awsContext())
 			if err != nil {
 				break
 			}

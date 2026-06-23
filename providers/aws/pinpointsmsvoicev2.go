@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/pinpointsmsvoicev2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *PinpointSMSVoiceV2Generator) InitResources() error {
 	svc := pinpointsmsvoicev2.NewFromConfig(config)
 	p := pinpointsmsvoicev2.NewDescribePhoneNumbersPaginator(svc, &pinpointsmsvoicev2.DescribePhoneNumbersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +49,7 @@ func (g *PinpointSMSVoiceV2Generator) InitResources() error {
 	}
 
 	for cp := pinpointsmsvoicev2.NewDescribeConfigurationSetsPaginator(svc, &pinpointsmsvoicev2.DescribeConfigurationSetsInput{}); cp.HasMorePages(); {
-		page, err := cp.NextPage(context.TODO())
+		page, err := cp.NextPage(awsContext())
 		if err != nil {
 			break
 		}
@@ -65,7 +63,7 @@ func (g *PinpointSMSVoiceV2Generator) InitResources() error {
 		}
 	}
 	for op := pinpointsmsvoicev2.NewDescribeOptOutListsPaginator(svc, &pinpointsmsvoicev2.DescribeOptOutListsInput{}); op.HasMorePages(); {
-		page, err := op.NextPage(context.TODO())
+		page, err := op.NextPage(awsContext())
 		if err != nil {
 			break
 		}

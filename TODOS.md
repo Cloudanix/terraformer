@@ -153,13 +153,18 @@ large resource set.
 > - `globalaccelerator` converted as the end-to-end demonstrator
 >   (`ctx := g.Context()`), unit-tested in `terraformutils/service_context_test.go`.
 >
-> **Remaining (the mechanical sweep — deliberately its own PR):** convert the
-> ~1000 `context.TODO()` call sites across all providers (727 in AWS) to
-> `g.Context()` so a hung *individual* SDK call inside a service also honours the
-> deadline. Must land atomically per provider to avoid a half-converted tree;
-> many sites are in receiver-less helpers that first need a `ctx` parameter
-> threaded in. The API and wiring above are in place, so this is now pure
-> mechanical follow-up with no design left to do.
+> **AWS sweep — DONE.** All 729 `context.TODO()` sites in `providers/aws` now go
+> through `awsContext()` (a package-level accessor in `aws_service.go` fed by
+> `AWSService.SetContext`), so a hung *individual* AWS SDK call — in a method or a
+> receiver-less helper — honours `--timeout` / Ctrl-C. The package var is safe
+> because per-service discovery runs sequentially (see the ponytail note on
+> `awsImportCtx`). `g.Context()` (the embedded-Service accessor) is the
+> equivalent for code that prefers a receiver; both read the same run context.
+>
+> **Remaining:** the other ~30 providers (~300 `context.TODO()` sites) still use
+> `context.TODO()`. Same recipe applies per provider (add a `SetContext` override
+> + package accessor, or convert to the embedded `Context()`), each as its own
+> commit. No design left — pure mechanical follow-up.
 
 **What:** Sweep every generator's `context.TODO()` and give the import run a
 real context with a timeout (and Ctrl-C cancellation), threaded from the CLI.

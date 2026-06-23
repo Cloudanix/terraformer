@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/comprehend"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ComprehendGenerator) InitResources() error {
 		return e
 	}
 	svc := comprehend.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	classifiers := comprehend.NewListDocumentClassifiersPaginator(svc, &comprehend.ListDocumentClassifiersInput{})
 	for classifiers.HasMorePages() {

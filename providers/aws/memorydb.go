@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/memorydb"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *MemoryDBGenerator) InitResources() error {
 
 	p := memorydb.NewDescribeClustersPaginator(svc, &memorydb.DescribeClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -50,7 +48,7 @@ func (g *MemoryDBGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for acls := memorydb.NewDescribeACLsPaginator(svc, &memorydb.DescribeACLsInput{}); acls.HasMorePages(); {
 		page, err := acls.NextPage(ctx)
 		if err != nil {

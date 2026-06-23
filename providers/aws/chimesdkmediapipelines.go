@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/chimesdkmediapipelines"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *ChimeSDKMediaPipelinesGenerator) InitResources() error {
 	svc := chimesdkmediapipelines.NewFromConfig(config)
 	p := chimesdkmediapipelines.NewListMediaInsightsPipelineConfigurationsPaginator(svc, &chimesdkmediapipelines.ListMediaInsightsPipelineConfigurationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

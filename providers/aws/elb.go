@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -40,7 +39,7 @@ func (g *ElbGenerator) InitResources() error {
 	svc := elasticloadbalancing.NewFromConfig(config)
 	p := elasticloadbalancing.NewDescribeLoadBalancersPaginator(svc, &elasticloadbalancing.DescribeLoadBalancersInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -57,7 +56,7 @@ func (g *ElbGenerator) InitResources() error {
 			g.Resources = append(g.Resources, resource)
 
 			// Named policies on the ELB, classified by policy type.
-			if pols, err := svc.DescribeLoadBalancerPolicies(context.TODO(),
+			if pols, err := svc.DescribeLoadBalancerPolicies(awsContext(),
 				&elasticloadbalancing.DescribeLoadBalancerPoliciesInput{LoadBalancerName: loadBalancer.LoadBalancerName}); err == nil {
 				for _, pd := range pols.PolicyDescriptions {
 					pName := StringValue(pd.PolicyName)

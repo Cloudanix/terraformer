@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/odb"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ODBGenerator) InitResources() error {
 		return e
 	}
 	svc := odb.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := odb.NewListOdbNetworksPaginator(svc, &odb.ListOdbNetworksInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {

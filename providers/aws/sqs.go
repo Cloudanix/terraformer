@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"os"
 	"strings"
@@ -46,7 +45,7 @@ func (g *SqsGenerator) InitResources() error {
 		listQueuesInput.QueueNamePrefix = aws.String(sqsPrefix)
 	}
 
-	queuesList, err := svc.ListQueues(context.TODO(), &listQueuesInput)
+	queuesList, err := svc.ListQueues(awsContext(), &listQueuesInput)
 
 	if err != nil {
 		return err

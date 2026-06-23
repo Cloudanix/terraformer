@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/signer"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *SignerGenerator) InitResources() error {
 
 	p := signer.NewListSigningProfilesPaginator(svc, &signer.ListSigningProfilesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func (g *SignerGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_signer_signing_profile", "aws", defaultAllowEmptyValues))
 			profileName := name
-			if perms, err := svc.ListProfilePermissions(context.TODO(), &signer.ListProfilePermissionsInput{ProfileName: &profileName}); err == nil {
+			if perms, err := svc.ListProfilePermissions(awsContext(), &signer.ListProfilePermissionsInput{ProfileName: &profileName}); err == nil {
 				for _, perm := range perms.Permissions {
 					sid := StringValue(perm.StatementId)
 					if sid == "" {
@@ -63,7 +61,7 @@ func (g *SignerGenerator) InitResources() error {
 
 	jobInput := &signer.ListSigningJobsInput{}
 	for {
-		out, err := svc.ListSigningJobs(context.TODO(), jobInput)
+		out, err := svc.ListSigningJobs(awsContext(), jobInput)
 		if err != nil {
 			break
 		}

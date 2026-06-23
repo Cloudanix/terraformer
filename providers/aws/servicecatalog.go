@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/servicecatalog"
 )
@@ -37,7 +35,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 	var resources []terraformutils.Resource
 	var portfolioIDs []string
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -60,7 +58,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 		}
 		cp := servicecatalog.NewListConstraintsForPortfolioPaginator(svc, &servicecatalog.ListConstraintsForPortfolioInput{PortfolioId: &portfolioID})
 		for cp.HasMorePages() {
-			page, err := cp.NextPage(context.TODO())
+			page, err := cp.NextPage(awsContext())
 			if err != nil {
 				break
 			}
@@ -73,7 +71,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 					id, id, "aws_servicecatalog_constraint", "aws", servicecatalogAllowEmptyValues))
 			}
 		}
-		if budgets, err := svc.ListBudgetsForResource(context.TODO(), &servicecatalog.ListBudgetsForResourceInput{ResourceId: &portfolioID}); err == nil {
+		if budgets, err := svc.ListBudgetsForResource(awsContext(), &servicecatalog.ListBudgetsForResourceInput{ResourceId: &portfolioID}); err == nil {
 			for _, b := range budgets.Budgets {
 				bn := StringValue(b.BudgetName)
 				if bn == "" {
@@ -84,7 +82,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 			}
 		}
 		for ppp := servicecatalog.NewListPrincipalsForPortfolioPaginator(svc, &servicecatalog.ListPrincipalsForPortfolioInput{PortfolioId: &portfolioID}); ppp.HasMorePages(); {
-			page, err := ppp.NextPage(context.TODO())
+			page, err := ppp.NextPage(awsContext())
 			if err != nil {
 				break
 			}
@@ -99,7 +97,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 			}
 		}
 		for prod := servicecatalog.NewSearchProductsAsAdminPaginator(svc, &servicecatalog.SearchProductsAsAdminInput{PortfolioId: &portfolioID}); prod.HasMorePages(); {
-			page, err := prod.NextPage(context.TODO())
+			page, err := prod.NextPage(awsContext())
 			if err != nil {
 				break
 			}
@@ -115,7 +113,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 					"en:"+productID+":"+portfolioID, portfolioID+"_"+productID, "aws_servicecatalog_product_portfolio_association", "aws", servicecatalogAllowEmptyValues))
 			}
 		}
-		if access, err := svc.ListPortfolioAccess(context.TODO(), &servicecatalog.ListPortfolioAccessInput{PortfolioId: &portfolioID}); err == nil {
+		if access, err := svc.ListPortfolioAccess(awsContext(), &servicecatalog.ListPortfolioAccessInput{PortfolioId: &portfolioID}); err == nil {
 			for _, acct := range access.AccountIds {
 				if acct == "" {
 					continue
@@ -129,7 +127,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 
 	pp := servicecatalog.NewSearchProductsAsAdminPaginator(svc, &servicecatalog.SearchProductsAsAdminInput{})
 	for pp.HasMorePages() {
-		page, err := pp.NextPage(context.TODO())
+		page, err := pp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -147,7 +145,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 				"aws_servicecatalog_product",
 				"aws",
 				servicecatalogAllowEmptyValues))
-			if arts, err := svc.ListProvisioningArtifacts(context.TODO(), &servicecatalog.ListProvisioningArtifactsInput{ProductId: &productID}); err == nil {
+			if arts, err := svc.ListProvisioningArtifacts(awsContext(), &servicecatalog.ListProvisioningArtifactsInput{ProductId: &productID}); err == nil {
 				for _, a := range arts.ProvisioningArtifactDetails {
 					aid := StringValue(a.Id)
 					if aid == "" {
@@ -161,7 +159,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 	}
 
 	for sp := servicecatalog.NewSearchProvisionedProductsPaginator(svc, &servicecatalog.SearchProvisionedProductsInput{}); sp.HasMorePages(); {
-		page, err := sp.NextPage(context.TODO())
+		page, err := sp.NextPage(awsContext())
 		if err != nil {
 			break
 		}
@@ -177,7 +175,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 
 	tagOptions := servicecatalog.NewListTagOptionsPaginator(svc, &servicecatalog.ListTagOptionsInput{})
 	for tagOptions.HasMorePages() {
-		page, err := tagOptions.NextPage(context.TODO())
+		page, err := tagOptions.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -190,7 +188,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 				id, id, "aws_servicecatalog_tag_option", "aws", servicecatalogAllowEmptyValues))
 			tagOptionID := id
 			for rp := servicecatalog.NewListResourcesForTagOptionPaginator(svc, &servicecatalog.ListResourcesForTagOptionInput{TagOptionId: &tagOptionID}); rp.HasMorePages(); {
-				rpage, err := rp.NextPage(context.TODO())
+				rpage, err := rp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -208,7 +206,7 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 
 	serviceActions := servicecatalog.NewListServiceActionsPaginator(svc, &servicecatalog.ListServiceActionsInput{})
 	for serviceActions.HasMorePages() {
-		page, err := serviceActions.NextPage(context.TODO())
+		page, err := serviceActions.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

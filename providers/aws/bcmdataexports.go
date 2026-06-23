@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/bcmdataexports"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *BCMDataExportsGenerator) InitResources() error {
 	svc := bcmdataexports.NewFromConfig(config)
 	p := bcmdataexports.NewListExportsPaginator(svc, &bcmdataexports.ListExportsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

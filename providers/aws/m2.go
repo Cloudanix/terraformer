@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/m2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *M2Generator) InitResources() error {
 	}
 	svc := m2.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	p := m2.NewListApplicationsPaginator(svc, &m2.ListApplicationsInput{})
 	for p.HasMorePages() {
 		page, err := p.NextPage(ctx)

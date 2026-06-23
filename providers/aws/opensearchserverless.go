@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/opensearchserverless"
 	"github.com/aws/aws-sdk-go-v2/service/opensearchserverless/types"
 
@@ -38,7 +36,7 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 
 	p := opensearchserverless.NewListCollectionsPaginator(svc, &opensearchserverless.ListCollectionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -52,7 +50,7 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for _, scType := range types.SecurityConfigType("").Values() {
 		t := scType
 		for sp := opensearchserverless.NewListSecurityConfigsPaginator(svc, &opensearchserverless.ListSecurityConfigsInput{Type: t}); sp.HasMorePages(); {
@@ -137,7 +135,7 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 	}
 
 	for cg := opensearchserverless.NewListCollectionGroupsPaginator(svc, &opensearchserverless.ListCollectionGroupsInput{}); cg.HasMorePages(); {
-		page, err := cg.NextPage(context.TODO())
+		page, err := cg.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

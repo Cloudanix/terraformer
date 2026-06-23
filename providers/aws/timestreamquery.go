@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/timestreamquery"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +31,7 @@ func (g *TimestreamQueryGenerator) InitResources() error {
 	}
 	svc := timestreamquery.NewFromConfig(config)
 	for p := timestreamquery.NewListScheduledQueriesPaginator(svc, &timestreamquery.ListScheduledQueriesInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

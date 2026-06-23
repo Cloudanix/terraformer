@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/devicefarm"
 )
@@ -33,7 +31,7 @@ func (g *DeviceFarmGenerator) InitResources() error {
 		return e
 	}
 	svc := devicefarm.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	p := devicefarm.NewListProjectsPaginator(svc, &devicefarm.ListProjectsInput{})
 	var resources []terraformutils.Resource
 	var projectArns []string
@@ -90,7 +88,7 @@ func (g *DeviceFarmGenerator) InitResources() error {
 			}
 		}
 	}
-	if profiles, err := svc.ListInstanceProfiles(context.TODO(), &devicefarm.ListInstanceProfilesInput{}); err == nil {
+	if profiles, err := svc.ListInstanceProfiles(awsContext(), &devicefarm.ListInstanceProfilesInput{}); err == nil {
 		for _, ip := range profiles.InstanceProfiles {
 			arn := StringValue(ip.Arn)
 			if arn == "" {
@@ -102,7 +100,7 @@ func (g *DeviceFarmGenerator) InitResources() error {
 	}
 	tgp := devicefarm.NewListTestGridProjectsPaginator(svc, &devicefarm.ListTestGridProjectsInput{})
 	for tgp.HasMorePages() {
-		page, err := tgp.NextPage(context.TODO())
+		page, err := tgp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

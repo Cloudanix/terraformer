@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -45,7 +44,7 @@ func (g *EfsGenerator) InitResources() error {
 	// Replication configurations are keyed by the source file system id.
 	rc := efs.NewDescribeReplicationConfigurationsPaginator(svc, &efs.DescribeReplicationConfigurationsInput{})
 	for rc.HasMorePages() {
-		page, err := rc.NextPage(context.TODO())
+		page, err := rc.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -64,7 +63,7 @@ func (g *EfsGenerator) InitResources() error {
 func (g *EfsGenerator) loadFileSystem(svc *efs.Client) error {
 	p := efs.NewDescribeFileSystemsPaginator(svc, &efs.DescribeFileSystemsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -76,7 +75,7 @@ func (g *EfsGenerator) loadFileSystem(svc *efs.Client) error {
 				"aws",
 				efsAllowEmptyValues))
 
-			targetsResponse, err := svc.DescribeMountTargets(context.TODO(), &efs.DescribeMountTargetsInput{
+			targetsResponse, err := svc.DescribeMountTargets(awsContext(), &efs.DescribeMountTargetsInput{
 				FileSystemId: fileSystem.FileSystemId,
 			})
 			if err != nil {
@@ -92,7 +91,7 @@ func (g *EfsGenerator) loadFileSystem(svc *efs.Client) error {
 					efsAllowEmptyValues))
 			}
 
-			if bp, err := svc.DescribeBackupPolicy(context.TODO(), &efs.DescribeBackupPolicyInput{
+			if bp, err := svc.DescribeBackupPolicy(awsContext(), &efs.DescribeBackupPolicyInput{
 				FileSystemId: fileSystem.FileSystemId,
 			}); err == nil && bp.BackupPolicy != nil && bp.BackupPolicy.Status != "DISABLED" {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -103,7 +102,7 @@ func (g *EfsGenerator) loadFileSystem(svc *efs.Client) error {
 					efsAllowEmptyValues))
 			}
 
-			policyResponse, err := svc.DescribeFileSystemPolicy(context.TODO(), &efs.DescribeFileSystemPolicyInput{
+			policyResponse, err := svc.DescribeFileSystemPolicy(awsContext(), &efs.DescribeFileSystemPolicyInput{
 				FileSystemId: fileSystem.FileSystemId,
 			})
 			if err != nil {
@@ -129,7 +128,7 @@ func (g *EfsGenerator) loadFileSystem(svc *efs.Client) error {
 func (g *EfsGenerator) loadAccessPoint(svc *efs.Client) error {
 	p := efs.NewDescribeAccessPointsPaginator(svc, &efs.DescribeAccessPointsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

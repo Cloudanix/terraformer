@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/qldb"
 	"github.com/aws/aws-sdk-go-v2/service/qldb/types"
@@ -35,7 +33,7 @@ func (g *QLDBGenerator) InitResources() error {
 	var ledgerNames []string
 	p := qldb.NewListLedgersPaginator(svc, &qldb.ListLedgersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -54,7 +52,7 @@ func (g *QLDBGenerator) InitResources() error {
 		}
 		sp := qldb.NewListJournalKinesisStreamsForLedgerPaginator(svc, &qldb.ListJournalKinesisStreamsForLedgerInput{LedgerName: &ledger})
 		for sp.HasMorePages() {
-			page, err := sp.NextPage(context.TODO())
+			page, err := sp.NextPage(awsContext())
 			if err != nil {
 				break
 			}

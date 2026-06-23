@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/dlm"
 	"github.com/aws/aws-sdk-go-v2/service/dlm/types"
 )
@@ -35,7 +33,7 @@ func (g *DlmGenerator) InitResources() error {
 	}
 	svc := dlm.NewFromConfig(config)
 
-	output, err := svc.GetLifecyclePolicies(context.TODO(), &dlm.GetLifecyclePoliciesInput{})
+	output, err := svc.GetLifecyclePolicies(awsContext(), &dlm.GetLifecyclePoliciesInput{})
 	if err != nil {
 		return err
 	}

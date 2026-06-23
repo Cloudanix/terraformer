@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/datapipeline"
 )
@@ -36,7 +34,7 @@ func (g *DataPipelineGenerator) InitResources() error {
 	p := datapipeline.NewListPipelinesPaginator(svc, &datapipeline.ListPipelinesInput{})
 	var resources []terraformutils.Resource
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -50,7 +48,7 @@ func (g *DataPipelineGenerator) InitResources() error {
 				"aws",
 				datapipelineAllowEmptyValues))
 			// The pipeline definition is a singleton imported by the pipeline ID.
-			if def, err := svc.GetPipelineDefinition(context.TODO(), &datapipeline.GetPipelineDefinitionInput{PipelineId: pipeline.Id}); err == nil && len(def.PipelineObjects) > 0 {
+			if def, err := svc.GetPipelineDefinition(awsContext(), &datapipeline.GetPipelineDefinitionInput{PipelineId: pipeline.Id}); err == nil && len(def.PipelineObjects) > 0 {
 				resources = append(resources, terraformutils.NewSimpleResource(
 					pipelineID, pipelineName, "aws_datapipeline_pipeline_definition", "aws", datapipelineAllowEmptyValues))
 			}

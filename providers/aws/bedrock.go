@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/bedrock"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *BedrockGenerator) InitResources() error {
 		return e
 	}
 	svc := bedrock.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	models := bedrock.NewListCustomModelsPaginator(svc, &bedrock.ListCustomModelsInput{})
 	for models.HasMorePages() {
@@ -99,7 +97,7 @@ func (g *BedrockGenerator) InitResources() error {
 
 	profiles := bedrock.NewListInferenceProfilesPaginator(svc, &bedrock.ListInferenceProfilesInput{})
 	for profiles.HasMorePages() {
-		page, err := profiles.NextPage(context.TODO())
+		page, err := profiles.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

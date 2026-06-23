@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/opensearch"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *OpenSearchGenerator) InitResources() error {
 	}
 	svc := opensearch.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	out, err := svc.ListDomainNames(ctx, &opensearch.ListDomainNamesInput{})
 	if err != nil {
 		return err
@@ -121,7 +119,7 @@ func (g *OpenSearchGenerator) InitResources() error {
 	}
 
 	for ap := opensearch.NewListApplicationsPaginator(svc, &opensearch.ListApplicationsInput{}); ap.HasMorePages(); {
-		page, err := ap.NextPage(context.TODO())
+		page, err := ap.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/workspacesweb"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +31,7 @@ func (g *WorkSpacesWebGenerator) InitResources() error {
 		return e
 	}
 	svc := workspacesweb.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(arn, tfType string) {
 		if arn != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(arn, arn, tfType, "aws", defaultAllowEmptyValues))

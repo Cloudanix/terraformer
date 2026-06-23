@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
@@ -35,7 +33,7 @@ func (g *VPCRouteServerGenerator) InitResources() error {
 		return e
 	}
 	svc := ec2.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	for p := ec2.NewDescribeRouteServersPaginator(svc, &ec2.DescribeRouteServersInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)

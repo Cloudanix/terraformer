@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/mediastore"
 )
@@ -36,7 +34,7 @@ func (g *MediaStoreGenerator) InitResources() error {
 	p := mediastore.NewListContainersPaginator(svc, &mediastore.ListContainersInput{})
 	var resources []terraformutils.Resource
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func (g *MediaStoreGenerator) InitResources() error {
 				"aws_media_store_container",
 				"aws",
 				mediastoreAllowEmptyValues))
-			if _, err := svc.GetContainerPolicy(context.TODO(), &mediastore.GetContainerPolicyInput{ContainerName: container.Name}); err == nil {
+			if _, err := svc.GetContainerPolicy(awsContext(), &mediastore.GetContainerPolicyInput{ContainerName: container.Name}); err == nil {
 				resources = append(resources, terraformutils.NewSimpleResource(
 					containerName, containerName, "aws_media_store_container_policy", "aws", mediastoreAllowEmptyValues))
 			}

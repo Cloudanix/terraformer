@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/auditmanager"
 	"github.com/aws/aws-sdk-go-v2/service/auditmanager/types"
 
@@ -35,7 +33,7 @@ func (g *AuditManagerGenerator) InitResources() error {
 	svc := auditmanager.NewFromConfig(config)
 	p := auditmanager.NewListAssessmentsPaginator(svc, &auditmanager.ListAssessmentsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *AuditManagerGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for sp := auditmanager.NewListAssessmentFrameworkShareRequestsPaginator(svc, &auditmanager.ListAssessmentFrameworkShareRequestsInput{RequestType: types.ShareRequestTypeSent}); sp.HasMorePages(); {
 		page, err := sp.NextPage(ctx)
 		if err != nil {

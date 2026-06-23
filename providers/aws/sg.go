@@ -16,7 +16,6 @@ package aws
 
 import (
 	"bytes"
-	"context"
 	"fmt"
 	"os"
 	"sort"
@@ -248,7 +247,7 @@ func (g *SecurityGenerator) InitResources() error {
 	p := ec2.NewDescribeSecurityGroupsPaginator(svc, &ec2.DescribeSecurityGroupsInput{})
 	var resourcesToFilter []types.SecurityGroup
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -261,7 +260,7 @@ func (g *SecurityGenerator) InitResources() error {
 
 	// Additional (non-home) VPC associations of a security group.
 	for ap := ec2.NewDescribeSecurityGroupVpcAssociationsPaginator(svc, &ec2.DescribeSecurityGroupVpcAssociationsInput{}); ap.HasMorePages(); {
-		page, err := ap.NextPage(context.TODO())
+		page, err := ap.NextPage(awsContext())
 		if err != nil {
 			break
 		}

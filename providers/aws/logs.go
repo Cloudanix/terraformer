@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -64,7 +63,7 @@ func (g *LogsGenerator) InitResources() error {
 	}
 	svc := cloudwatchlogs.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var logGroupNames []string
 	p := cloudwatchlogs.NewDescribeLogGroupsPaginator(svc, &cloudwatchlogs.DescribeLogGroupsInput{})
 	for p.HasMorePages() {

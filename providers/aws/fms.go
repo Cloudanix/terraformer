@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/fms"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *FmsGenerator) InitResources() error {
 
 	p := fms.NewListPoliciesPaginator(svc, &fms.ListPoliciesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -50,7 +48,7 @@ func (g *FmsGenerator) InitResources() error {
 		}
 	}
 
-	if admin, err := svc.GetAdminAccount(context.TODO(), &fms.GetAdminAccountInput{}); err == nil {
+	if admin, err := svc.GetAdminAccount(awsContext(), &fms.GetAdminAccountInput{}); err == nil {
 		id := StringValue(admin.AdminAccount)
 		if id != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -60,7 +58,7 @@ func (g *FmsGenerator) InitResources() error {
 
 	var rsToken *string
 	for {
-		out, err := svc.ListResourceSets(context.TODO(), &fms.ListResourceSetsInput{NextToken: rsToken})
+		out, err := svc.ListResourceSets(awsContext(), &fms.ListResourceSetsInput{NextToken: rsToken})
 		if err != nil {
 			break
 		}

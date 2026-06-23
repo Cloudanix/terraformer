@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/resourcegroups"
 )
@@ -36,7 +34,7 @@ func (g *ResourceGroupsGenerator) InitResources() error {
 	p := resourcegroups.NewListGroupsPaginator(svc, &resourcegroups.ListGroupsInput{})
 	var resources []terraformutils.Resource
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -53,14 +51,14 @@ func (g *ResourceGroupsGenerator) InitResources() error {
 			// aws_resourcegroups_resource models a MANUAL group membership. Skip
 			// query-based groups (membership is computed from a tag/CFN query, not
 			// individually managed). A group with no query → manual.
-			if _, qErr := svc.GetGroupQuery(context.TODO(), &resourcegroups.GetGroupQueryInput{Group: &groupName}); qErr == nil {
+			if _, qErr := svc.GetGroupQuery(awsContext(), &resourcegroups.GetGroupQueryInput{Group: &groupName}); qErr == nil {
 				continue // query-based group → members are auto, not managed resources
 			}
 			if groupArn == "" {
 				continue
 			}
 			for rp := resourcegroups.NewListGroupResourcesPaginator(svc, &resourcegroups.ListGroupResourcesInput{Group: &groupArn}); rp.HasMorePages(); {
-				rpage, err := rp.NextPage(context.TODO())
+				rpage, err := rp.NextPage(awsContext())
 				if err != nil {
 					break
 				}

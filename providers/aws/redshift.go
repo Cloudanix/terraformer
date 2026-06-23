@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strings"
 
 	"log"
@@ -34,7 +33,7 @@ type RedshiftGenerator struct {
 func (g *RedshiftGenerator) loadClusters(svc *redshift.Client, accountID string) error {
 	p := redshift.NewDescribeClustersPaginator(svc, &redshift.DescribeClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -52,12 +51,12 @@ func (g *RedshiftGenerator) loadClusters(svc *redshift.Client, accountID string)
 					resourceName, resourceName, "aws_redshift_cluster_iam_roles", "aws", RedshiftAllowEmptyValues))
 			}
 			if nsArn := StringValue(db.ClusterNamespaceArn); nsArn != "" {
-				if _, err := svc.GetResourcePolicy(context.TODO(), &redshift.GetResourcePolicyInput{ResourceArn: &nsArn}); err == nil {
+				if _, err := svc.GetResourcePolicy(awsContext(), &redshift.GetResourcePolicyInput{ResourceArn: &nsArn}); err == nil {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						nsArn, resourceName, "aws_redshift_resource_policy", "aws", RedshiftAllowEmptyValues))
 				}
 			}
-			if partners, err := svc.DescribePartners(context.TODO(), &redshift.DescribePartnersInput{
+			if partners, err := svc.DescribePartners(awsContext(), &redshift.DescribePartnersInput{
 				AccountId: &accountID, ClusterIdentifier: db.ClusterIdentifier}); err == nil {
 				for _, pt := range partners.PartnerIntegrationInfoList {
 					dbName, partnerName := StringValue(pt.DatabaseName), StringValue(pt.PartnerName)
@@ -73,7 +72,7 @@ func (g *RedshiftGenerator) loadClusters(svc *redshift.Client, accountID string)
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					resourceName, resourceName, "aws_redshift_snapshot_copy", "aws", RedshiftAllowEmptyValues))
 			}
-			if status, err := svc.DescribeLoggingStatus(context.TODO(),
+			if status, err := svc.DescribeLoggingStatus(awsContext(),
 				&redshift.DescribeLoggingStatusInput{ClusterIdentifier: db.ClusterIdentifier}); err == nil &&
 				status.LoggingEnabled != nil && *status.LoggingEnabled {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -87,7 +86,7 @@ func (g *RedshiftGenerator) loadClusters(svc *redshift.Client, accountID string)
 func (g *RedshiftGenerator) loadParameterGroups(svc *redshift.Client) error {
 	p := redshift.NewDescribeClusterParameterGroupsPaginator(svc, &redshift.DescribeClusterParameterGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -111,7 +110,7 @@ func (g *RedshiftGenerator) loadParameterGroups(svc *redshift.Client) error {
 func (g *RedshiftGenerator) loadSubnetGroups(svc *redshift.Client) error {
 	p := redshift.NewDescribeClusterSubnetGroupsPaginator(svc, &redshift.DescribeClusterSubnetGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -132,7 +131,7 @@ func (g *RedshiftGenerator) loadSubnetGroups(svc *redshift.Client) error {
 func (g *RedshiftGenerator) loadEventSubscription(svc *redshift.Client) error {
 	p := redshift.NewDescribeEventSubscriptionsPaginator(svc, &redshift.DescribeEventSubscriptionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -153,7 +152,7 @@ func (g *RedshiftGenerator) loadEventSubscription(svc *redshift.Client) error {
 func (g *RedshiftGenerator) loadSnapshotSchedules(svc *redshift.Client) error {
 	p := redshift.NewDescribeSnapshotSchedulesPaginator(svc, &redshift.DescribeSnapshotSchedulesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -185,7 +184,7 @@ func (g *RedshiftGenerator) loadSnapshotSchedules(svc *redshift.Client) error {
 func (g *RedshiftGenerator) loadSnapshotCopyGrants(svc *redshift.Client) error {
 	p := redshift.NewDescribeSnapshotCopyGrantsPaginator(svc, &redshift.DescribeSnapshotCopyGrantsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -204,7 +203,7 @@ func (g *RedshiftGenerator) loadSnapshotCopyGrants(svc *redshift.Client) error {
 func (g *RedshiftGenerator) loadDataShareAuthorizations(svc *redshift.Client) error {
 	p := redshift.NewDescribeDataSharesPaginator(svc, &redshift.DescribeDataSharesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -288,7 +287,7 @@ func (g *RedshiftGenerator) InitResources() error {
 func (g *RedshiftGenerator) loadRedshiftIntegrations(svc *redshift.Client) error {
 	p := redshift.NewDescribeIntegrationsPaginator(svc, &redshift.DescribeIntegrationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -305,7 +304,7 @@ func (g *RedshiftGenerator) loadRedshiftIntegrations(svc *redshift.Client) error
 }
 
 func (g *RedshiftGenerator) loadRedshiftExtras(svc *redshift.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(name, tfType string) {
 		if name != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -371,7 +370,7 @@ func (g *RedshiftGenerator) loadRedshiftExtras(svc *redshift.Client) error {
 func (g *RedshiftGenerator) loadScheduledActions(svc *redshift.Client) error {
 	p := redshift.NewDescribeScheduledActionsPaginator(svc, &redshift.DescribeScheduledActionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -390,7 +389,7 @@ func (g *RedshiftGenerator) loadScheduledActions(svc *redshift.Client) error {
 func (g *RedshiftGenerator) loadUsageLimits(svc *redshift.Client) error {
 	p := redshift.NewDescribeUsageLimitsPaginator(svc, &redshift.DescribeUsageLimitsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -407,7 +406,7 @@ func (g *RedshiftGenerator) loadUsageLimits(svc *redshift.Client) error {
 }
 
 func (g *RedshiftGenerator) loadAuthenticationProfiles(svc *redshift.Client) error {
-	out, err := svc.DescribeAuthenticationProfiles(context.TODO(), &redshift.DescribeAuthenticationProfilesInput{})
+	out, err := svc.DescribeAuthenticationProfiles(awsContext(), &redshift.DescribeAuthenticationProfilesInput{})
 	if err != nil {
 		return err
 	}
@@ -425,7 +424,7 @@ func (g *RedshiftGenerator) loadAuthenticationProfiles(svc *redshift.Client) err
 func (g *RedshiftGenerator) loadEndpointAccess(svc *redshift.Client) error {
 	p := redshift.NewDescribeEndpointAccessPaginator(svc, &redshift.DescribeEndpointAccessInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

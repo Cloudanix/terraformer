@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/ivs"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *IVSGenerator) InitResources() error {
 
 	p := ivs.NewListChannelsPaginator(svc, &ivs.ListChannelsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +49,7 @@ func (g *IVSGenerator) InitResources() error {
 	}
 
 	for kp := ivs.NewListPlaybackKeyPairsPaginator(svc, &ivs.ListPlaybackKeyPairsInput{}); kp.HasMorePages(); {
-		page, err := kp.NextPage(context.TODO())
+		page, err := kp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -66,7 +64,7 @@ func (g *IVSGenerator) InitResources() error {
 	}
 
 	for rc := ivs.NewListRecordingConfigurationsPaginator(svc, &ivs.ListRecordingConfigurationsInput{}); rc.HasMorePages(); {
-		page, err := rc.NextPage(context.TODO())
+		page, err := rc.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/glacier"
@@ -39,7 +37,7 @@ func (g *GlacierGenerator) InitResources() error {
 
 	p := glacier.NewListVaultsPaginator(svc, &glacier.ListVaultsInput{AccountId: aws.String("-")})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -53,7 +51,7 @@ func (g *GlacierGenerator) InitResources() error {
 				continue
 			}
 			// Vault lock is a singleton on the vault, imported by vault name.
-			if _, err := svc.GetVaultLock(context.TODO(), &glacier.GetVaultLockInput{AccountId: aws.String("-"), VaultName: v.VaultName}); err == nil {
+			if _, err := svc.GetVaultLock(awsContext(), &glacier.GetVaultLockInput{AccountId: aws.String("-"), VaultName: v.VaultName}); err == nil {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					name, name, "aws_glacier_vault_lock", "aws", defaultAllowEmptyValues))
 			}

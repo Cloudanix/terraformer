@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/rbin"
 	"github.com/aws/aws-sdk-go-v2/service/rbin/types"
 
@@ -39,7 +37,7 @@ func (g *RbinGenerator) InitResources() error {
 	for _, rt := range []types.ResourceType{types.ResourceTypeEbsSnapshot, types.ResourceTypeEc2Image} {
 		p := rbin.NewListRulesPaginator(svc, &rbin.ListRulesInput{ResourceType: rt})
 		for p.HasMorePages() {
-			page, err := p.NextPage(context.TODO())
+			page, err := p.NextPage(awsContext())
 			if err != nil {
 				return err
 			}

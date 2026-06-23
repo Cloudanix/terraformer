@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/ecr"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *EcrGenerator) InitResources() error {
 
 	p := ecr.NewDescribeRepositoriesPaginator(svc, &ecr.DescribeRepositoriesInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -48,7 +46,7 @@ func (g *EcrGenerator) InitResources() error {
 				"aws",
 				defaultAllowEmptyValues))
 
-			_, err := svc.GetRepositoryPolicy(context.TODO(), &ecr.GetRepositoryPolicyInput{
+			_, err := svc.GetRepositoryPolicy(awsContext(), &ecr.GetRepositoryPolicyInput{
 				RepositoryName: repository.RepositoryName,
 				RegistryId:     repository.RegistryId,
 			})
@@ -61,7 +59,7 @@ func (g *EcrGenerator) InitResources() error {
 					defaultAllowEmptyValues))
 			}
 
-			_, err = svc.GetLifecyclePolicy(context.TODO(), &ecr.GetLifecyclePolicyInput{
+			_, err = svc.GetLifecyclePolicy(awsContext(), &ecr.GetLifecyclePolicyInput{
 				RepositoryName: repository.RepositoryName,
 				RegistryId:     repository.RegistryId,
 			})
@@ -77,7 +75,7 @@ func (g *EcrGenerator) InitResources() error {
 	}
 
 	for tp := ecr.NewDescribeRepositoryCreationTemplatesPaginator(svc, &ecr.DescribeRepositoryCreationTemplatesInput{}); tp.HasMorePages(); {
-		page, err := tp.NextPage(context.TODO())
+		page, err := tp.NextPage(awsContext())
 		if err != nil {
 			break
 		}
@@ -93,7 +91,7 @@ func (g *EcrGenerator) InitResources() error {
 
 	rules := ecr.NewDescribePullThroughCacheRulesPaginator(svc, &ecr.DescribePullThroughCacheRulesInput{})
 	for rules.HasMorePages() {
-		page, err := rules.NextPage(context.TODO())
+		page, err := rules.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -114,15 +112,15 @@ func (g *EcrGenerator) InitResources() error {
 	}
 	account := StringValue(registryID)
 	if account != "" {
-		if _, err := svc.GetRegistryScanningConfiguration(context.TODO(), &ecr.GetRegistryScanningConfigurationInput{}); err == nil {
+		if _, err := svc.GetRegistryScanningConfiguration(awsContext(), &ecr.GetRegistryScanningConfigurationInput{}); err == nil {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				account, account, "aws_ecr_registry_scanning_configuration", "aws", defaultAllowEmptyValues))
 		}
-		if _, err := svc.GetRegistryPolicy(context.TODO(), &ecr.GetRegistryPolicyInput{}); err == nil {
+		if _, err := svc.GetRegistryPolicy(awsContext(), &ecr.GetRegistryPolicyInput{}); err == nil {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				account, account, "aws_ecr_registry_policy", "aws", defaultAllowEmptyValues))
 		}
-		if out, err := svc.DescribeRegistry(context.TODO(), &ecr.DescribeRegistryInput{}); err == nil &&
+		if out, err := svc.DescribeRegistry(awsContext(), &ecr.DescribeRegistryInput{}); err == nil &&
 			out.ReplicationConfiguration != nil && len(out.ReplicationConfiguration.Rules) > 0 {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				account, account, "aws_ecr_replication_configuration", "aws", defaultAllowEmptyValues))

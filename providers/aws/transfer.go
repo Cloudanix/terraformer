@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/transfer"
 	"github.com/aws/aws-sdk-go-v2/service/transfer/types"
@@ -35,7 +33,7 @@ func (g *TransferGenerator) InitResources() error {
 	}
 	svc := transfer.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var serverIDs []string
 	p := transfer.NewListServersPaginator(svc, &transfer.ListServersInput{})
 	for p.HasMorePages() {
@@ -148,7 +146,7 @@ func (g *TransferGenerator) InitResources() error {
 
 	conns := transfer.NewListConnectorsPaginator(svc, &transfer.ListConnectorsInput{})
 	for conns.HasMorePages() {
-		page, err := conns.NextPage(context.TODO())
+		page, err := conns.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -160,7 +158,7 @@ func (g *TransferGenerator) InitResources() error {
 
 	profiles := transfer.NewListProfilesPaginator(svc, &transfer.ListProfilesInput{})
 	for profiles.HasMorePages() {
-		page, err := profiles.NextPage(context.TODO())
+		page, err := profiles.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -172,7 +170,7 @@ func (g *TransferGenerator) InitResources() error {
 
 	workflows := transfer.NewListWorkflowsPaginator(svc, &transfer.ListWorkflowsInput{})
 	for workflows.HasMorePages() {
-		page, err := workflows.NextPage(context.TODO())
+		page, err := workflows.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -184,7 +182,7 @@ func (g *TransferGenerator) InitResources() error {
 
 	webApps := transfer.NewListWebAppsPaginator(svc, &transfer.ListWebAppsInput{})
 	for webApps.HasMorePages() {
-		page, err := webApps.NextPage(context.TODO())
+		page, err := webApps.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

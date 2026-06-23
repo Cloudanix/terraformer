@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3files"
 
@@ -35,7 +33,7 @@ func (g *S3FilesGenerator) InitResources() error {
 		return e
 	}
 	svc := s3files.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := s3files.NewListFileSystemsPaginator(svc, &s3files.ListFileSystemsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {

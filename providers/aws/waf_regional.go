@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/wafregional"
 )
@@ -74,7 +72,7 @@ func (g *WafRegionalGenerator) InitResources() error {
 }
 
 func (g *WafRegionalGenerator) loadWebACL(svc *wafregional.Client) error {
-	output, err := svc.ListWebACLs(context.TODO(), &wafregional.ListWebACLsInput{})
+	output, err := svc.ListWebACLs(awsContext(), &wafregional.ListWebACLsInput{})
 	if err != nil {
 		return err
 	}
@@ -90,7 +88,7 @@ func (g *WafRegionalGenerator) loadWebACL(svc *wafregional.Client) error {
 }
 
 func (g *WafRegionalGenerator) loadByteMatchSet(svc *wafregional.Client) error {
-	output, err := svc.ListByteMatchSets(context.TODO(), &wafregional.ListByteMatchSetsInput{})
+	output, err := svc.ListByteMatchSets(awsContext(), &wafregional.ListByteMatchSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -106,7 +104,7 @@ func (g *WafRegionalGenerator) loadByteMatchSet(svc *wafregional.Client) error {
 }
 
 func (g *WafRegionalGenerator) loadGeoMatchSet(svc *wafregional.Client) error {
-	output, err := svc.ListGeoMatchSets(context.TODO(), &wafregional.ListGeoMatchSetsInput{})
+	output, err := svc.ListGeoMatchSets(awsContext(), &wafregional.ListGeoMatchSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -122,7 +120,7 @@ func (g *WafRegionalGenerator) loadGeoMatchSet(svc *wafregional.Client) error {
 }
 
 func (g *WafRegionalGenerator) loadIPSet(svc *wafregional.Client) error {
-	output, err := svc.ListIPSets(context.TODO(), &wafregional.ListIPSetsInput{})
+	output, err := svc.ListIPSets(awsContext(), &wafregional.ListIPSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -138,7 +136,7 @@ func (g *WafRegionalGenerator) loadIPSet(svc *wafregional.Client) error {
 }
 
 func (g *WafRegionalGenerator) loadRateBasedRules(svc *wafregional.Client) error {
-	output, err := svc.ListRateBasedRules(context.TODO(), &wafregional.ListRateBasedRulesInput{})
+	output, err := svc.ListRateBasedRules(awsContext(), &wafregional.ListRateBasedRulesInput{})
 	if err != nil {
 		return err
 	}
@@ -154,7 +152,7 @@ func (g *WafRegionalGenerator) loadRateBasedRules(svc *wafregional.Client) error
 }
 
 func (g *WafRegionalGenerator) loadRegexMatchSets(svc *wafregional.Client) error {
-	output, err := svc.ListRegexMatchSets(context.TODO(), &wafregional.ListRegexMatchSetsInput{})
+	output, err := svc.ListRegexMatchSets(awsContext(), &wafregional.ListRegexMatchSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -170,7 +168,7 @@ func (g *WafRegionalGenerator) loadRegexMatchSets(svc *wafregional.Client) error
 }
 
 func (g *WafRegionalGenerator) loadRegexPatternSets(svc *wafregional.Client) error {
-	output, err := svc.ListRegexPatternSets(context.TODO(), &wafregional.ListRegexPatternSetsInput{})
+	output, err := svc.ListRegexPatternSets(awsContext(), &wafregional.ListRegexPatternSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -186,7 +184,7 @@ func (g *WafRegionalGenerator) loadRegexPatternSets(svc *wafregional.Client) err
 }
 
 func (g *WafRegionalGenerator) loadWafRules(svc *wafregional.Client) error {
-	output, err := svc.ListRules(context.TODO(), &wafregional.ListRulesInput{})
+	output, err := svc.ListRules(awsContext(), &wafregional.ListRulesInput{})
 	if err != nil {
 		return err
 	}
@@ -202,7 +200,7 @@ func (g *WafRegionalGenerator) loadWafRules(svc *wafregional.Client) error {
 }
 
 func (g *WafRegionalGenerator) loadWafRuleGroups(svc *wafregional.Client) error {
-	output, err := svc.ListRuleGroups(context.TODO(), &wafregional.ListRuleGroupsInput{})
+	output, err := svc.ListRuleGroups(awsContext(), &wafregional.ListRuleGroupsInput{})
 	if err != nil {
 		return err
 	}
@@ -218,7 +216,7 @@ func (g *WafRegionalGenerator) loadWafRuleGroups(svc *wafregional.Client) error 
 }
 
 func (g *WafRegionalGenerator) loadSizeConstraintSets(svc *wafregional.Client) error {
-	output, err := svc.ListSizeConstraintSets(context.TODO(), &wafregional.ListSizeConstraintSetsInput{})
+	output, err := svc.ListSizeConstraintSets(awsContext(), &wafregional.ListSizeConstraintSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -234,7 +232,7 @@ func (g *WafRegionalGenerator) loadSizeConstraintSets(svc *wafregional.Client) e
 }
 
 func (g *WafRegionalGenerator) loadSQLInjectionMatchSets(svc *wafregional.Client) error {
-	output, err := svc.ListSqlInjectionMatchSets(context.TODO(), &wafregional.ListSqlInjectionMatchSetsInput{})
+	output, err := svc.ListSqlInjectionMatchSets(awsContext(), &wafregional.ListSqlInjectionMatchSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -250,7 +248,7 @@ func (g *WafRegionalGenerator) loadSQLInjectionMatchSets(svc *wafregional.Client
 }
 
 func (g *WafRegionalGenerator) loadXSSMatchSet(svc *wafregional.Client) error {
-	output, err := svc.ListXssMatchSets(context.TODO(), &wafregional.ListXssMatchSetsInput{})
+	output, err := svc.ListXssMatchSets(awsContext(), &wafregional.ListXssMatchSetsInput{})
 	if err != nil {
 		return err
 	}

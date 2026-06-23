@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/inspector"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *InspectorGenerator) InitResources() error {
 		return e
 	}
 	svc := inspector.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	targets := inspector.NewListAssessmentTargetsPaginator(svc, &inspector.ListAssessmentTargetsInput{})
 	for targets.HasMorePages() {

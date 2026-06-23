@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/emr"
 )
@@ -48,7 +46,7 @@ func (g *EmrGenerator) InitResources() error {
 func (g *EmrGenerator) addStudios(client *emr.Client) error {
 	p := emr.NewListStudiosPaginator(client, &emr.ListStudiosInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -60,7 +58,7 @@ func (g *EmrGenerator) addStudios(client *emr.Client) error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(s.Name), "aws_emr_studio", "aws", emrAllowEmptyValues))
 			for mp := emr.NewListStudioSessionMappingsPaginator(client, &emr.ListStudioSessionMappingsInput{StudioId: s.StudioId}); mp.HasMorePages(); {
-				mpage, err := mp.NextPage(context.TODO())
+				mpage, err := mp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -82,7 +80,7 @@ func (g *EmrGenerator) addStudios(client *emr.Client) error {
 func (g *EmrGenerator) addClusters(client *emr.Client) error {
 	p := emr.NewListClustersPaginator(client, &emr.ListClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -96,7 +94,7 @@ func (g *EmrGenerator) addClusters(client *emr.Client) error {
 				emrAllowEmptyValues,
 			))
 			g.addInstanceGroupsAndFleets(client, clusterID)
-			if msp, err := client.GetManagedScalingPolicy(context.TODO(), &emr.GetManagedScalingPolicyInput{ClusterId: cluster.Id}); err == nil && msp.ManagedScalingPolicy != nil {
+			if msp, err := client.GetManagedScalingPolicy(awsContext(), &emr.GetManagedScalingPolicyInput{ClusterId: cluster.Id}); err == nil && msp.ManagedScalingPolicy != nil {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					clusterID, clusterID, "aws_emr_managed_scaling_policy", "aws", emrAllowEmptyValues))
 			}
@@ -112,7 +110,7 @@ func (g *EmrGenerator) addInstanceGroupsAndFleets(client *emr.Client, clusterID 
 	if clusterID == "" {
 		return
 	}
-	ctx := context.TODO()
+	ctx := awsContext()
 	for fp := emr.NewListInstanceFleetsPaginator(client, &emr.ListInstanceFleetsInput{ClusterId: &clusterID}); fp.HasMorePages(); {
 		page, err := fp.NextPage(ctx)
 		if err != nil {
@@ -146,7 +144,7 @@ func (g *EmrGenerator) addInstanceGroupsAndFleets(client *emr.Client, clusterID 
 func (g *EmrGenerator) addSecurityConfigurations(client *emr.Client) error {
 	p := emr.NewListSecurityConfigurationsPaginator(client, &emr.ListSecurityConfigurationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/account"
 	accounttypes "github.com/aws/aws-sdk-go-v2/service/account/types"
 
@@ -36,7 +34,7 @@ func (g *AccountGenerator) InitResources() error {
 		return e
 	}
 	svc := account.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	// Opt-in Regions explicitly enabled (default-on Regions aren't managed).
 	for p := account.NewListRegionsPaginator(svc, &account.ListRegionsInput{}); p.HasMorePages(); {

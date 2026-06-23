@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/neptune"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -37,7 +35,7 @@ func (g *NeptuneGenerator) InitResources() error {
 
 	p := neptune.NewDescribeDBClustersPaginator(svc, &neptune.DescribeDBClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -57,7 +55,7 @@ func (g *NeptuneGenerator) InitResources() error {
 				name, name, tfType, "aws", defaultAllowEmptyValues))
 		}
 	}
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := neptune.NewDescribeDBClusterParameterGroupsPaginator(svc, &neptune.DescribeDBClusterParameterGroupsInput{}); p.HasMorePages(); {
 		pg, err := p.NextPage(ctx)
 		if err != nil {

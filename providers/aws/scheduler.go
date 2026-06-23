@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/scheduler"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *SchedulerGenerator) InitResources() error {
 		return e
 	}
 	svc := scheduler.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	groups := scheduler.NewListScheduleGroupsPaginator(svc, &scheduler.ListScheduleGroupsInput{})
 	for groups.HasMorePages() {

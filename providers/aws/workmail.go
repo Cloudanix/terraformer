@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/workmail"
 
@@ -35,7 +33,7 @@ func (g *WorkMailGenerator) InitResources() error {
 		return e
 	}
 	svc := workmail.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	var orgIDs []string
 	for p := workmail.NewListOrganizationsPaginator(svc, &workmail.ListOrganizationsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)

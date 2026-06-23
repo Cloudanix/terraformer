@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/uxc"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *UXCGenerator) InitResources() error {
 		return e
 	}
 	svc := uxc.NewFromConfig(config)
-	if _, err := svc.GetAccountCustomizations(context.TODO(), &uxc.GetAccountCustomizationsInput{}); err != nil {
+	if _, err := svc.GetAccountCustomizations(awsContext(), &uxc.GetAccountCustomizationsInput{}); err != nil {
 		return nil
 	}
 	account, err := g.getAccountNumber(config)

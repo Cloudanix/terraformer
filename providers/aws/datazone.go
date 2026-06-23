@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/datazone"
 	datazonetypes "github.com/aws/aws-sdk-go-v2/service/datazone/types"
@@ -35,7 +33,7 @@ func (g *DataZoneGenerator) InitResources() error {
 		return e
 	}
 	svc := datazone.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	var domainIDs []string
 	p := datazone.NewListDomainsPaginator(svc, &datazone.ListDomainsInput{})

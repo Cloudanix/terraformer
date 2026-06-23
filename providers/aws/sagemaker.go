@@ -36,7 +36,7 @@ func (g *SageMakerGenerator) InitResources() error {
 		return e
 	}
 	svc := sagemaker.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	domains := sagemaker.NewListDomainsPaginator(svc, &sagemaker.ListDomainsInput{})
 	for domains.HasMorePages() {

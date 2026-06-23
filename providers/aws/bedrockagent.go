@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockagent"
 
@@ -33,7 +31,7 @@ func (g *BedrockAgentGenerator) InitResources() error {
 		return e
 	}
 	svc := bedrockagent.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	var agentIDs []string
 	p := bedrockagent.NewListAgentsPaginator(svc, &bedrockagent.ListAgentsInput{})
 	for p.HasMorePages() {
@@ -128,7 +126,7 @@ func (g *BedrockAgentGenerator) InitResources() error {
 	}
 
 	for fp := bedrockagent.NewListFlowsPaginator(svc, &bedrockagent.ListFlowsInput{}); fp.HasMorePages(); {
-		page, err := fp.NextPage(context.TODO())
+		page, err := fp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -143,7 +141,7 @@ func (g *BedrockAgentGenerator) InitResources() error {
 	}
 
 	for pp := bedrockagent.NewListPromptsPaginator(svc, &bedrockagent.ListPromptsInput{}); pp.HasMorePages(); {
-		page, err := pp.NextPage(context.TODO())
+		page, err := pp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

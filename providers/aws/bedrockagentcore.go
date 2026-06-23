@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/bedrockagentcorecontrol"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *BedrockAgentCoreGenerator) InitResources() error {
 		return e
 	}
 	svc := bedrockagentcorecontrol.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	emit := func(id, name, tfType string) {
 		if id != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(id, name, tfType, "aws", defaultAllowEmptyValues))

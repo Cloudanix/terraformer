@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 	ec2types "github.com/aws/aws-sdk-go-v2/service/ec2/types"
@@ -55,7 +53,7 @@ func (g *SubnetGenerator) InitResources() error {
 	svc := ec2.NewFromConfig(config)
 	p := ec2.NewDescribeSubnetsPaginator(svc, &ec2.DescribeSubnetsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -65,7 +63,7 @@ func (g *SubnetGenerator) InitResources() error {
 			if subnetID == "" {
 				continue
 			}
-			out, err := svc.GetSubnetCidrReservations(context.TODO(), &ec2.GetSubnetCidrReservationsInput{SubnetId: subnet.SubnetId})
+			out, err := svc.GetSubnetCidrReservations(awsContext(), &ec2.GetSubnetCidrReservationsInput{SubnetId: subnet.SubnetId})
 			if err != nil {
 				continue
 			}

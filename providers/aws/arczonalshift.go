@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/arczonalshift"
 	arczonalshifttypes "github.com/aws/aws-sdk-go-v2/service/arczonalshift/types"
 
@@ -35,7 +33,7 @@ func (g *ARCZonalShiftGenerator) InitResources() error {
 		return e
 	}
 	svc := arczonalshift.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := arczonalshift.NewListManagedResourcesPaginator(svc, &arczonalshift.ListManagedResourcesInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {

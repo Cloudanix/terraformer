@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/emrcontainers"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *EMRContainersGenerator) InitResources() error {
 
 	p := emrcontainers.NewListVirtualClustersPaginator(svc, &emrcontainers.ListVirtualClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +49,7 @@ func (g *EMRContainersGenerator) InitResources() error {
 	}
 
 	for jt := emrcontainers.NewListJobTemplatesPaginator(svc, &emrcontainers.ListJobTemplatesInput{}); jt.HasMorePages(); {
-		page, err := jt.NextPage(context.TODO())
+		page, err := jt.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

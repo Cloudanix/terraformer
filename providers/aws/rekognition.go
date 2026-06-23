@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/rekognition"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *RekognitionGenerator) InitResources() error {
 		return e
 	}
 	svc := rekognition.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	collections := rekognition.NewListCollectionsPaginator(svc, &rekognition.ListCollectionsInput{})
 	for collections.HasMorePages() {

@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -39,7 +38,7 @@ func (g *CodeDeployGenerator) InitResources() error {
 	p := codedeploy.NewListApplicationsPaginator(svc, &codedeploy.ListApplicationsInput{})
 	var resources []terraformutils.Resource
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -55,7 +54,7 @@ func (g *CodeDeployGenerator) InitResources() error {
 				ApplicationName: aws.String(application),
 			})
 			for gp.HasMorePages() {
-				gpage, err := gp.NextPage(context.TODO())
+				gpage, err := gp.NextPage(awsContext())
 				if err != nil {
 					return err
 				}
@@ -78,7 +77,7 @@ func (g *CodeDeployGenerator) InitResources() error {
 	// AWS-managed and not importable as user resources.
 	cp := codedeploy.NewListDeploymentConfigsPaginator(svc, &codedeploy.ListDeploymentConfigsInput{})
 	for cp.HasMorePages() {
-		cpage, err := cp.NextPage(context.TODO())
+		cpage, err := cp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

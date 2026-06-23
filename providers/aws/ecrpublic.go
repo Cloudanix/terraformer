@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/ecrpublic"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -40,7 +38,7 @@ func (g *EcrPublicGenerator) InitResources() error {
 
 	p := ecrpublic.NewDescribeRepositoriesPaginator(svc, &ecrpublic.DescribeRepositoriesInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -53,7 +51,7 @@ func (g *EcrPublicGenerator) InitResources() error {
 				ecrPublicAllowEmptyValues)
 			g.Resources = append(g.Resources, resource)
 
-			if _, err := svc.GetRepositoryPolicy(context.TODO(), &ecrpublic.GetRepositoryPolicyInput{
+			if _, err := svc.GetRepositoryPolicy(awsContext(), &ecrpublic.GetRepositoryPolicyInput{
 				RepositoryName: repository.RepositoryName, RegistryId: repository.RegistryId,
 			}); err == nil {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

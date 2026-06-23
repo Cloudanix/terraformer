@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/kinesisanalyticsv2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *KinesisAnalyticsV2Generator) InitResources() error {
 	}
 	svc := kinesisanalyticsv2.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var appNames []string
 	p := kinesisanalyticsv2.NewListApplicationsPaginator(svc, &kinesisanalyticsv2.ListApplicationsInput{})
 	for p.HasMorePages() {
