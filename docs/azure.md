@@ -178,8 +178,16 @@ export ARM_USE_ADAL=true
     * `azurerm_application_insights`
 *   `automation`
     * `azurerm_automation_account`
+*   `cdn`
+    * `azurerm_cdn_endpoint`
+    * `azurerm_cdn_profile`
 *   `cognitive`
     * `azurerm_cognitive_account`
+*   `monitor`
+    * `azurerm_monitor_action_group`
+    * `azurerm_monitor_activity_log_alert`
+    * `azurerm_monitor_autoscale_setting`
+    * `azurerm_monitor_metric_alert`
 *   `eventgrid`
     * `azurerm_eventgrid_domain`
     * `azurerm_eventgrid_topic`
