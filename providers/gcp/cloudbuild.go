@@ -4,7 +4,7 @@ import (
 	"context"
 
 	cloudbuild "cloud.google.com/go/cloudbuild/apiv1"
-	pb "google.golang.org/genproto/googleapis/devtools/cloudbuild/v1"
+	pb "cloud.google.com/go/cloudbuild/apiv1/v2/cloudbuildpb"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
