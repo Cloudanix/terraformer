@@ -102,6 +102,28 @@ func (g *BigtableGenerator) InitResources() error {
 			}
 		}
 
+		// Walk the instance for its materialized views.
+		mvList, mverr := bigtableService.Projects.Instances.MaterializedViews.List(obj.Name).Do()
+		if mverr == nil {
+			for _, mv := range mvList.MaterializedViews {
+				mt := strings.Split(mv.Name, "/")
+				mvName := mt[len(mt)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					project+"/"+instanceName+"/"+mvName,
+					mvName,
+					"google_bigtable_materialized_view",
+					g.ProviderName,
+					map[string]string{
+						"materialized_view_id": mvName,
+						"instance":             instanceName,
+						"project":              project,
+					},
+					bigtableAllowEmptyValues,
+					bigtableAdditionalFields,
+				))
+			}
+		}
+
 		// Walk the instance for its app profiles.
 		profilesList, perr := bigtableService.Projects.Instances.AppProfiles.List(obj.Name).Do()
 		if perr == nil {
