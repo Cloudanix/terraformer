@@ -295,3 +295,20 @@ Coverage **88 → 547** emitted types; **100 services**; full repo green (build/
 4. **Bespoke deep per-env / org-provisioned** (firebase config singletons, apigee per-environment keyvaluemaps/targetservers/keystores, scc folder/v2/management variants) — large, low-value-without-live-project surface.
 
 Build-validated only; no live-project refresh available in sandbox to confirm P4 diff-empty.
+
+---
+
+## Progress checkpoint — session 2, post-SDK-recheck (461 commits)
+
+Coverage **88 → 600** emitted types; **105 services**; full repo green incl. `go test ./providers/gcp/` (3 new unit tests). GA gap 682.
+
+**This round (with tests):**
+- **computeIam** (new service) — google_compute_{disk,image,instance,snapshot,subnetwork,instance_template,region_disk,instant_snapshot,region_instant_snapshot,storage_pool}_iam_member, via a hand generator that walks zones/regions + GetIamPolicy (codegen has no IAM template). Unit-tested `expandComputeBindings` (role×member flattening).
+- Refactored + unit-tested two branching mappings: `discoveryEngineEngineType` (solutionType→engine resource), `appEngineVersionType` (env→standard/flexible).
+- New services: appEngine, firebaseAppHosting, firebaseDataConnect, developerConnect (expanded), dialogflowCx/Es, discoveryengine, apigee, identityPlatform, apihub, beyondcorp, containerAnalysis, parameterManager, firebaseRules.
+- Cluster expansions: dlp (+4), networkServices (+4), networkManagement (+1), bigqueryReservation (+4), osConfig (+1), apigee env/attachments (+5), backupdr, storage folder/managed_folder/anywhere_cache.
+
+**Remaining 682 — confirmed blockers:**
+1. **SDK not in `google.golang.org/api v0.286.0`** (need `go get google.golang.org/api@latest`): chronicle (~13), gemini/cloudaicompanion (~12), ces (~9), scc-management/securitycentermanagement (~10). Plain `go get` does NOT bump the module.
+2. **No List API** (~560): every `*_iam_binding`/`_policy`, `*_signed_url_key`, `*_with_rules`, config singletons, `*_acl`/access_control, attachment/membership sub-blocks, `firestore_document`, `storage_bucket_object`, apigee per-env keyvaluemaps/keystores/references (get-by-name only), datacatalog tag_template/entry/tag. Correctly excluded — listing impossible.
+3. **scc v2** (~10): securitycenter/v2 API surface (separate from v1, deferred).
