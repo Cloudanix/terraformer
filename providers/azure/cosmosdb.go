@@ -176,6 +176,43 @@ func (g *CosmosDBGenerator) listCassandra(resourceGroupName string, accountName 
 	return resources, nil
 }
 
+func (g *CosmosDBGenerator) listGremlin(resourceGroupName string, accountName string) ([]terraformutils.Resource, error) {
+	var resources []terraformutils.Resource
+	ctx := context.Background()
+	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
+	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
+	client := documentdb.NewGremlinResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
+
+	databases, err := client.ListGremlinDatabases(ctx, resourceGroupName, accountName)
+	if err != nil {
+		return nil, err
+	}
+	for _, database := range *databases.Value {
+		resources = append(resources, terraformutils.NewSimpleResource(
+			*database.ID,
+			*database.Name,
+			"azurerm_cosmosdb_gremlin_database",
+			g.ProviderName,
+			[]string{}))
+
+		graphs, err := client.ListGremlinGraphs(ctx, resourceGroupName, accountName, *database.Name)
+		if err != nil {
+			return nil, err
+		}
+		for _, graph := range *graphs.Value {
+			resources = append(resources, terraformutils.NewSimpleResource(
+				*graph.ID,
+				*graph.Name,
+				"azurerm_cosmosdb_gremlin_graph",
+				g.ProviderName,
+				[]string{}))
+		}
+	}
+
+	return resources, nil
+}
+
 func (g *CosmosDBGenerator) listAndAddForDatabaseAccounts() ([]terraformutils.Resource, error) {
 	var resources []terraformutils.Resource
 	ctx := context.Background()
@@ -233,6 +270,12 @@ func (g *CosmosDBGenerator) listAndAddForDatabaseAccounts() ([]terraformutils.Re
 			return nil, err
 		}
 		resources = append(resources, cassandra...)
+
+		gremlin, err := g.listGremlin(id.ResourceGroup, *account.Name)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, gremlin...)
 	}
 
 	return resources, nil
