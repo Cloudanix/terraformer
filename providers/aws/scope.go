@@ -74,6 +74,8 @@ var serviceScope = map[string]regionScope{
 	"dsql":                         scopeRegional,
 	"s3vectors":                    scopeRegional,
 	"bedrock-agentcore-control":    scopeRegional,
+	"s3files":                      scopeRegional,
+	"uxc":                          scopeRegional,
 	"arc-region-switch":            scopeRegional,
 	"arc-zonal-shift":              scopeRegional,
 	"workmail":                     scopeRegional,

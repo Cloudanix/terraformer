@@ -561,6 +561,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/route53resolver v1.46.0
 	github.com/aws/aws-sdk-go-v2/service/rum v1.31.8
 	github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5
+	github.com/aws/aws-sdk-go-v2/service/s3files v1.1.1
 	github.com/aws/aws-sdk-go-v2/service/s3outposts v1.35.2
 	github.com/aws/aws-sdk-go-v2/service/s3tables v1.16.6
 	github.com/aws/aws-sdk-go-v2/service/s3vectors v1.8.0
@@ -585,6 +586,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/timestreamwrite v1.36.0
 	github.com/aws/aws-sdk-go-v2/service/transcribe v1.56.3
 	github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3
+	github.com/aws/aws-sdk-go-v2/service/uxc v1.1.2
 	github.com/aws/aws-sdk-go-v2/service/verifiedpermissions v1.34.6
 	github.com/aws/aws-sdk-go-v2/service/vpclattice v1.22.2
 	github.com/aws/aws-sdk-go-v2/service/wellarchitected v1.40.6

@@ -48,6 +48,14 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bedrockagentcore_harness`
     * `aws_bedrockagentcore_api_key_credential_provider`
     * `aws_bedrockagentcore_online_evaluation_config`
+*   `s3files`
+    * `aws_s3files_file_system`
+    * `aws_s3files_file_system_policy`
+    * `aws_s3files_synchronization_configuration`
+    * `aws_s3files_access_point`
+    * `aws_s3files_mount_target`
+*   `uxc`
+    * `aws_uxc_account_customizations`
 *   `s3vectors`
     * `aws_s3vectors_vector_bucket`
     * `aws_s3vectors_index`
