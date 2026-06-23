@@ -188,6 +188,8 @@ export ARM_USE_ADAL=true
     * `azurerm_application_insights`
 *   `attestation`
     * `azurerm_attestation_provider`
+*   `automanage`
+    * `azurerm_automanage_configuration`
 *   `automation`
     * `azurerm_automation_account`
 *   `data_protection`
@@ -270,6 +272,9 @@ export ARM_USE_ADAL=true
     * `azurerm_servicebus_namespace`
 *   `signalr`
     * `azurerm_signalr_service`
+*   `lighthouse`
+    * `azurerm_lighthouse_assignment`
+    * `azurerm_lighthouse_definition`
 *   `load_balancer`
     * `azurerm_lb`
 *   `log_analytics`
@@ -278,6 +283,8 @@ export ARM_USE_ADAL=true
     * `azurerm_machine_learning_workspace`
 *   `managed_identity`
     * `azurerm_user_assigned_identity`
+*   `spatial_anchors`
+    * `azurerm_spatial_anchors_account`
 *   `storage_mover`
     * `azurerm_storage_mover`
 *   `traffic_manager`
