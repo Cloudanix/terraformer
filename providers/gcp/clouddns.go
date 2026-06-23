@@ -127,7 +127,33 @@ func (g *CloudDNSGenerator) InitResources() error {
 
 	g.Resources = g.createZonesResources(ctx, svc, project)
 	g.Resources = append(g.Resources, g.createPoliciesResources(ctx, svc, project)...)
+	g.Resources = append(g.Resources, g.createResponsePoliciesResources(ctx, svc, project)...)
 	return nil
+}
+
+func (g CloudDNSGenerator) createResponsePoliciesResources(ctx context.Context, svc *dns.Service, project string) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	listCall := svc.ResponsePolicies.List(project)
+	if err := listCall.Pages(ctx, func(page *dns.ResponsePoliciesListResponse) error {
+		for _, obj := range page.ResponsePolicies {
+			resources = append(resources, terraformutils.NewResource(
+				project+"/"+obj.ResponsePolicyName,
+				obj.ResponsePolicyName,
+				"google_dns_response_policy",
+				g.ProviderName,
+				map[string]string{
+					"response_policy_name": obj.ResponsePolicyName,
+					"project":              project,
+				},
+				[]string{""},
+				map[string]interface{}{},
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
 
 func (g *CloudDNSGenerator) PostConvertHook() error {

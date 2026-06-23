@@ -96,6 +96,7 @@ List of supported GCP services:
     * `google_dns_managed_zone`
     * `google_dns_record_set`
     * `google_dns_policy`
+    * `google_dns_response_policy`
 *   `externalVpnGateways`
     * `google_compute_external_vpn_gateway`
 *   `firewall`
