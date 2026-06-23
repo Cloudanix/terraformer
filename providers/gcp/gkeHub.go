@@ -78,11 +78,13 @@ func (g *GkeHubGenerator) InitResources() error {
 	featuresList := gkeHubService.Projects.Locations.Features.List(parent)
 	g.Resources = append(g.Resources, g.createFeaturesResources(ctx, featuresList)...)
 
+	scopeNames := []string{}
 	scopesList := gkeHubService.Projects.Locations.Scopes.List(parent)
 	if err := scopesList.Pages(ctx, func(page *gkehub.ListScopesResponse) error {
 		for _, obj := range page.Scopes {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
+			scopeNames = append(scopeNames, obj.Name)
 			g.Resources = append(g.Resources, terraformutils.NewResource(
 				obj.Name, name, "google_gke_hub_scope", g.ProviderName,
 				map[string]string{"scope_id": name, "project": g.GetArgs()["project"].(string)},
@@ -92,6 +94,33 @@ func (g *GkeHubGenerator) InitResources() error {
 		return nil
 	}); err != nil {
 		log.Println(err)
+	}
+	for _, scope := range scopeNames {
+		scopeID := strings.Split(scope, "/")[len(strings.Split(scope, "/"))-1]
+		if err := gkeHubService.Projects.Locations.Scopes.Namespaces.List(scope).Pages(ctx, func(p *gkehub.ListScopeNamespacesResponse) error {
+			for _, o := range p.ScopeNamespaces {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_gke_hub_namespace", g.ProviderName,
+					map[string]string{"scope_id": scopeID, "project": g.GetArgs()["project"].(string)},
+					gkeHubAllowEmptyValues, gkeHubAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+		if err := gkeHubService.Projects.Locations.Scopes.Rbacrolebindings.List(scope).Pages(ctx, func(p *gkehub.ListScopeRBACRoleBindingsResponse) error {
+			for _, o := range p.Rbacrolebindings {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_gke_hub_scope_rbac_role_binding", g.ProviderName,
+					map[string]string{"scope_id": scopeID, "project": g.GetArgs()["project"].(string)},
+					gkeHubAllowEmptyValues, gkeHubAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 
 	fleetsList := gkeHubService.Projects.Locations.Fleets.List(parent)
