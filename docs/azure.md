@@ -285,6 +285,7 @@ export ARM_USE_ADAL=true
     * `azurerm_network_security_group`
     * `azurerm_network_security_rule`
 *   `network_watcher`
+    * `azurerm_network_connection_monitor`
     * `azurerm_network_packet_capture`
     * `azurerm_network_watcher`
     * `azurerm_network_watcher_flow_log`

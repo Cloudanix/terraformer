@@ -84,6 +84,21 @@ func (az *NetworkWatcherGenerator) appendPacketCaptures(parent *network.Watcher,
 	return nil
 }
 
+func (az *NetworkWatcherGenerator) appendConnectionMonitors(parent *network.Watcher, resourceGroupID *ResourceID) error {
+	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
+	client := network.NewConnectionMonitorsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = authorizer
+	ctx := context.Background()
+	resources, err := client.List(ctx, resourceGroupID.ResourceGroup, *parent.Name)
+	if err != nil {
+		return err
+	}
+	for _, item := range *resources.Value {
+		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_network_connection_monitor")
+	}
+	return nil
+}
+
 func (az *NetworkWatcherGenerator) InitResources() error {
 
 	resources, err := az.listResources()
@@ -101,6 +116,10 @@ func (az *NetworkWatcherGenerator) InitResources() error {
 			return err
 		}
 		err = az.appendPacketCaptures(&resource, resourceGroupID)
+		if err != nil {
+			return err
+		}
+		err = az.appendConnectionMonitors(&resource, resourceGroupID)
 		if err != nil {
 			return err
 		}
