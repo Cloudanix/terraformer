@@ -185,6 +185,7 @@ List of supported GCP services:
     * `google_netapp_storage_pool`
 *   `networkConnectivity`
     * `google_network_connectivity_hub`
+    * `google_network_connectivity_spoke`
 *   `networkServices`
     * `google_network_services_mesh`
     * `google_network_services_gateway`

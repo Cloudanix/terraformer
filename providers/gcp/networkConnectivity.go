@@ -19,6 +19,7 @@ import (
 	"log"
 	"strings"
 
+	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/networkconnectivity/v1"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -69,6 +70,39 @@ func (g *NetworkConnectivityGenerator) InitResources() error {
 
 	hubsList := networkConnectivityService.Projects.Locations.Global.Hubs.List(
 		"projects/" + g.GetArgs()["project"].(string) + "/locations/global")
-	g.Resources = g.createResources(ctx, hubsList)
+	g.Resources = append(g.Resources, g.createResources(ctx, hubsList)...)
+
+	spokesList := networkConnectivityService.Projects.Locations.Spokes.List(
+		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
+	g.Resources = append(g.Resources, g.createSpokesResources(ctx, spokesList)...)
 	return nil
+}
+
+// Run on spokesList and create for each TerraformResource
+func (g NetworkConnectivityGenerator) createSpokesResources(ctx context.Context, list *networkconnectivity.ProjectsLocationsSpokesListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *networkconnectivity.ListSpokesResponse) error {
+		for _, obj := range page.Spokes {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_network_connectivity_spoke",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				networkConnectivityAllowEmptyValues,
+				networkConnectivityAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
