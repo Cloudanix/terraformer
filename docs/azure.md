@@ -233,10 +233,14 @@ export ARM_USE_ADAL=true
     * `azurerm_lb_backend_address_pool`
     * `azurerm_lb_nat_rule`
     * `azurerm_lb_probe`
+*   `mssql`
+    * `azurerm_mssql_managed_instance`
 *   `nat_gateway`
     * `azurerm_nat_gateway`
 *   `netapp`
     * `azurerm_netapp_account`
+*   `powerbi`
+    * `azurerm_powerbi_embedded`
 *   `network_interface`
     * `azurerm_network_interface`
 *   `network_security_group`
