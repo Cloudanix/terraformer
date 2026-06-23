@@ -78,6 +78,17 @@ func (g *DataplexGenerator) InitResources() error {
 				o.Name, name, "google_dataplex_entry_type", g.ProviderName,
 				map[string]string{"entry_type_id": name, "project": project, "location": location},
 				dataplexAllowEmptyValues, dataplexAdditionalFields))
+			if policy, perr := dataplexService.Projects.Locations.EntryTypes.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_dataplex_entry_type_iam_member", g.ProviderName,
+							map[string]string{"entry_type_id": name, "role": b.Role, "member": m, "project": project, "location": location},
+							dataplexAllowEmptyValues, dataplexAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
