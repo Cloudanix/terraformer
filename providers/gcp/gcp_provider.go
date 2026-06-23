@@ -161,6 +161,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["firebaseRules"] = &GCPFacade{service: &FirebaseRulesGenerator{}}
 	services["appEngine"] = &GCPFacade{service: &AppEngineGenerator{}}
 	services["firebaseAppHosting"] = &GCPFacade{service: &FirebaseAppHostingGenerator{}}
+	services["firebaseDataConnect"] = &GCPFacade{service: &FirebaseDataConnectGenerator{}}
 	services["healthcare"] = &GCPFacade{service: &HealthcareGenerator{}}
 	services["looker"] = &GCPFacade{service: &LookerGenerator{}}
 	services["datastream"] = &GCPFacade{service: &DatastreamGenerator{}}
