@@ -150,6 +150,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["memcache"] = &GCPFacade{service: &MemcacheGenerator{}}
 	services["privateca"] = &GCPFacade{service: &PrivatecaGenerator{}}
 	services["clouddeploy"] = &GCPFacade{service: &ClouddeployGenerator{}}
+	services["dialogflow"] = &GCPFacade{service: &DialogflowGenerator{}}
 	return services
 }
 

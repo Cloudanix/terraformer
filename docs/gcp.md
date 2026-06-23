@@ -68,6 +68,8 @@ List of supported GCP services:
     * `google_data_fusion_instance`
 *   `datastream`
     * `google_datastream_stream`
+*   `dialogflow`
+    * `google_dialogflow_cx_agent`
 *   `disks`
     * `google_compute_disk`
 *   `dns`
