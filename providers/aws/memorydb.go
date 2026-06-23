@@ -96,6 +96,15 @@ func (g *MemoryDBGenerator) InitResources() error {
 			g.addNamed(StringValue(u.Name), "aws_memorydb_user")
 		}
 	}
+	for mc := memorydb.NewDescribeMultiRegionClustersPaginator(svc, &memorydb.DescribeMultiRegionClustersInput{}); mc.HasMorePages(); {
+		page, err := mc.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, c := range page.MultiRegionClusters {
+			g.addNamed(StringValue(c.MultiRegionClusterName), "aws_memorydb_multi_region_cluster")
+		}
+	}
 	return nil
 }
 

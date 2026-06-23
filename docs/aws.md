@@ -1019,6 +1019,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_memorydb_snapshot`
     * `aws_memorydb_subnet_group`
     * `aws_memorydb_user`
+    * `aws_memorydb_multi_region_cluster`
 *   `neptune`
     * `aws_neptune_cluster`
     * `aws_neptune_cluster_parameter_group`
@@ -1038,6 +1039,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_opensearch_vpc_endpoint`
     * `aws_opensearch_outbound_connection`
     * `aws_opensearch_package`
+    * `aws_opensearch_application`
     * `aws_opensearch_package_association`
 *   `opensearchserverless`
     * `aws_opensearchserverless_collection`
@@ -1090,6 +1092,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpclattice_service_network`
     * `aws_vpclattice_target_group`
     * `aws_vpclattice_service_network_vpc_association`
+    * `aws_vpclattice_resource_gateway`
     * `aws_vpclattice_listener`
     * `aws_vpclattice_listener_rule`
     * `aws_vpclattice_access_log_subscription`
@@ -1291,6 +1294,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_schemas_schema`
 *   `timestream-influxdb`
     * `aws_timestreaminfluxdb_db_instance`
+    * `aws_timestreaminfluxdb_db_cluster`
 *   `timestream-write`
     * `aws_timestreamwrite_database`
     * `aws_timestreamwrite_table`

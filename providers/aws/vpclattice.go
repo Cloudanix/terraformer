@@ -211,5 +211,20 @@ func (g *VPCLatticeGenerator) InitResources() error {
 				id, id, "aws_vpclattice_service_network_vpc_association", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for rg := vpclattice.NewListResourceGatewaysPaginator(svc, &vpclattice.ListResourceGatewaysInput{}); rg.HasMorePages(); {
+		page, err := rg.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, r := range page.Items {
+			id := StringValue(r.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(r.Name), "aws_vpclattice_resource_gateway", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

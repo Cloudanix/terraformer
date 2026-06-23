@@ -119,5 +119,20 @@ func (g *OpenSearchGenerator) InitResources() error {
 				id, id, "aws_opensearch_package", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for ap := opensearch.NewListApplicationsPaginator(svc, &opensearch.ListApplicationsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, a := range page.ApplicationSummaries {
+			id := StringValue(a.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(a.Name), "aws_opensearch_application", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }

@@ -49,5 +49,20 @@ func (g *TimestreamInfluxDBGenerator) InitResources() error {
 				id, StringValue(inst.Name), "aws_timestreaminfluxdb_db_instance", "aws", defaultAllowEmptyValues))
 		}
 	}
+
+	for cp := timestreaminfluxdb.NewListDbClustersPaginator(svc, &timestreaminfluxdb.ListDbClustersInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, c := range page.Items {
+			id := StringValue(c.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(c.Name), "aws_timestreaminfluxdb_db_cluster", "aws", defaultAllowEmptyValues))
+		}
+	}
 	return nil
 }
