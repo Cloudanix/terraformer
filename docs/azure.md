@@ -210,6 +210,15 @@ export ARM_USE_ADAL=true
     * `azurerm_digital_twins_instance`
 *   `elastic_san`
     * `azurerm_elastic_san`
+*   `hdinsight`
+    * `azurerm_hdinsight_hadoop_cluster`
+    * `azurerm_hdinsight_hbase_cluster`
+    * `azurerm_hdinsight_interactive_query_cluster`
+    * `azurerm_hdinsight_kafka_cluster`
+    * `azurerm_hdinsight_ml_services_cluster`
+    * `azurerm_hdinsight_rserver_cluster`
+    * `azurerm_hdinsight_spark_cluster`
+    * `azurerm_hdinsight_storm_cluster`
 *   `healthcare`
     * `azurerm_healthcare_service`
 *   `load_test`

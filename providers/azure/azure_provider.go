@@ -347,6 +347,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"data_share":                           &DataShareGenerator{},
 		"dashboard":                            &DashboardGenerator{},
 		"elastic_san":                          &ElasticSANGenerator{},
+		"hdinsight":                            &HDInsightGenerator{},
 		"healthcare":                           &HealthcareGenerator{},
 		"load_test":                            &LoadTestGenerator{},
 		"private_dns_resolver":                 &PrivateDNSResolverGenerator{},
