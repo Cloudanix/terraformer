@@ -6,7 +6,7 @@ by `providers/azure/*.go` (excluding test files).
 ## Coverage
 
 - Baseline: **141** types (35 services), measured 2026-06-23.
-- Current: **270** types (+129). Large P3 long-tail + clean-service batch added with registration unit tests. Phase 1 mgmt-plane complete (incl. app_service
+- Current: **273** types (+132). Extensive P3 + clean-service coverage with registration unit tests.
   modern apps + service_plan); Phase 2 incl. policy; ~50 new Phase 2/3 Track 2
   services. Phase 5 migration DONE (35/35 Track 1→2). azuread (P4) already in fork.
 - Provider gap (vs v4.78.0, 1130 types): re-run `plan.md` §3 to recompute.

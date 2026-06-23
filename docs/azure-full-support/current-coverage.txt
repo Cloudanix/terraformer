@@ -33,6 +33,7 @@ azurerm_cosmosdb_mongo_database
 azurerm_cosmosdb_sql_container
 azurerm_cosmosdb_sql_database
 azurerm_cosmosdb_table
+azurerm_custom_provider
 azurerm_dashboard_grafana
 azurerm_data_factory
 azurerm_data_factory_custom_dataset
@@ -107,6 +108,7 @@ azurerm_eventhub_namespace_authorization_rule
 azurerm_eventhub_namespace_disaster_recovery_config
 azurerm_firewall
 azurerm_fluid_relay_server
+azurerm_frontdoor
 azurerm_hdinsight_hadoop_cluster
 azurerm_hdinsight_hbase_cluster
 azurerm_hdinsight_interactive_query_cluster
@@ -187,6 +189,7 @@ azurerm_orbital_spacecraft
 azurerm_policy_assignment
 azurerm_policy_definition
 azurerm_policy_set_definition
+azurerm_portal_dashboard
 azurerm_postgresql_configuration
 azurerm_postgresql_database
 azurerm_postgresql_firewall_rule
