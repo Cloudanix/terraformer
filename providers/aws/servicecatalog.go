@@ -73,6 +73,16 @@ func (g *ServiceCatalogGenerator) InitResources() error {
 					id, id, "aws_servicecatalog_constraint", "aws", servicecatalogAllowEmptyValues))
 			}
 		}
+		if budgets, err := svc.ListBudgetsForResource(context.TODO(), &servicecatalog.ListBudgetsForResourceInput{ResourceId: &portfolioID}); err == nil {
+			for _, b := range budgets.Budgets {
+				bn := StringValue(b.BudgetName)
+				if bn == "" {
+					continue
+				}
+				resources = append(resources, terraformutils.NewSimpleResource(
+					bn+":"+portfolioID, bn+"_"+portfolioID, "aws_servicecatalog_budget_resource_association", "aws", servicecatalogAllowEmptyValues))
+			}
+		}
 		for ppp := servicecatalog.NewListPrincipalsForPortfolioPaginator(svc, &servicecatalog.ListPrincipalsForPortfolioInput{PortfolioId: &portfolioID}); ppp.HasMorePages(); {
 			page, err := ppp.NextPage(context.TODO())
 			if err != nil {

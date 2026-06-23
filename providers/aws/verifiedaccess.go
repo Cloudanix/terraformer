@@ -49,6 +49,12 @@ func (g *VerifiedAccessGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_verifiedaccess_instance", "aws", defaultAllowEmptyValues))
+			if lc, err := svc.DescribeVerifiedAccessInstanceLoggingConfigurations(ctx, &ec2.DescribeVerifiedAccessInstanceLoggingConfigurationsInput{
+				VerifiedAccessInstanceIds: []string{id},
+			}); err == nil && len(lc.LoggingConfigurations) > 0 {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_verifiedaccess_instance_logging_configuration", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 

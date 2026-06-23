@@ -961,6 +961,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_verifiedaccess_trust_provider`
     * `aws_verifiedaccess_group`
     * `aws_verifiedaccess_endpoint`
+    * `aws_verifiedaccess_instance_logging_configuration`
 *   `verifiedpermissions`
     * `aws_verifiedpermissions_policy_store`
     * `aws_verifiedpermissions_policy`
@@ -1316,6 +1317,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_servicecatalog_portfolio_share`
     * `aws_servicecatalog_principal_portfolio_association`
     * `aws_servicecatalog_product_portfolio_association`
+    * `aws_servicecatalog_budget_resource_association`
 *   `servicecatalog-appregistry`
     * `aws_servicecatalogappregistry_application`
 *   `servicediscovery`
