@@ -16,67 +16,60 @@ package azure
 
 import (
 	"context"
-	"log"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7"
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2021-02-01/network"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
 )
 
 type VirtualNetworkGenerator struct {
 	AzureService
 }
 
-func (g VirtualNetworkGenerator) createResources(ctx context.Context, iterator network.VirtualNetworkListResultIterator) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	for iterator.NotDone() {
-		virtualNetwork := iterator.Value()
-		tferName := terraformutils.TfSanitize(*virtualNetwork.Name)
-		for _, resource := range resources {
-			if tferName == resource.ResourceName {
-				*virtualNetwork.Name = *virtualNetwork.Name + "_" + *virtualNetwork.ID
-			}
-		}
-
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*virtualNetwork.ID,
-			*virtualNetwork.Name,
-			"azurerm_virtual_network",
-			g.ProviderName,
-			[]string{}))
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (g *VirtualNetworkGenerator) InitResources() error {
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	virtualNetworkClient := network.NewVirtualNetworksClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	virtualNetworkClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	var (
-		output network.VirtualNetworkListResultIterator
-		err    error
-	)
-
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		output, err = virtualNetworkClient.ListComplete(ctx, rg)
-	} else {
-		output, err = virtualNetworkClient.ListAllComplete(ctx)
-	}
+// initVirtualNetworks imports azurerm_virtual_network (Track 2 armnetwork). The
+// PostConvertHook below strips inlined subnets to avoid circular dependencies.
+func (g *VirtualNetworkGenerator) initVirtualNetworks() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	client, err := armnetwork.NewVirtualNetworksClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	g.Resources, err = g.createResources(ctx, output)
-	if err != nil {
+	var vnets []*armnetwork.VirtualNetwork
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListAllPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			vnets = append(vnets, page.Value...)
+		}
+	} else {
+		for _, rg := range rgs {
+			pager := client.NewListPager(rg, nil)
+			for pager.More() {
+				page, err := pager.NextPage(context.TODO())
+				if err != nil {
+					return err
+				}
+				vnets = append(vnets, page.Value...)
+			}
+		}
+	}
+	for _, vnet := range vnets {
+		id := valueOrEmpty(vnet.ID)
+		if id == "" {
+			continue
+		}
+		g.AppendSimpleResourceWithDuplicateCheck(id, valueOrEmpty(vnet.Name), "azurerm_virtual_network")
+	}
+	return nil
+}
+
+func (g *VirtualNetworkGenerator) InitResources() error {
+	if _, cred, _ := g.getClientOptions(); cred == nil {
+		return nil
+	}
+	if err := g.initVirtualNetworks(); err != nil {
 		return err
 	}
 
