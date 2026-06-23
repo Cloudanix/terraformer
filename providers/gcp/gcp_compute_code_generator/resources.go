@@ -192,4 +192,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"serviceAttachments": basicGCPResource{
 		terraformName: "google_compute_service_attachment",
 	},
+	"regionNetworkEndpointGroups": basicGCPResource{
+		terraformName: "google_compute_region_network_endpoint_group",
+	},
 }
