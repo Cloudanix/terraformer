@@ -33,35 +33,6 @@ type AlloydbGenerator struct {
 	GCPService
 }
 
-// Run on clustersList and create for each TerraformResource
-func (g AlloydbGenerator) createResources(ctx context.Context, list *alloydb.ProjectsLocationsClustersListCall) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
-	location := g.GetArgs()["region"].(compute.Region).Name
-	if err := list.Pages(ctx, func(page *alloydb.ListClustersResponse) error {
-		for _, obj := range page.Clusters {
-			t := strings.Split(obj.Name, "/")
-			name := t[len(t)-1]
-			resources = append(resources, terraformutils.NewResource(
-				obj.Name,
-				name,
-				"google_alloydb_cluster",
-				g.ProviderName,
-				map[string]string{
-					"cluster_id": name,
-					"project":    g.GetArgs()["project"].(string),
-					"location":   location,
-				},
-				alloydbAllowEmptyValues,
-				alloydbAdditionalFields,
-			))
-		}
-		return nil
-	}); err != nil {
-		log.Println(err)
-	}
-	return resources
-}
-
 // Generate TerraformResources from GCP API,
 func (g *AlloydbGenerator) InitResources() error {
 	ctx := context.Background()
@@ -69,9 +40,44 @@ func (g *AlloydbGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
 
-	clustersList := alloydbService.Projects.Locations.Clusters.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, clustersList)
+	clusterNames := []string{}
+	clustersList := alloydbService.Projects.Locations.Clusters.List("projects/" + project + "/locations/" + location)
+	if err := clustersList.Pages(ctx, func(page *alloydb.ListClustersResponse) error {
+		for _, obj := range page.Clusters {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			clusterNames = append(clusterNames, name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_alloydb_cluster", g.ProviderName,
+				map[string]string{"cluster_id": name, "project": project, "location": location},
+				alloydbAllowEmptyValues, alloydbAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	for _, cluster := range clusterNames {
+		instList := alloydbService.Projects.Locations.Clusters.Instances.List(
+			"projects/" + project + "/locations/" + location + "/clusters/" + cluster)
+		if err := instList.Pages(ctx, func(page *alloydb.ListInstancesResponse) error {
+			for _, obj := range page.Instances {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_alloydb_instance", g.ProviderName,
+					map[string]string{"instance_id": name, "cluster": cluster, "project": project, "location": location},
+					alloydbAllowEmptyValues, alloydbAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
 	return nil
 }

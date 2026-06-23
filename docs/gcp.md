@@ -35,6 +35,7 @@ List of supported GCP services:
     * `google_api_gateway_api` (beta-only; use --provider-type beta)
 *   `alloydb`
     * `google_alloydb_cluster`
+    * `google_alloydb_instance`
 *   `apphub`
     * `google_apphub_application`
 *   `artifactRegistry`
