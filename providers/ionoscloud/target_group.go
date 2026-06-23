@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *TargetGroupGenerator) InitResources() error {
 	cloudAPIClient := client.CloudAPIClient
 	resourceType := "ionoscloud_target_group"
 
-	targetGroupResponse, _, err := cloudAPIClient.TargetGroupsApi.TargetgroupsGet(context.TODO()).Depth(1).Execute()
+	targetGroupResponse, _, err := cloudAPIClient.TargetGroupsApi.TargetgroupsGet(runContext()).Depth(1).Execute()
 	if err != nil {
 		return err
 	}

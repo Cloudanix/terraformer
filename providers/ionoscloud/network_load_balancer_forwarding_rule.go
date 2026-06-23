@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -22,7 +21,7 @@ func (g *NetworkLoadBalancerForwardingRuleGenerator) InitResources() error {
 		return err
 	}
 	for _, datacenter := range datacenters {
-		networkLoadBalancerResponse, _, err := cloudAPIClient.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(context.TODO(), *datacenter.Id).Execute()
+		networkLoadBalancerResponse, _, err := cloudAPIClient.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersGet(runContext(), *datacenter.Id).Execute()
 		if err != nil {
 			return err
 		}
@@ -34,7 +33,7 @@ func (g *NetworkLoadBalancerForwardingRuleGenerator) InitResources() error {
 		}
 		networkLoadBalancers := *networkLoadBalancerResponse.Items
 		for _, nlb := range networkLoadBalancers {
-			forwardingRulesResponse, _, err := cloudAPIClient.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(context.TODO(), *datacenter.Id, *nlb.Id).Depth(1).Execute()
+			forwardingRulesResponse, _, err := cloudAPIClient.NetworkLoadBalancersApi.DatacentersNetworkloadbalancersForwardingrulesGet(runContext(), *datacenter.Id, *nlb.Id).Depth(1).Execute()
 			if err != nil {
 				return err
 			}

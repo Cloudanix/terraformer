@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -22,7 +21,7 @@ func (g *ServerGenerator) InitResources() error {
 	}
 
 	for _, datacenter := range datacenters {
-		servers, _, err := cloudAPIClient.ServersApi.DatacentersServersGet(context.TODO(), *datacenter.Id).Depth(4).Execute()
+		servers, _, err := cloudAPIClient.ServersApi.DatacentersServersGet(runContext(), *datacenter.Id).Depth(4).Execute()
 		if err != nil {
 			return err
 		}
@@ -37,7 +36,7 @@ func (g *ServerGenerator) InitResources() error {
 			if !isServerValid(server, *datacenter.Id) {
 				continue
 			}
-			_, apiResponse, err := cloudAPIClient.LabelsApi.DatacentersServersLabelsFindByKey(context.TODO(), *datacenter.Id, *server.Id, "managedexternally").Execute()
+			_, apiResponse, err := cloudAPIClient.LabelsApi.DatacentersServersLabelsFindByKey(runContext(), *datacenter.Id, *server.Id, "managedexternally").Execute()
 			if err != nil {
 				if !apiResponse.HttpNotFound() {
 					return err

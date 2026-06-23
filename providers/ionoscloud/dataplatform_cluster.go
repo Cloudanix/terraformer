@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *DataPlatformClusterGenerator) InitResources() error {
 	dataPlatformClient := client.DataPlatformAPIClient
 	resourceType := "ionoscloud_dataplatform_cluster"
 
-	response, _, err := dataPlatformClient.DataPlatformClusterApi.ClustersGet(context.TODO()).Execute()
+	response, _, err := dataPlatformClient.DataPlatformClusterApi.ClustersGet(runContext()).Execute()
 	if err != nil {
 		return err
 	}

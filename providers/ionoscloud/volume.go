@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -20,7 +19,7 @@ func (g *VolumeGenerator) InitResources() error {
 		return err
 	}
 	for _, datacenter := range datacenters {
-		servers, _, err := cloudAPIClient.ServersApi.DatacentersServersGet(context.TODO(), *datacenter.Id).Depth(1).Execute()
+		servers, _, err := cloudAPIClient.ServersApi.DatacentersServersGet(runContext(), *datacenter.Id).Depth(1).Execute()
 		if err != nil {
 			return err
 		}
@@ -31,7 +30,7 @@ func (g *VolumeGenerator) InitResources() error {
 			continue
 		}
 		for _, server := range *servers.Items {
-			volumes, _, err := cloudAPIClient.ServersApi.DatacentersServersVolumesGet(context.TODO(), *datacenter.Id, *server.Id).Depth(1).Execute()
+			volumes, _, err := cloudAPIClient.ServersApi.DatacentersServersVolumesGet(runContext(), *datacenter.Id, *server.Id).Depth(1).Execute()
 			if err != nil {
 				return err
 			}

@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -22,7 +21,7 @@ func (g *LoadBalancerGenerator) InitResources() error {
 		return err
 	}
 	for _, datacenter := range datacenters {
-		loadBalancerResponse, _, err := cloudAPIClient.LoadBalancersApi.DatacentersLoadbalancersGet(context.TODO(), *datacenter.Id).Depth(1).Execute()
+		loadBalancerResponse, _, err := cloudAPIClient.LoadBalancersApi.DatacentersLoadbalancersGet(runContext(), *datacenter.Id).Depth(1).Execute()
 		if err != nil {
 			return err
 		}
