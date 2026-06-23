@@ -121,6 +121,38 @@ func (g *GcsGenerator) createBucketsResources(ctx context.Context, gcsService *s
 			}
 
 			resources = append(resources, g.createNotificationResources(gcsService, bucket)...)
+
+			bucketName := bucket.Name
+			if err := gcsService.Folders.List(bucketName).Pages(ctx, func(page *storage.Folders) error {
+				for _, f := range page.Items {
+					resources = append(resources, terraformutils.NewResource(
+						bucketName+"/folders/"+f.Name, bucketName+"_"+f.Name, "google_storage_folder", g.ProviderName,
+						map[string]string{"bucket": bucketName, "name": f.Name}, GcsAllowEmptyValues, GcsAdditionalFields))
+				}
+				return nil
+			}); err != nil {
+				log.Println(err)
+			}
+			if err := gcsService.ManagedFolders.List(bucketName).Pages(ctx, func(page *storage.ManagedFolders) error {
+				for _, f := range page.Items {
+					resources = append(resources, terraformutils.NewResource(
+						bucketName+"/managedFolders/"+f.Name, bucketName+"_"+f.Name, "google_storage_managed_folder", g.ProviderName,
+						map[string]string{"bucket": bucketName, "name": f.Name}, GcsAllowEmptyValues, GcsAdditionalFields))
+				}
+				return nil
+			}); err != nil {
+				log.Println(err)
+			}
+			if err := gcsService.AnywhereCaches.List(bucketName).Pages(ctx, func(page *storage.AnywhereCaches) error {
+				for _, c := range page.Items {
+					resources = append(resources, terraformutils.NewResource(
+						bucketName+"/anywhereCaches/"+c.AnywhereCacheId, bucketName+"_"+c.AnywhereCacheId, "google_storage_anywhere_cache", g.ProviderName,
+						map[string]string{"bucket": bucketName, "anywhere_cache_id": c.AnywhereCacheId}, GcsAllowEmptyValues, GcsAdditionalFields))
+				}
+				return nil
+			}); err != nil {
+				log.Println(err)
+			}
 		}
 		return nil
 	}); err != nil {
