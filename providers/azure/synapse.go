@@ -1,4 +1,4 @@
-// Copyright 2021 The Terraformer Authors.
+// Copyright 2019 The Terraformer Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,206 +16,134 @@ package azure
 
 import (
 	"context"
-	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/preview/synapse/2019-06-01-preview/managedvirtualnetwork"
-	"github.com/Azure/azure-sdk-for-go/services/synapse/mgmt/2020-12-01/synapse"
-	// "github.com/Azure/azure-sdk-for-go/services/preview/synapse/2020-08-01-preview/accesscontrol"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/synapse/armsynapse"
 )
 
 type SynapseGenerator struct {
 	AzureService
 }
 
-func (az *SynapseGenerator) listWorkspaces() ([]synapse.Workspace, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := synapse.NewWorkspacesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator synapse.WorkspaceInfoListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListByResourceGroupComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListComplete(ctx)
-	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []synapse.Workspace
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *SynapseGenerator) appendWorkspace(workspace *synapse.Workspace) {
-	az.AppendSimpleResource(*workspace.ID, *workspace.Name, "azurerm_synapse_workspace")
-}
-
-func (az *SynapseGenerator) appendSQLPools(workspace *synapse.Workspace, workspaceRg *ResourceID) error {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := synapse.NewSQLPoolsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	iterator, err := client.ListByWorkspaceComplete(ctx, workspaceRg.ResourceGroup, *workspace.Name)
-	if err != nil {
-		return err
-	}
-	for iterator.NotDone() {
-		item := iterator.Value()
-		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_synapse_sql_pool")
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return err
-		}
-	}
-	return nil
-}
-
-func (az *SynapseGenerator) appendSparkPools(workspace *synapse.Workspace, workspaceRg *ResourceID) error {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := synapse.NewBigDataPoolsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	iterator, err := client.ListByWorkspaceComplete(ctx, workspaceRg.ResourceGroup, *workspace.Name)
-	if err != nil {
-		return err
-	}
-	for iterator.NotDone() {
-		item := iterator.Value()
-		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_synapse_spark_pool")
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return err
-		}
-	}
-	return nil
-}
-
-func (az *SynapseGenerator) appendFirewallRule(workspace *synapse.Workspace, workspaceRg *ResourceID) error {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := synapse.NewIPFirewallRulesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	iterator, err := client.ListByWorkspaceComplete(ctx, workspaceRg.ResourceGroup, *workspace.Name)
-	if err != nil {
-		return err
-	}
-	for iterator.NotDone() {
-		item := iterator.Value()
-		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_synapse_firewall_rule")
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return err
-		}
-	}
-	return nil
-}
-
-func (az *SynapseGenerator) appendManagedPrivateEndpoint(workspace *synapse.Workspace) error {
-
-	if workspace.WorkspaceProperties == nil || workspace.WorkspaceProperties.ManagedVirtualNetwork == nil {
+// InitResources imports azurerm_synapse_workspace, sql_pool, spark_pool,
+// firewall_rule and private_link_hub. Migrated to the Track 2 armsynapse SDK.
+// (azurerm_synapse_managed_private_endpoint is a data-plane resource served by
+// the synapse managed-virtual-network dev endpoint, not the management SDK, so
+// it is deferred with the other synapse data-plane resources — see STATUS.md.)
+func (g *SynapseGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
 		return nil
 	}
-	virtualNetworkName := *workspace.WorkspaceProperties.ManagedVirtualNetwork
-	if virtualNetworkName == "" || virtualNetworkName == "default" {
-		return nil
-	}
-	subscriptionID, _, authorizer, _ := az.getClientArgs()
-	// ManagedPrivateEndpointsClient does not have a ...WithBaseURI function, why is this different?
-	client := managedvirtualnetwork.NewManagedPrivateEndpointsClient(subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	iterator, err := client.ListComplete(ctx, virtualNetworkName)
+	wsClient, err := armsynapse.NewWorkspacesClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for iterator.NotDone() {
-		item := iterator.Value()
-		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_synapse_managed_private_endpoint")
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return err
-		}
-	}
-	return nil
-}
-
-func (az *SynapseGenerator) listPrivateLinkHubs() ([]synapse.PrivateLinkHub, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := synapse.NewPrivateLinkHubsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator synapse.PrivateLinkHubInfoListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListByResourceGroupComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListComplete(ctx)
-	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []synapse.PrivateLinkHub
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *SynapseGenerator) appendtPrivateLinkHubs(workspace *synapse.PrivateLinkHub) {
-	az.AppendSimpleResource(*workspace.ID, *workspace.Name, "azurerm_synapse_private_link_hub")
-}
-
-func (az *SynapseGenerator) InitResources() error {
-
-	workspaces, err := az.listWorkspaces()
+	sqlClient, err := armsynapse.NewSQLPoolsClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for _, workspace := range workspaces {
-		az.appendWorkspace(&workspace)
-		workspaceRg, err := ParseAzureResourceID(*workspace.ID)
+	sparkClient, err := armsynapse.NewBigDataPoolsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	fwClient, err := armsynapse.NewIPFirewallRulesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	plhClient, err := armsynapse.NewPrivateLinkHubsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+
+	workspaces, err := g.listWorkspaces(wsClient)
+	if err != nil {
+		return err
+	}
+	for _, ws := range workspaces {
+		wsID := valueOrEmpty(ws.ID)
+		if wsID == "" {
+			continue
+		}
+		g.AppendSimpleResource(wsID, valueOrEmpty(ws.Name), "azurerm_synapse_workspace")
+		parsed, err := ParseAzureResourceID(wsID)
 		if err != nil {
 			return err
 		}
-		err = az.appendSQLPools(&workspace, workspaceRg)
-		if err != nil {
+		rg, wsName := parsed.ResourceGroup, valueOrEmpty(ws.Name)
+
+		if err := appendFromPager(&g.AzureService, sqlClient.NewListByWorkspacePager(rg, wsName, nil),
+			func(p armsynapse.SQLPoolsClientListByWorkspaceResponse) []*armsynapse.SQLPool { return p.Value },
+			func(i *armsynapse.SQLPool) string { return valueOrEmpty(i.ID) },
+			func(i *armsynapse.SQLPool) string { return valueOrEmpty(i.Name) },
+			"azurerm_synapse_sql_pool"); err != nil {
 			return err
 		}
-		err = az.appendSparkPools(&workspace, workspaceRg)
-		if err != nil {
+		if err := appendFromPager(&g.AzureService, sparkClient.NewListByWorkspacePager(rg, wsName, nil),
+			func(p armsynapse.BigDataPoolsClientListByWorkspaceResponse) []*armsynapse.BigDataPoolResourceInfo {
+				return p.Value
+			},
+			func(i *armsynapse.BigDataPoolResourceInfo) string { return valueOrEmpty(i.ID) },
+			func(i *armsynapse.BigDataPoolResourceInfo) string { return valueOrEmpty(i.Name) },
+			"azurerm_synapse_spark_pool"); err != nil {
 			return err
 		}
-		err = az.appendFirewallRule(&workspace, workspaceRg)
-		if err != nil {
-			return err
-		}
-		err = az.appendManagedPrivateEndpoint(&workspace)
-		if err != nil {
+		if err := appendFromPager(&g.AzureService, fwClient.NewListByWorkspacePager(rg, wsName, nil),
+			func(p armsynapse.IPFirewallRulesClientListByWorkspaceResponse) []*armsynapse.IPFirewallRuleInfo {
+				return p.Value
+			},
+			func(i *armsynapse.IPFirewallRuleInfo) string { return valueOrEmpty(i.ID) },
+			func(i *armsynapse.IPFirewallRuleInfo) string { return valueOrEmpty(i.Name) },
+			"azurerm_synapse_firewall_rule"); err != nil {
 			return err
 		}
 	}
 
-	hubs, err := az.listPrivateLinkHubs()
-	if err == nil {
-		for _, hub := range hubs {
-			az.appendtPrivateLinkHubs(&hub)
+	return g.appendPrivateLinkHubs(plhClient)
+}
+
+func (g *SynapseGenerator) listWorkspaces(client *armsynapse.WorkspacesClient) ([]*armsynapse.Workspace, error) {
+	var workspaces []*armsynapse.Workspace
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			workspaces = append(workspaces, page.Value...)
+		}
+		return workspaces, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListByResourceGroupPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			workspaces = append(workspaces, page.Value...)
+		}
+	}
+	return workspaces, nil
+}
+
+func (g *SynapseGenerator) appendPrivateLinkHubs(client *armsynapse.PrivateLinkHubsClient) error {
+	id := func(i *armsynapse.PrivateLinkHub) string { return valueOrEmpty(i.ID) }
+	name := func(i *armsynapse.PrivateLinkHub) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armsynapse.PrivateLinkHubsClientListResponse) []*armsynapse.PrivateLinkHub { return p.Value },
+			id, name, "azurerm_synapse_private_link_hub")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armsynapse.PrivateLinkHubsClientListByResourceGroupResponse) []*armsynapse.PrivateLinkHub {
+				return p.Value
+			},
+			id, name, "azurerm_synapse_private_link_hub"); err != nil {
+			return err
 		}
 	}
 	return nil
