@@ -155,6 +155,7 @@ List of supported GCP services:
 *   `gke`
 *   `gkebackup`
     * `google_gke_backup_backup_plan`
+    * `google_gke_backup_restore_plan`
     * `google_container_cluster`
     * `google_container_node_pool`
 *   `gkeHub`

@@ -70,8 +70,32 @@ func (g *GkebackupGenerator) InitResources() error {
 		return err
 	}
 
-	backupPlansList := gkebackupService.Projects.Locations.BackupPlans.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, backupPlansList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	backupPlansList := gkebackupService.Projects.Locations.BackupPlans.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, backupPlansList)...)
+
+	restorePlansList := gkebackupService.Projects.Locations.RestorePlans.List(parent)
+	g.Resources = append(g.Resources, g.createRestorePlansResources(ctx, restorePlansList)...)
 	return nil
+}
+
+// Run on restorePlansList and create for each TerraformResource
+func (g GkebackupGenerator) createRestorePlansResources(ctx context.Context, list *gkebackup.ProjectsLocationsRestorePlansListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *gkebackup.ListRestorePlansResponse) error {
+		for _, obj := range page.RestorePlans {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name, name, "google_gke_backup_restore_plan", g.ProviderName,
+				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
+				gkebackupAllowEmptyValues, gkebackupAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
