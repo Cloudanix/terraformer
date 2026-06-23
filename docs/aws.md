@@ -33,6 +33,10 @@ terraformer import aws --resources=sg --regions=us-east-1
 
 #### Supported services
 
+*   `account`
+    * `aws_account_region`
+    * `aws_account_alternate_contact`
+    * `aws_account_primary_contact`
 *   `accessanalyzer`
     * `aws_accessanalyzer_analyzer`
     * `aws_accessanalyzer_archive_rule`

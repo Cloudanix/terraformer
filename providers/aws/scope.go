@@ -38,6 +38,7 @@ const (
 // the assertion can prove completeness.
 var serviceScope = map[string]regionScope{
 	// global — bound to a default region, imported in the aws-global pass
+	"account":           scopeGlobal,
 	"budgets":           scopeGlobal,
 	"cloudfront":        scopeGlobal,
 	"ecrpublic":         scopeGlobal,

@@ -36,6 +36,7 @@ const NoRegion = ""
 // SupportedGlobalResources should be bound to a default region. AWS doesn't specify in which region default services are
 // placed (see  https://docs.aws.amazon.com/general/latest/gr/rande.html), so we shouldn't assume any region as well
 var SupportedGlobalResources = []string{
+	"account",
 	"budgets",
 	"cloudfront",
 	"ecrpublic",
@@ -328,6 +329,7 @@ func (p *AWSProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 		"applicationinsights":          &AwsFacade{service: &ApplicationInsightsGenerator{}},
 		"auditmanager":                 &AwsFacade{service: &AuditManagerGenerator{}},
 		"bedrock":                      &AwsFacade{service: &BedrockGenerator{}},
+		"account":                      &AwsFacade{service: &AccountGenerator{}},
 		"bcmdataexports":               &AwsFacade{service: &BCMDataExportsGenerator{}},
 		"bedrockagent":                 &AwsFacade{service: &BedrockAgentGenerator{}},
 		"ce":                           &AwsFacade{service: &CostExplorerGenerator{}},

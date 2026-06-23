@@ -1,6 +1,3 @@
-aws_account_alternate_contact
-aws_account_primary_contact
-aws_account_region
 aws_acm_certificate_validation
 aws_acmpca_certificate
 aws_ami_copy

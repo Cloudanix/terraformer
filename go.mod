@@ -427,6 +427,7 @@ require (
 
 require (
 	github.com/IBM/continuous-delivery-go-sdk/v2 v2.0.2
+	github.com/aws/aws-sdk-go-v2/service/account v1.32.4
 	github.com/aws/aws-sdk-go-v2/service/acmpca v1.47.6
 	github.com/aws/aws-sdk-go-v2/service/amp v1.44.0
 	github.com/aws/aws-sdk-go-v2/service/amplify v1.39.4
