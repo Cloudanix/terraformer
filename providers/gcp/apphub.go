@@ -87,5 +87,31 @@ func (g *ApphubGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+
+	// Walk each application for its services.
+	appNames := []string{}
+	if err := apphubService.Projects.Locations.Applications.List(parent).Pages(ctx, func(p *apphub.ListApplicationsResponse) error {
+		for _, o := range p.Applications {
+			appNames = append(appNames, o.Name)
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	for _, app := range appNames {
+		if err := apphubService.Projects.Locations.Applications.Services.List(app).Pages(ctx, func(p *apphub.ListServicesResponse) error {
+			for _, o := range p.Services {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_apphub_service", g.ProviderName,
+					map[string]string{"service_id": name, "application_id": strings.Split(app, "/")[len(strings.Split(app, "/"))-1], "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+					apphubAllowEmptyValues, apphubAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
 	return nil
 }

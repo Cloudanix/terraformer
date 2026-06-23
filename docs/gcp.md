@@ -49,6 +49,7 @@ List of supported GCP services:
 *   `apphub`
     * `google_apphub_application`
     * `google_apphub_service_project_attachment`
+    * `google_apphub_service`
 *   `artifactRegistry`
     * `google_artifact_registry_repository`
 *   `binaryAuthorization`
