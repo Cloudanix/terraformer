@@ -249,4 +249,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"crossSiteNetworks": basicGCPResource{
 		terraformName: "google_compute_cross_site_network",
 	},
+	"interconnectGroups": basicGCPResource{
+		terraformName: "google_compute_interconnect_group",
+	},
 }

@@ -43,6 +43,7 @@ var ComputeServices = map[string]terraformutils.ServiceGenerator{
 	"instanceTemplates":             &GCPFacade{service: &InstanceTemplatesGenerator{}},
 	"instantSnapshots":              &GCPFacade{service: &InstantSnapshotsGenerator{}},
 	"interconnectAttachments":       &GCPFacade{service: &InterconnectAttachmentsGenerator{}},
+	"interconnectGroups":            &GCPFacade{service: &InterconnectGroupsGenerator{}},
 	"interconnects":                 &GCPFacade{service: &InterconnectsGenerator{}},
 	"machineImages":                 &GCPFacade{service: &MachineImagesGenerator{}},
 	"networkAttachments":            &GCPFacade{service: &NetworkAttachmentsGenerator{}},
