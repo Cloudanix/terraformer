@@ -71,8 +71,22 @@ func (g *DataprocMetastoreGenerator) InitResources() error {
 		return err
 	}
 
-	servicesList := metastoreService.Projects.Locations.Services.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, servicesList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	servicesList := metastoreService.Projects.Locations.Services.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, servicesList)...)
+
+	if err := metastoreService.Projects.Locations.Federations.List(parent).Pages(ctx, func(p *metastore.ListFederationsResponse) error {
+		for _, o := range p.Federations {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_dataproc_metastore_federation", g.ProviderName,
+				map[string]string{"federation_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				dataprocMetastoreAllowEmptyValues, dataprocMetastoreAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }

@@ -132,6 +132,7 @@ List of supported GCP services:
     * `google_data_fusion_instance`
 *   `dataprocMetastore`
     * `google_dataproc_metastore_service`
+    * `google_dataproc_metastore_federation`
 *   `datastream`
     * `google_datastream_stream`
     * `google_datastream_connection_profile`
