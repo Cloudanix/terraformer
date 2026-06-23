@@ -182,8 +182,12 @@ export ARM_USE_ADAL=true
     * `azurerm_kubernetes_cluster_node_pool`
 *   `application_insights`
     * `azurerm_application_insights`
+*   `attestation`
+    * `azurerm_attestation_provider`
 *   `automation`
     * `azurerm_automation_account`
+*   `data_protection`
+    * `azurerm_data_protection_backup_vault`
 *   `apim`
     * `azurerm_api_management`
 *   `bastion`
