@@ -111,6 +111,7 @@ List of supported GCP services:
     * `google_eventarc_channel`
 *   `filestore`
     * `google_filestore_instance`
+    * `google_filestore_backup`
 *   `firestore`
     * `google_firestore_database`
 *   `forwardingRules`

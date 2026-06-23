@@ -70,8 +70,40 @@ func (g *FilestoreGenerator) InitResources() error {
 		return err
 	}
 
-	instancesList := filestoreService.Projects.Locations.Instances.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, instancesList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	instancesList := filestoreService.Projects.Locations.Instances.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, instancesList)...)
+
+	backupsList := filestoreService.Projects.Locations.Backups.List(parent)
+	g.Resources = append(g.Resources, g.createBackupsResources(ctx, backupsList)...)
 	return nil
+}
+
+// Run on backupsList and create for each TerraformResource
+func (g FilestoreGenerator) createBackupsResources(ctx context.Context, list *file.ProjectsLocationsBackupsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *file.ListBackupsResponse) error {
+		for _, obj := range page.Backups {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_filestore_backup",
+				g.ProviderName,
+				map[string]string{
+					"name":     name,
+					"project":  g.GetArgs()["project"].(string),
+					"location": location,
+				},
+				filestoreAllowEmptyValues,
+				filestoreAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
