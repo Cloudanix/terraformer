@@ -399,6 +399,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"dns":                                  &DNSGenerator{},
 		"eventhub":                             &EventHubGenerator{},
 		"keyvault":                             &KeyVaultGenerator{},
+		"kubernetes":                           &KubernetesGenerator{},
 		"load_balancer":                        &LoadBalancerGenerator{},
 		"management_lock":                      &ManagementLockGenerator{},
 		"nat_gateway":                          &NatGatewayGenerator{},

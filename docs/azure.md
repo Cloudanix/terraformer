@@ -169,6 +169,8 @@ export ARM_USE_ADAL=true
     * `azurerm_eventhub_consumer_group`
     * `azurerm_eventhub_namespace`
     * `azurerm_eventhub_namespace_authorization_rule`
+*   `kubernetes`
+    * `azurerm_kubernetes_cluster`
 *   `load_balancer`
     * `azurerm_lb`
     * `azurerm_lb_backend_address_pool`
