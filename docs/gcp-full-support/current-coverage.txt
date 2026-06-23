@@ -1,4 +1,5 @@
 google_access_context_manager_access_policy
+google_alloydb_cluster
 google_api_gateway_api
 google_apphub_application
 google_artifact_registry_repository
@@ -132,6 +133,7 @@ google_eventarc_trigger
 google_filestore_backup
 google_filestore_instance
 google_firestore_database
+google_gke_backup_backup_plan
 google_gke_hub_feature
 google_gke_hub_membership
 google_healthcare_dataset
@@ -149,6 +151,7 @@ google_logging_project_sink
 google_looker_instance
 google_managed_kafka_cluster
 google_memcache_instance
+google_migration_center_group
 google_monitoring_alert_policy
 google_monitoring_group
 google_monitoring_notification_channel
@@ -171,10 +174,12 @@ google_project_iam_member
 google_pubsub_schema
 google_pubsub_subscription
 google_pubsub_topic
+google_recaptcha_enterprise_key
 google_redis_cluster
 google_redis_instance
 google_scc_source
 google_secret_manager_secret
+google_secure_source_manager_instance
 google_service_account
 google_service_directory_namespace
 google_spanner_database
