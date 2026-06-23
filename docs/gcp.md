@@ -189,6 +189,8 @@ List of supported GCP services:
     * `google_secret_manager_secret`
 *   `securityPolicies`
     * `google_compute_security_policy`
+*   `serviceDirectory`
+    * `google_service_directory_namespace`
 *   `spanner`
     * `google_spanner_instance`
 *   `sslCertificates`

@@ -146,6 +146,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["looker"] = &GCPFacade{service: &LookerGenerator{}}
 	services["datastream"] = &GCPFacade{service: &DatastreamGenerator{}}
 	services["datacatalog"] = &GCPFacade{service: &DatacatalogGenerator{}}
+	services["serviceDirectory"] = &GCPFacade{service: &ServiceDirectoryGenerator{}}
 	return services
 }
 
