@@ -154,5 +154,43 @@ func (g *SecurityCenterGenerator) InitResources() error {
 	}); err != nil {
 		log.Println(err)
 	}
+
+	orgParent := "organizations/" + org
+	if err := sccService.Organizations.BigQueryExports.List(orgParent).Pages(ctx, func(p *securitycenter.ListBigQueryExportsResponse) error {
+		for _, o := range p.BigQueryExports {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_scc_organization_scc_big_query_export", g.ProviderName,
+				map[string]string{"big_query_export_id": t[len(t)-1], "organization": org},
+				securityCenterAllowEmptyValues, securityCenterAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := sccService.Organizations.SecurityHealthAnalyticsSettings.CustomModules.List(orgParent).Pages(ctx, func(p *securitycenter.ListSecurityHealthAnalyticsCustomModulesResponse) error {
+		for _, o := range p.SecurityHealthAnalyticsCustomModules {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_scc_organization_custom_module", g.ProviderName,
+				map[string]string{"organization": org},
+				securityCenterAllowEmptyValues, securityCenterAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := sccService.Organizations.EventThreatDetectionSettings.CustomModules.List(orgParent).Pages(ctx, func(p *securitycenter.ListEventThreatDetectionCustomModulesResponse) error {
+		for _, o := range p.EventThreatDetectionCustomModules {
+			t := strings.Split(o.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, t[len(t)-1], "google_scc_event_threat_detection_custom_module", g.ProviderName,
+				map[string]string{"organization": org},
+				securityCenterAllowEmptyValues, securityCenterAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
