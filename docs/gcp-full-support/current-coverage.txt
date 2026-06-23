@@ -255,6 +255,7 @@ google_org_policy_policy
 google_os_config_os_policy_assignment
 google_parallelstore_instance
 google_privateca_ca_pool
+google_privateca_certificate
 google_privateca_certificate_authority
 google_privateca_certificate_template
 google_project
