@@ -77,6 +77,38 @@ func (g *GkeHubGenerator) InitResources() error {
 
 	featuresList := gkeHubService.Projects.Locations.Features.List(parent)
 	g.Resources = append(g.Resources, g.createFeaturesResources(ctx, featuresList)...)
+
+	scopesList := gkeHubService.Projects.Locations.Scopes.List(parent)
+	if err := scopesList.Pages(ctx, func(page *gkehub.ListScopesResponse) error {
+		for _, obj := range page.Scopes {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_gke_hub_scope", g.ProviderName,
+				map[string]string{"scope_id": name, "project": g.GetArgs()["project"].(string)},
+				gkeHubAllowEmptyValues, gkeHubAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	fleetsList := gkeHubService.Projects.Locations.Fleets.List(parent)
+	if err := fleetsList.Pages(ctx, func(page *gkehub.ListFleetsResponse) error {
+		for _, obj := range page.Fleets {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_gke_hub_fleet", g.ProviderName,
+				map[string]string{"project": g.GetArgs()["project"].(string)},
+				gkeHubAllowEmptyValues, gkeHubAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
