@@ -67,6 +67,8 @@ List of supported GCP services:
     * `google_bigquery_reservation`
 *   `bigQueryDataTransfer`
     * `google_bigquery_data_transfer_config`
+*   `bigQueryDataPolicy`
+    * `google_bigquery_datapolicy_data_policy`
 *   `bigtable`
     * `google_bigtable_instance`
     * `google_bigtable_table`
