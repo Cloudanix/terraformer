@@ -37,4 +37,7 @@ func TestP3ServicesRegistered(t *testing.T) {
 	assertRegistered(t, "spatial_anchors", &SpatialAnchorsGenerator{})
 	assertRegistered(t, "lighthouse", &LighthouseGenerator{})
 	assertRegistered(t, "hdinsight", &HDInsightGenerator{})
+	assertRegistered(t, "service_fabric", &ServiceFabricGenerator{})
+	assertRegistered(t, "arc", &ArcGenerator{})
+	assertRegistered(t, "databox_edge", &DataBoxEdgeGenerator{})
 }

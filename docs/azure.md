@@ -186,6 +186,8 @@ export ARM_USE_ADAL=true
     * `azurerm_kubernetes_cluster_node_pool`
 *   `application_insights`
     * `azurerm_application_insights`
+*   `arc`
+    * `azurerm_arc_machine`
 *   `attestation`
     * `azurerm_attestation_provider`
 *   `automanage`
@@ -204,6 +206,8 @@ export ARM_USE_ADAL=true
     * `azurerm_dashboard_grafana`
 *   `data_share`
     * `azurerm_data_share_account`
+*   `databox_edge`
+    * `azurerm_databox_edge_device`
 *   `datadog`
     * `azurerm_datadog_monitor`
 *   `dynatrace`
@@ -283,6 +287,8 @@ export ARM_USE_ADAL=true
     * `azurerm_machine_learning_workspace`
 *   `managed_identity`
     * `azurerm_user_assigned_identity`
+*   `service_fabric`
+    * `azurerm_service_fabric_cluster`
 *   `spatial_anchors`
     * `azurerm_spatial_anchors_account`
 *   `storage_mover`
