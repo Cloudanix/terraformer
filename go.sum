@@ -332,6 +332,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/purview/armpurview v1.2.0 
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/purview/armpurview v1.2.0/go.mod h1:B/ISjKE6y8n0C9rnrIoVjv6RnXii3xIXjwYjKo/smh0=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/recoveryservices/armrecoveryservices v1.6.0 h1:tyFbORs8iNJGoD4DCRTweqLRCS8PiWqyoj8TqLFZZfo=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/recoveryservices/armrecoveryservices v1.6.0/go.mod h1:D01KTLlDky2hIhRbX5NjyDb84O6jflookw6b+Gd5h/U=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis v1.0.0 h1:nmpTBgRg1HynngFYICRhceC7s5dmbKN9fJ/XQz/UQ2I=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis v1.0.0/go.mod h1:3yjiOtnkVociBTlF7UZrwAGfJrGaOCsvtVS4HzNajxQ=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/relay/armrelay v1.2.0 h1:ddxi4cOpXITuxtF1OufEPMDxKXliXkCed2G5wIIS6q4=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/relay/armrelay v1.2.0/go.mod h1:6vRCDOn9tHa3/zqZz2E1QQ0rkxa0+uuRCaMi/wtpGJE=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armdeployments v1.0.0 h1:67nFqWXpo0x5Nz0XEb1yI7s8D+EHy8NsTinYw9sZnLk=
