@@ -323,6 +323,7 @@ List of supported GCP services:
 *   `privateca`
     * `google_privateca_ca_pool`
     * `google_privateca_certificate_authority`
+    * `google_privateca_certificate`
     * `google_privateca_certificate_template`
 *   `project`
     * `google_project`

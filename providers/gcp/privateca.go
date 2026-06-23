@@ -106,6 +106,20 @@ func (g *PrivatecaGenerator) InitResources() error {
 		}); err != nil {
 			log.Println(err)
 		}
+		if err := privatecaService.Projects.Locations.CaPools.Certificates.List(
+			"projects/"+project+"/locations/"+location+"/caPools/"+pool).Pages(ctx, func(page *privateca.ListCertificatesResponse) error {
+			for _, obj := range page.Certificates {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_privateca_certificate", g.ProviderName,
+					map[string]string{"name": name, "pool": pool, "project": project, "location": location},
+					privatecaAllowEmptyValues, privatecaAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 	}
 	return nil
 }
