@@ -147,6 +147,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["datastream"] = &GCPFacade{service: &DatastreamGenerator{}}
 	services["datacatalog"] = &GCPFacade{service: &DatacatalogGenerator{}}
 	services["serviceDirectory"] = &GCPFacade{service: &ServiceDirectoryGenerator{}}
+	services["memcache"] = &GCPFacade{service: &MemcacheGenerator{}}
 	return services
 }
 

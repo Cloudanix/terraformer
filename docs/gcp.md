@@ -131,6 +131,8 @@ List of supported GCP services:
     * `google_looker_instance`
 *   `logging`
     * `google_logging_metric`
+*   `memcache`
+    * `google_memcache_instance`
 *   `memoryStore`
     * `google_redis_instance`
 *   `monitoring`
