@@ -72,6 +72,25 @@ func (g *AccessContextManagerGenerator) InitResources() error {
 	}
 
 	for _, policy := range policyNames {
+		policyID := strings.Split(policy, "/")[len(strings.Split(policy, "/"))-1]
+		// Bulk (plural) forms manage all perimeters/levels in a policy as one resource.
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			policy+"/servicePerimeters", policyID+"_service_perimeters", "google_access_context_manager_service_perimeters", g.ProviderName,
+			map[string]string{"parent": policy}, accessContextManagerAllowEmptyValues, accessContextManagerAdditionalFields))
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			policy+"/accessLevels", policyID+"_access_levels", "google_access_context_manager_access_levels", g.ProviderName,
+			map[string]string{"parent": policy}, accessContextManagerAllowEmptyValues, accessContextManagerAdditionalFields))
+		if err := acmService.AccessPolicies.AuthorizedOrgsDescs.List(policy).Pages(ctx, func(page *accesscontextmanager.ListAuthorizedOrgsDescsResponse) error {
+			for _, obj := range page.AuthorizedOrgsDescs {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, obj.Name, "google_access_context_manager_authorized_orgs_desc", g.ProviderName,
+					map[string]string{"name": obj.Name, "parent": policy},
+					accessContextManagerAllowEmptyValues, accessContextManagerAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
 		if err := acmService.AccessPolicies.ServicePerimeters.List(policy).Pages(ctx, func(page *accesscontextmanager.ListServicePerimetersResponse) error {
 			for _, obj := range page.ServicePerimeters {
 				g.Resources = append(g.Resources, terraformutils.NewResource(
@@ -94,6 +113,19 @@ func (g *AccessContextManagerGenerator) InitResources() error {
 		}); err != nil {
 			log.Println(err)
 		}
+	}
+
+	if err := acmService.Organizations.GcpUserAccessBindings.List("organizations/"+org).Pages(ctx, func(page *accesscontextmanager.ListGcpUserAccessBindingsResponse) error {
+		for _, obj := range page.GcpUserAccessBindings {
+			t := strings.Split(obj.Name, "/")
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, t[len(t)-1], "google_access_context_manager_gcp_user_access_binding", g.ProviderName,
+				map[string]string{"organization_id": org},
+				accessContextManagerAllowEmptyValues, accessContextManagerAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
 	}
 	return nil
 }
