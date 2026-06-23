@@ -59,6 +59,7 @@ google_clouddeploy_deploy_policy
 google_clouddeploy_target
 google_cloudfunctions_function
 google_cloudfunctions2_function
+google_cloudfunctions2_function_iam_member
 google_composer_environment
 google_compute_address
 google_compute_autoscaler
