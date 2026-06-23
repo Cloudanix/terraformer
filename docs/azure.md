@@ -261,6 +261,7 @@ export ARM_USE_ADAL=true
     * `azurerm_lb_backend_address_pool`
     * `azurerm_lb_nat_rule`
     * `azurerm_lb_probe`
+    * `azurerm_lb_rule`
 *   `mssql`
     * `azurerm_mssql_managed_instance`
 *   `nat_gateway`

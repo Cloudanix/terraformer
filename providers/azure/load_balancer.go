@@ -153,6 +153,40 @@ func (g *LoadBalancerGenerator) listLoadBalancerBackendAddressPools(resourceGrou
 	return resources, nil
 }
 
+func (g *LoadBalancerGenerator) listLoadBalancerRules(resourceGroupName string, loadBalancerName string) ([]terraformutils.Resource, error) {
+	var resources []terraformutils.Resource
+	ctx := context.Background()
+	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
+	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
+
+	client := network.NewLoadBalancerLoadBalancingRulesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
+	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
+	iterator, err := client.ListComplete(ctx, resourceGroupName, loadBalancerName)
+	if err != nil {
+		return nil, err
+	}
+	for iterator.NotDone() {
+		rule := iterator.Value()
+		re := regexp.MustCompile(`/loadBalancingRules/.*$`)
+		loadBalancerID := re.ReplaceAllLiteralString(*rule.ID, "")
+		resources = append(resources, terraformutils.NewResource(
+			*rule.ID,
+			*rule.Name,
+			"azurerm_lb_rule",
+			g.ProviderName,
+			map[string]string{"loadbalancer_id": loadBalancerID},
+			[]string{},
+			map[string]interface{}{},
+		))
+		if err := iterator.Next(); err != nil {
+			log.Println(err)
+			break
+		}
+	}
+
+	return resources, nil
+}
+
 func (g *LoadBalancerGenerator) listAndAddForLoadBalancers() ([]terraformutils.Resource, error) {
 	var resources []terraformutils.Resource
 	ctx := context.Background()
@@ -207,6 +241,12 @@ func (g *LoadBalancerGenerator) listAndAddForLoadBalancers() ([]terraformutils.R
 			return nil, err
 		}
 		resources = append(resources, backendAddressPools...)
+
+		rules, err := g.listLoadBalancerRules(id.ResourceGroup, *loadBalancer.Name)
+		if err != nil {
+			return nil, err
+		}
+		resources = append(resources, rules...)
 
 		if err := loadBalancerIterator.Next(); err != nil {
 			log.Println(err)
