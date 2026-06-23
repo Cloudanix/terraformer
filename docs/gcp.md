@@ -144,6 +144,7 @@ List of supported GCP services:
 *   `filestore`
     * `google_filestore_instance`
     * `google_filestore_backup`
+    * `google_filestore_snapshot`
 *   `firestore`
     * `google_firestore_database`
 *   `forwardingRules`

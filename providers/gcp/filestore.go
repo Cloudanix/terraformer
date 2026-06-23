@@ -76,6 +76,38 @@ func (g *FilestoreGenerator) InitResources() error {
 
 	backupsList := filestoreService.Projects.Locations.Backups.List(parent)
 	g.Resources = append(g.Resources, g.createBackupsResources(ctx, backupsList)...)
+
+	// Walk each instance for its snapshots.
+	for _, r := range g.Resources {
+		if r.InstanceInfo.Type != "google_filestore_instance" {
+			continue
+		}
+		instanceName, ok := r.Item["name"].(string)
+		if !ok {
+			continue
+		}
+		instancePath := parent + "/instances/" + instanceName
+		snapsList := filestoreService.Projects.Locations.Instances.Snapshots.List(instancePath)
+		if err := snapsList.Pages(ctx, func(page *file.ListSnapshotsResponse) error {
+			for _, obj := range page.Snapshots {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name, name, "google_filestore_snapshot", g.ProviderName,
+					map[string]string{
+						"name":     name,
+						"instance": instanceName,
+						"project":  g.GetArgs()["project"].(string),
+						"location": g.GetArgs()["region"].(compute.Region).Name,
+					},
+					filestoreAllowEmptyValues, filestoreAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
 	return nil
 }
 
