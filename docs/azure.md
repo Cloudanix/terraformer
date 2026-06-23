@@ -174,6 +174,8 @@ export ARM_USE_ADAL=true
     * `azurerm_lb_backend_address_pool`
     * `azurerm_lb_nat_rule`
     * `azurerm_lb_probe`
+*   `nat_gateway`
+    * `azurerm_nat_gateway`
 *   `network_interface`
     * `azurerm_network_interface`
 *   `network_security_group`
