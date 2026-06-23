@@ -96,6 +96,7 @@ List of supported GCP services:
 *   `certificateManager`
     * `google_certificate_manager_certificate`
     * `google_certificate_manager_certificate_map`
+    * `google_certificate_manager_certificate_map_entry`
     * `google_certificate_manager_dns_authorization`
     * `google_certificate_manager_trust_config`
     * `google_certificate_manager_certificate_issuance_config`

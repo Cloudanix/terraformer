@@ -75,7 +75,25 @@ func (g *CertificateManagerGenerator) InitResources() error {
 	g.Resources = append(g.Resources, g.createResources(ctx, certificatesList)...)
 
 	mapsList := certificateManagerService.Projects.Locations.CertificateMaps.List(parent)
-	g.Resources = append(g.Resources, g.createMapsResources(ctx, mapsList)...)
+	mapResources := g.createMapsResources(ctx, mapsList)
+	g.Resources = append(g.Resources, mapResources...)
+	for _, mr := range mapResources {
+		mapName := mr.InstanceState.ID
+		mapID := strings.Split(mapName, "/")[len(strings.Split(mapName, "/"))-1]
+		if err := certificateManagerService.Projects.Locations.CertificateMaps.CertificateMapEntries.List(mapName).Pages(ctx, func(p *certificatemanager.ListCertificateMapEntriesResponse) error {
+			for _, o := range p.CertificateMapEntries {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_certificate_manager_certificate_map_entry", g.ProviderName,
+					map[string]string{"name": name, "map": mapID, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+					certificateManagerAllowEmptyValues, certificateManagerAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
 
 	authsList := certificateManagerService.Projects.Locations.DnsAuthorizations.List(parent)
 	g.Resources = append(g.Resources, g.createDNSAuthResources(ctx, authsList)...)
