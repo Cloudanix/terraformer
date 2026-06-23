@@ -157,6 +157,8 @@ export ARM_USE_ADAL=true
     * `azurerm_sql_virtual_network_rule`
 *   `databricks`
     * `azurerm_databricks_workspace`
+*   `device_update`
+    * `azurerm_iothub_device_update_account`
 *   `disk`
     * `azurerm_managed_disk`
 *   `dns`
@@ -181,6 +183,8 @@ export ARM_USE_ADAL=true
     * `azurerm_network_ddos_protection_plan`
 *   `firewall`
     * `azurerm_firewall`
+*   `kubernetes_fleet`
+    * `azurerm_kubernetes_fleet_manager`
 *   `kubernetes`
     * `azurerm_kubernetes_cluster`
     * `azurerm_kubernetes_cluster_node_pool`
@@ -309,6 +313,11 @@ export ARM_USE_ADAL=true
     * `azurerm_storage_mover`
 *   `traffic_manager`
     * `azurerm_traffic_manager_profile`
+*   `virtual_desktop`
+    * `azurerm_virtual_desktop_application_group`
+    * `azurerm_virtual_desktop_host_pool`
+    * `azurerm_virtual_desktop_scaling_plan`
+    * `azurerm_virtual_desktop_workspace`
 *   `vmware`
     * `azurerm_vmware_private_cloud`
 *   `voice_services`

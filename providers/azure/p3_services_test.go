@@ -52,4 +52,7 @@ func TestP3ServicesRegistered(t *testing.T) {
 	assertRegistered(t, "redis_enterprise", &RedisEnterpriseGenerator{})
 	assertRegistered(t, "maintenance", &MaintenanceGenerator{})
 	assertRegistered(t, "service_networking", &ServiceNetworkingGenerator{})
+	assertRegistered(t, "virtual_desktop", &VirtualDesktopGenerator{})
+	assertRegistered(t, "kubernetes_fleet", &KubernetesFleetGenerator{})
+	assertRegistered(t, "device_update", &DeviceUpdateGenerator{})
 }
