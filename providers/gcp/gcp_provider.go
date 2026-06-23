@@ -196,6 +196,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["bigQueryReservation"] = &GCPFacade{service: &BigQueryReservationGenerator{}}
 	services["bigQueryDataTransfer"] = &GCPFacade{service: &BigQueryDataTransferGenerator{}}
 	services["gkeOnPrem"] = &GCPFacade{service: &GkeOnPremGenerator{}}
+	services["pubsubLite"] = &GCPFacade{service: &PubsubLiteGenerator{}}
 	return services
 }
 
