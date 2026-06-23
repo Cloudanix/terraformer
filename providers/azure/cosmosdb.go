@@ -1,4 +1,4 @@
-// Copyright 2020 The Terraformer Authors.
+// Copyright 2019 The Terraformer Authors.
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,281 +18,231 @@ import (
 	"context"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/services/cosmos-db/mgmt/2021-06-15/documentdb"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cosmos/armcosmos/v3"
 )
 
 type CosmosDBGenerator struct {
 	AzureService
 }
 
-func (g *CosmosDBGenerator) listSQLDatabasesAndContainersBehind(resourceGroupName string, accountName string) ([]terraformutils.Resource, []terraformutils.Resource, error) {
-	var resourcesDatabase []terraformutils.Resource
-	var resourcesContainer []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	SQLResourcesClient := documentdb.NewSQLResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	SQLResourcesClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	sqlDatabases, err := SQLResourcesClient.ListSQLDatabases(ctx, resourceGroupName, accountName)
-	if err != nil {
-		return nil, nil, err
-	}
-	for _, sqlDatabase := range *sqlDatabases.Value {
-		// NOTE:
-		// For a similar reason as
-		// https://github.com/terraform-providers/terraform-provider-azurerm/issues/7472#issuecomment-650684349
-		// The cosmosdb resource format change is NOT yet addressed in terraform provider
-		// This line is a workaround to convert to old format, and might be removed if they deprecate the old format
-		sqlDatabaseIDInOldFormat := strings.Replace(*sqlDatabase.ID, "sqlDatabases", "databases", 1)
-		resourcesDatabase = append(resourcesDatabase, terraformutils.NewSimpleResource(
-			sqlDatabaseIDInOldFormat,
-			*sqlDatabase.Name,
-			"azurerm_cosmosdb_sql_database",
-			g.ProviderName,
-			[]string{}))
-
-		sqlContainers, err := SQLResourcesClient.ListSQLContainers(ctx, resourceGroupName, accountName, *sqlDatabase.Name)
-		if err != nil {
-			return nil, nil, err
-		}
-		for _, sqlContainer := range *sqlContainers.Value {
-			// NOTE:
-			// For a similar reason as
-			// https://github.com/terraform-providers/terraform-provider-azurerm/issues/7472#issuecomment-650684349
-			// The cosmosdb resource format change is NOT yet addressed in terraform provider
-			// This line is a workaround to convert to old format, and might be removed if they deprecate the old format
-			sqlContainerIDInOldFormat := strings.Replace(*sqlContainer.ID, "sqlDatabases", "databases", 1)
-			resourcesContainer = append(resourcesContainer, terraformutils.NewSimpleResource(
-				sqlContainerIDInOldFormat,
-				*sqlContainer.Name,
-				"azurerm_cosmosdb_sql_container",
-				g.ProviderName,
-				[]string{}))
-		}
-	}
-
-	return resourcesDatabase, resourcesContainer, nil
+// sqlOldFormatID rewrites a Cosmos DB SQL resource ID from the current
+// "sqlDatabases" segment to the legacy "databases" segment the azurerm provider
+// still expects (see terraform-provider-azurerm#7472).
+func sqlOldFormatID(id string) string {
+	return strings.Replace(id, "sqlDatabases", "databases", 1)
 }
 
-func (g *CosmosDBGenerator) listTables(resourceGroupName string, accountName string) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	TableResourcesClient := documentdb.NewTableResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	TableResourcesClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	tables, err := TableResourcesClient.ListTables(ctx, resourceGroupName, accountName)
-	if err != nil {
-		return nil, err
-	}
-	for _, table := range *tables.Value {
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*table.ID,
-			*table.Name,
-			"azurerm_cosmosdb_table",
-			g.ProviderName,
-			[]string{}))
-	}
-
-	return resources, nil
-}
-
-func (g *CosmosDBGenerator) listMongoDB(resourceGroupName string, accountName string) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	client := documentdb.NewMongoDBResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	databases, err := client.ListMongoDBDatabases(ctx, resourceGroupName, accountName)
-	if err != nil {
-		return nil, err
-	}
-	for _, database := range *databases.Value {
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*database.ID,
-			*database.Name,
-			"azurerm_cosmosdb_mongo_database",
-			g.ProviderName,
-			[]string{}))
-
-		collections, err := client.ListMongoDBCollections(ctx, resourceGroupName, accountName, *database.Name)
-		if err != nil {
-			return nil, err
-		}
-		for _, collection := range *collections.Value {
-			resources = append(resources, terraformutils.NewSimpleResource(
-				*collection.ID,
-				*collection.Name,
-				"azurerm_cosmosdb_mongo_collection",
-				g.ProviderName,
-				[]string{}))
-		}
-	}
-
-	return resources, nil
-}
-
-func (g *CosmosDBGenerator) listCassandra(resourceGroupName string, accountName string) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	client := documentdb.NewCassandraResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	keyspaces, err := client.ListCassandraKeyspaces(ctx, resourceGroupName, accountName)
-	if err != nil {
-		return nil, err
-	}
-	for _, keyspace := range *keyspaces.Value {
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*keyspace.ID,
-			*keyspace.Name,
-			"azurerm_cosmosdb_cassandra_keyspace",
-			g.ProviderName,
-			[]string{}))
-
-		tables, err := client.ListCassandraTables(ctx, resourceGroupName, accountName, *keyspace.Name)
-		if err != nil {
-			return nil, err
-		}
-		for _, table := range *tables.Value {
-			resources = append(resources, terraformutils.NewSimpleResource(
-				*table.ID,
-				*table.Name,
-				"azurerm_cosmosdb_cassandra_table",
-				g.ProviderName,
-				[]string{}))
-		}
-	}
-
-	return resources, nil
-}
-
-func (g *CosmosDBGenerator) listGremlin(resourceGroupName string, accountName string) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	client := documentdb.NewGremlinResourcesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	databases, err := client.ListGremlinDatabases(ctx, resourceGroupName, accountName)
-	if err != nil {
-		return nil, err
-	}
-	for _, database := range *databases.Value {
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*database.ID,
-			*database.Name,
-			"azurerm_cosmosdb_gremlin_database",
-			g.ProviderName,
-			[]string{}))
-
-		graphs, err := client.ListGremlinGraphs(ctx, resourceGroupName, accountName, *database.Name)
-		if err != nil {
-			return nil, err
-		}
-		for _, graph := range *graphs.Value {
-			resources = append(resources, terraformutils.NewSimpleResource(
-				*graph.ID,
-				*graph.Name,
-				"azurerm_cosmosdb_gremlin_graph",
-				g.ProviderName,
-				[]string{}))
-		}
-	}
-
-	return resources, nil
-}
-
-func (g *CosmosDBGenerator) listAndAddForDatabaseAccounts() ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	DatabaseAccountsClient := documentdb.NewDatabaseAccountsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	DatabaseAccountsClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	var (
-		accounts documentdb.DatabaseAccountsListResult
-		err      error
-	)
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		accounts, err = DatabaseAccountsClient.ListByResourceGroup(ctx, rg)
-	} else {
-		accounts, err = DatabaseAccountsClient.List(ctx)
-	}
-	if err != nil {
-		return nil, err
-	}
-	for _, account := range *accounts.Value {
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*account.ID,
-			*account.Name,
-			"azurerm_cosmosdb_account",
-			g.ProviderName,
-			[]string{}))
-
-		id, err := ParseAzureResourceID(*account.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		tables, err := g.listTables(id.ResourceGroup, *account.Name)
-		if err != nil {
-			return nil, err
-		}
-		resources = append(resources, tables...)
-
-		sqlDatabases, sqlContainers, err := g.listSQLDatabasesAndContainersBehind(id.ResourceGroup, *account.Name)
-		if err != nil {
-			return nil, err
-		}
-		resources = append(resources, sqlDatabases...)
-		resources = append(resources, sqlContainers...)
-
-		mongo, err := g.listMongoDB(id.ResourceGroup, *account.Name)
-		if err != nil {
-			return nil, err
-		}
-		resources = append(resources, mongo...)
-
-		cassandra, err := g.listCassandra(id.ResourceGroup, *account.Name)
-		if err != nil {
-			return nil, err
-		}
-		resources = append(resources, cassandra...)
-
-		gremlin, err := g.listGremlin(id.ResourceGroup, *account.Name)
-		if err != nil {
-			return nil, err
-		}
-		resources = append(resources, gremlin...)
-	}
-
-	return resources, nil
-}
-
+// InitResources imports azurerm_cosmosdb_account and its SQL, Table, MongoDB,
+// Cassandra and Gremlin child resources. Migrated to the Track 2 armcosmos SDK.
 func (g *CosmosDBGenerator) InitResources() error {
-	functions := []func() ([]terraformutils.Resource, error){
-		g.listAndAddForDatabaseAccounts,
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	accountsClient, err := armcosmos.NewDatabaseAccountsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	sqlClient, err := armcosmos.NewSQLResourcesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	tableClient, err := armcosmos.NewTableResourcesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	mongoClient, err := armcosmos.NewMongoDBResourcesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	cassandraClient, err := armcosmos.NewCassandraResourcesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	gremlinClient, err := armcosmos.NewGremlinResourcesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
 
-	for _, f := range functions {
-		resources, err := f()
+	accounts, err := g.listAccounts(accountsClient)
+	if err != nil {
+		return err
+	}
+	for _, account := range accounts {
+		accountID := valueOrEmpty(account.ID)
+		if accountID == "" {
+			continue
+		}
+		g.AppendSimpleResource(accountID, valueOrEmpty(account.Name), "azurerm_cosmosdb_account")
+		parsed, err := ParseAzureResourceID(accountID)
 		if err != nil {
 			return err
 		}
-		g.Resources = append(g.Resources, resources...)
-	}
+		rg, acc := parsed.ResourceGroup, valueOrEmpty(account.Name)
 
+		if err := g.appendSQL(sqlClient, rg, acc); err != nil {
+			return err
+		}
+		if err := g.appendTables(tableClient, rg, acc); err != nil {
+			return err
+		}
+		if err := g.appendMongo(mongoClient, rg, acc); err != nil {
+			return err
+		}
+		if err := g.appendCassandra(cassandraClient, rg, acc); err != nil {
+			return err
+		}
+		if err := g.appendGremlin(gremlinClient, rg, acc); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func (g *CosmosDBGenerator) listAccounts(client *armcosmos.DatabaseAccountsClient) ([]*armcosmos.DatabaseAccountGetResults, error) {
+	var accounts []*armcosmos.DatabaseAccountGetResults
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			accounts = append(accounts, page.Value...)
+		}
+		return accounts, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListByResourceGroupPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			accounts = append(accounts, page.Value...)
+		}
+	}
+	return accounts, nil
+}
+
+func (g *CosmosDBGenerator) appendSQL(client *armcosmos.SQLResourcesClient, rg, acc string) error {
+	dbPager := client.NewListSQLDatabasesPager(rg, acc, nil)
+	for dbPager.More() {
+		page, err := dbPager.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, db := range page.Value {
+			if db == nil || valueOrEmpty(db.ID) == "" {
+				continue
+			}
+			dbName := valueOrEmpty(db.Name)
+			g.AppendSimpleResource(sqlOldFormatID(valueOrEmpty(db.ID)), dbName, "azurerm_cosmosdb_sql_database")
+
+			cPager := client.NewListSQLContainersPager(rg, acc, dbName, nil)
+			for cPager.More() {
+				cPage, err := cPager.NextPage(context.TODO())
+				if err != nil {
+					return err
+				}
+				for _, c := range cPage.Value {
+					if c == nil || valueOrEmpty(c.ID) == "" {
+						continue
+					}
+					g.AppendSimpleResource(sqlOldFormatID(valueOrEmpty(c.ID)), valueOrEmpty(c.Name), "azurerm_cosmosdb_sql_container")
+				}
+			}
+		}
+	}
+	return nil
+}
+
+func (g *CosmosDBGenerator) appendTables(client *armcosmos.TableResourcesClient, rg, acc string) error {
+	return appendFromPager(&g.AzureService, client.NewListTablesPager(rg, acc, nil),
+		func(p armcosmos.TableResourcesClientListTablesResponse) []*armcosmos.TableGetResults { return p.Value },
+		func(i *armcosmos.TableGetResults) string { return valueOrEmpty(i.ID) },
+		func(i *armcosmos.TableGetResults) string { return valueOrEmpty(i.Name) },
+		"azurerm_cosmosdb_table")
+}
+
+func (g *CosmosDBGenerator) appendMongo(client *armcosmos.MongoDBResourcesClient, rg, acc string) error {
+	dbPager := client.NewListMongoDBDatabasesPager(rg, acc, nil)
+	for dbPager.More() {
+		page, err := dbPager.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, db := range page.Value {
+			if db == nil || valueOrEmpty(db.ID) == "" {
+				continue
+			}
+			dbName := valueOrEmpty(db.Name)
+			g.AppendSimpleResource(valueOrEmpty(db.ID), dbName, "azurerm_cosmosdb_mongo_database")
+			if err := appendFromPager(&g.AzureService, client.NewListMongoDBCollectionsPager(rg, acc, dbName, nil),
+				func(p armcosmos.MongoDBResourcesClientListMongoDBCollectionsResponse) []*armcosmos.MongoDBCollectionGetResults {
+					return p.Value
+				},
+				func(i *armcosmos.MongoDBCollectionGetResults) string { return valueOrEmpty(i.ID) },
+				func(i *armcosmos.MongoDBCollectionGetResults) string { return valueOrEmpty(i.Name) },
+				"azurerm_cosmosdb_mongo_collection"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (g *CosmosDBGenerator) appendCassandra(client *armcosmos.CassandraResourcesClient, rg, acc string) error {
+	ksPager := client.NewListCassandraKeyspacesPager(rg, acc, nil)
+	for ksPager.More() {
+		page, err := ksPager.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, ks := range page.Value {
+			if ks == nil || valueOrEmpty(ks.ID) == "" {
+				continue
+			}
+			ksName := valueOrEmpty(ks.Name)
+			g.AppendSimpleResource(valueOrEmpty(ks.ID), ksName, "azurerm_cosmosdb_cassandra_keyspace")
+			if err := appendFromPager(&g.AzureService, client.NewListCassandraTablesPager(rg, acc, ksName, nil),
+				func(p armcosmos.CassandraResourcesClientListCassandraTablesResponse) []*armcosmos.CassandraTableGetResults {
+					return p.Value
+				},
+				func(i *armcosmos.CassandraTableGetResults) string { return valueOrEmpty(i.ID) },
+				func(i *armcosmos.CassandraTableGetResults) string { return valueOrEmpty(i.Name) },
+				"azurerm_cosmosdb_cassandra_table"); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (g *CosmosDBGenerator) appendGremlin(client *armcosmos.GremlinResourcesClient, rg, acc string) error {
+	dbPager := client.NewListGremlinDatabasesPager(rg, acc, nil)
+	for dbPager.More() {
+		page, err := dbPager.NextPage(context.TODO())
+		if err != nil {
+			return err
+		}
+		for _, db := range page.Value {
+			if db == nil || valueOrEmpty(db.ID) == "" {
+				continue
+			}
+			dbName := valueOrEmpty(db.Name)
+			g.AppendSimpleResource(valueOrEmpty(db.ID), dbName, "azurerm_cosmosdb_gremlin_database")
+			if err := appendFromPager(&g.AzureService, client.NewListGremlinGraphsPager(rg, acc, dbName, nil),
+				func(p armcosmos.GremlinResourcesClientListGremlinGraphsResponse) []*armcosmos.GremlinGraphGetResults {
+					return p.Value
+				},
+				func(i *armcosmos.GremlinGraphGetResults) string { return valueOrEmpty(i.ID) },
+				func(i *armcosmos.GremlinGraphGetResults) string { return valueOrEmpty(i.Name) },
+				"azurerm_cosmosdb_gremlin_graph"); err != nil {
+				return err
+			}
+		}
+	}
 	return nil
 }
