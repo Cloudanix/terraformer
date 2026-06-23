@@ -33,7 +33,7 @@ type SpannerGenerator struct {
 }
 
 // Run on databasesList and create for each TerraformResource (per-instance walk)
-func (g SpannerGenerator) createDatabasesResources(ctx context.Context, databasesList *spanner.ProjectsInstancesDatabasesListCall, instanceName string) []terraformutils.Resource {
+func (g SpannerGenerator) createDatabasesResources(ctx context.Context, svc *spanner.Service, databasesList *spanner.ProjectsInstancesDatabasesListCall, instanceName string) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
 	project := g.GetArgs()["project"].(string)
 	if err := databasesList.Pages(ctx, func(page *spanner.ListDatabasesResponse) error {
@@ -53,6 +53,20 @@ func (g SpannerGenerator) createDatabasesResources(ctx context.Context, database
 				spannerAllowEmptyValues,
 				spannerAdditionalFields,
 			))
+			// Walk the database for its backup schedules.
+			if err := svc.Projects.Instances.Databases.BackupSchedules.List(obj.Name).Pages(ctx, func(bp *spanner.ListBackupSchedulesResponse) error {
+				for _, bs := range bp.BackupSchedules {
+					bt := strings.Split(bs.Name, "/")
+					bsName := bt[len(bt)-1]
+					resources = append(resources, terraformutils.NewResource(
+						bs.Name, bsName, "google_spanner_backup_schedule", g.ProviderName,
+						map[string]string{"name": bsName, "instance": instanceName, "database": name, "project": project},
+						spannerAllowEmptyValues, spannerAdditionalFields))
+				}
+				return nil
+			}); err != nil {
+				log.Println(err)
+			}
 		}
 		return nil
 	}); err != nil {
@@ -96,7 +110,7 @@ func (g *SpannerGenerator) InitResources() error {
 
 	for _, instanceName := range instanceNames {
 		databasesList := spannerService.Projects.Instances.Databases.List("projects/" + project + "/instances/" + instanceName)
-		g.Resources = append(g.Resources, g.createDatabasesResources(ctx, databasesList, instanceName)...)
+		g.Resources = append(g.Resources, g.createDatabasesResources(ctx, spannerService, databasesList, instanceName)...)
 	}
 	return nil
 }
