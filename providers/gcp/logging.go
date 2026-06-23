@@ -208,6 +208,31 @@ func (g *LoggingGenerator) loadScopedSinks(ctx context.Context) {
 		}); err != nil {
 			_ = err
 		}
+		if err := svc.Folders.Exclusions.List("folders/"+folder).Pages(ctx, func(page *loggingv2.ListExclusionsResponse) error {
+			for _, o := range page.Exclusions {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					"folders/"+folder+"/exclusions/"+o.Name, o.Name, "google_logging_folder_exclusion", g.ProviderName,
+					map[string]string{"name": o.Name, "folder": folder}, loggingAllowEmptyValues, loggingAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			_ = err
+		}
+		if err := svc.Folders.Locations.Buckets.List("folders/"+folder+"/locations/-").Pages(ctx, func(page *loggingv2.ListBucketsResponse) error {
+			for _, b := range page.Buckets {
+				bt := strings.Split(b.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					b.Name, bt[len(bt)-1], "google_logging_folder_bucket_config", g.ProviderName,
+					map[string]string{"bucket_id": bt[len(bt)-1], "location": bt[len(bt)-3], "folder": "folders/" + folder},
+					loggingAllowEmptyValues, loggingAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			_ = err
+		}
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			"folders/"+folder+"/settings", folder, "google_logging_folder_settings", g.ProviderName,
+			map[string]string{"folder": folder}, loggingAllowEmptyValues, loggingAdditionalFields))
 	}
 	if org, _ := g.GetArgs()["organization"].(string); org != "" {
 		if err := svc.Organizations.Sinks.List("organizations/"+org).Pages(ctx, func(page *loggingv2.ListSinksResponse) error {
@@ -221,5 +246,30 @@ func (g *LoggingGenerator) loadScopedSinks(ctx context.Context) {
 		}); err != nil {
 			_ = err
 		}
+		if err := svc.Organizations.Exclusions.List("organizations/"+org).Pages(ctx, func(page *loggingv2.ListExclusionsResponse) error {
+			for _, o := range page.Exclusions {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					"organizations/"+org+"/exclusions/"+o.Name, o.Name, "google_logging_organization_exclusion", g.ProviderName,
+					map[string]string{"name": o.Name, "org_id": org}, loggingAllowEmptyValues, loggingAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			_ = err
+		}
+		if err := svc.Organizations.Locations.Buckets.List("organizations/"+org+"/locations/-").Pages(ctx, func(page *loggingv2.ListBucketsResponse) error {
+			for _, b := range page.Buckets {
+				bt := strings.Split(b.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					b.Name, bt[len(bt)-1], "google_logging_organization_bucket_config", g.ProviderName,
+					map[string]string{"bucket_id": bt[len(bt)-1], "location": bt[len(bt)-3], "organization": org},
+					loggingAllowEmptyValues, loggingAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			_ = err
+		}
+		g.Resources = append(g.Resources, terraformutils.NewResource(
+			"organizations/"+org+"/settings", org, "google_logging_organization_settings", g.ProviderName,
+			map[string]string{"organization": org}, loggingAllowEmptyValues, loggingAdditionalFields))
 	}
 }
