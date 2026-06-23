@@ -62,6 +62,17 @@ func (g *SecurityCenterGenerator) InitResources() error {
 				securityCenterAllowEmptyValues,
 				securityCenterAdditionalFields,
 			))
+			if policy, perr := sccService.Organizations.Sources.GetIamPolicy(obj.Name, &securitycenter.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_scc_source_iam_member", g.ProviderName,
+							map[string]string{"source": obj.Name, "organization": org, "role": b.Role, "member": m},
+							securityCenterAllowEmptyValues, securityCenterAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
