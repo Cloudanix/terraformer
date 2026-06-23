@@ -33,35 +33,6 @@ type DialogflowGenerator struct {
 	GCPService
 }
 
-// Run on agentsList and create for each TerraformResource
-func (g DialogflowGenerator) createResources(ctx context.Context, agentsList *dialogflow.ProjectsLocationsAgentsListCall) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
-	location := g.GetArgs()["region"].(compute.Region).Name
-	if err := agentsList.Pages(ctx, func(page *dialogflow.GoogleCloudDialogflowCxV3ListAgentsResponse) error {
-		for _, obj := range page.Agents {
-			t := strings.Split(obj.Name, "/")
-			name := t[len(t)-1]
-			resources = append(resources, terraformutils.NewResource(
-				obj.Name,
-				name,
-				"google_dialogflow_cx_agent",
-				g.ProviderName,
-				map[string]string{
-					"name":     name,
-					"project":  g.GetArgs()["project"].(string),
-					"location": location,
-				},
-				dialogflowAllowEmptyValues,
-				dialogflowAdditionalFields,
-			))
-		}
-		return nil
-	}); err != nil {
-		log.Println(err)
-	}
-	return resources
-}
-
 // Generate TerraformResources from GCP API,
 func (g *DialogflowGenerator) InitResources() error {
 	ctx := context.Background()
@@ -70,8 +41,50 @@ func (g *DialogflowGenerator) InitResources() error {
 		return err
 	}
 
-	agentsList := dialogflowService.Projects.Locations.Agents.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, agentsList)
+	location := g.GetArgs()["region"].(compute.Region).Name
+	project := g.GetArgs()["project"].(string)
+	agentNames := []string{}
+	agentsList := dialogflowService.Projects.Locations.Agents.List("projects/" + project + "/locations/" + location)
+	if err := agentsList.Pages(ctx, func(page *dialogflow.GoogleCloudDialogflowCxV3ListAgentsResponse) error {
+		for _, obj := range page.Agents {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			agentNames = append(agentNames, obj.Name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name, name, "google_dialogflow_cx_agent", g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				dialogflowAllowEmptyValues, dialogflowAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	for _, agent := range agentNames {
+		if err := dialogflowService.Projects.Locations.Agents.Flows.List(agent).Pages(ctx, func(p *dialogflow.GoogleCloudDialogflowCxV3ListFlowsResponse) error {
+			for _, o := range p.Flows {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_dialogflow_cx_flow", g.ProviderName,
+					map[string]string{"parent": agent, "project": project},
+					dialogflowAllowEmptyValues, dialogflowAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+		if err := dialogflowService.Projects.Locations.Agents.Intents.List(agent).Pages(ctx, func(p *dialogflow.GoogleCloudDialogflowCxV3ListIntentsResponse) error {
+			for _, o := range p.Intents {
+				t := strings.Split(o.Name, "/")
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, t[len(t)-1], "google_dialogflow_cx_intent", g.ProviderName,
+					map[string]string{"parent": agent, "project": project},
+					dialogflowAllowEmptyValues, dialogflowAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
 	return nil
 }
