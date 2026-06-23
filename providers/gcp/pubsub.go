@@ -165,6 +165,21 @@ func (g *PubsubGenerator) InitResources() error {
 			}
 		}
 	}
+	for _, r := range schemasResources {
+		full := r.InstanceState.ID
+		name := r.Item["name"].(string)
+		if policy, perr := pubsubService.Projects.Schemas.GetIamPolicy(full).Do(); perr == nil {
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						full+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+						"google_pubsub_schema_iam_member", g.ProviderName,
+						map[string]string{"schema": name, "role": b.Role, "member": m, "project": project},
+						pubsubAllowEmptyValues, pubsubAdditionalFields))
+				}
+			}
+		}
+	}
 	return nil
 }
 
