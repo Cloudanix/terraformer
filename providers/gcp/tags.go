@@ -58,6 +58,17 @@ func (g *TagsGenerator) InitResources() error {
 				tagsAllowEmptyValues,
 				tagsAdditionalFields,
 			))
+			if policy, perr := crmService.TagKeys.GetIamPolicy(obj.Name, &cloudresourcemanager.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, id+"_"+b.Role+"_"+m,
+							"google_tags_tag_key_iam_member", g.ProviderName,
+							map[string]string{"tag_key": obj.Name, "role": b.Role, "member": m},
+							tagsAllowEmptyValues, tagsAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
