@@ -51,6 +51,17 @@ func (g *BigQueryDataPolicyGenerator) InitResources() error {
 				obj.Name, name, "google_bigquery_datapolicy_data_policy", g.ProviderName,
 				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
 				bigQueryDataPolicyAllowEmptyValues, bigQueryDataPolicyAdditionalFields))
+			if policy, perr := svc.Projects.Locations.DataPolicies.GetIamPolicy(obj.Name, &bigquerydatapolicy.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_bigquery_datapolicy_data_policy_iam_member", g.ProviderName,
+							map[string]string{"data_policy_id": name, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": location},
+							bigQueryDataPolicyAllowEmptyValues, bigQueryDataPolicyAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
