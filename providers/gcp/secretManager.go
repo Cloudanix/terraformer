@@ -127,6 +127,17 @@ func (g SecretManagerGenerator) createRegionalSecretsResources(ctx context.Conte
 				secretManagerAllowEmptyValues,
 				secretManagerAdditionalFields,
 			))
+			if policy, perr := svc.Projects.Locations.Secrets.GetIamPolicy(obj.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_secret_manager_regional_secret_iam_member", g.ProviderName,
+							map[string]string{"secret_id": name, "location": location, "role": b.Role, "member": m, "project": project},
+							secretManagerAllowEmptyValues, secretManagerAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
