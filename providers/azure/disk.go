@@ -15,58 +15,40 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2019-07-01/compute"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v6"
 )
 
 type DiskGenerator struct {
 	AzureService
 }
 
-func (g DiskGenerator) createResources(diskListIterator compute.DiskListIterator) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	for diskListIterator.NotDone() {
-		disk := diskListIterator.Value()
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*disk.ID,
-			*disk.Name,
-			"azurerm_managed_disk",
-			"azurerm",
-			[]string{}))
-		if err := diskListIterator.Next(); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
+// InitResources imports azurerm_managed_disk. Migrated to the Track 2
+// armcompute SDK (was the deprecated Track 1 services/compute module).
 func (g *DiskGenerator) InitResources() error {
-	ctx := context.Background()
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	disksClient := compute.NewDisksClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	disksClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	var (
-		output compute.DiskListIterator
-		err    error
-	)
-
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		output, err = disksClient.ListByResourceGroupComplete(ctx, rg)
-	} else {
-		output, err = disksClient.ListComplete(ctx)
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
+	client, err := armcompute.NewDisksClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	g.Resources, err = g.createResources(output)
-	return err
+
+	id := func(i *armcompute.Disk) string { return valueOrEmpty(i.ID) }
+	name := func(i *armcompute.Disk) string { return valueOrEmpty(i.Name) }
+
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armcompute.DisksClientListResponse) []*armcompute.Disk { return p.Value },
+			id, name, "azurerm_managed_disk")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armcompute.DisksClientListByResourceGroupResponse) []*armcompute.Disk { return p.Value },
+			id, name, "azurerm_managed_disk"); err != nil {
+			return err
+		}
+	}
+	return nil
 }

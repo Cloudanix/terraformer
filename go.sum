@@ -248,6 +248,8 @@ github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcogni
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/cognitiveservices/armcognitiveservices v1.8.0/go.mod h1:BElPQ/GZtrdQ2i5uDZw3OKLE1we75W0AEWyeBR1TWQA=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/communication/armcommunication v1.0.0 h1:cdWpTwgJAmPCNfDaPEKrEpdL3nN3Et1fsgHa7da25Fc=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/communication/armcommunication v1.0.0/go.mod h1:FIr7kpDk2wZgREROjbQGkKE0yVPtvOndfJ+WxBtoPQY=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v6 v6.4.0 h1:z7Mqz6l0EFH549GvHEqfjKvi+cRScxLWbaoeLm9wxVQ=
+github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v6 v6.4.0/go.mod h1:v6gbfH+7DG7xH2kUNs+ZJ9tF6O3iNnR85wMtmr+F54o=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/confidentialledger/armconfidentialledger v1.2.0 h1:r8gb1bUxeL/QpJbF1sAucSDu8PiguG+4mfa38lhNPEk=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/confidentialledger/armconfidentialledger v1.2.0/go.mod h1:liwaWQzkLww/+T9MYkcUnGCmxGua58RWC3wIc+VntNw=
 github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/containerservice/armcontainerservice/v5 v5.0.0 h1:5n7dPVqsWfVKw+ZiEKSd3Kzu7gwBkbEBkeXb8rgaE9Q=
