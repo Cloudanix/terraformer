@@ -73,6 +73,7 @@ azurerm_data_factory_trigger_tumbling_window
 azurerm_data_protection_backup_vault
 azurerm_data_share_account
 azurerm_databricks_workspace
+azurerm_datadog_monitor
 azurerm_dev_center
 azurerm_digital_twins_instance
 azurerm_dns_a_record
@@ -85,6 +86,7 @@ azurerm_dns_ptr_record
 azurerm_dns_srv_record
 azurerm_dns_txt_record
 azurerm_dns_zone
+azurerm_dynatrace_monitor
 azurerm_elastic_san
 azurerm_eventgrid_domain
 azurerm_eventgrid_topic
