@@ -992,6 +992,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudwatch_log_resource_policy`
     * `aws_cloudwatch_log_account_policy`
     * `aws_cloudwatch_query_definition`
+    * `aws_cloudwatch_log_anomaly_detector`
+    * `aws_cloudwatch_log_delivery`
+    * `aws_cloudwatch_log_delivery_destination`
+    * `aws_cloudwatch_log_delivery_source`
     * `aws_cloudwatch_log_metric_filter`
     * `aws_cloudwatch_log_subscription_filter`
 *   `macie2`
