@@ -202,6 +202,10 @@ export ARM_USE_ADAL=true
     * `azurerm_dashboard_grafana`
 *   `data_share`
     * `azurerm_data_share_account`
+*   `datadog`
+    * `azurerm_datadog_monitor`
+*   `dynatrace`
+    * `azurerm_dynatrace_monitor`
 *   `digital_twins`
     * `azurerm_digital_twins_instance`
 *   `elastic_san`

@@ -409,6 +409,8 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"automation":                           &AutomationGenerator{},
 		"cognitive":                            &CognitiveGenerator{},
 		"data_protection":                      &DataProtectionGenerator{},
+		"datadog":                              &DatadogGenerator{},
+		"dynatrace":                            &DynatraceGenerator{},
 		"application_gateway":                  &ApplicationGatewayGenerator{},
 		"cdn":                                  &CDNGenerator{},
 		"chaos_studio":                         &ChaosStudioGenerator{},
