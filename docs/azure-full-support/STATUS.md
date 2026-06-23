@@ -75,10 +75,21 @@ services + multi-resource sub-resource expansions.
 
 `providers/azuread/` separate stream.
 
-## Phase 5 — Track 1 → Track 2 migration (not started, last)
+## Phase 5 — Track 1 → Track 2 migration (in progress)
 
-35 original services still on Track 1. Dual auth path keeps both working.
-`grep -r "azure-sdk-for-go/services" providers/azure` must be empty when done.
+Behavior-preserving SDK swaps (same resource types + ARM import IDs), validated
+by build/vet/test (live no-diff `terraform plan` round-trip not available in the
+offline sandbox). **Migrated:** disk, public_ip (+prefix), ssh_public_key,
+resource_group, management_lock, route_table (+route/route_filter),
+network_security_group (+rule), app_service (also modernized).
+
+**Remaining (~27 files still import `azure-sdk-for-go/services`):** networking
+(virtual_network, subnet, network_interface, network_watcher, dns, private_dns,
+private_endpoint, application_gateway, load_balancer), compute (virtual_machine,
+scaleset), storage_*, database, cosmosdb, eventhub, keyvault, redis, container,
+data_factory (largest), synapse, analysis, databricks, purview, security_center_*.
+Done when `grep -r "azure-sdk-for-go/services" providers/azure` is empty; then
+drop Track 1 + go-autorest/hamilton from go.mod.
 
 ## How to build/test offline (sandbox)
 
