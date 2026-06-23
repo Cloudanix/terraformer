@@ -72,7 +72,23 @@ func (g *GkebackupGenerator) InitResources() error {
 
 	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
 	backupPlansList := gkebackupService.Projects.Locations.BackupPlans.List(parent)
-	g.Resources = append(g.Resources, g.createResources(ctx, backupPlansList)...)
+	planResources := g.createResources(ctx, backupPlansList)
+	g.Resources = append(g.Resources, planResources...)
+	for _, r := range planResources {
+		res := r.InstanceState.ID
+		if policy, perr := gkebackupService.Projects.Locations.BackupPlans.GetIamPolicy(res).Do(); perr == nil {
+			short := strings.Split(res, "/")[len(strings.Split(res, "/"))-1]
+			for _, b := range policy.Bindings {
+				for _, m := range b.Members {
+					g.Resources = append(g.Resources, terraformutils.NewResource(
+						res+" "+b.Role+" "+m, short+"_"+b.Role+"_"+m,
+						"google_gke_backup_backup_plan_iam_member", g.ProviderName,
+						map[string]string{"name": short, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+						gkebackupAllowEmptyValues, gkebackupAdditionalFields))
+				}
+			}
+		}
+	}
 
 	restorePlansList := gkebackupService.Projects.Locations.RestorePlans.List(parent)
 	g.Resources = append(g.Resources, g.createRestorePlansResources(ctx, restorePlansList)...)
