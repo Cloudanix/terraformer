@@ -154,6 +154,17 @@ func (g *DataplexGenerator) InitResources() error {
 				map[string]string{"aspect_type_id": name, "project": project, "location": location},
 				dataplexAllowEmptyValues, dataplexAdditionalFields,
 			))
+			if policy, perr := dataplexService.Projects.Locations.AspectTypes.GetIamPolicy(obj.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_dataplex_aspect_type_iam_member", g.ProviderName,
+							map[string]string{"aspect_type_id": name, "role": b.Role, "member": m, "project": project, "location": location},
+							dataplexAllowEmptyValues, dataplexAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
