@@ -76,6 +76,35 @@ func (g *EventarcGenerator) InitResources() error {
 
 	channelsList := eventarcService.Projects.Locations.Channels.List(parent)
 	g.Resources = append(g.Resources, g.createChannelsResources(ctx, channelsList)...)
+
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
+	if err := eventarcService.Projects.Locations.Pipelines.List(parent).Pages(ctx, func(p *eventarc.ListPipelinesResponse) error {
+		for _, o := range p.Pipelines {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_eventarc_pipeline", g.ProviderName,
+				map[string]string{"pipeline_id": name, "project": proj, "location": loc},
+				eventarcAllowEmptyValues, eventarcAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := eventarcService.Projects.Locations.GoogleApiSources.List(parent).Pages(ctx, func(p *eventarc.ListGoogleApiSourcesResponse) error {
+		for _, o := range p.GoogleApiSources {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_eventarc_google_api_source", g.ProviderName,
+				map[string]string{"google_api_source_id": name, "project": proj, "location": loc},
+				eventarcAllowEmptyValues, eventarcAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 

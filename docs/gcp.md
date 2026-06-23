@@ -152,6 +152,8 @@ List of supported GCP services:
 *   `eventarc`
     * `google_eventarc_trigger`
     * `google_eventarc_channel`
+    * `google_eventarc_pipeline`
+    * `google_eventarc_google_api_source`
 *   `filestore`
     * `google_filestore_instance`
     * `google_filestore_backup`
