@@ -270,6 +270,7 @@ List of supported GCP services:
     * `google_vpc_access_connector`
 *   `workstations`
     * `google_workstations_workstation_cluster`
+    * `google_workstations_workstation_config`
 *   `workflows`
     * `google_workflows_workflow`
 *   `subnetworks`

@@ -33,23 +33,24 @@ type WorkstationsGenerator struct {
 	GCPService
 }
 
-// Run on clustersList and create for each TerraformResource
-func (g WorkstationsGenerator) createResources(ctx context.Context, clustersList *workstations.ProjectsLocationsWorkstationClustersListCall) []terraformutils.Resource {
+// Run on configsList and create for each TerraformResource (per-cluster walk)
+func (g WorkstationsGenerator) createConfigResources(ctx context.Context, list *workstations.ProjectsLocationsWorkstationClustersWorkstationConfigsListCall, clusterID string) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
 	location := g.GetArgs()["region"].(compute.Region).Name
-	if err := clustersList.Pages(ctx, func(page *workstations.ListWorkstationClustersResponse) error {
-		for _, obj := range page.WorkstationClusters {
+	if err := list.Pages(ctx, func(page *workstations.ListWorkstationConfigsResponse) error {
+		for _, obj := range page.WorkstationConfigs {
 			t := strings.Split(obj.Name, "/")
 			name := t[len(t)-1]
 			resources = append(resources, terraformutils.NewResource(
 				obj.Name,
 				name,
-				"google_workstations_workstation_cluster",
+				"google_workstations_workstation_config",
 				g.ProviderName,
 				map[string]string{
-					"name":     name,
-					"project":  g.GetArgs()["project"].(string),
-					"location": location,
+					"workstation_config_id":  name,
+					"workstation_cluster_id": clusterID,
+					"project":                g.GetArgs()["project"].(string),
+					"location":               location,
 				},
 				workstationsAllowEmptyValues,
 				workstationsAdditionalFields,
@@ -69,9 +70,35 @@ func (g *WorkstationsGenerator) InitResources() error {
 	if err != nil {
 		return err
 	}
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
 
-	clustersList := workstationsService.Projects.Locations.WorkstationClusters.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, clustersList)
+	clusterIDs := []string{}
+	clustersList := workstationsService.Projects.Locations.WorkstationClusters.List("projects/" + project + "/locations/" + location)
+	if err := clustersList.Pages(ctx, func(page *workstations.ListWorkstationClustersResponse) error {
+		for _, obj := range page.WorkstationClusters {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			clusterIDs = append(clusterIDs, name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_workstations_workstation_cluster",
+				g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				workstationsAllowEmptyValues,
+				workstationsAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	for _, cluster := range clusterIDs {
+		configsList := workstationsService.Projects.Locations.WorkstationClusters.WorkstationConfigs.List(
+			"projects/" + project + "/locations/" + location + "/workstationClusters/" + cluster)
+		g.Resources = append(g.Resources, g.createConfigResources(ctx, configsList, cluster)...)
+	}
 	return nil
 }
