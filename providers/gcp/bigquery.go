@@ -52,6 +52,50 @@ func (g BigQueryGenerator) createDatasets(ctx context.Context, dataSetsList *big
 				map[string]interface{}{},
 			))
 			resources = append(resources, g.createResourcesTables(ctx, ID, bigQueryService)...)
+			resources = append(resources, g.createResourcesRoutines(ctx, ID, bigQueryService)...)
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
+}
+
+func (g *BigQueryGenerator) createResourcesRoutines(ctx context.Context, datasetID string, bigQueryService *bigquery.Service) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	project := g.GetArgs()["project"].(string)
+	routineList := bigQueryService.Routines.List(project, datasetID)
+	if err := routineList.Pages(ctx, func(page *bigquery.ListRoutinesResponse) error {
+		for _, routine := range page.Routines {
+			if routine.RoutineReference == nil {
+				continue
+			}
+			routineID := routine.RoutineReference.RoutineId
+			resources = append(resources, terraformutils.NewResource(
+				project+"/"+datasetID+"/"+routineID,
+				routineID,
+				"google_bigquery_routine",
+				g.ProviderName,
+				map[string]string{
+					"project":    project,
+					"dataset_id": datasetID,
+					"routine_id": routineID,
+				},
+				bigQueryAllowEmptyValues,
+				map[string]interface{}{},
+			))
+			routinePath := "projects/" + project + "/datasets/" + datasetID + "/routines/" + routineID
+			if policy, perr := bigQueryService.Routines.GetIamPolicy(routinePath, &bigquery.GetIamPolicyRequest{}).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						resources = append(resources, terraformutils.NewResource(
+							routinePath+" "+b.Role+" "+m, routineID+"_"+b.Role+"_"+m,
+							"google_bigquery_routine_iam_member", g.ProviderName,
+							map[string]string{"dataset_id": datasetID, "routine_id": routineID, "role": b.Role, "member": m, "project": project},
+							bigQueryAllowEmptyValues, map[string]interface{}{}))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
