@@ -84,6 +84,17 @@ func (g *PrivatecaGenerator) InitResources() error {
 				o.Name, name, "google_privateca_certificate_template", g.ProviderName,
 				map[string]string{"name": name, "project": project, "location": location},
 				privatecaAllowEmptyValues, privatecaAdditionalFields))
+			if policy, perr := privatecaService.Projects.Locations.CertificateTemplates.GetIamPolicy(o.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							o.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_privateca_certificate_template_iam_member", g.ProviderName,
+							map[string]string{"certificate_template": name, "role": b.Role, "member": m, "project": project, "location": location},
+							privatecaAllowEmptyValues, privatecaAdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
