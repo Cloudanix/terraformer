@@ -258,4 +258,7 @@ var terraformResources = map[string]gcpResourceRenderable{
 	"regionCompositeHealthChecks": basicGCPResource{
 		terraformName: "google_compute_region_composite_health_check",
 	},
+	"regionHealthAggregationPolicies": basicGCPResource{
+		terraformName: "google_compute_region_health_aggregation_policy",
+	},
 }
