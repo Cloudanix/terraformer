@@ -67,6 +67,8 @@ List of supported GCP services:
     * `google_compute_external_vpn_gateway`
 *   `firewall`
     * `google_compute_firewall`
+*   `essentialContacts`
+    * `google_essential_contacts_contact`
 *   `eventarc`
     * `google_eventarc_trigger`
 *   `filestore`

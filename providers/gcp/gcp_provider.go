@@ -137,6 +137,7 @@ func (p *GCPProvider) GetSupportedService() map[string]terraformutils.ServiceGen
 	services["notebooks"] = &GCPFacade{service: &NotebooksGenerator{}}
 	services["certificateManager"] = &GCPFacade{service: &CertificateManagerGenerator{}}
 	services["binaryAuthorization"] = &GCPFacade{service: &BinaryAuthorizationGenerator{}}
+	services["essentialContacts"] = &GCPFacade{service: &EssentialContactsGenerator{}}
 	return services
 }
 
