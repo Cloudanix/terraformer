@@ -126,6 +126,8 @@ List of supported GCP services:
     * `google_monitoring_uptime_check_config`
 *   `notebooks`
     * `google_notebooks_instance`
+*   `networkConnectivity`
+    * `google_network_connectivity_hub`
 *   `networks`
     * `google_compute_network`
 *   `nodeGroups`
