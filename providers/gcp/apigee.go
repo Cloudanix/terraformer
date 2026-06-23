@@ -72,14 +72,34 @@ func (g *ApigeeGenerator) InitResources() error {
 	}
 	if r, e := svc.Organizations.Envgroups.List(org).Do(); e == nil {
 		for _, o := range r.EnvironmentGroups {
-			add(o.Name, tail(o.Name), "google_apigee_envgroup", map[string]string{"name": tail(o.Name), "org_id": org})
+			eg := tail(o.Name)
+			add(o.Name, eg, "google_apigee_envgroup", map[string]string{"name": eg, "org_id": org})
+			if ae := svc.Organizations.Envgroups.Attachments.List(o.Name).Pages(ctx, func(ap *apigee.GoogleCloudApigeeV1ListEnvironmentGroupAttachmentsResponse) error {
+				for _, a := range ap.EnvironmentGroupAttachments {
+					add(o.Name+"/attachments/"+a.Name, eg+"_"+a.Name, "google_apigee_envgroup_attachment",
+						map[string]string{"envgroup_id": eg, "org_id": org})
+				}
+				return nil
+			}); ae != nil {
+				log.Println(ae)
+			}
 		}
 	} else {
 		log.Println(e)
 	}
 	if r, e := svc.Organizations.Instances.List(org).Do(); e == nil {
 		for _, o := range r.Instances {
-			add(o.Name, tail(o.Name), "google_apigee_instance", map[string]string{"name": tail(o.Name), "org_id": org})
+			inst := tail(o.Name)
+			add(o.Name, inst, "google_apigee_instance", map[string]string{"name": inst, "org_id": org})
+			if ae := svc.Organizations.Instances.Attachments.List(o.Name).Pages(ctx, func(ap *apigee.GoogleCloudApigeeV1ListInstanceAttachmentsResponse) error {
+				for _, a := range ap.Attachments {
+					add(o.Name+"/attachments/"+a.Name, inst+"_"+a.Name, "google_apigee_instance_attachment",
+						map[string]string{"instance_id": inst, "org_id": org})
+				}
+				return nil
+			}); ae != nil {
+				log.Println(ae)
+			}
 		}
 	} else {
 		log.Println(e)
@@ -101,6 +121,34 @@ func (g *ApigeeGenerator) InitResources() error {
 	if r, e := svc.Organizations.Appgroups.List(org).Do(); e == nil {
 		for _, o := range r.AppGroups {
 			add(o.Name, o.Name, "google_apigee_app_group", map[string]string{"name": o.Name, "org_id": org})
+		}
+	} else {
+		log.Println(e)
+	}
+
+	// Shared flows (org-level).
+	if r, e := svc.Organizations.Sharedflows.List(org).Do(); e == nil {
+		for _, o := range r.SharedFlows {
+			add(o.Name, tail(o.Name), "google_apigee_sharedflow", map[string]string{"name": tail(o.Name), "org_id": org})
+		}
+	} else {
+		log.Println(e)
+	}
+
+	// Environments come from the org resource as a list of names; walk each for security actions.
+	if o, e := svc.Organizations.Get(org).Do(); e == nil {
+		for _, env := range o.Environments {
+			envParent := org + "/environments/" + env
+			add(envParent, env, "google_apigee_environment", map[string]string{"name": env, "org_id": org})
+			if se := svc.Organizations.Environments.SecurityActions.List(envParent).Pages(ctx, func(sp *apigee.GoogleCloudApigeeV1ListSecurityActionsResponse) error {
+				for _, sa := range sp.SecurityActions {
+					add(sa.Name, env+"_"+tail(sa.Name), "google_apigee_security_action",
+						map[string]string{"security_action_id": tail(sa.Name), "env_id": env, "org_id": org})
+				}
+				return nil
+			}); se != nil {
+				log.Println(se)
+			}
 		}
 	} else {
 		log.Println(e)
