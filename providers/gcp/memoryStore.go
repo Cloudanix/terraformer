@@ -71,8 +71,40 @@ func (g *MemoryStoreGenerator) InitResources() error {
 		return err
 	}
 
-	redisInstancesList := redisService.Projects.Locations.Instances.List("projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	redisInstancesList := redisService.Projects.Locations.Instances.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, redisInstancesList)...)
 
-	g.Resources = g.createResources(ctx, redisInstancesList)
+	clustersList := redisService.Projects.Locations.Clusters.List(parent)
+	g.Resources = append(g.Resources, g.createClusterResources(ctx, clustersList)...)
 	return nil
+}
+
+// Run on clustersList and create for each TerraformResource
+func (g MemoryStoreGenerator) createClusterResources(ctx context.Context, clustersList *redis.ProjectsLocationsClustersListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	region := g.GetArgs()["region"].(compute.Region).Name
+	if err := clustersList.Pages(ctx, func(page *redis.ListClustersResponse) error {
+		for _, obj := range page.Clusters {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_redis_cluster",
+				g.ProviderName,
+				map[string]string{
+					"name":    name,
+					"project": g.GetArgs()["project"].(string),
+					"region":  region,
+				},
+				redisAllowEmptyValues,
+				redisAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }

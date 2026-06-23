@@ -173,6 +173,7 @@ List of supported GCP services:
     * `google_memcache_instance`
 *   `memoryStore`
     * `google_redis_instance`
+    * `google_redis_cluster`
 *   `monitoring`
     * `google_monitoring_alert_policy`
     * `google_monitoring_group`
