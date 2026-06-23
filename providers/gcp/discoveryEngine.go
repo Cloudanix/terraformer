@@ -63,6 +63,61 @@ func (g *DiscoveryEngineGenerator) InitResources() error {
 				discoveryEngineAllowEmptyValues,
 				discoveryEngineAdditionalFields,
 			))
+			dsAttrs := func(id string) map[string]string {
+				return map[string]string{"data_store_id": name, "location": location, "project": project, "id": id}
+			}
+			if e := discoveryEngineService.Projects.Locations.Collections.DataStores.Schemas.List(obj.Name).Pages(ctx, func(sp *discoveryengine.GoogleCloudDiscoveryengineV1ListSchemasResponse) error {
+				for _, o := range sp.Schemas {
+					g.Resources = append(g.Resources, terraformutils.NewResource(o.Name, name+"_"+lastSeg(o.Name), "google_discovery_engine_schema", g.ProviderName, dsAttrs(lastSeg(o.Name)), discoveryEngineAllowEmptyValues, discoveryEngineAdditionalFields))
+				}
+				return nil
+			}); e != nil {
+				log.Println(e)
+			}
+			if e := discoveryEngineService.Projects.Locations.Collections.DataStores.Controls.List(obj.Name).Pages(ctx, func(cp *discoveryengine.GoogleCloudDiscoveryengineV1ListControlsResponse) error {
+				for _, o := range cp.Controls {
+					g.Resources = append(g.Resources, terraformutils.NewResource(o.Name, name+"_"+lastSeg(o.Name), "google_discovery_engine_control", g.ProviderName, dsAttrs(lastSeg(o.Name)), discoveryEngineAllowEmptyValues, discoveryEngineAdditionalFields))
+				}
+				return nil
+			}); e != nil {
+				log.Println(e)
+			}
+			if e := discoveryEngineService.Projects.Locations.Collections.DataStores.SiteSearchEngine.TargetSites.List(obj.Name+"/siteSearchEngine").Pages(ctx, func(tp *discoveryengine.GoogleCloudDiscoveryengineV1ListTargetSitesResponse) error {
+				for _, o := range tp.TargetSites {
+					g.Resources = append(g.Resources, terraformutils.NewResource(o.Name, name+"_"+lastSeg(o.Name), "google_discovery_engine_target_site", g.ProviderName, dsAttrs(lastSeg(o.Name)), discoveryEngineAllowEmptyValues, discoveryEngineAdditionalFields))
+				}
+				return nil
+			}); e != nil {
+				log.Println(e)
+			}
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	if err := discoveryEngineService.Projects.Locations.Collections.Engines.List(parent).Pages(ctx, func(page *discoveryengine.GoogleCloudDiscoveryengineV1ListEnginesResponse) error {
+		for _, e := range page.Engines {
+			name := lastSeg(e.Name)
+			tfType := "google_discovery_engine_search_engine"
+			switch e.SolutionType {
+			case "SOLUTION_TYPE_CHAT":
+				tfType = "google_discovery_engine_chat_engine"
+			case "SOLUTION_TYPE_RECOMMENDATION":
+				tfType = "google_discovery_engine_recommendation_engine"
+			}
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				e.Name, name, tfType, g.ProviderName,
+				map[string]string{"engine_id": name, "location": location, "project": project},
+				discoveryEngineAllowEmptyValues, discoveryEngineAdditionalFields))
+			if ae := discoveryEngineService.Projects.Locations.Collections.Engines.Assistants.List(e.Name).Pages(ctx, func(ap *discoveryengine.GoogleCloudDiscoveryengineV1ListAssistantsResponse) error {
+				for _, o := range ap.Assistants {
+					g.Resources = append(g.Resources, terraformutils.NewResource(o.Name, name+"_"+lastSeg(o.Name), "google_discovery_engine_assistant", g.ProviderName, map[string]string{"location": location, "project": project}, discoveryEngineAllowEmptyValues, discoveryEngineAdditionalFields))
+				}
+				return nil
+			}); ae != nil {
+				log.Println(ae)
+			}
 		}
 		return nil
 	}); err != nil {
@@ -70,3 +125,5 @@ func (g *DiscoveryEngineGenerator) InitResources() error {
 	}
 	return nil
 }
+
+func lastSeg(s string) string { p := strings.Split(s, "/"); return p[len(p)-1] }
