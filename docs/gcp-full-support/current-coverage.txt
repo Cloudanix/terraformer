@@ -16,6 +16,7 @@ google_bigquery_routine
 google_bigquery_table
 google_bigtable_app_profile
 google_bigtable_instance
+google_bigtable_logical_view
 google_bigtable_table
 google_binary_authorization_attestor
 google_certificate_manager_certificate
@@ -204,6 +205,7 @@ google_recaptcha_enterprise_key
 google_redis_cluster
 google_redis_instance
 google_scc_source
+google_secret_manager_regional_secret
 google_secret_manager_secret
 google_secure_source_manager_instance
 google_service_account
