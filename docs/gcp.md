@@ -97,6 +97,8 @@ List of supported GCP services:
     * `google_datastream_connection_profile`
     * `google_datastream_private_connection`
 *   `dialogflow`
+*   `developerConnect`
+    * `google_developer_connect_connection`
     * `google_dialogflow_cx_agent`
 *   `disks`
     * `google_compute_disk`
