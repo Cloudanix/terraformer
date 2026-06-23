@@ -70,8 +70,22 @@ func (g *OracleDatabaseGenerator) InitResources() error {
 		return err
 	}
 
-	infraList := oracleDatabaseService.Projects.Locations.CloudExadataInfrastructures.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, infraList)
+	parent := "projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name
+	infraList := oracleDatabaseService.Projects.Locations.CloudExadataInfrastructures.List(parent)
+	g.Resources = append(g.Resources, g.createResources(ctx, infraList)...)
+
+	if err := oracleDatabaseService.Projects.Locations.AutonomousDatabases.List(parent).Pages(ctx, func(p *oracledatabase.ListAutonomousDatabasesResponse) error {
+		for _, o := range p.AutonomousDatabases {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_oracle_database_autonomous_database", g.ProviderName,
+				map[string]string{"autonomous_database_id": name, "project": g.GetArgs()["project"].(string), "location": g.GetArgs()["region"].(compute.Region).Name},
+				oracleDatabaseAllowEmptyValues, oracleDatabaseAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
