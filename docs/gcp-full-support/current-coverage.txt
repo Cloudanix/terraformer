@@ -33,6 +33,7 @@ google_bigquery_routine
 google_bigquery_table
 google_bigtable_app_profile
 google_bigtable_instance
+google_bigtable_instance_iam_member
 google_bigtable_logical_view
 google_bigtable_materialized_view
 google_bigtable_table
