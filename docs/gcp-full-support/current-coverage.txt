@@ -10,6 +10,7 @@ google_api_gateway_api
 google_api_source_id
 google_apikeys_key
 google_apphub_application
+google_apphub_service
 google_apphub_service_project_attachment
 google_artifact_registry_repository
 google_backup_dr_management_server
