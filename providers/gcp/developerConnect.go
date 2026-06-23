@@ -70,8 +70,50 @@ func (g *DeveloperConnectGenerator) InitResources() error {
 		return err
 	}
 
-	connectionsList := dcService.Projects.Locations.Connections.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, connectionsList)
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
+	parent := "projects/" + project + "/locations/" + location
+	tail := func(s string) string { p := strings.Split(s, "/"); return p[len(p)-1] }
+
+	connectionsList := dcService.Projects.Locations.Connections.List(parent)
+	connResources := g.createResources(ctx, connectionsList)
+	g.Resources = connResources
+	for _, cr := range connResources {
+		conn := tail(cr.InstanceState.ID)
+		if e := dcService.Projects.Locations.Connections.GitRepositoryLinks.List(cr.InstanceState.ID).Pages(ctx, func(rp *developerconnect.ListGitRepositoryLinksResponse) error {
+			for _, o := range rp.GitRepositoryLinks {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, conn+"_"+tail(o.Name), "google_developer_connect_git_repository_link", g.ProviderName,
+					map[string]string{"git_repository_link_id": tail(o.Name), "parent_connection": conn, "location": location, "project": project},
+					developerConnectAllowEmptyValues, developerConnectAdditionalFields))
+			}
+			return nil
+		}); e != nil {
+			log.Println(e)
+		}
+	}
+
+	if err := dcService.Projects.Locations.AccountConnectors.List(parent).Pages(ctx, func(p *developerconnect.ListAccountConnectorsResponse) error {
+		for _, o := range p.AccountConnectors {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_developer_connect_account_connector", g.ProviderName,
+				map[string]string{"account_connector_id": tail(o.Name), "location": location, "project": project},
+				developerConnectAllowEmptyValues, developerConnectAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := dcService.Projects.Locations.InsightsConfigs.List(parent).Pages(ctx, func(p *developerconnect.ListInsightsConfigsResponse) error {
+		for _, o := range p.InsightsConfigs {
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, tail(o.Name), "google_developer_connect_insights_config", g.ProviderName,
+				map[string]string{"insights_config_id": tail(o.Name), "location": location, "project": project},
+				developerConnectAllowEmptyValues, developerConnectAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
