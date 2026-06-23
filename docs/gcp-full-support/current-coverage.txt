@@ -5,6 +5,7 @@ google_biglake_catalog
 google_bigquery_dataset
 google_bigquery_routine
 google_bigquery_table
+google_bigtable_app_profile
 google_bigtable_instance
 google_bigtable_table
 google_binary_authorization_attestor
@@ -116,6 +117,7 @@ google_discovery_engine_data_store
 google_dns_managed_zone
 google_dns_policy
 google_dns_record_set
+google_dns_response_policy
 google_document_ai_processor
 google_essential_contacts_contact
 google_eventarc_channel
