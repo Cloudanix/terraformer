@@ -33,35 +33,6 @@ type VmwareengineGenerator struct {
 	GCPService
 }
 
-// Run on privateCloudsList and create for each TerraformResource
-func (g VmwareengineGenerator) createResources(ctx context.Context, privateCloudsList *vmwareengine.ProjectsLocationsPrivateCloudsListCall) []terraformutils.Resource {
-	resources := []terraformutils.Resource{}
-	location := g.GetArgs()["region"].(compute.Region).Name
-	if err := privateCloudsList.Pages(ctx, func(page *vmwareengine.ListPrivateCloudsResponse) error {
-		for _, obj := range page.PrivateClouds {
-			t := strings.Split(obj.Name, "/")
-			name := t[len(t)-1]
-			resources = append(resources, terraformutils.NewResource(
-				obj.Name,
-				name,
-				"google_vmwareengine_private_cloud",
-				g.ProviderName,
-				map[string]string{
-					"name":     name,
-					"project":  g.GetArgs()["project"].(string),
-					"location": location,
-				},
-				vmwareengineAllowEmptyValues,
-				vmwareengineAdditionalFields,
-			))
-		}
-		return nil
-	}); err != nil {
-		log.Println(err)
-	}
-	return resources
-}
-
 // Generate TerraformResources from GCP API,
 func (g *VmwareengineGenerator) InitResources() error {
 	ctx := context.Background()
@@ -70,8 +41,58 @@ func (g *VmwareengineGenerator) InitResources() error {
 		return err
 	}
 
-	privateCloudsList := vmwareengineService.Projects.Locations.PrivateClouds.List(
-		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
-	g.Resources = g.createResources(ctx, privateCloudsList)
+	project := g.GetArgs()["project"].(string)
+	location := g.GetArgs()["region"].(compute.Region).Name
+
+	pcNames := []string{}
+	privateCloudsList := vmwareengineService.Projects.Locations.PrivateClouds.List("projects/" + project + "/locations/" + location)
+	if err := privateCloudsList.Pages(ctx, func(page *vmwareengine.ListPrivateCloudsResponse) error {
+		for _, obj := range page.PrivateClouds {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			pcNames = append(pcNames, name)
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_vmwareengine_private_cloud",
+				g.ProviderName,
+				map[string]string{"name": name, "project": project, "location": location},
+				vmwareengineAllowEmptyValues,
+				vmwareengineAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
+	for _, pc := range pcNames {
+		clustersList := vmwareengineService.Projects.Locations.PrivateClouds.Clusters.List(
+			"projects/" + project + "/locations/" + location + "/privateClouds/" + pc)
+		if err := clustersList.Pages(ctx, func(page *vmwareengine.ListClustersResponse) error {
+			for _, obj := range page.Clusters {
+				t := strings.Split(obj.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					obj.Name,
+					name,
+					"google_vmwareengine_cluster",
+					g.ProviderName,
+					map[string]string{
+						"name":          name,
+						"parent":        "projects/" + project + "/locations/" + location + "/privateClouds/" + pc,
+						"project":       project,
+						"location":      location,
+						"private_cloud": pc,
+					},
+					vmwareengineAllowEmptyValues,
+					vmwareengineAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+	}
 	return nil
 }

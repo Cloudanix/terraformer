@@ -267,6 +267,7 @@ List of supported GCP services:
     * `google_vertex_ai_dataset`
 *   `vmwareengine`
     * `google_vmwareengine_private_cloud`
+    * `google_vmwareengine_cluster`
 *   `vpcAccess`
     * `google_vpc_access_connector`
 *   `workstations`
