@@ -86,6 +86,20 @@ func (g *DataplexGenerator) InitResources() error {
 		log.Println(err)
 	}
 
+	if err := dataplexService.Projects.Locations.Glossaries.List("projects/"+project+"/locations/"+location).Pages(ctx, func(p *dataplex.GoogleCloudDataplexV1ListGlossariesResponse) error {
+		for _, o := range p.Glossaries {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_dataplex_glossary", g.ProviderName,
+				map[string]string{"glossary_id": name, "project": project, "location": location},
+				dataplexAllowEmptyValues, dataplexAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+
 	aspectTypesList := dataplexService.Projects.Locations.AspectTypes.List("projects/" + project + "/locations/" + location)
 	if err := aspectTypesList.Pages(ctx, func(page *dataplex.GoogleCloudDataplexV1ListAspectTypesResponse) error {
 		for _, obj := range page.AspectTypes {
