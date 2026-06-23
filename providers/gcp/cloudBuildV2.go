@@ -53,6 +53,17 @@ func (g *CloudBuildV2Generator) InitResources() error {
 				obj.Name, name, "google_cloudbuildv2_connection", g.ProviderName,
 				map[string]string{"name": name, "project": g.GetArgs()["project"].(string), "location": location},
 				cloudBuildV2AllowEmptyValues, cloudBuildV2AdditionalFields))
+			if policy, perr := svc.Projects.Locations.Connections.GetIamPolicy(obj.Name).Do(); perr == nil {
+				for _, b := range policy.Bindings {
+					for _, m := range b.Members {
+						g.Resources = append(g.Resources, terraformutils.NewResource(
+							obj.Name+" "+b.Role+" "+m, name+"_"+b.Role+"_"+m,
+							"google_cloudbuildv2_connection_iam_member", g.ProviderName,
+							map[string]string{"name": name, "role": b.Role, "member": m, "project": g.GetArgs()["project"].(string), "location": location},
+							cloudBuildV2AllowEmptyValues, cloudBuildV2AdditionalFields))
+					}
+				}
+			}
 		}
 		return nil
 	}); err != nil {
