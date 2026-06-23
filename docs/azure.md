@@ -221,6 +221,8 @@ export ARM_USE_ADAL=true
     * `azurerm_lb`
 *   `log_analytics`
     * `azurerm_log_analytics_workspace`
+*   `machine_learning`
+    * `azurerm_machine_learning_workspace`
 *   `managed_identity`
     * `azurerm_user_assigned_identity`
 *   `traffic_manager`

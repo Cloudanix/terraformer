@@ -414,6 +414,7 @@ func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceG
 		"kusto":                                &KustoGenerator{},
 		"load_balancer":                        &LoadBalancerGenerator{},
 		"log_analytics":                        &LogAnalyticsGenerator{},
+		"machine_learning":                     &MachineLearningGenerator{},
 		"managed_identity":                     &ManagedIdentityGenerator{},
 		"management_group":                     &ManagementGroupGenerator{},
 		"management_lock":                      &ManagementLockGenerator{},
