@@ -76,6 +76,35 @@ func (g *NetappGenerator) InitResources() error {
 
 	volumesList := netappService.Projects.Locations.Volumes.List(parent)
 	g.Resources = append(g.Resources, g.createVolumesResources(ctx, volumesList)...)
+
+	loc := g.GetArgs()["region"].(compute.Region).Name
+	proj := g.GetArgs()["project"].(string)
+	if err := netappService.Projects.Locations.ActiveDirectories.List(parent).Pages(ctx, func(p *netapp.ListActiveDirectoriesResponse) error {
+		for _, o := range p.ActiveDirectories {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_netapp_active_directory", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				netappAllowEmptyValues, netappAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	if err := netappService.Projects.Locations.BackupVaults.List(parent).Pages(ctx, func(p *netapp.ListBackupVaultsResponse) error {
+		for _, o := range p.BackupVaults {
+			t := strings.Split(o.Name, "/")
+			name := t[len(t)-1]
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				o.Name, name, "google_netapp_backup_vault", g.ProviderName,
+				map[string]string{"name": name, "project": proj, "location": loc},
+				netappAllowEmptyValues, netappAdditionalFields))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
 	return nil
 }
 
