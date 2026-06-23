@@ -73,6 +73,35 @@ func (g *ArtifactRegistryGenerator) InitResources() error {
 	repositoriesList := artifactRegistryService.Projects.Locations.Repositories.List(
 		"projects/" + g.GetArgs()["project"].(string) + "/locations/" + g.GetArgs()["region"].(compute.Region).Name)
 
-	g.Resources = g.createResources(ctx, repositoriesList)
+	repoResources := g.createResources(ctx, repositoriesList)
+	g.Resources = append(g.Resources, repoResources...)
+
+	// Per-repository IAM (member form, matching the project_iam_member precedent).
+	for _, r := range repoResources {
+		repo := r.InstanceState.ID
+		policy, perr := artifactRegistryService.Projects.Locations.Repositories.GetIamPolicy(repo).Do()
+		if perr != nil {
+			continue
+		}
+		for _, b := range policy.Bindings {
+			for _, m := range b.Members {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					repo+" "+b.Role+" "+m,
+					repo+"_"+b.Role+"_"+m,
+					"google_artifact_registry_repository_iam_member",
+					g.ProviderName,
+					map[string]string{
+						"repository": repo,
+						"role":       b.Role,
+						"member":     m,
+						"project":    g.GetArgs()["project"].(string),
+						"location":   g.GetArgs()["region"].(compute.Region).Name,
+					},
+					artifactRegistryAllowEmptyValues,
+					artifactRegistryAdditionalFields,
+				))
+			}
+		}
+	}
 	return nil
 }

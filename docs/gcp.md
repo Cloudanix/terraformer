@@ -55,6 +55,7 @@ List of supported GCP services:
     * `google_apphub_workload`
 *   `artifactRegistry`
     * `google_artifact_registry_repository`
+    * `google_artifact_registry_repository_iam_member`
 *   `binaryAuthorization`
     * `google_binary_authorization_attestor`
 *   `backupdr`
