@@ -107,5 +107,38 @@ func (g *DatastreamGenerator) InitResources() error {
 
 	connectionProfilesList := datastreamService.Projects.Locations.ConnectionProfiles.List(parent)
 	g.Resources = append(g.Resources, g.createConnectionProfilesResources(ctx, connectionProfilesList)...)
+
+	pcList := datastreamService.Projects.Locations.PrivateConnections.List(parent)
+	g.Resources = append(g.Resources, g.createPrivateConnectionsResources(ctx, pcList)...)
 	return nil
+}
+
+// Run on privateConnectionsList and create for each TerraformResource
+func (g DatastreamGenerator) createPrivateConnectionsResources(ctx context.Context, list *datastream.ProjectsLocationsPrivateConnectionsListCall) []terraformutils.Resource {
+	resources := []terraformutils.Resource{}
+	location := g.GetArgs()["region"].(compute.Region).Name
+	if err := list.Pages(ctx, func(page *datastream.ListPrivateConnectionsResponse) error {
+		for _, obj := range page.PrivateConnections {
+			t := strings.Split(obj.Name, "/")
+			name := t[len(t)-1]
+			resources = append(resources, terraformutils.NewResource(
+				obj.Name,
+				name,
+				"google_datastream_private_connection",
+				g.ProviderName,
+				map[string]string{
+					"name":                  name,
+					"private_connection_id": name,
+					"project":               g.GetArgs()["project"].(string),
+					"location":              location,
+				},
+				datastreamAllowEmptyValues,
+				datastreamAdditionalFields,
+			))
+		}
+		return nil
+	}); err != nil {
+		log.Println(err)
+	}
+	return resources
 }
