@@ -19,6 +19,7 @@ import (
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"google.golang.org/api/iterator"
+	loggingv2 "google.golang.org/api/logging/v2"
 
 	"cloud.google.com/go/logging/logadmin"
 )
@@ -100,6 +101,42 @@ func (g *LoggingGenerator) InitResources() error {
 	if err := g.loadLoggingSinks(ctx, client); err != nil {
 		return err
 	}
+	g.loadScopedSinks(ctx)
 
 	return nil
+}
+
+// loadScopedSinks enumerates folder/organization log sinks when GOOGLE_FOLDER /
+// GOOGLE_ORGANIZATION are set (org/folder-scoped; no-op otherwise).
+func (g *LoggingGenerator) loadScopedSinks(ctx context.Context) {
+	svc, err := loggingv2.NewService(ctx)
+	if err != nil {
+		return
+	}
+	if folder, _ := g.GetArgs()["folder"].(string); folder != "" {
+		if err := svc.Folders.Sinks.List("folders/"+folder).Pages(ctx, func(page *loggingv2.ListSinksResponse) error {
+			for _, s := range page.Sinks {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					"folders/"+folder+"/sinks/"+s.Name, s.Name, "google_logging_folder_sink", g.ProviderName,
+					map[string]string{"name": s.Name, "folder": folder}, loggingAllowEmptyValues, loggingAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			_ = err
+		}
+	}
+	if org, _ := g.GetArgs()["organization"].(string); org != "" {
+		if err := svc.Organizations.Sinks.List("organizations/"+org).Pages(ctx, func(page *loggingv2.ListSinksResponse) error {
+			for _, s := range page.Sinks {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					"organizations/"+org+"/sinks/"+s.Name, s.Name, "google_logging_organization_sink", g.ProviderName,
+					map[string]string{"name": s.Name, "org_id": org}, loggingAllowEmptyValues, loggingAdditionalFields,
+				))
+			}
+			return nil
+		}); err != nil {
+			_ = err
+		}
+	}
 }

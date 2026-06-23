@@ -217,6 +217,8 @@ List of supported GCP services:
 *   `logging`
     * `google_logging_metric`
     * `google_logging_project_sink`
+    * `google_logging_folder_sink` (requires GOOGLE_FOLDER)
+    * `google_logging_organization_sink` (requires GOOGLE_ORGANIZATION)
 *   `managedKafka`
     * `google_managed_kafka_cluster`
 *   `memcache`
