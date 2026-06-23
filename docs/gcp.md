@@ -397,6 +397,7 @@ List of supported GCP services:
     * `google_vmwareengine_network_policy`
     * `google_vmwareengine_network_peering`
     * `google_vmwareengine_network`
+    * `google_vmwareengine_external_address`
 *   `vpcAccess`
     * `google_vpc_access_connector`
 *   `workstations`

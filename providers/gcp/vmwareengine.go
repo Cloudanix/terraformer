@@ -115,6 +115,21 @@ func (g *VmwareengineGenerator) InitResources() error {
 	}
 
 	for _, pc := range pcNames {
+		pcParent := "projects/" + project + "/locations/" + location + "/privateClouds/" + pc
+		if err := vmwareengineService.Projects.Locations.PrivateClouds.ExternalAddresses.List(pcParent).Pages(ctx, func(p *vmwareengine.ListExternalAddressesResponse) error {
+			for _, o := range p.ExternalAddresses {
+				t := strings.Split(o.Name, "/")
+				name := t[len(t)-1]
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					o.Name, name, "google_vmwareengine_external_address", g.ProviderName,
+					map[string]string{"name": name, "parent": pcParent, "project": project, "location": location},
+					vmwareengineAllowEmptyValues, vmwareengineAdditionalFields))
+			}
+			return nil
+		}); err != nil {
+			log.Println(err)
+		}
+
 		clustersList := vmwareengineService.Projects.Locations.PrivateClouds.Clusters.List(
 			"projects/" + project + "/locations/" + location + "/privateClouds/" + pc)
 		if err := clustersList.Pages(ctx, func(page *vmwareengine.ListClustersResponse) error {
