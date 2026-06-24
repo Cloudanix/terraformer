@@ -70,7 +70,7 @@ func (g CDNGenerator) createResources(cdnList []godo.CDN) []terraformutils.Resou
 
 func (g *CDNGenerator) InitResources() error {
 	client := g.generateClient()
-	output, err := g.listCDNs(context.TODO(), client)
+	output, err := g.listCDNs(runContext(), client)
 	if err != nil {
 		return err
 	}

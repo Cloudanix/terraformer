@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/route53recoveryreadiness"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *Route53RecoveryReadinessGenerator) InitResources() error {
 	svc := route53recoveryreadiness.NewFromConfig(config)
 	p := route53recoveryreadiness.NewListCellsPaginator(svc, &route53recoveryreadiness.ListCellsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -50,7 +48,7 @@ func (g *Route53RecoveryReadinessGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for rc := route53recoveryreadiness.NewListReadinessChecksPaginator(svc, &route53recoveryreadiness.ListReadinessChecksInput{}); rc.HasMorePages(); {
 		page, err := rc.NextPage(ctx)
 		if err != nil {

@@ -4,7 +4,20 @@ Deferred work captured during reviews. Each entry: What / Why / Context / Depend
 
 ---
 
-## T4 — Add a fixed-region scope and the globalaccelerator service
+## T4 — Add a fixed-region scope and the globalaccelerator service — DONE
+
+> Resolved: `globalaccelerator` ships as `scopeGlobal` (registered + generator in
+> `providers/aws/globalaccelerator.go`), emitting accelerator / listener /
+> endpoint_group / custom-routing-* / cross_account_attachment. Its control plane
+> only answers in us-west-2, so the generator pins `config.Region = "us-west-2"`
+> after the aws-global pass hands it region "aws-global" (value copy — does not
+> touch the per-region config cache). The general `scopeFixed` machinery below is
+> **intentionally not built** (YAGNI): the SDK's partition-global endpoint ruleset
+> already routes the aws-global pass for shield (us-east-1), networkmanager,
+> route53, and globalaccelerator, and the per-generator region pin covers the one
+> service whose single-region API needed certainty. Build `scopeFixed` only if a
+> future service's API is single-region AND the aws-global pass demonstrably
+> fails for it — none does today.
 
 **What:** Support AWS services whose control plane lives in a single fixed
 region that is neither us-east-1 nor "global" — starting with
@@ -69,7 +82,30 @@ decision. Independent of the region-machinery work in T4.
 
 ---
 
-## T2 — Stream resources to disk per service (bound memory)
+## T2 — Stream resources to disk per service (bound memory) — PARTIAL
+
+> Landed (the safe part): `ImportFromPlan`'s per-service write loop now drops
+> each service's resource slice (`importedResource[serviceName] = nil`) right
+> after its files are written, so the refreshed state is GC'd during the write
+> phase instead of lingering to the end.
+>
+> **Why only partial — the peak is blocked by `--connect`:** the memory peak is
+> not during write, it's at the end of the refresh stage, when
+> `RefreshResourcesByProvider` has refreshed *every* service and
+> `ConnectServices` (run once, `--connect` defaults ON) needs *all* services'
+> resources resident simultaneously to build cross-service interpolation refs.
+> So the real peak-reducer — free each service right after *its refresh*, before
+> refreshing the next — cannot be done without either (a) a `--connect`-off fast
+> path that streams refresh→write→free per service, or (b) a two-pass connect
+> (first pass records the id→address map per service then frees the bodies;
+> second pass rewrites references from the map). Both are real pipeline reworks.
+>
+> **Blocked on validation:** correctness here (no dropped resources, `--connect`
+> refs still resolve, tfstate intact) can only be proven by running a real large
+> import, and the gRPC refresh plugin is bind-blocked in this sandbox (same wall
+> as STATUS.md's plan round-trip). Do the (a)/(b) rework in a networked env where
+> an end-to-end import validates it. Interim mitigation unchanged: scope
+> `--resources` instead of `*`.
 
 **What:** Free each service's resources from memory after its files are written,
 instead of holding every resource's fully-refreshed state in memory until the
@@ -99,7 +135,44 @@ large resource set.
 
 ---
 
-## T3 — Replace `context.TODO()` with a timeout/cancellable context
+## T3 — Replace `context.TODO()` with a timeout/cancellable context — DONE
+
+> Landed: the orchestration foundation + adoption API.
+> - `--timeout <seconds>` flag (0 = off) on every provider import command
+>   (`baseProviderFlags`).
+> - `Import()` builds a run context: `signal.NotifyContext` (Ctrl-C / SIGTERM)
+>   wrapped in `context.WithTimeout` when `--timeout > 0`. A second Ctrl-C
+>   hard-kills (NotifyContext restores default handling after the first signal),
+>   so this is not a regression.
+> - `terraformutils.Service` gained `SetContext`/`Context()` (defaults to
+>   `context.Background()`); `initServiceResources` sets it per service via an
+>   optional interface assertion, so the ~6 providers whose generators don't embed
+>   `Service` are unaffected (no interface change, nothing breaks).
+> - `initAllServicesResources` stops launching new services once the context is
+>   cancelled/expired (service-granularity cancellation, real teeth for the flag).
+> - `globalaccelerator` converted as the end-to-end demonstrator
+>   (`ctx := g.Context()`), unit-tested in `terraformutils/service_context_test.go`.
+>
+> **AWS sweep — DONE.** All 729 `context.TODO()` sites in `providers/aws` now go
+> through `awsContext()` (a package-level accessor in `aws_service.go` fed by
+> `AWSService.SetContext`), so a hung *individual* AWS SDK call — in a method or a
+> receiver-less helper — honours `--timeout` / Ctrl-C. The package var is safe
+> because per-service discovery runs sequentially (see the ponytail note on
+> `awsImportCtx`). `g.Context()` (the embedded-Service accessor) is the
+> equivalent for code that prefers a receiver; both read the same run context.
+>
+> **All providers swept.** Beyond AWS, the other providers carrying
+> `context.TODO()` were converted, one commit each, via the same recipe (a
+> per-package `runContext()` accessor + `SetContext` override on the base service,
+> or the embedded `g.Context()` for single sites): ionoscloud (incl. the
+> `helpers.GetAllDatacenters` ctx param), digitalocean, honeycombio, opal,
+> heroku, keycloak. Each builds green.
+>
+> **Intentionally left:** `commercetools/connectivity/client.go` — its lone
+> `context.TODO()` is in the oauth2 *client construction* helper (a sub-package
+> with no `Service`), a one-time connection-setup call, not a generator discovery
+> call that could hang the import. Not worth threading context through a separate
+> package for. Revisit only if it ever blocks.
 
 **What:** Sweep every generator's `context.TODO()` and give the import run a
 real context with a timeout (and Ctrl-C cancellation), threaded from the CLI.

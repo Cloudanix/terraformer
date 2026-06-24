@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/wafv2"
 	"github.com/aws/aws-sdk-go-v2/service/wafv2/types"
@@ -59,12 +57,43 @@ func (g *Wafv2Generator) InitResources() error {
 	if err := g.loadWebACLLoggingConfiguration(svc); err != nil {
 		return err
 	}
+	if err := g.loadAPIKeys(svc); err != nil {
+		return err
+	}
 
 	return nil
 }
 
+// wafv2APIKeyID builds the aws_wafv2_api_key import id ("<api_key>,<scope>").
+func wafv2APIKeyID(apiKey, scope string) string {
+	return apiKey + "," + scope
+}
+
+func (g *Wafv2Generator) loadAPIKeys(svc *wafv2.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListAPIKeys(awsContext(), &wafv2.ListAPIKeysInput{Scope: g.scope, NextMarker: marker})
+		if err != nil {
+			return err
+		}
+		for _, k := range out.APIKeySummaries {
+			apiKey := StringValue(k.APIKey)
+			if apiKey == "" {
+				continue
+			}
+			id := wafv2APIKeyID(apiKey, string(g.scope))
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_wafv2_api_key", "aws", wafv2AllowEmptyValues))
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
 func (g *Wafv2Generator) loadWebACL(svc *wafv2.Client) error {
-	output, err := svc.ListWebACLs(context.TODO(), &wafv2.ListWebACLsInput{Scope: g.scope})
+	output, err := svc.ListWebACLs(awsContext(), &wafv2.ListWebACLsInput{Scope: g.scope})
 	if err != nil {
 		return err
 	}
@@ -95,7 +124,7 @@ func (g *Wafv2Generator) loadWebACL(svc *wafv2.Client) error {
 
 func (g *Wafv2Generator) loadWebACLAssociations(svc *wafv2.Client, webACLArn *string) error {
 	for _, resourceType := range types.ResourceTypeApplicationLoadBalancer.Values() {
-		output, err := svc.ListResourcesForWebACL(context.TODO(),
+		output, err := svc.ListResourcesForWebACL(awsContext(),
 			&wafv2.ListResourcesForWebACLInput{WebACLArn: webACLArn, ResourceType: resourceType})
 		if err != nil {
 			return err
@@ -119,7 +148,7 @@ func (g *Wafv2Generator) loadWebACLAssociations(svc *wafv2.Client, webACLArn *st
 }
 
 func (g *Wafv2Generator) loadIPSet(svc *wafv2.Client) error {
-	output, err := svc.ListIPSets(context.TODO(), &wafv2.ListIPSetsInput{Scope: g.scope})
+	output, err := svc.ListIPSets(awsContext(), &wafv2.ListIPSetsInput{Scope: g.scope})
 	if err != nil {
 		return err
 	}
@@ -141,7 +170,7 @@ func (g *Wafv2Generator) loadIPSet(svc *wafv2.Client) error {
 }
 
 func (g *Wafv2Generator) loadRegexPatternSets(svc *wafv2.Client) error {
-	output, err := svc.ListRegexPatternSets(context.TODO(), &wafv2.ListRegexPatternSetsInput{Scope: g.scope})
+	output, err := svc.ListRegexPatternSets(awsContext(), &wafv2.ListRegexPatternSetsInput{Scope: g.scope})
 	if err != nil {
 		return err
 	}
@@ -163,7 +192,7 @@ func (g *Wafv2Generator) loadRegexPatternSets(svc *wafv2.Client) error {
 }
 
 func (g *Wafv2Generator) loadWafRuleGroups(svc *wafv2.Client) error {
-	output, err := svc.ListRuleGroups(context.TODO(), &wafv2.ListRuleGroupsInput{Scope: g.scope})
+	output, err := svc.ListRuleGroups(awsContext(), &wafv2.ListRuleGroupsInput{Scope: g.scope})
 	if err != nil {
 		return err
 	}
@@ -186,7 +215,7 @@ func (g *Wafv2Generator) loadWafRuleGroups(svc *wafv2.Client) error {
 }
 
 func (g *Wafv2Generator) loadWebACLLoggingConfiguration(svc *wafv2.Client) error {
-	output, err := svc.ListLoggingConfigurations(context.TODO(), &wafv2.ListLoggingConfigurationsInput{Scope: g.scope})
+	output, err := svc.ListLoggingConfigurations(awsContext(), &wafv2.ListLoggingConfigurationsInput{Scope: g.scope})
 	if err != nil {
 		return err
 	}

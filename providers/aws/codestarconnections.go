@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/codestarconnections"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -37,7 +35,7 @@ func (g *CodeStarConnectionsGenerator) InitResources() error {
 
 	p := codestarconnections.NewListConnectionsPaginator(svc, &codestarconnections.ListConnectionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -56,7 +54,7 @@ func (g *CodeStarConnectionsGenerator) InitResources() error {
 	}
 
 	for hp := codestarconnections.NewListHostsPaginator(svc, &codestarconnections.ListHostsInput{}); hp.HasMorePages(); {
-		page, err := hp.NextPage(context.TODO())
+		page, err := hp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

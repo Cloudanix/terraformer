@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/rum"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *RumGenerator) InitResources() error {
 
 	p := rum.NewListAppMonitorsPaginator(svc, &rum.ListAppMonitorsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func (g *RumGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_rum_app_monitor", "aws", defaultAllowEmptyValues))
 
-			if dest, err := svc.ListRumMetricsDestinations(context.TODO(), &rum.ListRumMetricsDestinationsInput{AppMonitorName: monitor.Name}); err == nil && len(dest.Destinations) > 0 {
+			if dest, err := svc.ListRumMetricsDestinations(awsContext(), &rum.ListRumMetricsDestinationsInput{AppMonitorName: monitor.Name}); err == nil && len(dest.Destinations) > 0 {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					name, name, "aws_rum_metrics_destination", "aws", defaultAllowEmptyValues))
 			}

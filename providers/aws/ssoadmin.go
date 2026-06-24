@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssoadmin"
 
@@ -41,7 +39,7 @@ func (g *SSOAdminGenerator) InitResources() error {
 		return e
 	}
 	svc := ssoadmin.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	instances, err := svc.ListInstances(ctx, &ssoadmin.ListInstancesInput{})
 	if err != nil {

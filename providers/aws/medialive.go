@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -50,7 +49,7 @@ func (g *MediaLiveGenerator) InitResources() error {
 
 	multiplexes := medialive.NewListMultiplexesPaginator(svc, &medialive.ListMultiplexesInput{})
 	for multiplexes.HasMorePages() {
-		page, err := multiplexes.NextPage(context.TODO())
+		page, err := multiplexes.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			break
@@ -64,7 +63,7 @@ func (g *MediaLiveGenerator) InitResources() error {
 				id, id, "aws_medialive_multiplex", "aws", medialiveAllowEmptyValues))
 			multiplexID := id
 			for pp := medialive.NewListMultiplexProgramsPaginator(svc, &medialive.ListMultiplexProgramsInput{MultiplexId: &multiplexID}); pp.HasMorePages(); {
-				ppage, err := pp.NextPage(context.TODO())
+				ppage, err := pp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -86,7 +85,7 @@ func (g *MediaLiveGenerator) InitResources() error {
 func (g *MediaLiveGenerator) GetChannels(svc *medialive.Client) error {
 	p := medialive.NewListChannelsPaginator(svc, &medialive.ListChannelsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -107,7 +106,7 @@ func (g *MediaLiveGenerator) GetChannels(svc *medialive.Client) error {
 func (g *MediaLiveGenerator) GetInputs(svc *medialive.Client) error {
 	p := medialive.NewListInputsPaginator(svc, &medialive.ListInputsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -128,7 +127,7 @@ func (g *MediaLiveGenerator) GetInputs(svc *medialive.Client) error {
 func (g *MediaLiveGenerator) GetInputSecurityGroups(svc *medialive.Client) error {
 	p := medialive.NewListInputSecurityGroupsPaginator(svc, &medialive.ListInputSecurityGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

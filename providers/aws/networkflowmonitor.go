@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/networkflowmonitor"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +31,7 @@ func (g *NetworkFlowMonitorGenerator) InitResources() error {
 	}
 	svc := networkflowmonitor.NewFromConfig(config)
 	for p := networkflowmonitor.NewListMonitorsPaginator(svc, &networkflowmonitor.ListMonitorsInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -47,7 +45,7 @@ func (g *NetworkFlowMonitorGenerator) InitResources() error {
 		}
 	}
 	for p := networkflowmonitor.NewListScopesPaginator(svc, &networkflowmonitor.ListScopesInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

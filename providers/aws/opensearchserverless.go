@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/opensearchserverless"
 	"github.com/aws/aws-sdk-go-v2/service/opensearchserverless/types"
 
@@ -38,7 +36,7 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 
 	p := opensearchserverless.NewListCollectionsPaginator(svc, &opensearchserverless.ListCollectionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -52,7 +50,7 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for _, scType := range types.SecurityConfigType("").Values() {
 		t := scType
 		for sp := opensearchserverless.NewListSecurityConfigsPaginator(svc, &opensearchserverless.ListSecurityConfigsInput{Type: t}); sp.HasMorePages(); {
@@ -133,6 +131,21 @@ func (g *OpenSearchServerlessGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(v.Name), "aws_opensearchserverless_vpc_endpoint", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for cg := opensearchserverless.NewListCollectionGroupsPaginator(svc, &opensearchserverless.ListCollectionGroupsInput{}); cg.HasMorePages(); {
+		page, err := cg.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, c := range page.CollectionGroupSummaries {
+			id := StringValue(c.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(c.Name), "aws_opensearchserverless_collection_group", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

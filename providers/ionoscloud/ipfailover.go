@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -17,13 +16,13 @@ type IPFailoverGenerator struct {
 func (g *IPFailoverGenerator) InitResources() error {
 	client := g.generateClient()
 	cloudAPIClient := client.CloudAPIClient
-	datacenters, err := helpers.GetAllDatacenters(*cloudAPIClient)
+	datacenters, err := helpers.GetAllDatacenters(runContext(), *cloudAPIClient)
 	resourceType := "ionoscloud_ipfailover"
 	if err != nil {
 		return err
 	}
 	for _, datacenter := range datacenters {
-		lans, _, err := cloudAPIClient.LANsApi.DatacentersLansGet(context.TODO(), *datacenter.Id).Depth(1).Execute()
+		lans, _, err := cloudAPIClient.LANsApi.DatacentersLansGet(runContext(), *datacenter.Id).Depth(1).Execute()
 		if err != nil {
 			return err
 		}

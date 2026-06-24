@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -31,7 +30,7 @@ type CodeCommitGenerator struct {
 func (g *CodeCommitGenerator) loadRepository(svc *codecommit.Client) error {
 	p := codecommit.NewListRepositoriesPaginator(svc, &codecommit.ListRepositoriesInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -43,7 +42,7 @@ func (g *CodeCommitGenerator) loadRepository(svc *codecommit.Client) error {
 				"aws_codecommit_repository",
 				"aws",
 				codecommitAllowEmptyValues))
-			if triggers, err := svc.GetRepositoryTriggers(context.TODO(), &codecommit.GetRepositoryTriggersInput{RepositoryName: repository.RepositoryName}); err == nil && len(triggers.Triggers) > 0 {
+			if triggers, err := svc.GetRepositoryTriggers(awsContext(), &codecommit.GetRepositoryTriggersInput{RepositoryName: repository.RepositoryName}); err == nil && len(triggers.Triggers) > 0 {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					resourceName, resourceName, "aws_codecommit_trigger", "aws", codecommitAllowEmptyValues))
 			}
@@ -55,7 +54,7 @@ func (g *CodeCommitGenerator) loadRepository(svc *codecommit.Client) error {
 func (g *CodeCommitGenerator) loadApprovalRuleTemplate(svc *codecommit.Client) error {
 	p := codecommit.NewListApprovalRuleTemplatesPaginator(svc, &codecommit.ListApprovalRuleTemplatesInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -69,7 +68,7 @@ func (g *CodeCommitGenerator) loadApprovalRuleTemplate(svc *codecommit.Client) e
 			tmpl := templateName
 			assocInput := &codecommit.ListRepositoriesForApprovalRuleTemplateInput{ApprovalRuleTemplateName: &tmpl}
 			for {
-				out, err := svc.ListRepositoriesForApprovalRuleTemplate(context.TODO(), assocInput)
+				out, err := svc.ListRepositoriesForApprovalRuleTemplate(awsContext(), assocInput)
 				if err != nil {
 					break
 				}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/keyspaces"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *KeyspacesGenerator) InitResources() error {
 
 	p := keyspaces.NewListKeyspacesPaginator(svc, &keyspaces.ListKeyspacesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *KeyspacesGenerator) InitResources() error {
 				name, name, "aws_keyspaces_keyspace", "aws", defaultAllowEmptyValues))
 			ksName := name
 			for tp := keyspaces.NewListTablesPaginator(svc, &keyspaces.ListTablesInput{KeyspaceName: &ksName}); tp.HasMorePages(); {
-				tpage, err := tp.NextPage(context.TODO())
+				tpage, err := tp.NextPage(awsContext())
 				if err != nil {
 					break
 				}

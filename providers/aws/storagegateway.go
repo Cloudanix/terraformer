@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/storagegateway"
 	"github.com/aws/aws-sdk-go-v2/service/storagegateway/types"
@@ -35,7 +33,7 @@ func (g *StorageGatewayGenerator) InitResources() error {
 	}
 	svc := storagegateway.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var gatewayArns []string
 	p := storagegateway.NewListGatewaysPaginator(svc, &storagegateway.ListGatewaysInput{})
 	for p.HasMorePages() {
@@ -89,7 +87,7 @@ func (g *StorageGatewayGenerator) InitResources() error {
 
 	pools := storagegateway.NewListTapePoolsPaginator(svc, &storagegateway.ListTapePoolsInput{})
 	for pools.HasMorePages() {
-		page, err := pools.NextPage(context.TODO())
+		page, err := pools.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -100,7 +98,7 @@ func (g *StorageGatewayGenerator) InitResources() error {
 	}
 
 	for fs := storagegateway.NewListFileSharesPaginator(svc, &storagegateway.ListFileSharesInput{}); fs.HasMorePages(); {
-		page, err := fs.NextPage(context.TODO())
+		page, err := fs.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -124,7 +122,7 @@ func (g *StorageGatewayGenerator) InitResources() error {
 	}
 
 	for vol := storagegateway.NewListVolumesPaginator(svc, &storagegateway.ListVolumesInput{}); vol.HasMorePages(); {
-		page, err := vol.NextPage(context.TODO())
+		page, err := vol.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

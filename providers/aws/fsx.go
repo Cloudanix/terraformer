@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/fsx"
 	"github.com/aws/aws-sdk-go-v2/service/fsx/types"
 
@@ -65,7 +63,7 @@ func (g *FsxGenerator) InitResources() error {
 		return e
 	}
 	svc := fsx.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	fileSystems := fsx.NewDescribeFileSystemsPaginator(svc, &fsx.DescribeFileSystemsInput{})
 	for fileSystems.HasMorePages() {

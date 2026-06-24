@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -64,7 +63,7 @@ func (g *LogsGenerator) InitResources() error {
 	}
 	svc := cloudwatchlogs.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var logGroupNames []string
 	p := cloudwatchlogs.NewDescribeLogGroupsPaginator(svc, &cloudwatchlogs.DescribeLogGroupsInput{})
 	for p.HasMorePages() {
@@ -188,6 +187,67 @@ func (g *LogsGenerator) InitResources() error {
 				id, StringValue(q.Name), "aws_cloudwatch_query_definition", "aws", logsAllowEmptyValues))
 		}
 	}
+
+	for ad := cloudwatchlogs.NewListLogAnomalyDetectorsPaginator(svc, &cloudwatchlogs.ListLogAnomalyDetectorsInput{}); ad.HasMorePages(); {
+		page, err := ad.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, d := range page.AnomalyDetectors {
+			arn := StringValue(d.AnomalyDetectorArn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(d.DetectorName), "aws_cloudwatch_log_anomaly_detector", "aws", logsAllowEmptyValues))
+		}
+	}
+
+	for dp := cloudwatchlogs.NewDescribeDeliveriesPaginator(svc, &cloudwatchlogs.DescribeDeliveriesInput{}); dp.HasMorePages(); {
+		page, err := dp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, d := range page.Deliveries {
+			id := StringValue(d.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_cloudwatch_log_delivery", "aws", logsAllowEmptyValues))
+		}
+	}
+
+	for dd := cloudwatchlogs.NewDescribeDeliveryDestinationsPaginator(svc, &cloudwatchlogs.DescribeDeliveryDestinationsInput{}); dd.HasMorePages(); {
+		page, err := dd.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, d := range page.DeliveryDestinations {
+			name := StringValue(d.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_log_delivery_destination", "aws", logsAllowEmptyValues))
+		}
+	}
+
+	for ds := cloudwatchlogs.NewDescribeDeliverySourcesPaginator(svc, &cloudwatchlogs.DescribeDeliverySourcesInput{}); ds.HasMorePages(); {
+		page, err := ds.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, d := range page.DeliverySources {
+			name := StringValue(d.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_log_delivery_source", "aws", logsAllowEmptyValues))
+		}
+	}
+
 	return nil
 }
 

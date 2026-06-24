@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/route53domains"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -37,7 +35,7 @@ func (g *Route53DomainsGenerator) InitResources() error {
 
 	p := route53domains.NewListDomainsPaginator(svc, &route53domains.ListDomainsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *Route53DomainsGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_route53domains_registered_domain", "aws", defaultAllowEmptyValues))
 			domainName := name
-			if detail, err := svc.GetDomainDetail(context.TODO(), &route53domains.GetDomainDetailInput{DomainName: &domainName}); err == nil {
+			if detail, err := svc.GetDomainDetail(awsContext(), &route53domains.GetDomainDetailInput{DomainName: &domainName}); err == nil {
 				for _, key := range detail.DnssecKeys {
 					keyID := StringValue(key.Id)
 					if keyID == "" {

@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"encoding/json"
 	"errors"
 	"strconv"
@@ -91,7 +90,7 @@ func (g *LambdaGenerator) PostConvertHook() error {
 func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 	p := lambda.NewListFunctionsPaginator(svc, &lambda.ListFunctionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -108,7 +107,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 				map[string]interface{}{},
 			))
 
-			if rc, err := svc.GetFunctionRecursionConfig(context.TODO(), &lambda.GetFunctionRecursionConfigInput{
+			if rc, err := svc.GetFunctionRecursionConfig(awsContext(), &lambda.GetFunctionRecursionConfigInput{
 				FunctionName: function.FunctionName,
 			}); err == nil && rc.RecursiveLoop != "" && rc.RecursiveLoop != "Terminate" {
 				name := StringValue(function.FunctionName)
@@ -116,7 +115,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 					name, name, "aws_lambda_function_recursion_config", "aws", lambdaAllowEmptyValues))
 			}
 
-			gp, err := svc.GetPolicy(context.TODO(), &lambda.GetPolicyInput{
+			gp, err := svc.GetPolicy(awsContext(), &lambda.GetPolicyInput{
 				FunctionName: aws.String(*function.FunctionArn),
 			})
 
@@ -158,7 +157,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 					FunctionName: function.FunctionName,
 				})
 			for pi.HasMorePages() {
-				piage, err := pi.NextPage(context.TODO())
+				piage, err := pi.NextPage(awsContext())
 				if err != nil {
 					return err
 				}
@@ -177,7 +176,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 
 			pa := lambda.NewListAliasesPaginator(svc, &lambda.ListAliasesInput{FunctionName: function.FunctionName})
 			for pa.HasMorePages() {
-				apage, err := pa.NextPage(context.TODO())
+				apage, err := pa.NextPage(awsContext())
 				if err != nil {
 					return err
 				}
@@ -198,7 +197,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 
 			pu := lambda.NewListFunctionUrlConfigsPaginator(svc, &lambda.ListFunctionUrlConfigsInput{FunctionName: function.FunctionName})
 			for pu.HasMorePages() {
-				upage, err := pu.NextPage(context.TODO())
+				upage, err := pu.NextPage(awsContext())
 				if err != nil {
 					return err
 				}
@@ -216,7 +215,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 
 			ppc := lambda.NewListProvisionedConcurrencyConfigsPaginator(svc, &lambda.ListProvisionedConcurrencyConfigsInput{FunctionName: function.FunctionName})
 			for ppc.HasMorePages() {
-				ppage, err := ppc.NextPage(context.TODO())
+				ppage, err := ppc.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -237,7 +236,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 				}
 			}
 
-			if rmc, err := svc.GetRuntimeManagementConfig(context.TODO(), &lambda.GetRuntimeManagementConfigInput{FunctionName: function.FunctionName}); err == nil &&
+			if rmc, err := svc.GetRuntimeManagementConfig(awsContext(), &lambda.GetRuntimeManagementConfigInput{FunctionName: function.FunctionName}); err == nil &&
 				rmc.UpdateRuntimeOn != "" && rmc.UpdateRuntimeOn != "Auto" {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					StringValue(function.FunctionName),
@@ -255,7 +254,7 @@ func (g *LambdaGenerator) addFunctions(svc *lambda.Client) error {
 func (g *LambdaGenerator) addCodeSigningConfigs(svc *lambda.Client) error {
 	p := lambda.NewListCodeSigningConfigsPaginator(svc, &lambda.ListCodeSigningConfigsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -274,7 +273,7 @@ func (g *LambdaGenerator) addCodeSigningConfigs(svc *lambda.Client) error {
 func (g *LambdaGenerator) addEventSourceMappings(svc *lambda.Client) error {
 	p := lambda.NewListEventSourceMappingsPaginator(svc, &lambda.ListEventSourceMappingsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -299,7 +298,7 @@ func (g *LambdaGenerator) addEventSourceMappings(svc *lambda.Client) error {
 func (g *LambdaGenerator) addLayerVersions(svc *lambda.Client) error {
 	pl := lambda.NewListLayersPaginator(svc, &lambda.ListLayersInput{})
 	for pl.HasMorePages() {
-		plage, err := pl.NextPage(context.TODO())
+		plage, err := pl.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -308,7 +307,7 @@ func (g *LambdaGenerator) addLayerVersions(svc *lambda.Client) error {
 				LayerName: layer.LayerName,
 			})
 			for pv.HasMorePages() {
-				pvage, err := pv.NextPage(context.TODO())
+				pvage, err := pv.NextPage(awsContext())
 				if err != nil {
 					return err
 				}
@@ -320,7 +319,7 @@ func (g *LambdaGenerator) addLayerVersions(svc *lambda.Client) error {
 						"aws",
 						lambdaAllowEmptyValues,
 					))
-					if _, err := svc.GetLayerVersionPolicy(context.TODO(), &lambda.GetLayerVersionPolicyInput{
+					if _, err := svc.GetLayerVersionPolicy(awsContext(), &lambda.GetLayerVersionPolicyInput{
 						LayerName: layer.LayerName, VersionNumber: &layerVersion.Version}); err == nil {
 						layerName := StringValue(layer.LayerName)
 						ver := strconv.FormatInt(layerVersion.Version, 10)

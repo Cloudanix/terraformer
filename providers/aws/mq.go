@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/mq"
 )
@@ -30,7 +28,7 @@ type MQGenerator struct {
 func (g *MQGenerator) loadBrokers(svc *mq.Client) error {
 	p := mq.NewListBrokersPaginator(svc, &mq.ListBrokersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -60,7 +58,7 @@ func (g *MQGenerator) InitResources() error {
 	}
 
 	// Configurations: ListConfigurations is a single call (no paginator).
-	configs, err := svc.ListConfigurations(context.TODO(), &mq.ListConfigurationsInput{})
+	configs, err := svc.ListConfigurations(awsContext(), &mq.ListConfigurationsInput{})
 	if err != nil {
 		return err
 	}

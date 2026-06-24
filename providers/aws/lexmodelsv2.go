@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/lexmodelsv2"
 
@@ -37,7 +35,7 @@ func (g *LexModelsV2Generator) InitResources() error {
 
 	p := lexmodelsv2.NewListBotsPaginator(svc, &lexmodelsv2.ListBotsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -57,7 +55,7 @@ func (g *LexModelsV2Generator) InitResources() error {
 // loadBotChildren enumerates a bot's versions plus its DRAFT-version locales,
 // intents, slot types, and slots. Import IDs are comma-separated component lists.
 func (g *LexModelsV2Generator) loadBotChildren(svc *lexmodelsv2.Client, botID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	const draft = "DRAFT"
 
 	for vp := lexmodelsv2.NewListBotVersionsPaginator(svc, &lexmodelsv2.ListBotVersionsInput{BotId: aws.String(botID)}); vp.HasMorePages(); {

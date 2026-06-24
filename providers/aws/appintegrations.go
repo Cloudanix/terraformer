@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/appintegrations"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *AppIntegrationsGenerator) InitResources() error {
 	svc := appintegrations.NewFromConfig(config)
 	p := appintegrations.NewListApplicationsPaginator(svc, &appintegrations.ListApplicationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *AppIntegrationsGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for dp := appintegrations.NewListDataIntegrationsPaginator(svc, &appintegrations.ListDataIntegrationsInput{}); dp.HasMorePages(); {
 		page, err := dp.NextPage(ctx)
 		if err != nil {

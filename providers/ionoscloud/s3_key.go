@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *S3KeyGenerator) InitResources() error {
 	cloudAPIClient := client.CloudAPIClient
 	resourceType := "ionoscloud_s3_key"
 
-	usersResponse, _, err := cloudAPIClient.UserManagementApi.UmUsersGet(context.TODO()).Execute()
+	usersResponse, _, err := cloudAPIClient.UserManagementApi.UmUsersGet(runContext()).Execute()
 	if err != nil {
 		return err
 	}
@@ -26,7 +25,7 @@ func (g *S3KeyGenerator) InitResources() error {
 		return nil
 	}
 	for _, user := range *usersResponse.Items {
-		s3KeysResponse, _, err := cloudAPIClient.UserS3KeysApi.UmUsersS3keysGet(context.TODO(), *user.Id).Depth(1).Execute()
+		s3KeysResponse, _, err := cloudAPIClient.UserS3KeysApi.UmUsersS3keysGet(runContext(), *user.Id).Depth(1).Execute()
 		if err != nil {
 			return err
 		}

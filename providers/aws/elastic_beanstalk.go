@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
 	"github.com/aws/aws-sdk-go-v2/service/elasticbeanstalk"
@@ -47,7 +45,7 @@ func (g *BeanstalkGenerator) InitResources() error {
 }
 
 func (g *BeanstalkGenerator) addApplicationVersions(client *elasticbeanstalk.Client) error {
-	response, err := client.DescribeApplicationVersions(context.TODO(), &elasticbeanstalk.DescribeApplicationVersionsInput{})
+	response, err := client.DescribeApplicationVersions(awsContext(), &elasticbeanstalk.DescribeApplicationVersionsInput{})
 	if err != nil {
 		return err
 	}
@@ -64,7 +62,7 @@ func (g *BeanstalkGenerator) addApplicationVersions(client *elasticbeanstalk.Cli
 }
 
 func (g *BeanstalkGenerator) addApplications(client *elasticbeanstalk.Client) error {
-	response, err := client.DescribeApplications(context.TODO(), &elasticbeanstalk.DescribeApplicationsInput{})
+	response, err := client.DescribeApplications(awsContext(), &elasticbeanstalk.DescribeApplicationsInput{})
 	if err != nil {
 		return err
 	}
@@ -89,7 +87,7 @@ func (g *BeanstalkGenerator) addApplications(client *elasticbeanstalk.Client) er
 }
 
 func (g *BeanstalkGenerator) addEnvironments(client *elasticbeanstalk.Client) error {
-	response, err := client.DescribeEnvironments(context.TODO(), &elasticbeanstalk.DescribeEnvironmentsInput{})
+	response, err := client.DescribeEnvironments(awsContext(), &elasticbeanstalk.DescribeEnvironmentsInput{})
 	if err != nil {
 		return err
 	}

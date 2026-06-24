@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/shield"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *ShieldGenerator) InitResources() error {
 		return e
 	}
 	svc := shield.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	protections := shield.NewListProtectionsPaginator(svc, &shield.ListProtectionsInput{})
 	for protections.HasMorePages() {

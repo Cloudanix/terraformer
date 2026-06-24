@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/amp"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,7 +30,7 @@ func (g *PrometheusGenerator) InitResources() error {
 		return e
 	}
 	svc := amp.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	var workspaceIDs []string
 	p := amp.NewListWorkspacesPaginator(svc, &amp.ListWorkspacesInput{})
 	for p.HasMorePages() {

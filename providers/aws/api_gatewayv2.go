@@ -39,7 +39,7 @@ func (g *APIGatewayV2Generator) InitResources() error {
 		return e
 	}
 	svc := apigatewayv2.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	apiIDs, err := g.loadAPIs(ctx, svc)
 	if err != nil {

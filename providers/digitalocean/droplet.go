@@ -71,7 +71,7 @@ func (g DropletGenerator) createResources(dropletList []godo.Droplet) []terrafor
 
 func (g *DropletGenerator) InitResources() error {
 	client := g.generateClient()
-	output, err := g.listDroplets(context.TODO(), client)
+	output, err := g.listDroplets(runContext(), client)
 	if err != nil {
 		return err
 	}

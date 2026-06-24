@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/savingsplans"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,7 +30,7 @@ func (g *SavingsPlansGenerator) InitResources() error {
 		return e
 	}
 	svc := savingsplans.NewFromConfig(config)
-	out, err := svc.DescribeSavingsPlans(context.TODO(), &savingsplans.DescribeSavingsPlansInput{})
+	out, err := svc.DescribeSavingsPlans(awsContext(), &savingsplans.DescribeSavingsPlansInput{})
 	if err != nil {
 		return err
 	}

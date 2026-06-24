@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +33,7 @@ type TransitGatewayGenerator struct {
 func (g *TransitGatewayGenerator) getTransitGateways(svc *ec2.Client) error {
 	p := ec2.NewDescribeTransitGatewaysPaginator(svc, &ec2.DescribeTransitGatewaysInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -54,7 +53,7 @@ func (g *TransitGatewayGenerator) getTransitGateways(svc *ec2.Client) error {
 func (g *TransitGatewayGenerator) getTransitGatewayRouteTables(svc *ec2.Client) error {
 	p := ec2.NewDescribeTransitGatewayRouteTablesPaginator(svc, &ec2.DescribeTransitGatewayRouteTablesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -77,7 +76,7 @@ func (g *TransitGatewayGenerator) loadRouteTableAssociations(svc *ec2.Client, rt
 	if rtbID == "" {
 		return
 	}
-	ctx := context.TODO()
+	ctx := awsContext()
 	rtb := rtbID
 	for p := ec2.NewGetTransitGatewayRouteTableAssociationsPaginator(svc, &ec2.GetTransitGatewayRouteTableAssociationsInput{TransitGatewayRouteTableId: &rtb}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
@@ -140,7 +139,7 @@ func (g *TransitGatewayGenerator) loadRouteTableAssociations(svc *ec2.Client, rt
 func (g *TransitGatewayGenerator) getTransitGatewayVpcAttachments(svc *ec2.Client) error {
 	p := ec2.NewDescribeTransitGatewayVpcAttachmentsPaginator(svc, &ec2.DescribeTransitGatewayVpcAttachmentsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

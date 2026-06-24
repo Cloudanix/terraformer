@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/observabilityadmin"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +31,7 @@ func (g *ObservabilityAdminGenerator) InitResources() error {
 	}
 	svc := observabilityadmin.NewFromConfig(config)
 	for p := observabilityadmin.NewListTelemetryRulesPaginator(svc, &observabilityadmin.ListTelemetryRulesInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

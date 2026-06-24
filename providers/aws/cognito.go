@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/cognitoidentity"
@@ -24,7 +22,7 @@ func (g *CognitoGenerator) loadIdentityPools(svc *cognitoidentity.Client) error 
 		MaxResults: aws.Int32(CognitoMaxResults),
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -38,7 +36,7 @@ func (g *CognitoGenerator) loadIdentityPools(svc *cognitoidentity.Client) error 
 				"aws",
 				[]string{}))
 			poolID := id
-			if roles, err := svc.GetIdentityPoolRoles(context.TODO(), &cognitoidentity.GetIdentityPoolRolesInput{IdentityPoolId: &poolID}); err == nil && len(roles.Roles) > 0 {
+			if roles, err := svc.GetIdentityPoolRoles(awsContext(), &cognitoidentity.GetIdentityPoolRolesInput{IdentityPoolId: &poolID}); err == nil && len(roles.Roles) > 0 {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					poolID, poolID, "aws_cognito_identity_pool_roles_attachment", "aws", []string{}))
 			}
@@ -55,7 +53,7 @@ func (g *CognitoGenerator) loadUserPools(svc *cognitoidentityprovider.Client) ([
 
 	var userPoolIds []string
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return nil, err
 		}
@@ -83,7 +81,7 @@ func (g *CognitoGenerator) loadUserPoolClients(svc *cognitoidentityprovider.Clie
 		})
 
 		for p.HasMorePages() {
-			page, err := p.NextPage(context.TODO())
+			page, err := p.NextPage(awsContext())
 			if err != nil {
 				return err
 			}
@@ -139,7 +137,7 @@ func (g *CognitoGenerator) InitResources() error {
 //   - aws_cognito_identity_provider  → "<user_pool_id>:<provider_name>"
 func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Client, userPoolIds []string) error {
 	for _, userPoolID := range userPoolIds {
-		if desc, err := svc.DescribeUserPool(context.TODO(), &cognitoidentityprovider.DescribeUserPoolInput{UserPoolId: aws.String(userPoolID)}); err == nil && desc.UserPool != nil {
+		if desc, err := svc.DescribeUserPool(awsContext(), &cognitoidentityprovider.DescribeUserPoolInput{UserPoolId: aws.String(userPoolID)}); err == nil && desc.UserPool != nil {
 			domain := StringValue(desc.UserPool.Domain)
 			if domain != "" {
 				g.Resources = append(g.Resources, terraformutils.NewResource(
@@ -151,7 +149,7 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 			UserPoolId: aws.String(userPoolID), Limit: aws.Int32(CognitoMaxResults),
 		})
 		for groups.HasMorePages() {
-			page, err := groups.NextPage(context.TODO())
+			page, err := groups.NextPage(awsContext())
 			if err != nil {
 				return err
 			}
@@ -166,7 +164,7 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 				for ug := cognitoidentityprovider.NewListUsersInGroupPaginator(svc, &cognitoidentityprovider.ListUsersInGroupInput{
 					UserPoolId: aws.String(userPoolID), GroupName: aws.String(name),
 				}); ug.HasMorePages(); {
-					ugPage, err := ug.NextPage(context.TODO())
+					ugPage, err := ug.NextPage(awsContext())
 					if err != nil {
 						break
 					}
@@ -187,7 +185,7 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 			UserPoolId: aws.String(userPoolID), MaxResults: aws.Int32(CognitoMaxResults),
 		})
 		for servers.HasMorePages() {
-			page, err := servers.NextPage(context.TODO())
+			page, err := servers.NextPage(awsContext())
 			if err != nil {
 				return err
 			}
@@ -206,7 +204,7 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 			UserPoolId: aws.String(userPoolID), MaxResults: aws.Int32(CognitoMaxResults),
 		})
 		for providers.HasMorePages() {
-			page, err := providers.NextPage(context.TODO())
+			page, err := providers.NextPage(awsContext())
 			if err != nil {
 				return err
 			}
@@ -225,7 +223,7 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 			UserPoolId: aws.String(userPoolID),
 		})
 		for users.HasMorePages() {
-			page, err := users.NextPage(context.TODO())
+			page, err := users.NextPage(awsContext())
 			if err != nil {
 				return err
 			}
@@ -240,7 +238,7 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 			}
 		}
 
-		if ui, err := svc.GetUICustomization(context.TODO(), &cognitoidentityprovider.GetUICustomizationInput{
+		if ui, err := svc.GetUICustomization(awsContext(), &cognitoidentityprovider.GetUICustomizationInput{
 			UserPoolId: aws.String(userPoolID),
 		}); err == nil && ui.UICustomization != nil && StringValue(ui.UICustomization.CSS) != "" {
 			g.Resources = append(g.Resources, terraformutils.NewResource(
@@ -248,7 +246,7 @@ func (g *CognitoGenerator) loadUserPoolChildren(svc *cognitoidentityprovider.Cli
 				map[string]string{"user_pool_id": userPoolID}, CognitoAllowEmptyValues, CognitoAdditionalFields))
 		}
 
-		if rc, err := svc.DescribeRiskConfiguration(context.TODO(), &cognitoidentityprovider.DescribeRiskConfigurationInput{
+		if rc, err := svc.DescribeRiskConfiguration(awsContext(), &cognitoidentityprovider.DescribeRiskConfigurationInput{
 			UserPoolId: aws.String(userPoolID),
 		}); err == nil && rc.RiskConfiguration != nil &&
 			(rc.RiskConfiguration.AccountTakeoverRiskConfiguration != nil ||

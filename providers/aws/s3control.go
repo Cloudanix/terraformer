@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/s3control"
 
@@ -43,7 +41,7 @@ func (g *S3ControlGenerator) InitResources() error {
 
 	p := s3control.NewListStorageLensConfigurationsPaginator(svc, &s3control.ListStorageLensConfigurationsInput{AccountId: aws.String(accountID)})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -57,7 +55,7 @@ func (g *S3ControlGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	if insts, err := svc.ListAccessGrantsInstances(ctx, &s3control.ListAccessGrantsInstancesInput{AccountId: aws.String(accountID)}); err == nil {
 		if len(insts.AccessGrantsInstancesList) > 0 {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

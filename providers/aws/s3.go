@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -41,7 +40,7 @@ func (g *S3Generator) createResources(config aws.Config, buckets *s3.ListBuckets
 	svc := s3.NewFromConfig(config)
 	for _, bucket := range buckets.Buckets {
 		resourceName := StringValue(bucket.Name)
-		location, err := svc.GetBucketLocation(context.TODO(), &s3.GetBucketLocationInput{Bucket: bucket.Name})
+		location, err := svc.GetBucketLocation(awsContext(), &s3.GetBucketLocationInput{Bucket: bucket.Name})
 		if err != nil {
 			log.Println(err)
 			continue
@@ -55,7 +54,7 @@ func (g *S3Generator) createResources(config aws.Config, buckets *s3.ListBuckets
 			}
 			// try get policy
 			var policy *s3.GetBucketPolicyOutput
-			policy, err = svc.GetBucketPolicy(context.TODO(), &s3.GetBucketPolicyInput{
+			policy, err = svc.GetBucketPolicy(awsContext(), &s3.GetBucketPolicyInput{
 				Bucket: bucket.Name,
 			})
 
@@ -90,7 +89,7 @@ func (g *S3Generator) createResources(config aws.Config, buckets *s3.ListBuckets
 // Most "Get*" calls error (NoSuch*Configuration) when unset, which we treat as
 // "not configured" and skip.
 func (g *S3Generator) bucketSubresources(svc *s3.Client, bucket string) []terraformutils.Resource {
-	ctx := context.TODO()
+	ctx := awsContext()
 	var resources []terraformutils.Resource
 	add := func(tfType string) {
 		resources = append(resources, terraformutils.NewSimpleResource(
@@ -180,7 +179,7 @@ func (g *S3Generator) InitResources() error {
 	}
 	svc := s3.NewFromConfig(config)
 
-	buckets, err := svc.ListBuckets(context.TODO(), nil)
+	buckets, err := svc.ListBuckets(awsContext(), nil)
 	if err != nil {
 		return err
 	}
@@ -188,7 +187,7 @@ func (g *S3Generator) InitResources() error {
 
 	// S3 Express directory buckets (separate API).
 	for p := s3.NewListDirectoryBucketsPaginator(svc, &s3.ListDirectoryBucketsInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			break
 		}

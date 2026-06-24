@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/detective"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *DetectiveGenerator) InitResources() error {
 	}
 	svc := detective.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var graphArns []string
 	p := detective.NewListGraphsPaginator(svc, &detective.ListGraphsInput{})
 	for p.HasMorePages() {

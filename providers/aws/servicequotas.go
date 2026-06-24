@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/servicequotas"
 	"github.com/aws/aws-sdk-go-v2/service/servicequotas/types"
 
@@ -76,7 +74,7 @@ func (g *ServiceQuotasGenerator) InitResources() error {
 	var changes []types.RequestedServiceQuotaChange
 	p := servicequotas.NewListRequestedServiceQuotaChangeHistoryPaginator(svc, &servicequotas.ListRequestedServiceQuotaChangeHistoryInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -89,7 +87,7 @@ func (g *ServiceQuotasGenerator) InitResources() error {
 	}
 
 	for tp := servicequotas.NewListServiceQuotaIncreaseRequestsInTemplatePaginator(svc, &servicequotas.ListServiceQuotaIncreaseRequestsInTemplateInput{}); tp.HasMorePages(); {
-		page, err := tp.NextPage(context.TODO())
+		page, err := tp.NextPage(awsContext())
 		if err != nil {
 			break
 		}
@@ -108,7 +106,7 @@ func (g *ServiceQuotasGenerator) InitResources() error {
 
 	// Template association is an account singleton (ASSOCIATED when the quota
 	// template is applied org-wide); imported by account id.
-	if assoc, err := svc.GetAssociationForServiceQuotaTemplate(context.TODO(), &servicequotas.GetAssociationForServiceQuotaTemplateInput{}); err == nil &&
+	if assoc, err := svc.GetAssociationForServiceQuotaTemplate(awsContext(), &servicequotas.GetAssociationForServiceQuotaTemplateInput{}); err == nil &&
 		assoc.ServiceQuotaTemplateAssociationStatus == types.ServiceQuotaTemplateAssociationStatusAssociated {
 		if account, err := g.getAccountNumber(config); err == nil {
 			id := StringValue(account)

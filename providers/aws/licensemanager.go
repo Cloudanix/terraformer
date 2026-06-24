@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/licensemanager"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -37,7 +35,7 @@ func (g *LicenseManagerGenerator) InitResources() error {
 
 	var token *string
 	for {
-		out, err := svc.ListLicenseConfigurations(context.TODO(), &licensemanager.ListLicenseConfigurationsInput{NextToken: token})
+		out, err := svc.ListLicenseConfigurations(awsContext(), &licensemanager.ListLicenseConfigurationsInput{NextToken: token})
 		if err != nil {
 			return err
 		}
@@ -58,7 +56,7 @@ func (g *LicenseManagerGenerator) InitResources() error {
 	// Distributed (granted-out) and received grants.
 	var gToken *string
 	for {
-		out, err := svc.ListDistributedGrants(context.TODO(), &licensemanager.ListDistributedGrantsInput{NextToken: gToken})
+		out, err := svc.ListDistributedGrants(awsContext(), &licensemanager.ListDistributedGrantsInput{NextToken: gToken})
 		if err != nil {
 			break
 		}

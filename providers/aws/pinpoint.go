@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/pinpoint"
 
@@ -39,7 +37,7 @@ func (g *PinpointGenerator) InitResources() error {
 	var appIDs []string
 	var token *string
 	for {
-		out, err := svc.GetApps(context.TODO(), &pinpoint.GetAppsInput{Token: token})
+		out, err := svc.GetApps(awsContext(), &pinpoint.GetAppsInput{Token: token})
 		if err != nil {
 			return err
 		}
@@ -64,13 +62,42 @@ func (g *PinpointGenerator) InitResources() error {
 	for _, appID := range appIDs {
 		g.loadPinpointChannels(svc, appID)
 	}
+
+	g.loadPinpointEmailTemplates(svc)
 	return nil
+}
+
+// loadPinpointEmailTemplates emits email message templates (imported by name).
+// ListTemplates returns every template type; filter to EMAIL.
+func (g *PinpointGenerator) loadPinpointEmailTemplates(svc *pinpoint.Client) {
+	var token *string
+	for {
+		out, err := svc.ListTemplates(awsContext(), &pinpoint.ListTemplatesInput{NextToken: token})
+		if err != nil || out.TemplatesResponse == nil {
+			return
+		}
+		for _, t := range out.TemplatesResponse.Item {
+			if string(t.TemplateType) != "EMAIL" {
+				continue
+			}
+			name := StringValue(t.TemplateName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_pinpoint_email_template", "aws", defaultAllowEmptyValues))
+		}
+		if out.TemplatesResponse.NextToken == nil {
+			return
+		}
+		token = out.TemplatesResponse.NextToken
+	}
 }
 
 // loadPinpointChannels probes each channel and event stream for an app. Every
 // channel is a singleton; its Terraform import ID is the application id.
 func (g *PinpointGenerator) loadPinpointChannels(svc *pinpoint.Client, appID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(tfType string) {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			appID, appID, tfType, "aws", defaultAllowEmptyValues))

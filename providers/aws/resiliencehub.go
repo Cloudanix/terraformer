@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/resiliencehub"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ResilienceHubGenerator) InitResources() error {
 	svc := resiliencehub.NewFromConfig(config)
 	p := resiliencehub.NewListAppsPaginator(svc, &resiliencehub.ListAppsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func (g *ResilienceHubGenerator) InitResources() error {
 		}
 	}
 	for pp := resiliencehub.NewListResiliencyPoliciesPaginator(svc, &resiliencehub.ListResiliencyPoliciesInput{}); pp.HasMorePages(); {
-		page, err := pp.NextPage(context.TODO())
+		page, err := pp.NextPage(awsContext())
 		if err != nil {
 			break
 		}

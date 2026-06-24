@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *PrivateCrossConnectGenerator) InitResources() error {
 	cloudAPIClient := client.CloudAPIClient
 	resourceType := "ionoscloud_private_crossconnect"
 
-	pccsResponse, _, err := cloudAPIClient.PrivateCrossConnectsApi.PccsGet(context.TODO()).Depth(1).Execute()
+	pccsResponse, _, err := cloudAPIClient.PrivateCrossConnectsApi.PccsGet(runContext()).Depth(1).Execute()
 	if err != nil {
 		return err
 	}

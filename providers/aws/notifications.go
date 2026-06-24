@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/notifications"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *NotificationsGenerator) InitResources() error {
 	}
 	svc := notifications.NewFromConfig(config)
 	for p := notifications.NewListNotificationHubsPaginator(svc, &notifications.ListNotificationHubsInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *NotificationsGenerator) InitResources() error {
 		}
 	}
 	for p := notifications.NewListNotificationConfigurationsPaginator(svc, &notifications.ListNotificationConfigurationsInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

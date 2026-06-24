@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/quicksight"
 
@@ -41,7 +39,7 @@ func (g *QuickSightGenerator) InitResources() error {
 	}
 	accountID := StringValue(account)
 	svc := quicksight.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	if sub, err := svc.DescribeAccountSubscription(ctx, &quicksight.DescribeAccountSubscriptionInput{AwsAccountId: aws.String(accountID)}); err == nil && sub.AccountInfo != nil {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

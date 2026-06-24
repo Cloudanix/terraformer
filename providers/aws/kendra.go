@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/kendra"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *KendraGenerator) InitResources() error {
 	}
 	svc := kendra.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var indexIDs []string
 	p := kendra.NewListIndicesPaginator(svc, &kendra.ListIndicesInput{})
 	for p.HasMorePages() {

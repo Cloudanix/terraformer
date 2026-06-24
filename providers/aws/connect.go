@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -38,7 +37,7 @@ func (g *ConnectGenerator) InitResources() error {
 		return e
 	}
 	svc := connect.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	var instanceIDs []string
 	p := connect.NewListInstancesPaginator(svc, &connect.ListInstancesInput{})
@@ -80,7 +79,7 @@ func (g *ConnectGenerator) InitResources() error {
 }
 
 func (g *ConnectGenerator) loadConnectChildren(svc *connect.Client, instanceID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(childID, tfType string) {
 		if childID != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

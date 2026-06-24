@@ -1,7 +1,6 @@
 package honeycombio
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -17,7 +16,7 @@ func (g *BoardGenerator) InitResources() error {
 		return fmt.Errorf("unable to initialize Honeycomb client: %v", err)
 	}
 
-	boards, err := client.Boards.List(context.TODO())
+	boards, err := client.Boards.List(runContext())
 	if err != nil {
 		return fmt.Errorf("unable to list Honeycomb boards: %v", err)
 	}

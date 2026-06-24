@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 )
@@ -36,7 +34,7 @@ func (g *DynamoDbGenerator) InitResources() error {
 	var tableNames []string
 	p := dynamodb.NewListTablesPaginator(svc, &dynamodb.ListTablesInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -53,7 +51,7 @@ func (g *DynamoDbGenerator) InitResources() error {
 	}
 
 	for _, tableName := range tableNames {
-		if out, err := svc.DescribeKinesisStreamingDestination(context.TODO(),
+		if out, err := svc.DescribeKinesisStreamingDestination(awsContext(),
 			&dynamodb.DescribeKinesisStreamingDestinationInput{TableName: &tableName}); err == nil {
 			for _, d := range out.KinesisDataStreamDestinations {
 				streamArn := StringValue(d.StreamArn)
@@ -64,13 +62,13 @@ func (g *DynamoDbGenerator) InitResources() error {
 					tableName+","+streamArn, tableName, "aws_dynamodb_kinesis_streaming_destination", "aws", dynamodbAllowEmptyValues))
 			}
 		}
-		if out, err := svc.DescribeContributorInsights(context.TODO(),
+		if out, err := svc.DescribeContributorInsights(awsContext(),
 			&dynamodb.DescribeContributorInsightsInput{TableName: &tableName}); err == nil &&
 			out.ContributorInsightsStatus != "" && out.ContributorInsightsStatus != "DISABLED" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				tableName, tableName, "aws_dynamodb_contributor_insights", "aws", dynamodbAllowEmptyValues))
 		}
-		if out, err := svc.DescribeTable(context.TODO(),
+		if out, err := svc.DescribeTable(awsContext(),
 			&dynamodb.DescribeTableInput{TableName: &tableName}); err == nil && out.Table != nil {
 			for _, r := range out.Table.Replicas {
 				region := StringValue(r.RegionName)
@@ -81,7 +79,7 @@ func (g *DynamoDbGenerator) InitResources() error {
 					tableName+":"+region, tableName+"_"+region, "aws_dynamodb_table_replica", "aws", dynamodbAllowEmptyValues))
 			}
 			if arn := StringValue(out.Table.TableArn); arn != "" {
-				if _, err := svc.GetResourcePolicy(context.TODO(), &dynamodb.GetResourcePolicyInput{ResourceArn: &arn}); err == nil {
+				if _, err := svc.GetResourcePolicy(awsContext(), &dynamodb.GetResourcePolicyInput{ResourceArn: &arn}); err == nil {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						arn, tableName, "aws_dynamodb_resource_policy", "aws", dynamodbAllowEmptyValues))
 				}
@@ -93,7 +91,7 @@ func (g *DynamoDbGenerator) InitResources() error {
 	// table replicas, not returned here.
 	var startName *string
 	for {
-		out, err := svc.ListGlobalTables(context.TODO(), &dynamodb.ListGlobalTablesInput{ExclusiveStartGlobalTableName: startName})
+		out, err := svc.ListGlobalTables(awsContext(), &dynamodb.ListGlobalTablesInput{ExclusiveStartGlobalTableName: startName})
 		if err != nil {
 			return err
 		}
@@ -112,7 +110,7 @@ func (g *DynamoDbGenerator) InitResources() error {
 	}
 
 	for ep := dynamodb.NewListExportsPaginator(svc, &dynamodb.ListExportsInput{}); ep.HasMorePages(); {
-		page, err := ep.NextPage(context.TODO())
+		page, err := ep.NextPage(awsContext())
 		if err != nil {
 			break
 		}

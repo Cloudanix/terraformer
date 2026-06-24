@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/ivschat"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *IVSChatGenerator) InitResources() error {
 	svc := ivschat.NewFromConfig(config)
 	p := ivschat.NewListRoomsPaginator(svc, &ivschat.ListRoomsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *IVSChatGenerator) InitResources() error {
 	}
 
 	for lc := ivschat.NewListLoggingConfigurationsPaginator(svc, &ivschat.ListLoggingConfigurationsInput{}); lc.HasMorePages(); {
-		page, err := lc.NextPage(context.TODO())
+		page, err := lc.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

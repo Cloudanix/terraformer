@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/amplify"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *AmplifyGenerator) InitResources() error {
 	}
 	svc := amplify.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var appIDs []string
 	p := amplify.NewListAppsPaginator(svc, &amplify.ListAppsInput{})
 	for p.HasMorePages() {

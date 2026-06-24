@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/ssmcontacts"
 
@@ -35,7 +33,7 @@ func (g *SSMContactsGenerator) InitResources() error {
 	}
 	svc := ssmcontacts.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var contactArns []string
 	p := ssmcontacts.NewListContactsPaginator(svc, &ssmcontacts.ListContactsInput{})
 	for p.HasMorePages() {

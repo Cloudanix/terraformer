@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/apprunner"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *AppRunnerGenerator) InitResources() error {
 	}
 	svc := apprunner.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(arn, tfType string) {
 		if arn != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/configservice"
 )
@@ -50,7 +48,7 @@ func (g *ConfigGenerator) InitResources() error {
 }
 
 func (g *ConfigGenerator) addConfigExtras(svc *configservice.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := configservice.NewDescribeConfigurationAggregatorsPaginator(svc, &configservice.DescribeConfigurationAggregatorsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {
@@ -152,7 +150,7 @@ func (g *ConfigGenerator) addConfigExtras(svc *configservice.Client) error {
 }
 
 func (g *ConfigGenerator) addConfigurationRecorders(svc *configservice.Client) ([]string, error) {
-	configurationRecorders, err := svc.DescribeConfigurationRecorders(context.TODO(),
+	configurationRecorders, err := svc.DescribeConfigurationRecorders(awsContext(),
 		&configservice.DescribeConfigurationRecordersInput{})
 
 	if err != nil {
@@ -182,7 +180,7 @@ func (g *ConfigGenerator) addConfigRules(svc *configservice.Client, configuratio
 
 	for {
 		configRules, err := svc.DescribeConfigRules(
-			context.TODO(),
+			awsContext(),
 			&configservice.DescribeConfigRulesInput{
 				NextToken: nextToken,
 			})
@@ -208,7 +206,7 @@ func (g *ConfigGenerator) addConfigRules(svc *configservice.Client, configuratio
 		}
 		// Remediation configs are keyed by config rule name.
 		if len(ruleNames) > 0 {
-			if rem, err := svc.DescribeRemediationConfigurations(context.TODO(),
+			if rem, err := svc.DescribeRemediationConfigurations(awsContext(),
 				&configservice.DescribeRemediationConfigurationsInput{ConfigRuleNames: ruleNames}); err == nil {
 				for _, rc := range rem.RemediationConfigurations {
 					ruleName := StringValue(rc.ConfigRuleName)
@@ -229,7 +227,7 @@ func (g *ConfigGenerator) addConfigRules(svc *configservice.Client, configuratio
 }
 
 func (g *ConfigGenerator) addDeliveryChannels(svc *configservice.Client, configurationRecorderRefs []string) error {
-	deliveryChannels, err := svc.DescribeDeliveryChannels(context.TODO(),
+	deliveryChannels, err := svc.DescribeDeliveryChannels(awsContext(),
 		&configservice.DescribeDeliveryChannelsInput{})
 
 	if err != nil {

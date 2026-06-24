@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -43,7 +42,7 @@ func (g *SnsGenerator) InitResources() error {
 	svc := sns.NewFromConfig(config)
 	p := sns.NewListTopicsPaginator(svc, &sns.ListTopicsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -59,7 +58,7 @@ func (g *SnsGenerator) InitResources() error {
 				snsAllowEmptyValues,
 			))
 
-			if dp, err := svc.GetDataProtectionPolicy(context.TODO(), &sns.GetDataProtectionPolicyInput{ResourceArn: topic.TopicArn}); err == nil && StringValue(dp.DataProtectionPolicy) != "" {
+			if dp, err := svc.GetDataProtectionPolicy(awsContext(), &sns.GetDataProtectionPolicyInput{ResourceArn: topic.TopicArn}); err == nil && StringValue(dp.DataProtectionPolicy) != "" {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					StringValue(topic.TopicArn), topicName, "aws_sns_topic_data_protection_policy", "aws", snsAllowEmptyValues))
 			}
@@ -68,7 +67,7 @@ func (g *SnsGenerator) InitResources() error {
 				TopicArn: topic.TopicArn,
 			})
 			for topicSubsPage.HasMorePages() {
-				topicSubsNextPage, err := topicSubsPage.NextPage(context.TODO())
+				topicSubsNextPage, err := topicSubsPage.NextPage(awsContext())
 				if err != nil {
 					log.Println(err)
 					continue
@@ -93,7 +92,7 @@ func (g *SnsGenerator) InitResources() error {
 
 	platformApps := sns.NewListPlatformApplicationsPaginator(svc, &sns.ListPlatformApplicationsInput{})
 	for platformApps.HasMorePages() {
-		page, err := platformApps.NextPage(context.TODO())
+		page, err := platformApps.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

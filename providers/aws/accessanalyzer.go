@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/accessanalyzer"
 )
@@ -36,7 +34,7 @@ func (g *AccessAnalyzerGenerator) InitResources() error {
 	p := accessanalyzer.NewListAnalyzersPaginator(svc, &accessanalyzer.ListAnalyzersInput{})
 	var resources []terraformutils.Resource
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -49,7 +47,7 @@ func (g *AccessAnalyzerGenerator) InitResources() error {
 				"aws",
 				accessanalyzerAllowEmptyValues))
 			for rp := accessanalyzer.NewListArchiveRulesPaginator(svc, &accessanalyzer.ListArchiveRulesInput{AnalyzerName: analyzer.Name}); rp.HasMorePages(); {
-				rpage, err := rp.NextPage(context.TODO())
+				rpage, err := rp.NextPage(awsContext())
 				if err != nil {
 					break
 				}

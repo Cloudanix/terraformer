@@ -1,7 +1,6 @@
 package opal
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -17,7 +16,7 @@ func (g *GroupGenerator) InitResources() error {
 		return fmt.Errorf("unable to list opal groups: %v", err)
 	}
 
-	groups, _, err := client.GroupsApi.GetGroups(context.TODO()).Execute()
+	groups, _, err := client.GroupsApi.GetGroups(runContext()).Execute()
 	if err != nil {
 		return fmt.Errorf("unable to list opal groups: %v", err)
 	}
@@ -47,7 +46,7 @@ func (g *GroupGenerator) InitResources() error {
 			break
 		}
 
-		groups, _, err = client.GroupsApi.GetGroups(context.TODO()).Cursor(*groups.Next.Get()).Execute()
+		groups, _, err = client.GroupsApi.GetGroups(runContext()).Cursor(*groups.Next.Get()).Execute()
 		if err != nil {
 			return fmt.Errorf("unable to list opal groups: %v", err)
 		}

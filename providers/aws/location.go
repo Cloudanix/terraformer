@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/location"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *LocationGenerator) InitResources() error {
 		return e
 	}
 	svc := location.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	maps := location.NewListMapsPaginator(svc, &location.ListMapsInput{})
 	for maps.HasMorePages() {

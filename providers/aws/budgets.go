@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -53,7 +52,7 @@ func (g *BudgetsGenerator) InitResources() error {
 		return err
 	}
 
-	output, err := budgetsSvc.DescribeBudgets(context.TODO(), &budgets.DescribeBudgetsInput{AccountId: account})
+	output, err := budgetsSvc.DescribeBudgets(awsContext(), &budgets.DescribeBudgetsInput{AccountId: account})
 	if err != nil {
 		return err
 	}
@@ -67,7 +66,7 @@ func (g *BudgetsGenerator) InitResources() error {
 			continue
 		}
 		for ap := budgets.NewDescribeBudgetActionsForBudgetPaginator(budgetsSvc, &budgets.DescribeBudgetActionsForBudgetInput{AccountId: account, BudgetName: budget.BudgetName}); ap.HasMorePages(); {
-			page, err := ap.NextPage(context.TODO())
+			page, err := ap.NextPage(awsContext())
 			if err != nil {
 				break
 			}

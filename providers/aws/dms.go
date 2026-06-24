@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	dms "github.com/aws/aws-sdk-go-v2/service/databasemigrationservice"
 	"github.com/aws/aws-sdk-go-v2/service/databasemigrationservice/types"
@@ -40,7 +38,7 @@ func (g *DmsGenerator) InitResources() error {
 		return e
 	}
 	svc := dms.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	instances := dms.NewDescribeReplicationInstancesPaginator(svc, &dms.DescribeReplicationInstancesInput{})
 	for instances.HasMorePages() {

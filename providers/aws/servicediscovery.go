@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -55,7 +54,7 @@ func (g *ServiceDiscoveryGenerator) InitResources() error {
 		return e
 	}
 	svc := servicediscovery.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	namespaces := servicediscovery.NewListNamespacesPaginator(svc, &servicediscovery.ListNamespacesInput{})
 	for namespaces.HasMorePages() {

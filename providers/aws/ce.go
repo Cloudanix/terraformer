@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/costexplorer"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *CostExplorerGenerator) InitResources() error {
 		return e
 	}
 	svc := costexplorer.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	monitors := costexplorer.NewGetAnomalyMonitorsPaginator(svc, &costexplorer.GetAnomalyMonitorsInput{})
 	for monitors.HasMorePages() {

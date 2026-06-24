@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/opensearch"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *OpenSearchGenerator) InitResources() error {
 	}
 	svc := opensearch.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	out, err := svc.ListDomainNames(ctx, &opensearch.ListDomainNamesInput{})
 	if err != nil {
 		return err
@@ -77,6 +75,27 @@ func (g *OpenSearchGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_opensearch_domain_saml_options", "aws", defaultAllowEmptyValues))
 		}
+		// Accounts authorized to access this domain's VPC endpoint.
+		// Import id is "<domain_name>,<account_id>".
+		var apToken *string
+		for {
+			acc, err := svc.ListVpcEndpointAccess(ctx, &opensearch.ListVpcEndpointAccessInput{DomainName: domain.DomainName, NextToken: apToken})
+			if err != nil {
+				break
+			}
+			for _, p := range acc.AuthorizedPrincipalList {
+				account := StringValue(p.Principal)
+				if account == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name+","+account, name+"_"+account, "aws_opensearch_authorize_vpc_endpoint_access", "aws", defaultAllowEmptyValues))
+			}
+			if acc.NextToken == nil {
+				break
+			}
+			apToken = acc.NextToken
+		}
 	}
 
 	if eps, err := svc.ListVpcEndpoints(ctx, &opensearch.ListVpcEndpointsInput{}); err == nil {
@@ -117,6 +136,21 @@ func (g *OpenSearchGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_opensearch_package", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for ap := opensearch.NewListApplicationsPaginator(svc, &opensearch.ListApplicationsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, a := range page.ApplicationSummaries {
+			id := StringValue(a.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(a.Name), "aws_opensearch_application", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

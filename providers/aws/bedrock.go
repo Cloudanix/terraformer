@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/bedrock"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *BedrockGenerator) InitResources() error {
 		return e
 	}
 	svc := bedrock.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	models := bedrock.NewListCustomModelsPaginator(svc, &bedrock.ListCustomModelsInput{})
 	for models.HasMorePages() {
@@ -94,6 +92,26 @@ func (g *BedrockGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(m.ProvisionedModelName), "aws_bedrock_provisioned_model_throughput", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	profiles := bedrock.NewListInferenceProfilesPaginator(svc, &bedrock.ListInferenceProfilesInput{})
+	for profiles.HasMorePages() {
+		page, err := profiles.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, p := range page.InferenceProfileSummaries {
+			// Only application-defined profiles are manageable; skip AWS system profiles.
+			if string(p.Type) != "APPLICATION" {
+				continue
+			}
+			id := StringValue(p.InferenceProfileId)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(p.InferenceProfileName), "aws_bedrock_inference_profile", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

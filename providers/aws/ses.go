@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/ses"
 	"github.com/aws/aws-sdk-go-v2/service/ses/types"
@@ -58,7 +56,7 @@ func (g *SesGenerator) InitResources() error {
 }
 
 func (g *SesGenerator) loadReceiptExtras(svc *ses.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	if filters, err := svc.ListReceiptFilters(ctx, &ses.ListReceiptFiltersInput{}); err == nil {
 		for _, f := range filters.Filters {
 			name := StringValue(f.Name)
@@ -84,7 +82,7 @@ func (g *SesGenerator) loadDomainIdentities(svc *ses.Client) error {
 		IdentityType: "Domain",
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -99,13 +97,24 @@ func (g *SesGenerator) loadDomainIdentities(svc *ses.Client) error {
 				identity, identity, "aws_ses_domain_dkim", "aws", sesAllowEmptyValues))
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				identity, identity, "aws_ses_domain_identity_verification", "aws", sesAllowEmptyValues))
-			if attrs, err := svc.GetIdentityMailFromDomainAttributes(context.TODO(), &ses.GetIdentityMailFromDomainAttributesInput{Identities: []string{identity}}); err == nil {
+			// Authorization policies attached to this identity (separate resource,
+			// not inlined on the identity). Import id "<identity>|<policy_name>".
+			if pol, err := svc.ListIdentityPolicies(awsContext(), &ses.ListIdentityPoliciesInput{Identity: &identity}); err == nil {
+				for _, pn := range pol.PolicyNames {
+					if pn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						identity+"|"+pn, identity+"_"+pn, "aws_ses_identity_policy", "aws", sesAllowEmptyValues))
+				}
+			}
+			if attrs, err := svc.GetIdentityMailFromDomainAttributes(awsContext(), &ses.GetIdentityMailFromDomainAttributesInput{Identities: []string{identity}}); err == nil {
 				if a, ok := attrs.MailFromDomainAttributes[identity]; ok && StringValue(a.MailFromDomain) != "" {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						identity, identity, "aws_ses_domain_mail_from", "aws", sesAllowEmptyValues))
 				}
 			}
-			if na, err := svc.GetIdentityNotificationAttributes(context.TODO(), &ses.GetIdentityNotificationAttributesInput{Identities: []string{identity}}); err == nil {
+			if na, err := svc.GetIdentityNotificationAttributes(awsContext(), &ses.GetIdentityNotificationAttributesInput{Identities: []string{identity}}); err == nil {
 				if a, ok := na.NotificationAttributes[identity]; ok {
 					for notifType, topic := range map[string]*string{
 						"Bounce": a.BounceTopic, "Complaint": a.ComplaintTopic, "Delivery": a.DeliveryTopic,
@@ -128,7 +137,7 @@ func (g *SesGenerator) loadMailIdentities(svc *ses.Client) error {
 		IdentityType: "EmailAddress",
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -145,7 +154,7 @@ func (g *SesGenerator) loadMailIdentities(svc *ses.Client) error {
 }
 
 func (g *SesGenerator) loadTemplates(svc *ses.Client) error {
-	templates, err := svc.ListTemplates(context.TODO(), &ses.ListTemplatesInput{})
+	templates, err := svc.ListTemplates(awsContext(), &ses.ListTemplatesInput{})
 	if err != nil {
 		return err
 	}
@@ -162,7 +171,7 @@ func (g *SesGenerator) loadTemplates(svc *ses.Client) error {
 }
 
 func (g *SesGenerator) loadConfigurationSets(svc *ses.Client) error {
-	configurationSets, err := svc.ListConfigurationSets(context.TODO(), &ses.ListConfigurationSetsInput{})
+	configurationSets, err := svc.ListConfigurationSets(awsContext(), &ses.ListConfigurationSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -175,7 +184,7 @@ func (g *SesGenerator) loadConfigurationSets(svc *ses.Client) error {
 			"aws_ses_configuration_set",
 			"aws",
 			sesAllowEmptyValues))
-		if desc, err := svc.DescribeConfigurationSet(context.TODO(), &ses.DescribeConfigurationSetInput{
+		if desc, err := svc.DescribeConfigurationSet(awsContext(), &ses.DescribeConfigurationSetInput{
 			ConfigurationSetName: configurationSet.Name,
 			ConfigurationSetAttributeNames: []types.ConfigurationSetAttribute{
 				types.ConfigurationSetAttributeEventDestinations,
@@ -195,7 +204,7 @@ func (g *SesGenerator) loadConfigurationSets(svc *ses.Client) error {
 }
 
 func (g *SesGenerator) loadRuleSets(svc *ses.Client) error {
-	ruleSets, err := svc.ListReceiptRuleSets(context.TODO(), &ses.ListReceiptRuleSetsInput{})
+	ruleSets, err := svc.ListReceiptRuleSets(awsContext(), &ses.ListReceiptRuleSetsInput{})
 	if err != nil {
 		return err
 	}
@@ -208,7 +217,7 @@ func (g *SesGenerator) loadRuleSets(svc *ses.Client) error {
 			"aws_ses_receipt_rule_set",
 			"aws",
 			sesAllowEmptyValues))
-		rules, err := svc.DescribeReceiptRuleSet(context.TODO(), &ses.DescribeReceiptRuleSetInput{
+		rules, err := svc.DescribeReceiptRuleSet(awsContext(), &ses.DescribeReceiptRuleSetInput{
 			RuleSetName: ruleSet.Name,
 		})
 		if err != nil {

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/cleanrooms"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *CleanRoomsGenerator) InitResources() error {
 	svc := cleanrooms.NewFromConfig(config)
 	p := cleanrooms.NewListCollaborationsPaginator(svc, &cleanrooms.ListCollaborationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *CleanRoomsGenerator) InitResources() error {
 	}
 
 	for ct := cleanrooms.NewListConfiguredTablesPaginator(svc, &cleanrooms.ListConfiguredTablesInput{}); ct.HasMorePages(); {
-		page, err := ct.NextPage(context.TODO())
+		page, err := ct.NextPage(awsContext())
 		if err != nil {
 			break
 		}

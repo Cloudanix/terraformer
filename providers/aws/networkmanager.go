@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/networkmanager"
 
@@ -51,7 +49,7 @@ func (g *NetworkManagerGenerator) InitResources() error {
 		return e
 	}
 	svc := networkmanager.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	var globalNetworkIDs []string
 	p := networkmanager.NewDescribeGlobalNetworksPaginator(svc, &networkmanager.DescribeGlobalNetworksInput{})

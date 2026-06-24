@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *ContainerRegistryTokenGenerator) InitResources() error {
 	crClient := client.ContainerRegistryAPIClient
 	resourceType := "ionoscloud_container_registry_token"
 
-	registriesResponse, _, err := crClient.RegistriesApi.RegistriesGet(context.TODO()).Execute()
+	registriesResponse, _, err := crClient.RegistriesApi.RegistriesGet(runContext()).Execute()
 	if err != nil {
 		return err
 	}
@@ -27,7 +26,7 @@ func (g *ContainerRegistryTokenGenerator) InitResources() error {
 	}
 	registries := *registriesResponse.Items
 	for _, registry := range registries {
-		tokensResponse, _, err := crClient.TokensApi.RegistriesTokensGet(context.TODO(), *registry.Id).Execute()
+		tokensResponse, _, err := crClient.TokensApi.RegistriesTokensGet(runContext(), *registry.Id).Execute()
 		if err != nil {
 			return err
 		}

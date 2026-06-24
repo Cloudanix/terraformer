@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/mediaconvert"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *MediaConvertGenerator) InitResources() error {
 		return e
 	}
 	svc := mediaconvert.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	p := mediaconvert.NewListQueuesPaginator(svc, &mediaconvert.ListQueuesInput{})
 	for p.HasMorePages() {

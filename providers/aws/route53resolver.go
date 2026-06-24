@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/route53resolver"
 	"github.com/aws/aws-sdk-go-v2/service/route53resolver/types"
@@ -35,7 +33,7 @@ func (g *Route53ResolverGenerator) InitResources() error {
 		return e
 	}
 	svc := route53resolver.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	endpoints := route53resolver.NewListResolverEndpointsPaginator(svc, &route53resolver.ListResolverEndpointsInput{})
 	for endpoints.HasMorePages() {

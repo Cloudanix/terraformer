@@ -15,9 +15,8 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/computeoptimizer"
+	"github.com/aws/aws-sdk-go-v2/service/computeoptimizer/types"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -34,7 +33,7 @@ func (g *ComputeOptimizerGenerator) InitResources() error {
 		return e
 	}
 	svc := computeoptimizer.NewFromConfig(config)
-	out, err := svc.GetEnrollmentStatus(context.TODO(), &computeoptimizer.GetEnrollmentStatusInput{})
+	out, err := svc.GetEnrollmentStatus(awsContext(), &computeoptimizer.GetEnrollmentStatusInput{})
 	if err != nil {
 		return err
 	}
@@ -48,6 +47,41 @@ func (g *ComputeOptimizerGenerator) InitResources() error {
 	if id := StringValue(account); id != "" {
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			id, id, "aws_computeoptimizer_enrollment_status", "aws", defaultAllowEmptyValues))
+	}
+	return g.loadRecommendationPreferences(svc)
+}
+
+// loadRecommendationPreferences emits any set recommendation preferences, one
+// per (resource type, scope). Import ID is "resourceType,scopeName,scopeValue"
+// (per aws_computeoptimizer_recommendation_preferences). GetRecommendationPreferences
+// requires a resource type, so iterate the importable enum values.
+func (g *ComputeOptimizerGenerator) loadRecommendationPreferences(svc *computeoptimizer.Client) error {
+	for _, rt := range types.ResourceType("").Values() {
+		if rt == types.ResourceTypeNotApplicable || rt == "Idle" {
+			continue
+		}
+		var token *string
+		for {
+			out, err := svc.GetRecommendationPreferences(awsContext(), &computeoptimizer.GetRecommendationPreferencesInput{
+				ResourceType: rt,
+				NextToken:    token,
+			})
+			if err != nil {
+				return err
+			}
+			for _, d := range out.RecommendationPreferencesDetails {
+				if d.Scope == nil || StringValue(d.Scope.Value) == "" {
+					continue
+				}
+				id := string(d.ResourceType) + "," + string(d.Scope.Name) + "," + StringValue(d.Scope.Value)
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_computeoptimizer_recommendation_preferences", "aws", defaultAllowEmptyValues))
+			}
+			if out.NextToken == nil || StringValue(out.NextToken) == "" {
+				break
+			}
+			token = out.NextToken
+		}
 	}
 	return nil
 }

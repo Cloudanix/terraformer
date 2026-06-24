@@ -1,8 +1,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/sfn"
 )
@@ -22,7 +20,7 @@ func (g *SfnGenerator) InitResources() error {
 
 	p := sfn.NewListStateMachinesPaginator(svc, &sfn.ListStateMachinesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -36,7 +34,7 @@ func (g *SfnGenerator) InitResources() error {
 			))
 			var aliasToken *string
 			for {
-				aliases, err := svc.ListStateMachineAliases(context.TODO(), &sfn.ListStateMachineAliasesInput{
+				aliases, err := svc.ListStateMachineAliases(awsContext(), &sfn.ListStateMachineAliasesInput{
 					StateMachineArn: stateMachine.StateMachineArn, NextToken: aliasToken,
 				})
 				if err != nil {
@@ -60,7 +58,7 @@ func (g *SfnGenerator) InitResources() error {
 
 	pActivity := sfn.NewListActivitiesPaginator(svc, &sfn.ListActivitiesInput{})
 	for pActivity.HasMorePages() {
-		pActivityNextPage, err := pActivity.NextPage(context.TODO())
+		pActivityNextPage, err := pActivity.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

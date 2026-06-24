@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/emrserverless"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *EMRServerlessGenerator) InitResources() error {
 
 	p := emrserverless.NewListApplicationsPaginator(svc, &emrserverless.ListApplicationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

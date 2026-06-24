@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/workspaces"
 )
@@ -48,7 +46,7 @@ func (g *WorkspacesGenerator) InitResources() error {
 func (g *WorkspacesGenerator) loadConnectionAliases(svc *workspaces.Client) error {
 	var nextToken *string
 	for {
-		out, err := svc.DescribeConnectionAliases(context.TODO(), &workspaces.DescribeConnectionAliasesInput{NextToken: nextToken})
+		out, err := svc.DescribeConnectionAliases(awsContext(), &workspaces.DescribeConnectionAliasesInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}
@@ -71,7 +69,7 @@ func (g *WorkspacesGenerator) loadConnectionAliases(svc *workspaces.Client) erro
 func (g *WorkspacesGenerator) loadWorkspaces(svc *workspaces.Client) error {
 	p := workspaces.NewDescribeWorkspacesPaginator(svc, &workspaces.DescribeWorkspacesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -98,7 +96,7 @@ func (g *WorkspacesGenerator) loadWorkspaces(svc *workspaces.Client) error {
 func (g *WorkspacesGenerator) loadWorkspacesIPGroup(svc *workspaces.Client) error {
 	var nextToken *string
 	for {
-		response, err := svc.DescribeIpGroups(context.TODO(), &workspaces.DescribeIpGroupsInput{NextToken: nextToken})
+		response, err := svc.DescribeIpGroups(awsContext(), &workspaces.DescribeIpGroupsInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}

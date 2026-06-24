@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/cloudfront"
 )
@@ -86,13 +84,124 @@ func (g *CloudFrontGenerator) InitResources() error {
 		return err
 	}
 
+	if err := g.loadVpcOrigins(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadAnycastIPLists(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadDistributionTenants(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadConnectionGroups(svc); err != nil {
+		return err
+	}
+
+	if err := g.loadTrustStores(svc); err != nil {
+		return err
+	}
+
 	return nil
+}
+
+func (g *CloudFrontGenerator) loadVpcOrigins(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListVpcOrigins(awsContext(), &cloudfront.ListVpcOriginsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.VpcOriginList == nil {
+			return nil
+		}
+		for _, v := range out.VpcOriginList.Items {
+			g.addSimple(StringValue(v.Id), StringValue(v.Name), "aws_cloudfront_vpc_origin")
+		}
+		marker = out.VpcOriginList.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadAnycastIPLists(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListAnycastIpLists(awsContext(), &cloudfront.ListAnycastIpListsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		if out.AnycastIpLists == nil {
+			return nil
+		}
+		for _, a := range out.AnycastIpLists.Items {
+			g.addSimple(StringValue(a.Id), StringValue(a.Name), "aws_cloudfront_anycast_ip_list")
+		}
+		marker = out.AnycastIpLists.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadDistributionTenants(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListDistributionTenants(awsContext(), &cloudfront.ListDistributionTenantsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, t := range out.DistributionTenantList {
+			g.addSimple(StringValue(t.Id), StringValue(t.Name), "aws_cloudfront_distribution_tenant")
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadConnectionGroups(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListConnectionGroups(awsContext(), &cloudfront.ListConnectionGroupsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, c := range out.ConnectionGroups {
+			g.addSimple(StringValue(c.Id), StringValue(c.Name), "aws_cloudfront_connection_group")
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
+func (g *CloudFrontGenerator) loadTrustStores(svc *cloudfront.Client) error {
+	var marker *string
+	for {
+		out, err := svc.ListTrustStores(awsContext(), &cloudfront.ListTrustStoresInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, t := range out.TrustStoreList {
+			g.addSimple(StringValue(t.Id), StringValue(t.Name), "aws_cloudfront_trust_store")
+		}
+		marker = out.NextMarker
+		if marker == nil {
+			return nil
+		}
+	}
 }
 
 func (g *CloudFrontGenerator) loadPublicKeys(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListPublicKeys(context.TODO(), &cloudfront.ListPublicKeysInput{Marker: marker})
+		out, err := svc.ListPublicKeys(awsContext(), &cloudfront.ListPublicKeysInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -112,7 +221,7 @@ func (g *CloudFrontGenerator) loadPublicKeys(svc *cloudfront.Client) error {
 func (g *CloudFrontGenerator) loadFieldLevelEncryption(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListFieldLevelEncryptionConfigs(context.TODO(), &cloudfront.ListFieldLevelEncryptionConfigsInput{Marker: marker})
+		out, err := svc.ListFieldLevelEncryptionConfigs(awsContext(), &cloudfront.ListFieldLevelEncryptionConfigsInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -130,7 +239,7 @@ func (g *CloudFrontGenerator) loadFieldLevelEncryption(svc *cloudfront.Client) e
 	}
 	marker = nil
 	for {
-		out, err := svc.ListFieldLevelEncryptionProfiles(context.TODO(), &cloudfront.ListFieldLevelEncryptionProfilesInput{Marker: marker})
+		out, err := svc.ListFieldLevelEncryptionProfiles(awsContext(), &cloudfront.ListFieldLevelEncryptionProfilesInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -150,7 +259,7 @@ func (g *CloudFrontGenerator) loadFieldLevelEncryption(svc *cloudfront.Client) e
 func (g *CloudFrontGenerator) loadContinuousDeploymentPolicies(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListContinuousDeploymentPolicies(context.TODO(), &cloudfront.ListContinuousDeploymentPoliciesInput{Marker: marker})
+		out, err := svc.ListContinuousDeploymentPolicies(awsContext(), &cloudfront.ListContinuousDeploymentPoliciesInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -174,7 +283,7 @@ func (g *CloudFrontGenerator) loadContinuousDeploymentPolicies(svc *cloudfront.C
 func (g *CloudFrontGenerator) loadRealtimeLogConfigs(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListRealtimeLogConfigs(context.TODO(), &cloudfront.ListRealtimeLogConfigsInput{Marker: marker})
+		out, err := svc.ListRealtimeLogConfigs(awsContext(), &cloudfront.ListRealtimeLogConfigsInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -194,7 +303,7 @@ func (g *CloudFrontGenerator) loadRealtimeLogConfigs(svc *cloudfront.Client) err
 func (g *CloudFrontGenerator) loadKeyValueStores(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListKeyValueStores(context.TODO(), &cloudfront.ListKeyValueStoresInput{Marker: marker})
+		out, err := svc.ListKeyValueStores(awsContext(), &cloudfront.ListKeyValueStoresInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -222,7 +331,7 @@ func (g *CloudFrontGenerator) addSimple(id, name, tfType string) {
 func (g *CloudFrontGenerator) loadFunctions(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListFunctions(context.TODO(), &cloudfront.ListFunctionsInput{Marker: marker})
+		out, err := svc.ListFunctions(awsContext(), &cloudfront.ListFunctionsInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -242,7 +351,7 @@ func (g *CloudFrontGenerator) loadFunctions(svc *cloudfront.Client) error {
 func (g *CloudFrontGenerator) loadOriginAccessControls(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListOriginAccessControls(context.TODO(), &cloudfront.ListOriginAccessControlsInput{Marker: marker})
+		out, err := svc.ListOriginAccessControls(awsContext(), &cloudfront.ListOriginAccessControlsInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -262,7 +371,7 @@ func (g *CloudFrontGenerator) loadOriginAccessControls(svc *cloudfront.Client) e
 func (g *CloudFrontGenerator) loadOriginAccessIdentities(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListCloudFrontOriginAccessIdentities(context.TODO(), &cloudfront.ListCloudFrontOriginAccessIdentitiesInput{Marker: marker})
+		out, err := svc.ListCloudFrontOriginAccessIdentities(awsContext(), &cloudfront.ListCloudFrontOriginAccessIdentitiesInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -282,7 +391,7 @@ func (g *CloudFrontGenerator) loadOriginAccessIdentities(svc *cloudfront.Client)
 func (g *CloudFrontGenerator) loadResponseHeadersPolicies(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListResponseHeadersPolicies(context.TODO(), &cloudfront.ListResponseHeadersPoliciesInput{Marker: marker})
+		out, err := svc.ListResponseHeadersPolicies(awsContext(), &cloudfront.ListResponseHeadersPoliciesInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -305,7 +414,7 @@ func (g *CloudFrontGenerator) loadResponseHeadersPolicies(svc *cloudfront.Client
 func (g *CloudFrontGenerator) loadOriginRequestPolicies(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListOriginRequestPolicies(context.TODO(), &cloudfront.ListOriginRequestPoliciesInput{Marker: marker})
+		out, err := svc.ListOriginRequestPolicies(awsContext(), &cloudfront.ListOriginRequestPoliciesInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -328,7 +437,7 @@ func (g *CloudFrontGenerator) loadOriginRequestPolicies(svc *cloudfront.Client) 
 func (g *CloudFrontGenerator) loadKeyGroups(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListKeyGroups(context.TODO(), &cloudfront.ListKeyGroupsInput{Marker: marker})
+		out, err := svc.ListKeyGroups(awsContext(), &cloudfront.ListKeyGroupsInput{Marker: marker})
 		if err != nil {
 			return err
 		}
@@ -351,7 +460,7 @@ func (g *CloudFrontGenerator) loadKeyGroups(svc *cloudfront.Client) error {
 func (g *CloudFrontGenerator) loadDistribution(svc *cloudfront.Client) error {
 	p := cloudfront.NewListDistributionsPaginator(svc, &cloudfront.ListDistributionsInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -371,7 +480,7 @@ func (g *CloudFrontGenerator) loadDistribution(svc *cloudfront.Client) error {
 			g.Resources = append(g.Resources, r)
 
 			// Realtime metrics subscription is a singleton per distribution.
-			if _, err := svc.GetMonitoringSubscription(context.TODO(), &cloudfront.GetMonitoringSubscriptionInput{DistributionId: distribution.Id}); err == nil {
+			if _, err := svc.GetMonitoringSubscription(awsContext(), &cloudfront.GetMonitoringSubscriptionInput{DistributionId: distribution.Id}); err == nil {
 				g.addSimple(StringValue(distribution.Id), StringValue(distribution.Id), "aws_cloudfront_monitoring_subscription")
 			}
 		}
@@ -382,7 +491,7 @@ func (g *CloudFrontGenerator) loadDistribution(svc *cloudfront.Client) error {
 func (g *CloudFrontGenerator) loadCachePolicy(svc *cloudfront.Client) error {
 	var marker *string
 	for {
-		out, err := svc.ListCachePolicies(context.TODO(), &cloudfront.ListCachePoliciesInput{
+		out, err := svc.ListCachePolicies(awsContext(), &cloudfront.ListCachePoliciesInput{
 			Marker: marker,
 		})
 		if err != nil {

@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *DNSZoneGenerator) InitResources() error {
 	dnsAPIClient := client.DNSAPIClient
 	resourceType := "ionoscloud_dns_zone"
 
-	response, _, err := dnsAPIClient.ZonesApi.ZonesGet(context.TODO()).Execute()
+	response, _, err := dnsAPIClient.ZonesApi.ZonesGet(runContext()).Execute()
 	if err != nil {
 		return err
 	}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/elastictranscoder"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ElasticTranscoderGenerator) InitResources() error {
 	svc := elastictranscoder.NewFromConfig(config)
 	p := elastictranscoder.NewListPipelinesPaginator(svc, &elastictranscoder.ListPipelinesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

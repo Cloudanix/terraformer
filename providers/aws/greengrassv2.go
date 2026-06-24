@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/greengrassv2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *GreengrassV2Generator) InitResources() error {
 
 	p := greengrassv2.NewListComponentsPaginator(svc, &greengrassv2.ListComponentsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
