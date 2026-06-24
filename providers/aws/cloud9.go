@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/cloud9"
 	"github.com/aws/aws-sdk-go-v2/service/cloud9/types"
@@ -34,12 +32,12 @@ func (g *Cloud9Generator) InitResources() error {
 		return e
 	}
 	svc := cloud9.NewFromConfig(config)
-	output, err := svc.ListEnvironments(context.TODO(), &cloud9.ListEnvironmentsInput{})
+	output, err := svc.ListEnvironments(awsContext(), &cloud9.ListEnvironmentsInput{})
 	if err != nil {
 		return err
 	}
 	for _, environmentID := range output.EnvironmentIds {
-		details, _ := svc.DescribeEnvironmentStatus(context.TODO(), &cloud9.DescribeEnvironmentStatusInput{
+		details, _ := svc.DescribeEnvironmentStatus(awsContext(), &cloud9.DescribeEnvironmentStatusInput{
 			EnvironmentId: &environmentID,
 		})
 		if details.Status == types.EnvironmentStatusError ||
@@ -53,7 +51,7 @@ func (g *Cloud9Generator) InitResources() error {
 			"aws",
 			cloud9AllowEmptyValues))
 		envID := environmentID
-		if members, err := svc.DescribeEnvironmentMemberships(context.TODO(), &cloud9.DescribeEnvironmentMembershipsInput{EnvironmentId: &envID}); err == nil {
+		if members, err := svc.DescribeEnvironmentMemberships(awsContext(), &cloud9.DescribeEnvironmentMembershipsInput{EnvironmentId: &envID}); err == nil {
 			for _, m := range members.Memberships {
 				userArn := StringValue(m.UserArn)
 				if userArn == "" || m.Permissions == types.PermissionsOwner {

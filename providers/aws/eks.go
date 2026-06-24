@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +32,7 @@ func (g *EksGenerator) getNodeGroups(clusterName string, svc *eks.Client) error 
 		ClusterName: &clusterName,
 	})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -53,7 +52,7 @@ func (g *EksGenerator) getNodeGroups(clusterName string, svc *eks.Client) error 
 // getClusterChildren enumerates a cluster's addons, Fargate profiles, and
 // identity provider configs. Import IDs are "<cluster_name>:<child_name>".
 func (g *EksGenerator) getClusterChildren(clusterName string, svc *eks.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	addons := eks.NewListAddonsPaginator(svc, &eks.ListAddonsInput{ClusterName: &clusterName})
 	for addons.HasMorePages() {
@@ -163,7 +162,7 @@ func (g *EksGenerator) InitResources() error {
 	svc := eks.NewFromConfig(config)
 	p := eks.NewListClustersPaginator(svc, &eks.ListClustersInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/notificationscontacts"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +31,7 @@ func (g *NotificationsContactsGenerator) InitResources() error {
 	}
 	svc := notificationscontacts.NewFromConfig(config)
 	for p := notificationscontacts.NewListEmailContactsPaginator(svc, &notificationscontacts.ListEmailContactsInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/codebuild"
 )
@@ -33,7 +31,7 @@ func (g *CodeBuildGenerator) InitResources() error {
 		return e
 	}
 	svc := codebuild.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	var projectNames []string
 	p := codebuild.NewListProjectsPaginator(svc, &codebuild.ListProjectsInput{})
 	for p.HasMorePages() {
@@ -95,7 +93,7 @@ func (g *CodeBuildGenerator) InitResources() error {
 
 	rg := codebuild.NewListReportGroupsPaginator(svc, &codebuild.ListReportGroupsInput{})
 	for rg.HasMorePages() {
-		page, err := rg.NextPage(context.TODO())
+		page, err := rg.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

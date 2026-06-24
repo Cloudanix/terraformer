@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/securitylake"
 	securitylaketypes "github.com/aws/aws-sdk-go-v2/service/securitylake/types"
 
@@ -35,7 +33,7 @@ func (g *SecurityLakeGenerator) InitResources() error {
 		return e
 	}
 	svc := securitylake.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	lakes, err := svc.ListDataLakes(ctx, &securitylake.ListDataLakesInput{})
 	if err != nil {

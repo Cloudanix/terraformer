@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -38,7 +37,7 @@ func (g *AppMeshGenerator) InitResources() error {
 
 	p := appmesh.NewListMeshesPaginator(svc, &appmesh.ListMeshesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -58,7 +57,7 @@ func (g *AppMeshGenerator) InitResources() error {
 // loadMeshChildren enumerates a mesh's virtual nodes/routers/services/gateways.
 // Import IDs are "<mesh-name>/<resource-name>".
 func (g *AppMeshGenerator) loadMeshChildren(svc *appmesh.Client, mesh string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(name, tfType string) {
 		if name != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

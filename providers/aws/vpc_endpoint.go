@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -87,7 +85,7 @@ func (g *VpcEndpointGenerator) InitResources() error {
 		return e
 	}
 	svc := ec2.NewFromConfig(config)
-	vpceps, err := svc.DescribeVpcEndpoints(context.TODO(), &ec2.DescribeVpcEndpointsInput{})
+	vpceps, err := svc.DescribeVpcEndpoints(awsContext(), &ec2.DescribeVpcEndpointsInput{})
 	if err != nil {
 		return err
 	}
@@ -95,7 +93,7 @@ func (g *VpcEndpointGenerator) InitResources() error {
 
 	np := ec2.NewDescribeVpcEndpointConnectionNotificationsPaginator(svc, &ec2.DescribeVpcEndpointConnectionNotificationsInput{})
 	for np.HasMorePages() {
-		page, err := np.NextPage(context.TODO())
+		page, err := np.NextPage(awsContext())
 		if err != nil {
 			break
 		}

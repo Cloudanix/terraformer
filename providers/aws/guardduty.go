@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -37,7 +36,7 @@ func (g *GuardDutyGenerator) InitResources() error {
 		return e
 	}
 	svc := guardduty.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	var detectorIDs []string
 	detectors := guardduty.NewListDetectorsPaginator(svc, &guardduty.ListDetectorsInput{})
@@ -102,7 +101,7 @@ func (g *GuardDutyGenerator) InitResources() error {
 }
 
 func (g *GuardDutyGenerator) addDetectorChildren(svc *guardduty.Client, detectorID string) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	child := func(childID, tfType string) {
 		if childID == "" {
 			return

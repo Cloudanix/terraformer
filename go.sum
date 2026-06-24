@@ -438,6 +438,10 @@ github.com/aws/aws-sdk-go-v2/service/appstream v1.61.0 h1:RfJ4tS3reB/AVTbDuQh2C9
 github.com/aws/aws-sdk-go-v2/service/appstream v1.61.0/go.mod h1:m5ICxj/+zz5TSCzcXVS7D5OHNmWbNpbdoj3rJDMk9mA=
 github.com/aws/aws-sdk-go-v2/service/appsync v1.54.4 h1:usX2XiWnjFbtJs7hlIbp9RPqUlcBY+n5Spm1Kzq/lY4=
 github.com/aws/aws-sdk-go-v2/service/appsync v1.54.4/go.mod h1:iwnsAGkoqj2WDZG5crswFe1C9WLS7BFeiihxz1Ow0VI=
+github.com/aws/aws-sdk-go-v2/service/arcregionswitch v1.9.3 h1:A4qONXChcll6Uzq3tOv4IAq6G/SzFnuUHs9j96Fr+q0=
+github.com/aws/aws-sdk-go-v2/service/arcregionswitch v1.9.3/go.mod h1:/GSnvbGccAp3fxf3QTfkBt4mzx6kBcngMRcy6HKwrvI=
+github.com/aws/aws-sdk-go-v2/service/arczonalshift v1.23.5 h1:jYJKmQSe35B94kvRHVONnGDYXttjdezB6lIftMTGRq0=
+github.com/aws/aws-sdk-go-v2/service/arczonalshift v1.23.5/go.mod h1:SGLRTHAbiJ4i6+WZlatWHLN3eMjhiFwg+tydyjDE6c4=
 github.com/aws/aws-sdk-go-v2/service/athena v1.58.4 h1:RXwMOjjGo1p2EucGcWsUJ3thdF0aH1LuCv1YmxGyCvw=
 github.com/aws/aws-sdk-go-v2/service/athena v1.58.4/go.mod h1:AFgcdu+EBc+c3FMvhbcsnFUYgCh75ZFkVsuETz8rVzM=
 github.com/aws/aws-sdk-go-v2/service/auditmanager v1.47.1 h1:Gj/VTVGIOauO+Ya7DzzBYuolVkCpKR9SBKntVU3Apfc=
@@ -456,6 +460,8 @@ github.com/aws/aws-sdk-go-v2/service/bedrock v1.64.0 h1:jZOg03lM41zl89h17avGr6AF
 github.com/aws/aws-sdk-go-v2/service/bedrock v1.64.0/go.mod h1:f0MnAznWRN75Dnezt6MBnHOKHEpAI/ztr4Q6Lo1IGDk=
 github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.56.0 h1:Gai8Jx4Az3bz5GYDerDwwvDaPx4WxWaAuFgP+P+JeTI=
 github.com/aws/aws-sdk-go-v2/service/bedrockagent v1.56.0/go.mod h1:GlwXK7c/0CMTSU4a0PAAp5jiYXH55DRYT3mliKlqf6M=
+github.com/aws/aws-sdk-go-v2/service/bedrockagentcorecontrol v1.45.0 h1:1ECnZRd4jGUiM54hJ1dNjoG2H+Y37LHyEq9oExolrfo=
+github.com/aws/aws-sdk-go-v2/service/bedrockagentcorecontrol v1.45.0/go.mod h1:MQ3INaQ+EXhLY92cpengp85BSJcXyvl4ttfPniodC90=
 github.com/aws/aws-sdk-go-v2/service/billing v1.11.7 h1:VPPcxuxnfuCvIbTwrpKKVo0awJfugZ+uvce6ildR6Sg=
 github.com/aws/aws-sdk-go-v2/service/billing v1.11.7/go.mod h1:qBg0yF5t7sq/eBLCurTuuJqVR0+zI1YqEDEB7jpA3g4=
 github.com/aws/aws-sdk-go-v2/service/budgets v1.44.6 h1:J/+Txi6glp85LSGzi8iRbc1Jii/FYmgVZ7p2qzHrbYM=
@@ -554,6 +560,8 @@ github.com/aws/aws-sdk-go-v2/service/docdb v1.49.5 h1:2CWj6T/9qT+nLh2WLCxCpQ8WTd
 github.com/aws/aws-sdk-go-v2/service/docdb v1.49.5/go.mod h1:cEgoGBX/E+JwDGo9NQ4wFIg3qmlRdlRDi9DH3EcZfzQ=
 github.com/aws/aws-sdk-go-v2/service/docdbelastic v1.21.7 h1:zyCRwMu8CYMNdh4BPrYzFLJUfRuKQlJYnX9IbTLh44o=
 github.com/aws/aws-sdk-go-v2/service/docdbelastic v1.21.7/go.mod h1:lcrvonI/iUSPWfXDEia4HRM6LKna/v3xU3hoyJggShs=
+github.com/aws/aws-sdk-go-v2/service/drs v1.39.4 h1:QPm33Ed1vIOLbspbCXSpbXs3GNRodKw0FZPAEOza0L8=
+github.com/aws/aws-sdk-go-v2/service/drs v1.39.4/go.mod h1:q4AHKjEx4SAUY0I4nr7E8ReANGIMC70mSih45YPDWUE=
 github.com/aws/aws-sdk-go-v2/service/dsql v1.14.6 h1:IVRf4060EURyJmopyZGbm9Wyw+xmRwqEDkUUngFtF34=
 github.com/aws/aws-sdk-go-v2/service/dsql v1.14.6/go.mod h1:tk6ceWdgunXi9oJTumAvHBAKr5zy+ZrrQvSMmrmfFPc=
 github.com/aws/aws-sdk-go-v2/service/dynamodb v1.59.0 h1:S1qETDbdXKZMYVveuxACCKuRqnAt2NlnmYnlq5SeuMY=
@@ -792,10 +800,14 @@ github.com/aws/aws-sdk-go-v2/service/s3 v1.104.0 h1:ta8csKy5vN91F3i5gGR85lFV0srB
 github.com/aws/aws-sdk-go-v2/service/s3 v1.104.0/go.mod h1:77ZAgynvx1txMvDG8gGWoWkO1augYDxkp9JElWFgjQU=
 github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5 h1:sS08pq42o+zTTacHH2bILnVX+56jIDsAmlSRKYwsB/0=
 github.com/aws/aws-sdk-go-v2/service/s3control v1.71.5/go.mod h1:dCGIfoT6n2eToJDHoP380259fiV2AuqujN+YYZHemxo=
+github.com/aws/aws-sdk-go-v2/service/s3files v1.1.1 h1:F7tDq8LUkRLRs9R8lEl4faU8IgIGWqog9oFrqSlz3Jc=
+github.com/aws/aws-sdk-go-v2/service/s3files v1.1.1/go.mod h1:nR8b1Rq1fp6Jze+BzuDTd06Fi98P/kYLMNDMivNINnQ=
 github.com/aws/aws-sdk-go-v2/service/s3outposts v1.35.2 h1:k8pb8onAQF3VsGNH1Am+3yEqMuIArxxXL0YAck7AXpE=
 github.com/aws/aws-sdk-go-v2/service/s3outposts v1.35.2/go.mod h1:OIZ3IxQ71VxFu8pGdPziP3HU/leYLrIboL33F+YJ9DI=
 github.com/aws/aws-sdk-go-v2/service/s3tables v1.16.6 h1:6Uu+pbOv0X6mrVZEolavZECblE9ZpZrmiYU72gG+Tgg=
 github.com/aws/aws-sdk-go-v2/service/s3tables v1.16.6/go.mod h1:n/QIB6WlsDUWejQR6XXbUB6+5z/NNuLh9nuwC68oFLk=
+github.com/aws/aws-sdk-go-v2/service/s3vectors v1.8.0 h1:RMOJ1tsgC9w4TY9cfnaGeGrkVctN/d3mOPJka/bkq3c=
+github.com/aws/aws-sdk-go-v2/service/s3vectors v1.8.0/go.mod h1:PeOMzZdOpvzfxsqbyT7dZNFQM1knxpotH5+O/Nbl3Dc=
 github.com/aws/aws-sdk-go-v2/service/sagemaker v1.256.0 h1:tunqU6XaIXMB/qozmjxOyRzW28GeUkbyTwVeWuyNvkQ=
 github.com/aws/aws-sdk-go-v2/service/sagemaker v1.256.0/go.mod h1:AyCRrgn6Qm1nKR2grD+o8iFlKx5c7jF2h72YkkjEaoQ=
 github.com/aws/aws-sdk-go-v2/service/savingsplans v1.33.7 h1:vnkZu0oF3q+mPHy6y01hVBbXWTrQPMQUcD001PF4FZ0=
@@ -866,6 +878,8 @@ github.com/aws/aws-sdk-go-v2/service/transcribe v1.56.3 h1:9vYn/F0ESeQ0ap145xw/w
 github.com/aws/aws-sdk-go-v2/service/transcribe v1.56.3/go.mod h1:q9XqMZYCidSMyZU9JI74vNVWx2KWwnjEO7BBUf59Seg=
 github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3 h1:cNVlVHbweLv8GK1NQFd5CpmZqwg14gL+LXMYv4RytAY=
 github.com/aws/aws-sdk-go-v2/service/transfer v1.73.3/go.mod h1:63aw6tjtHyLuKFPA2LEMrqkIS9DT7WCbCY2VkJRQesQ=
+github.com/aws/aws-sdk-go-v2/service/uxc v1.1.2 h1:lp5EpCHoUv3nMvzBuu220PiLJywYIpx9Uh7i8KI1iDw=
+github.com/aws/aws-sdk-go-v2/service/uxc v1.1.2/go.mod h1:4sVohAriFY0T4Z+zdkS/v/ZMPXy2p2ef/lfpD8vRPCU=
 github.com/aws/aws-sdk-go-v2/service/verifiedpermissions v1.34.6 h1:p7PMAj9ltbMK8f2QA5dIyP9UiZ/oze/KcL6vl+YkjcA=
 github.com/aws/aws-sdk-go-v2/service/verifiedpermissions v1.34.6/go.mod h1:2glbhLHXg2MJuadjB7Yf4ZgbtUpWWthbKrhYeHmoAvU=
 github.com/aws/aws-sdk-go-v2/service/vpclattice v1.22.2 h1:q9xVCezxBqFAv/sJakd63MZ564MxOY8CDfWuiih9awM=

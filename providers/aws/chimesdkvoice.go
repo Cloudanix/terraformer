@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/chimesdkvoice"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ChimeSDKVoiceGenerator) InitResources() error {
 	}
 	svc := chimesdkvoice.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(id, name, tfType string) {
 		if id != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -111,6 +109,17 @@ func (g *ChimeSDKVoiceGenerator) InitResources() error {
 		for _, d := range page.VoiceProfileDomains {
 			id := StringValue(d.VoiceProfileDomainId)
 			add(id, id, "aws_chimesdkvoice_voice_profile_domain")
+		}
+	}
+
+	// Account-level global settings (imported by account id) — only when the CDR
+	// bucket is actually configured (otherwise it's the empty AWS default).
+	if gs, err := svc.GetGlobalSettings(ctx, &chimesdkvoice.GetGlobalSettingsInput{}); err == nil &&
+		gs.VoiceConnector != nil && StringValue(gs.VoiceConnector.CdrBucket) != "" {
+		if account, err := g.getAccountNumber(config); err == nil {
+			if id := StringValue(account); id != "" {
+				add(id, id, "aws_chimesdkvoice_global_settings")
+			}
 		}
 	}
 	return nil

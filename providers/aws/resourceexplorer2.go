@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/resourceexplorer2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *ResourceExplorer2Generator) InitResources() error {
 
 	p := resourceexplorer2.NewListIndexesPaginator(svc, &resourceexplorer2.ListIndexesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -52,7 +50,7 @@ func (g *ResourceExplorer2Generator) InitResources() error {
 
 	vp := resourceexplorer2.NewListViewsPaginator(svc, &resourceexplorer2.ListViewsInput{})
 	for vp.HasMorePages() {
-		page, err := vp.NextPage(context.TODO())
+		page, err := vp.NextPage(awsContext())
 		if err != nil {
 			break
 		}

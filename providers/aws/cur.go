@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/costandusagereportservice"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *CURGenerator) InitResources() error {
 	svc := costandusagereportservice.NewFromConfig(config)
 	p := costandusagereportservice.NewDescribeReportDefinitionsPaginator(svc, &costandusagereportservice.DescribeReportDefinitionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"strings"
 
@@ -55,15 +54,15 @@ func (g *EbsGenerator) InitResources() error {
 	// Account/region-level EBS settings. Their Terraform import ID is the region.
 	region := config.Region
 	if region != "" {
-		if enc, err := svc.GetEbsEncryptionByDefault(context.TODO(), &ec2.GetEbsEncryptionByDefaultInput{}); err == nil && enc.EbsEncryptionByDefault != nil && *enc.EbsEncryptionByDefault {
+		if enc, err := svc.GetEbsEncryptionByDefault(awsContext(), &ec2.GetEbsEncryptionByDefaultInput{}); err == nil && enc.EbsEncryptionByDefault != nil && *enc.EbsEncryptionByDefault {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				region, region, "aws_ebs_encryption_by_default", "aws", ebsAllowEmptyValues))
 		}
-		if kms, err := svc.GetEbsDefaultKmsKeyId(context.TODO(), &ec2.GetEbsDefaultKmsKeyIdInput{}); err == nil && StringValue(kms.KmsKeyId) != "" {
+		if kms, err := svc.GetEbsDefaultKmsKeyId(awsContext(), &ec2.GetEbsDefaultKmsKeyIdInput{}); err == nil && StringValue(kms.KmsKeyId) != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				region, region, "aws_ebs_default_kms_key", "aws", ebsAllowEmptyValues))
 		}
-		if bpa, err := svc.GetSnapshotBlockPublicAccessState(context.TODO(), &ec2.GetSnapshotBlockPublicAccessStateInput{}); err == nil &&
+		if bpa, err := svc.GetSnapshotBlockPublicAccessState(awsContext(), &ec2.GetSnapshotBlockPublicAccessStateInput{}); err == nil &&
 			bpa.State != "" && bpa.State != types.SnapshotBlockPublicAccessStateUnblocked {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				region, region, "aws_ebs_snapshot_block_public_access", "aws", ebsAllowEmptyValues))
@@ -74,7 +73,7 @@ func (g *EbsGenerator) InitResources() error {
 		Filters: filters,
 	})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -82,7 +81,7 @@ func (g *EbsGenerator) InitResources() error {
 			isRootDevice := false // Let's leave root device configuration to be done in ec2_instance resources
 
 			for _, attachment := range volume.Attachments {
-				instances, _ := svc.DescribeInstances(context.TODO(), &ec2.DescribeInstancesInput{
+				instances, _ := svc.DescribeInstances(awsContext(), &ec2.DescribeInstancesInput{
 					InstanceIds: []string{StringValue(attachment.InstanceId)},
 				})
 				for _, reservation := range instances.Reservations {

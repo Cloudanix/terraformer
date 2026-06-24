@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,7 +31,7 @@ type RDSGenerator struct {
 func (g *RDSGenerator) loadDBClusters(svc *rds.Client) error {
 	p := rds.NewDescribeDBClustersPaginator(svc, &rds.DescribeDBClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -61,7 +60,7 @@ func (g *RDSGenerator) loadDBClusters(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBClusterSnapshots(svc *rds.Client) error {
 	p := rds.NewDescribeDBClusterSnapshotsPaginator(svc, &rds.DescribeDBClusterSnapshotsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -82,7 +81,7 @@ func (g *RDSGenerator) loadDBClusterSnapshots(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBProxies(svc *rds.Client) error {
 	p := rds.NewDescribeDBProxiesPaginator(svc, &rds.DescribeDBProxiesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -97,7 +96,7 @@ func (g *RDSGenerator) loadDBProxies(svc *rds.Client) error {
 			))
 			proxyName := resourceName
 			for tgp := rds.NewDescribeDBProxyTargetGroupsPaginator(svc, &rds.DescribeDBProxyTargetGroupsInput{DBProxyName: &proxyName}); tgp.HasMorePages(); {
-				tgPage, err := tgp.NextPage(context.TODO())
+				tgPage, err := tgp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -112,7 +111,7 @@ func (g *RDSGenerator) loadDBProxies(svc *rds.Client) error {
 				}
 			}
 			for tp := rds.NewDescribeDBProxyTargetsPaginator(svc, &rds.DescribeDBProxyTargetsInput{DBProxyName: &proxyName}); tp.HasMorePages(); {
-				tPage, err := tp.NextPage(context.TODO())
+				tPage, err := tp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -134,7 +133,7 @@ func (g *RDSGenerator) loadDBProxies(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBInstances(svc *rds.Client) error {
 	p := rds.NewDescribeDBInstancesPaginator(svc, &rds.DescribeDBInstancesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -171,7 +170,7 @@ func (g *RDSGenerator) loadDBInstances(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBProxyEndpoints(svc *rds.Client) error {
 	p := rds.NewDescribeDBProxyEndpointsPaginator(svc, &rds.DescribeDBProxyEndpointsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -191,7 +190,7 @@ func (g *RDSGenerator) loadDBProxyEndpoints(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBInstanceSnapshots(svc *rds.Client) error {
 	p := rds.NewDescribeDBSnapshotsPaginator(svc, &rds.DescribeDBSnapshotsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -212,7 +211,7 @@ func (g *RDSGenerator) loadDBInstanceSnapshots(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBParameterGroups(svc *rds.Client) error {
 	p := rds.NewDescribeDBParameterGroupsPaginator(svc, &rds.DescribeDBParameterGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -236,7 +235,7 @@ func (g *RDSGenerator) loadDBParameterGroups(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBSubnetGroups(svc *rds.Client) error {
 	p := rds.NewDescribeDBSubnetGroupsPaginator(svc, &rds.DescribeDBSubnetGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -257,7 +256,7 @@ func (g *RDSGenerator) loadDBSubnetGroups(svc *rds.Client) error {
 func (g *RDSGenerator) loadOptionGroups(svc *rds.Client) error {
 	p := rds.NewDescribeOptionGroupsPaginator(svc, &rds.DescribeOptionGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -281,7 +280,7 @@ func (g *RDSGenerator) loadOptionGroups(svc *rds.Client) error {
 func (g *RDSGenerator) loadEventSubscription(svc *rds.Client) error {
 	p := rds.NewDescribeEventSubscriptionsPaginator(svc, &rds.DescribeEventSubscriptionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -302,7 +301,7 @@ func (g *RDSGenerator) loadEventSubscription(svc *rds.Client) error {
 func (g *RDSGenerator) loadRDSGlobalClusters(svc *rds.Client) error {
 	p := rds.NewDescribeGlobalClustersPaginator(svc, &rds.DescribeGlobalClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -330,6 +329,8 @@ func (g *RDSGenerator) InitResources() error {
 		return e
 	}
 	svc := rds.NewFromConfig(config)
+
+	g.loadRDSCertificate(svc, config.Region)
 
 	if err := g.loadDBClusters(svc); err != nil {
 		return err
@@ -377,12 +378,111 @@ func (g *RDSGenerator) InitResources() error {
 	if err := g.loadRDSExtras(svc); err != nil {
 		return err
 	}
+	if err := g.loadDBShardGroups(svc); err != nil {
+		return err
+	}
+	if err := g.loadCustomDBEngineVersions(svc); err != nil {
+		return err
+	}
 
 	return nil
 }
 
+// customRDSEngines are the RDS Custom BYOL engine families. DescribeDBEngineVersions
+// otherwise returns thousands of AWS-managed versions; querying only these keeps
+// the import to customer-created CEVs (aws_rds_custom_db_engine_version).
+var customRDSEngines = []string{
+	"custom-oracle-ee", "custom-oracle-ee-cdb", "custom-oracle-se2", "custom-oracle-se2-cdb",
+	"custom-sqlserver-ee", "custom-sqlserver-se", "custom-sqlserver-web", "custom-sqlserver-dev",
+}
+
+// rdsCustomEngineVersionID builds the aws_rds_custom_db_engine_version import id.
+func rdsCustomEngineVersionID(engine, version string) string {
+	return engine + ":" + version
+}
+
+// loadCustomDBEngineVersions emits customer-created RDS Custom engine versions.
+func (g *RDSGenerator) loadCustomDBEngineVersions(svc *rds.Client) error {
+	includeAll := true
+	for i := range customRDSEngines {
+		engine := customRDSEngines[i]
+		p := rds.NewDescribeDBEngineVersionsPaginator(svc, &rds.DescribeDBEngineVersionsInput{
+			Engine:     &engine,
+			IncludeAll: &includeAll,
+		})
+		for p.HasMorePages() {
+			page, err := p.NextPage(awsContext())
+			if err != nil {
+				// A family with no custom versions returns an error for some accounts; skip it.
+				break
+			}
+			for _, v := range page.DBEngineVersions {
+				eng, ver := StringValue(v.Engine), StringValue(v.EngineVersion)
+				if eng == "" || ver == "" {
+					continue
+				}
+				id := rdsCustomEngineVersionID(eng, ver)
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_rds_custom_db_engine_version", "aws", RDSAllowEmptyValues))
+			}
+		}
+	}
+	return nil
+}
+
+// loadRDSCertificate emits the account/region default-CA override
+// (aws_rds_certificate, a per-region singleton imported by region) only when the
+// account has actually overridden the AWS default — otherwise it's just the
+// stock default and not managed infrastructure.
+func (g *RDSGenerator) loadRDSCertificate(svc *rds.Client, region string) {
+	if region == "" {
+		return
+	}
+	var marker *string
+	for {
+		out, err := svc.DescribeCertificates(awsContext(), &rds.DescribeCertificatesInput{Marker: marker})
+		if err != nil {
+			return
+		}
+		for _, c := range out.Certificates {
+			if c.CustomerOverride != nil && *c.CustomerOverride {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					region, region, "aws_rds_certificate", "aws", RDSAllowEmptyValues))
+				return
+			}
+		}
+		if out.Marker == nil {
+			return
+		}
+		marker = out.Marker
+	}
+}
+
+// loadDBShardGroups emits Aurora Limitless DB shard groups (imported by identifier).
+func (g *RDSGenerator) loadDBShardGroups(svc *rds.Client) error {
+	var marker *string
+	for {
+		out, err := svc.DescribeDBShardGroups(awsContext(), &rds.DescribeDBShardGroupsInput{Marker: marker})
+		if err != nil {
+			return err
+		}
+		for _, s := range out.DBShardGroups {
+			id := StringValue(s.DBShardGroupIdentifier)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, id, "aws_rds_shard_group", "aws", RDSAllowEmptyValues))
+		}
+		marker = out.Marker
+		if marker == nil {
+			return nil
+		}
+	}
+}
+
 func (g *RDSGenerator) loadRDSExtras(svc *rds.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	for p := rds.NewDescribeReservedDBInstancesPaginator(svc, &rds.DescribeReservedDBInstancesInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
 		if err != nil {
@@ -431,7 +531,7 @@ func (g *RDSGenerator) loadRDSExtras(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBClusterParameterGroups(svc *rds.Client) error {
 	p := rds.NewDescribeDBClusterParameterGroupsPaginator(svc, &rds.DescribeDBClusterParameterGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -450,7 +550,7 @@ func (g *RDSGenerator) loadDBClusterParameterGroups(svc *rds.Client) error {
 func (g *RDSGenerator) loadDBClusterEndpoints(svc *rds.Client) error {
 	p := rds.NewDescribeDBClusterEndpointsPaginator(svc, &rds.DescribeDBClusterEndpointsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

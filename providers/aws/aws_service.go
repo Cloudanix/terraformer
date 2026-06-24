@@ -35,6 +35,33 @@ type AWSService struct { //nolint
 	terraformutils.Service
 }
 
+// awsImportCtx holds the current import run's context (deadline + Ctrl-C) so the
+// AWS generators — including the many receiver-less helper functions — can pass
+// it to their SDK calls via awsContext(), instead of context.TODO(). Safe as a
+// package var because per-service discovery (InitResources) runs sequentially
+// in cmd/import.go's initAllServicesResources, and SetContext is called once per
+// service immediately before it. ponytail: a package global beats threading ctx
+// through 700+ existing call sites and free funcs; revisit only if InitResources
+// ever becomes concurrent (then store on the generator and use g.Context()).
+var awsImportCtx context.Context
+
+// awsContext returns the import-run context, or context.Background() when unset
+// (plan replay, tests, or before SetContext). Generators call this instead of
+// context.TODO() so a hung SDK call honours --timeout / Ctrl-C.
+func awsContext() context.Context {
+	if awsImportCtx != nil {
+		return awsImportCtx
+	}
+	return context.Background()
+}
+
+// SetContext captures the import-run context for awsContext() in addition to the
+// embedded Service's own storage.
+func (s *AWSService) SetContext(ctx context.Context) {
+	awsImportCtx = ctx
+	s.Service.SetContext(ctx)
+}
+
 var awsVariable = regexp.MustCompile(`(\${[0-9A-Za-z:]+})`)
 
 // defaultAllowEmptyValues lists attribute prefixes that may legitimately be
@@ -125,7 +152,7 @@ func (s *AWSService) generateConfig() (aws.Config, error) {
 		baseConfig.ClientLogMode = aws.LogRequestWithBody & aws.LogResponseWithBody
 	}
 
-	creds, e := baseConfig.Credentials.Retrieve(context.TODO())
+	creds, e := baseConfig.Credentials.Retrieve(awsContext())
 
 	if e != nil {
 		return baseConfig, e
@@ -163,7 +190,7 @@ func (s *AWSService) buildBaseConfig() (aws.Config, error) {
 	loadOptions = append(loadOptions, config.WithRetryer(func() aws.Retryer {
 		return retry.AddWithMaxAttempts(retry.NewAdaptiveMode(), 5)
 	}))
-	return config.LoadDefaultConfig(context.TODO(), loadOptions...)
+	return config.LoadDefaultConfig(awsContext(), loadOptions...)
 }
 
 // for CF interpolation and IAM Policy variables
@@ -173,7 +200,7 @@ func (*AWSService) escapeAwsInterpolation(str string) string {
 
 func (s *AWSService) getAccountNumber(config aws.Config) (*string, error) {
 	stsSvc := sts.NewFromConfig(config)
-	identity, err := stsSvc.GetCallerIdentity(context.TODO(), &sts.GetCallerIdentityInput{})
+	identity, err := stsSvc.GetCallerIdentity(awsContext(), &sts.GetCallerIdentityInput{})
 	if err != nil {
 		return nil, err
 	}

@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,7 +31,7 @@ func (g *GlueGenerator) loadGlueCrawlers(svc *glue.Client) error {
 	var GlueCrawlerAllowEmptyValues = []string{"tags."}
 	p := glue.NewGetCrawlersPaginator(svc, &glue.GetCrawlersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +50,7 @@ func (g *GlueGenerator) loadGlueCatalogDatabase(svc *glue.Client, account *strin
 	var GlueCatalogDatabaseAllowEmptyValues = []string{"tags."}
 	p := glue.NewGetDatabasesPaginator(svc, &glue.GetDatabasesInput{})
 	for p.HasMorePages() {
-		page, pErr := p.NextPage(context.TODO())
+		page, pErr := p.NextPage(awsContext())
 		if pErr != nil {
 			return databaseNames, pErr
 		}
@@ -78,7 +77,7 @@ func (g *GlueGenerator) loadGlueCatalogTable(svc *glue.Client, account *string, 
 	var GlueCatalogTableAllowEmptyValues = []string{"tags."}
 	p := glue.NewGetTablesPaginator(svc, &glue.GetTablesInput{DatabaseName: databaseName})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -94,7 +93,7 @@ func (g *GlueGenerator) loadGlueCatalogTable(svc *glue.Client, account *string, 
 			for ip := glue.NewGetPartitionIndexesPaginator(svc, &glue.GetPartitionIndexesInput{
 				CatalogId: account, DatabaseName: databaseName, TableName: catalogTable.Name,
 			}); ip.HasMorePages(); {
-				ipage, err := ip.NextPage(context.TODO())
+				ipage, err := ip.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -113,7 +112,7 @@ func (g *GlueGenerator) loadGlueCatalogTable(svc *glue.Client, account *string, 
 			for pp := glue.NewGetPartitionsPaginator(svc, &glue.GetPartitionsInput{
 				CatalogId: account, DatabaseName: databaseName, TableName: catalogTable.Name,
 			}); pp.HasMorePages(); {
-				ppage, err := pp.NextPage(context.TODO())
+				ppage, err := pp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -129,7 +128,7 @@ func (g *GlueGenerator) loadGlueCatalogTable(svc *glue.Client, account *string, 
 
 			// Table optimizers (Iceberg compaction/retention/orphan-file-deletion).
 			for _, optType := range gluetypes.TableOptimizerType("").Values() {
-				if _, err := svc.GetTableOptimizer(context.TODO(), &glue.GetTableOptimizerInput{
+				if _, err := svc.GetTableOptimizer(awsContext(), &glue.GetTableOptimizerInput{
 					CatalogId: account, DatabaseName: databaseName, TableName: catalogTable.Name, Type: optType,
 				}); err == nil {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -146,7 +145,7 @@ func (g *GlueGenerator) loadGlueJobs(svc *glue.Client) error {
 	var GlueJobAllowEmptyValues = []string{"tags."}
 	p := glue.NewGetJobsPaginator(svc, &glue.GetJobsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -165,7 +164,7 @@ func (g *GlueGenerator) loadGlueTriggers(svc *glue.Client) error {
 	var GlueTriggerAllowEmptyValues = []string{"tags."}
 	p := glue.NewGetTriggersPaginator(svc, &glue.GetTriggersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -262,14 +261,35 @@ func (g *GlueGenerator) InitResources() error {
 	// Account-level singletons keyed by catalog (account) ID.
 	catalogID := StringValue(account)
 	if catalogID != "" {
-		if _, err := svc.GetDataCatalogEncryptionSettings(context.TODO(), &glue.GetDataCatalogEncryptionSettingsInput{CatalogId: account}); err == nil {
+		if _, err := svc.GetDataCatalogEncryptionSettings(awsContext(), &glue.GetDataCatalogEncryptionSettingsInput{CatalogId: account}); err == nil {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				catalogID, catalogID, "aws_glue_data_catalog_encryption_settings", "aws", defaultAllowEmptyValues))
 		}
-		if pol, err := svc.GetResourcePolicy(context.TODO(), &glue.GetResourcePolicyInput{}); err == nil && StringValue(pol.PolicyInJson) != "" {
+		if pol, err := svc.GetResourcePolicy(awsContext(), &glue.GetResourcePolicyInput{}); err == nil && StringValue(pol.PolicyInJson) != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				catalogID, catalogID, "aws_glue_resource_policy", "aws", defaultAllowEmptyValues))
 		}
+	}
+
+	// Federated/nested catalogs (imported by catalog name).
+	var catToken *string
+	for {
+		out, err := svc.GetCatalogs(awsContext(), &glue.GetCatalogsInput{NextToken: catToken})
+		if err != nil {
+			break
+		}
+		for _, c := range out.CatalogList {
+			name := StringValue(c.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_glue_catalog", "aws", defaultAllowEmptyValues))
+		}
+		if out.NextToken == nil {
+			break
+		}
+		catToken = out.NextToken
 	}
 
 	return nil
@@ -278,7 +298,7 @@ func (g *GlueGenerator) InitResources() error {
 func (g *GlueGenerator) loadGlueClassifiers(svc *glue.Client) error {
 	p := glue.NewGetClassifiersPaginator(svc, &glue.GetClassifiersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -311,7 +331,7 @@ func (g *GlueGenerator) loadGlueUserDefinedFunctions(svc *glue.Client, account, 
 		CatalogId: account, DatabaseName: databaseName, Pattern: aws.String("*"),
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -331,7 +351,7 @@ func (g *GlueGenerator) loadGlueUserDefinedFunctions(svc *glue.Client, account, 
 func (g *GlueGenerator) loadGlueSchemas(svc *glue.Client) error {
 	p := glue.NewListSchemasPaginator(svc, &glue.ListSchemasInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -350,7 +370,7 @@ func (g *GlueGenerator) loadGlueSchemas(svc *glue.Client) error {
 func (g *GlueGenerator) loadGlueMLTransforms(svc *glue.Client) error {
 	p := glue.NewGetMLTransformsPaginator(svc, &glue.GetMLTransformsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -369,7 +389,7 @@ func (g *GlueGenerator) loadGlueMLTransforms(svc *glue.Client) error {
 func (g *GlueGenerator) loadGlueDevEndpoints(svc *glue.Client) error {
 	p := glue.NewGetDevEndpointsPaginator(svc, &glue.GetDevEndpointsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -388,7 +408,7 @@ func (g *GlueGenerator) loadGlueDevEndpoints(svc *glue.Client) error {
 func (g *GlueGenerator) loadGlueDataQualityRulesets(svc *glue.Client) error {
 	p := glue.NewListDataQualityRulesetsPaginator(svc, &glue.ListDataQualityRulesetsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -408,7 +428,7 @@ func (g *GlueGenerator) loadGlueConnections(svc *glue.Client, account *string) e
 	catalogID := StringValue(account)
 	p := glue.NewGetConnectionsPaginator(svc, &glue.GetConnectionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -427,7 +447,7 @@ func (g *GlueGenerator) loadGlueConnections(svc *glue.Client, account *string) e
 func (g *GlueGenerator) loadGlueWorkflows(svc *glue.Client) error {
 	p := glue.NewListWorkflowsPaginator(svc, &glue.ListWorkflowsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -445,7 +465,7 @@ func (g *GlueGenerator) loadGlueWorkflows(svc *glue.Client) error {
 func (g *GlueGenerator) loadGlueSecurityConfigurations(svc *glue.Client) error {
 	p := glue.NewGetSecurityConfigurationsPaginator(svc, &glue.GetSecurityConfigurationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -464,7 +484,7 @@ func (g *GlueGenerator) loadGlueSecurityConfigurations(svc *glue.Client) error {
 func (g *GlueGenerator) loadGlueRegistries(svc *glue.Client) error {
 	p := glue.NewListRegistriesPaginator(svc, &glue.ListRegistriesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

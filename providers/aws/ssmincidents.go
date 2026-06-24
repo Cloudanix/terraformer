@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/ssmincidents"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *SSMIncidentsGenerator) InitResources() error {
 
 	// The replication set is an account singleton; ListReplicationSets returns
 	// at most one ARN. aws_ssmincidents_replication_set imports by ARN.
-	if rs, err := svc.ListReplicationSets(context.TODO(), &ssmincidents.ListReplicationSetsInput{}); err == nil {
+	if rs, err := svc.ListReplicationSets(awsContext(), &ssmincidents.ListReplicationSetsInput{}); err == nil {
 		for _, arn := range rs.ReplicationSetArns {
 			if arn == "" {
 				continue
@@ -48,7 +46,7 @@ func (g *SSMIncidentsGenerator) InitResources() error {
 
 	p := ssmincidents.NewListResponsePlansPaginator(svc, &ssmincidents.ListResponsePlansInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

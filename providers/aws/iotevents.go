@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/iotevents"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *IoTEventsGenerator) InitResources() error {
 
 	var token *string
 	for {
-		out, err := svc.ListDetectorModels(context.TODO(), &iotevents.ListDetectorModelsInput{NextToken: token})
+		out, err := svc.ListDetectorModels(awsContext(), &iotevents.ListDetectorModelsInput{NextToken: token})
 		if err != nil {
 			return err
 		}

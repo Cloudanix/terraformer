@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/transcribe"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *TranscribeGenerator) InitResources() error {
 	svc := transcribe.NewFromConfig(config)
 	p := transcribe.NewListVocabulariesPaginator(svc, &transcribe.ListVocabulariesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *TranscribeGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for lm := transcribe.NewListLanguageModelsPaginator(svc, &transcribe.ListLanguageModelsInput{}); lm.HasMorePages(); {
 		page, err := lm.NextPage(ctx)
 		if err != nil {

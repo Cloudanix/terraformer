@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/devopsguru"
 	devopsgurutypes "github.com/aws/aws-sdk-go-v2/service/devopsguru/types"
 
@@ -35,7 +33,7 @@ func (g *DevOpsGuruGenerator) InitResources() error {
 		return e
 	}
 	svc := devopsguru.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	for p := devopsguru.NewListNotificationChannelsPaginator(svc, &devopsguru.ListNotificationChannelsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)

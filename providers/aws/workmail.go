@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/workmail"
 
@@ -35,7 +33,7 @@ func (g *WorkMailGenerator) InitResources() error {
 		return e
 	}
 	svc := workmail.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	var orgIDs []string
 	for p := workmail.NewListOrganizationsPaginator(svc, &workmail.ListOrganizationsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(ctx)
@@ -80,6 +78,20 @@ func (g *WorkMailGenerator) InitResources() error {
 				}
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					oid+"/"+uid, oid+"_"+uid, "aws_workmail_user", "aws", defaultAllowEmptyValues))
+			}
+		}
+		for p := workmail.NewListMailDomainsPaginator(svc, &workmail.ListMailDomainsInput{OrganizationId: aws.String(oid)}); p.HasMorePages(); {
+			page, err := p.NextPage(ctx)
+			if err != nil {
+				break
+			}
+			for _, d := range page.MailDomains {
+				domain := StringValue(d.DomainName)
+				if domain == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					oid+","+domain, oid+"_"+domain, "aws_workmail_domain", "aws", defaultAllowEmptyValues))
 			}
 		}
 	}

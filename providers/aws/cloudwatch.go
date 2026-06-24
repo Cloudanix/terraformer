@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatch"
 	"github.com/aws/aws-sdk-go-v2/service/cloudwatchevents"
@@ -46,6 +44,9 @@ func (g *CloudWatchGenerator) InitResources() error {
 	if err := g.createMetricStreams(cloudwatchSvc); err != nil {
 		return err
 	}
+	if err := g.createInsightRules(cloudwatchSvc); err != nil {
+		return err
+	}
 
 	cloudwatcheventsSvc := cloudwatchevents.NewFromConfig(config)
 	err = g.createRules(cloudwatcheventsSvc)
@@ -61,7 +62,7 @@ func (g *CloudWatchGenerator) InitResources() error {
 	if err := g.createEventAPIDestinations(cloudwatcheventsSvc); err != nil {
 		return err
 	}
-	if archives, err := cloudwatcheventsSvc.ListArchives(context.TODO(), &cloudwatchevents.ListArchivesInput{}); err == nil {
+	if archives, err := cloudwatcheventsSvc.ListArchives(awsContext(), &cloudwatchevents.ListArchivesInput{}); err == nil {
 		for _, a := range archives.Archives {
 			name := StringValue(a.ArchiveName)
 			if name == "" {
@@ -75,10 +76,30 @@ func (g *CloudWatchGenerator) InitResources() error {
 	return nil
 }
 
+// createInsightRules emits CloudWatch Contributor Insights rules (imported by name).
+func (g *CloudWatchGenerator) createInsightRules(svc *cloudwatch.Client) error {
+	p := cloudwatch.NewDescribeInsightRulesPaginator(svc, &cloudwatch.DescribeInsightRulesInput{})
+	for p.HasMorePages() {
+		page, err := p.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, r := range page.InsightRules {
+			name := StringValue(r.Name)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_cloudwatch_contributor_insight_rule", "aws", cloudwatchAllowEmptyValues))
+		}
+	}
+	return nil
+}
+
 func (g *CloudWatchGenerator) createMetricStreams(svc *cloudwatch.Client) error {
 	p := cloudwatch.NewListMetricStreamsPaginator(svc, &cloudwatch.ListMetricStreamsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -97,7 +118,7 @@ func (g *CloudWatchGenerator) createMetricStreams(svc *cloudwatch.Client) error 
 func (g *CloudWatchGenerator) createEventBuses(svc *cloudwatchevents.Client) error {
 	var nextToken *string
 	for {
-		output, err := svc.ListEventBuses(context.TODO(), &cloudwatchevents.ListEventBusesInput{NextToken: nextToken})
+		output, err := svc.ListEventBuses(awsContext(), &cloudwatchevents.ListEventBusesInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}
@@ -109,6 +130,12 @@ func (g *CloudWatchGenerator) createEventBuses(svc *cloudwatchevents.Client) err
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_cloudwatch_event_bus", "aws", cloudwatchAllowEmptyValues))
+			// Resource-based policy is a separate resource (not inlined on the bus),
+			// imported by bus name. Emit only when a policy is attached.
+			if StringValue(bus.Policy) != "" {
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					name, name, "aws_cloudwatch_event_bus_policy", "aws", cloudwatchAllowEmptyValues))
+			}
 		}
 		nextToken = output.NextToken
 		if nextToken == nil {
@@ -120,7 +147,7 @@ func (g *CloudWatchGenerator) createEventBuses(svc *cloudwatchevents.Client) err
 func (g *CloudWatchGenerator) createEventConnections(svc *cloudwatchevents.Client) error {
 	var nextToken *string
 	for {
-		output, err := svc.ListConnections(context.TODO(), &cloudwatchevents.ListConnectionsInput{NextToken: nextToken})
+		output, err := svc.ListConnections(awsContext(), &cloudwatchevents.ListConnectionsInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}
@@ -142,7 +169,7 @@ func (g *CloudWatchGenerator) createEventConnections(svc *cloudwatchevents.Clien
 func (g *CloudWatchGenerator) createEventAPIDestinations(svc *cloudwatchevents.Client) error {
 	var nextToken *string
 	for {
-		output, err := svc.ListApiDestinations(context.TODO(), &cloudwatchevents.ListApiDestinationsInput{NextToken: nextToken})
+		output, err := svc.ListApiDestinations(awsContext(), &cloudwatchevents.ListApiDestinationsInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}
@@ -164,7 +191,7 @@ func (g *CloudWatchGenerator) createEventAPIDestinations(svc *cloudwatchevents.C
 func (g *CloudWatchGenerator) createMetricAlarms(cloudwatchSvc *cloudwatch.Client) error {
 	var nextToken *string
 	for {
-		output, err := cloudwatchSvc.DescribeAlarms(context.TODO(), &cloudwatch.DescribeAlarmsInput{
+		output, err := cloudwatchSvc.DescribeAlarms(awsContext(), &cloudwatch.DescribeAlarmsInput{
 			NextToken: nextToken,
 		})
 		if err != nil {
@@ -197,7 +224,7 @@ func (g *CloudWatchGenerator) createMetricAlarms(cloudwatchSvc *cloudwatch.Clien
 func (g *CloudWatchGenerator) createDashboards(cloudwatchSvc *cloudwatch.Client) error {
 	var nextToken *string
 	for {
-		output, err := cloudwatchSvc.ListDashboards(context.TODO(), &cloudwatch.ListDashboardsInput{
+		output, err := cloudwatchSvc.ListDashboards(awsContext(), &cloudwatch.ListDashboardsInput{
 			NextToken: nextToken,
 		})
 		if err != nil {
@@ -222,7 +249,7 @@ func (g *CloudWatchGenerator) createDashboards(cloudwatchSvc *cloudwatch.Client)
 func (g *CloudWatchGenerator) createRules(cloudwatcheventsSvc *cloudwatchevents.Client) error {
 	var listRulesNextToken *string
 	for {
-		output, err := cloudwatcheventsSvc.ListRules(context.TODO(), &cloudwatchevents.ListRulesInput{
+		output, err := cloudwatcheventsSvc.ListRules(awsContext(), &cloudwatchevents.ListRulesInput{
 			NextToken: listRulesNextToken,
 		})
 		if err != nil {
@@ -238,7 +265,7 @@ func (g *CloudWatchGenerator) createRules(cloudwatcheventsSvc *cloudwatchevents.
 
 			var listTargetsNextToken *string
 			for {
-				targetResponse, err := cloudwatcheventsSvc.ListTargetsByRule(context.TODO(), &cloudwatchevents.ListTargetsByRuleInput{
+				targetResponse, err := cloudwatcheventsSvc.ListTargetsByRule(awsContext(), &cloudwatchevents.ListTargetsByRuleInput{
 					Rule:      rule.Name,
 					NextToken: listTargetsNextToken,
 				})

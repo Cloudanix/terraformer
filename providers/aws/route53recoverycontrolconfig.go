@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/route53recoverycontrolconfig"
 
@@ -38,7 +36,7 @@ func (g *Route53RecoveryControlConfigGenerator) InitResources() error {
 	var clusterArns []string
 	p := route53recoverycontrolconfig.NewListClustersPaginator(svc, &route53recoverycontrolconfig.ListClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -53,7 +51,7 @@ func (g *Route53RecoveryControlConfigGenerator) InitResources() error {
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for _, clusterArn := range clusterArns {
 		ca := clusterArn
 		for cp := route53recoverycontrolconfig.NewListControlPanelsPaginator(svc, &route53recoverycontrolconfig.ListControlPanelsInput{ClusterArn: &ca}); cp.HasMorePages(); {

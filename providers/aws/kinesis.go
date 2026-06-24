@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/kinesis"
 )
@@ -54,7 +52,7 @@ func (g *KinesisGenerator) InitResources() error {
 	var err error
 
 	for results == nil || *results.HasMoreStreams {
-		results, err = svc.ListStreams(context.TODO(), &request)
+		results, err = svc.ListStreams(awsContext(), &request)
 		if err != nil {
 			return err
 		}
@@ -70,7 +68,7 @@ func (g *KinesisGenerator) InitResources() error {
 			if streamARN == "" {
 				continue
 			}
-			if rp, err := svc.GetResourcePolicy(context.TODO(), &kinesis.GetResourcePolicyInput{ResourceARN: &streamARN}); err == nil && StringValue(rp.Policy) != "" {
+			if rp, err := svc.GetResourcePolicy(awsContext(), &kinesis.GetResourcePolicyInput{ResourceARN: &streamARN}); err == nil && StringValue(rp.Policy) != "" {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					streamARN, streamARN, "aws_kinesis_resource_policy", "aws", []string{}))
 			}
@@ -91,7 +89,7 @@ func (g *KinesisGenerator) addStreamConsumers(svc *kinesis.Client, streamARN str
 	}
 	p := kinesis.NewListStreamConsumersPaginator(svc, &kinesis.ListStreamConsumersInput{StreamARN: &streamARN})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

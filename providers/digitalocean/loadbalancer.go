@@ -70,7 +70,7 @@ func (g LoadBalancerGenerator) createResources(loadBalancerList []godo.LoadBalan
 
 func (g *LoadBalancerGenerator) InitResources() error {
 	client := g.generateClient()
-	output, err := g.listLoadBalancers(context.TODO(), client)
+	output, err := g.listLoadBalancers(runContext(), client)
 	if err != nil {
 		return err
 	}

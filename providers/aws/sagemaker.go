@@ -36,7 +36,7 @@ func (g *SageMakerGenerator) InitResources() error {
 		return e
 	}
 	svc := sagemaker.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	domains := sagemaker.NewListDomainsPaginator(svc, &sagemaker.ListDomainsInput{})
 	for domains.HasMorePages() {
@@ -131,6 +131,51 @@ func (g *SageMakerGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_sagemaker_code_repository", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for mc := sagemaker.NewListModelCardsPaginator(svc, &sagemaker.ListModelCardsInput{}); mc.HasMorePages(); {
+		page, err := mc.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, m := range page.ModelCardSummaries {
+			name := StringValue(m.ModelCardName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sagemaker_model_card", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for ap := sagemaker.NewListAlgorithmsPaginator(svc, &sagemaker.ListAlgorithmsInput{}); ap.HasMorePages(); {
+		page, err := ap.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, a := range page.AlgorithmSummaryList {
+			name := StringValue(a.AlgorithmName)
+			if name == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				name, name, "aws_sagemaker_algorithm", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for mp := sagemaker.NewListMlflowAppsPaginator(svc, &sagemaker.ListMlflowAppsInput{}); mp.HasMorePages(); {
+		page, err := mp.NextPage(ctx)
+		if err != nil {
+			return err
+		}
+		for _, m := range page.Summaries {
+			arn := StringValue(m.Arn)
+			if arn == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				arn, StringValue(m.Name), "aws_sagemaker_mlflow_app", "aws", defaultAllowEmptyValues))
 		}
 	}
 

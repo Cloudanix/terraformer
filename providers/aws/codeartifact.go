@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/codeartifact"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *CodeArtifactGenerator) InitResources() error {
 
 	p := codeartifact.NewListDomainsPaginator(svc, &codeartifact.ListDomainsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -48,7 +46,7 @@ func (g *CodeArtifactGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_codeartifact_domain", "aws", defaultAllowEmptyValues))
 			domainName := name
-			if _, err := svc.GetDomainPermissionsPolicy(context.TODO(), &codeartifact.GetDomainPermissionsPolicyInput{Domain: &domainName}); err == nil {
+			if _, err := svc.GetDomainPermissionsPolicy(awsContext(), &codeartifact.GetDomainPermissionsPolicyInput{Domain: &domainName}); err == nil {
 				if arn := StringValue(domain.Arn); arn != "" {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						arn, name, "aws_codeartifact_domain_permissions_policy", "aws", defaultAllowEmptyValues))
@@ -58,7 +56,7 @@ func (g *CodeArtifactGenerator) InitResources() error {
 	}
 
 	for rp := codeartifact.NewListRepositoriesPaginator(svc, &codeartifact.ListRepositoriesInput{}); rp.HasMorePages(); {
-		page, err := rp.NextPage(context.TODO())
+		page, err := rp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -71,7 +69,7 @@ func (g *CodeArtifactGenerator) InitResources() error {
 				arn, StringValue(repo.Name), "aws_codeartifact_repository", "aws", defaultAllowEmptyValues))
 			repoDomain, repoName := StringValue(repo.DomainName), StringValue(repo.Name)
 			if repoDomain != "" && repoName != "" {
-				if _, err := svc.GetRepositoryPermissionsPolicy(context.TODO(), &codeartifact.GetRepositoryPermissionsPolicyInput{Domain: &repoDomain, Repository: &repoName}); err == nil {
+				if _, err := svc.GetRepositoryPermissionsPolicy(awsContext(), &codeartifact.GetRepositoryPermissionsPolicyInput{Domain: &repoDomain, Repository: &repoName}); err == nil {
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						arn, repoName, "aws_codeartifact_repository_permissions_policy", "aws", defaultAllowEmptyValues))
 				}

@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *DataPlatformNodePoolGenerator) InitResources() error {
 	dataPlatformClient := client.DataPlatformAPIClient
 	resourceType := "ionoscloud_dataplatform_node_pool"
 
-	dpClusters, _, err := dataPlatformClient.DataPlatformClusterApi.ClustersGet(context.TODO()).Execute()
+	dpClusters, _, err := dataPlatformClient.DataPlatformClusterApi.ClustersGet(runContext()).Execute()
 	if err != nil {
 		return err
 	}
@@ -26,7 +25,7 @@ func (g *DataPlatformNodePoolGenerator) InitResources() error {
 		return nil
 	}
 	for _, dpCluster := range *dpClusters.Items {
-		dpNodePools, _, err := dataPlatformClient.DataPlatformNodePoolApi.ClustersNodepoolsGet(context.TODO(), *dpCluster.Id).Execute()
+		dpNodePools, _, err := dataPlatformClient.DataPlatformNodePoolApi.ClustersNodepoolsGet(runContext(), *dpCluster.Id).Execute()
 		if err != nil {
 			return err
 		}

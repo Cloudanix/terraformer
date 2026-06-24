@@ -15,7 +15,6 @@
 package keycloak
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"sort"
@@ -32,7 +31,8 @@ type RealmGenerator struct {
 func (g *RealmGenerator) InitResources() error {
 	var realms []*keycloak.Realm
 	var realmsGroups []*keycloak.Group
-	ctx := context.TODO()
+	// Use the import-run context so a hung Keycloak call honours --timeout / Ctrl-C.
+	ctx := g.Context()
 
 	// Connect to keycloak instance
 	userAgent := "GoogleCloudPlatform Terraformer/0.8.22 (+https://github.com/GoogleCloudPlatform/terraformer) Terraform Plugin SDK/2.10.1"

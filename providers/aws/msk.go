@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/kafka"
 )
@@ -35,7 +33,7 @@ func (g *MskGenerator) InitResources() error {
 	svc := kafka.NewFromConfig(config)
 	p := kafka.NewListClustersPaginator(svc, &kafka.ListClustersInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,18 +49,18 @@ func (g *MskGenerator) InitResources() error {
 			if clusterArn == "" {
 				continue
 			}
-			if _, err := svc.GetClusterPolicy(context.TODO(), &kafka.GetClusterPolicyInput{ClusterArn: &clusterArn}); err == nil {
+			if _, err := svc.GetClusterPolicy(awsContext(), &kafka.GetClusterPolicyInput{ClusterArn: &clusterArn}); err == nil {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					clusterArn, StringValue(clusterInfo.ClusterName), "aws_msk_cluster_policy", "aws", mskAllowEmptyValues))
 			}
-			if secrets, err := svc.ListScramSecrets(context.TODO(), &kafka.ListScramSecretsInput{ClusterArn: &clusterArn}); err == nil && len(secrets.SecretArnList) > 0 {
+			if secrets, err := svc.ListScramSecrets(awsContext(), &kafka.ListScramSecretsInput{ClusterArn: &clusterArn}); err == nil && len(secrets.SecretArnList) > 0 {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					clusterArn, StringValue(clusterInfo.ClusterName), "aws_msk_scram_secret_association", "aws", mskAllowEmptyValues))
 			}
 		}
 	}
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	for v2 := kafka.NewListClustersV2Paginator(svc, &kafka.ListClustersV2Input{}); v2.HasMorePages(); {
 		page, err := v2.NextPage(ctx)
 		if err != nil {

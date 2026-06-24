@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/servicecatalogappregistry"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -37,7 +35,7 @@ func (g *ServiceCatalogAppRegistryGenerator) InitResources() error {
 
 	p := servicecatalogappregistry.NewListApplicationsPaginator(svc, &servicecatalogappregistry.ListApplicationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

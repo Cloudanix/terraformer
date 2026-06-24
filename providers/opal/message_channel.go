@@ -1,7 +1,6 @@
 package opal
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -17,7 +16,7 @@ func (g *MessageChannelGenerator) InitResources() error {
 		return fmt.Errorf("unable to list opal message channels: %v", err)
 	}
 
-	messageChannels, _, err := client.MessageChannelsApi.GetMessageChannels(context.TODO()).Execute()
+	messageChannels, _, err := client.MessageChannelsApi.GetMessageChannels(runContext()).Execute()
 	if err != nil {
 		return fmt.Errorf("unable to list opal message channels: %v", err)
 	}

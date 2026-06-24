@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
 	"github.com/aws/aws-sdk-go-v2/service/autoscaling"
@@ -34,7 +32,7 @@ type AutoScalingGenerator struct {
 func (g *AutoScalingGenerator) loadAutoScalingGroups(svc *autoscaling.Client) error {
 	p := autoscaling.NewDescribeAutoScalingGroupsPaginator(svc, &autoscaling.DescribeAutoScalingGroupsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -55,7 +53,7 @@ func (g *AutoScalingGenerator) loadAutoScalingGroups(svc *autoscaling.Client) er
 			))
 
 			asgName := resourceName
-			if hooks, err := svc.DescribeLifecycleHooks(context.TODO(), &autoscaling.DescribeLifecycleHooksInput{AutoScalingGroupName: &asgName}); err == nil {
+			if hooks, err := svc.DescribeLifecycleHooks(awsContext(), &autoscaling.DescribeLifecycleHooksInput{AutoScalingGroupName: &asgName}); err == nil {
 				for _, h := range hooks.LifecycleHooks {
 					name := StringValue(h.LifecycleHookName)
 					if name == "" {
@@ -66,7 +64,7 @@ func (g *AutoScalingGenerator) loadAutoScalingGroups(svc *autoscaling.Client) er
 				}
 			}
 			for sp := autoscaling.NewDescribeScheduledActionsPaginator(svc, &autoscaling.DescribeScheduledActionsInput{AutoScalingGroupName: &asgName}); sp.HasMorePages(); {
-				spage, err := sp.NextPage(context.TODO())
+				spage, err := sp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -80,7 +78,7 @@ func (g *AutoScalingGenerator) loadAutoScalingGroups(svc *autoscaling.Client) er
 				}
 			}
 			for pp := autoscaling.NewDescribePoliciesPaginator(svc, &autoscaling.DescribePoliciesInput{AutoScalingGroupName: &asgName}); pp.HasMorePages(); {
-				ppage, err := pp.NextPage(context.TODO())
+				ppage, err := pp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -101,7 +99,7 @@ func (g *AutoScalingGenerator) loadAutoScalingGroups(svc *autoscaling.Client) er
 func (g *AutoScalingGenerator) loadLaunchConfigurations(svc *autoscaling.Client) error {
 	p := autoscaling.NewDescribeLaunchConfigurationsPaginator(svc, &autoscaling.DescribeLaunchConfigurationsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -131,7 +129,7 @@ func (g *AutoScalingGenerator) loadLaunchTemplates(config aws.Config) error {
 
 	p := ec2.NewDescribeLaunchTemplatesPaginator(ec2svc, &ec2.DescribeLaunchTemplatesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/paymentcryptography"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *PaymentCryptographyGenerator) InitResources() error {
 
 	p := paymentcryptography.NewListKeysPaginator(svc, &paymentcryptography.ListKeysInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +49,7 @@ func (g *PaymentCryptographyGenerator) InitResources() error {
 	}
 
 	for ap := paymentcryptography.NewListAliasesPaginator(svc, &paymentcryptography.ListAliasesInput{}); ap.HasMorePages(); {
-		page, err := ap.NextPage(context.TODO())
+		page, err := ap.NextPage(awsContext())
 		if err != nil {
 			break
 		}

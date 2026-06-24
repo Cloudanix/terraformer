@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/finspace"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *FinspaceGenerator) InitResources() error {
 
 	p := finspace.NewListKxEnvironmentsPaginator(svc, &finspace.ListKxEnvironmentsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -56,7 +54,7 @@ func (g *FinspaceGenerator) InitResources() error {
 // loadKxChildren enumerates a Kx environment's databases (and their dataviews),
 // clusters, users, scaling groups, and volumes. Import IDs are comma-separated.
 func (g *FinspaceGenerator) loadKxChildren(svc *finspace.Client, envID string) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	env := envID
 	add := func(id, name, tfType string) {
 		if id != "" {

@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/applicationautoscaling"
@@ -41,7 +40,7 @@ func (g *AppAutoScalingGenerator) InitResources() error {
 		return e
 	}
 	svc := applicationautoscaling.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	for _, namespace := range types.ServiceNamespace("").Values() {
 		targets := applicationautoscaling.NewDescribeScalableTargetsPaginator(svc, &applicationautoscaling.DescribeScalableTargetsInput{ServiceNamespace: namespace})

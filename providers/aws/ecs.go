@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"strconv"
 	"strings"
@@ -37,7 +36,7 @@ func (g *EcsGenerator) InitResources() error {
 	}
 	svc := ecs.NewFromConfig(config)
 
-	if settings, err := svc.ListAccountSettings(context.TODO(), &ecs.ListAccountSettingsInput{}); err == nil {
+	if settings, err := svc.ListAccountSettings(awsContext(), &ecs.ListAccountSettingsInput{}); err == nil {
 		for _, s := range settings.Settings {
 			name := string(s.Name)
 			if name == "" {
@@ -50,7 +49,7 @@ func (g *EcsGenerator) InitResources() error {
 
 	p := ecs.NewListClustersPaginator(svc, &ecs.ListClustersInput{})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -78,7 +77,7 @@ func (g *EcsGenerator) InitResources() error {
 				Cluster: &clusterArn,
 			})
 			for servicePage.HasMorePages() {
-				serviceNextPage, err := servicePage.NextPage(context.TODO())
+				serviceNextPage, err := servicePage.NextPage(awsContext())
 				if err != nil {
 					fmt.Println(err.Error())
 					continue
@@ -87,7 +86,7 @@ func (g *EcsGenerator) InitResources() error {
 					arnParts := strings.Split(serviceArn, "/")
 					serviceName := arnParts[len(arnParts)-1]
 
-					serResp, err := svc.DescribeServices(context.TODO(), &ecs.DescribeServicesInput{
+					serResp, err := svc.DescribeServices(awsContext(), &ecs.DescribeServicesInput{
 						Services: []string{
 							serviceName,
 						},
@@ -114,7 +113,7 @@ func (g *EcsGenerator) InitResources() error {
 						map[string]interface{}{},
 					))
 
-					taskSets, err := svc.DescribeTaskSets(context.TODO(), &ecs.DescribeTaskSetsInput{
+					taskSets, err := svc.DescribeTaskSets(awsContext(), &ecs.DescribeTaskSetsInput{
 						Cluster: &clusterArn,
 						Service: &serviceArn,
 					})
@@ -142,7 +141,7 @@ func (g *EcsGenerator) InitResources() error {
 	taskDefinitionsMap := map[string]terraformutils.Resource{}
 	taskDefinitionsPage := ecs.NewListTaskDefinitionsPaginator(svc, &ecs.ListTaskDefinitionsInput{})
 	for taskDefinitionsPage.HasMorePages() {
-		taskDefinitionsNextPage, e := taskDefinitionsPage.NextPage(context.TODO())
+		taskDefinitionsNextPage, e := taskDefinitionsPage.NextPage(awsContext())
 		if e != nil {
 			fmt.Println(e.Error())
 			continue
@@ -181,7 +180,7 @@ func (g *EcsGenerator) InitResources() error {
 	// Capacity providers. DescribeCapacityProviders with no names returns all,
 	// including the AWS-managed FARGATE / FARGATE_SPOT which aren't importable
 	// as aws_ecs_capacity_provider — skip those.
-	capacityProviders, err := svc.DescribeCapacityProviders(context.TODO(), &ecs.DescribeCapacityProvidersInput{})
+	capacityProviders, err := svc.DescribeCapacityProviders(awsContext(), &ecs.DescribeCapacityProvidersInput{})
 	if err != nil {
 		fmt.Println(err.Error())
 	} else {

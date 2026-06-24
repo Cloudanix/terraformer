@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/cloudsearch"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -35,7 +33,7 @@ func (g *CloudSearchGenerator) InitResources() error {
 	}
 	svc := cloudsearch.NewFromConfig(config)
 
-	out, err := svc.DescribeDomains(context.TODO(), &cloudsearch.DescribeDomainsInput{})
+	out, err := svc.DescribeDomains(awsContext(), &cloudsearch.DescribeDomainsInput{})
 	if err != nil {
 		return err
 	}
@@ -46,7 +44,7 @@ func (g *CloudSearchGenerator) InitResources() error {
 		}
 		g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 			name, name, "aws_cloudsearch_domain", "aws", defaultAllowEmptyValues))
-		if pol, err := svc.DescribeServiceAccessPolicies(context.TODO(), &cloudsearch.DescribeServiceAccessPoliciesInput{DomainName: d.DomainName}); err == nil &&
+		if pol, err := svc.DescribeServiceAccessPolicies(awsContext(), &cloudsearch.DescribeServiceAccessPoliciesInput{DomainName: d.DomainName}); err == nil &&
 			pol.AccessPolicies != nil && StringValue(pol.AccessPolicies.Options) != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_cloudsearch_domain_service_access_policy", "aws", defaultAllowEmptyValues))

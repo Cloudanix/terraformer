@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/s3tables"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *S3TablesGenerator) InitResources() error {
 
 	p := s3tables.NewListTableBucketsPaginator(svc, &s3tables.ListTableBucketsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -47,14 +45,14 @@ func (g *S3TablesGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, StringValue(bucket.Name), "aws_s3tables_table_bucket", "aws", defaultAllowEmptyValues))
-			if _, err := svc.GetTableBucketPolicy(context.TODO(), &s3tables.GetTableBucketPolicyInput{TableBucketARN: bucket.Arn}); err == nil {
+			if _, err := svc.GetTableBucketPolicy(awsContext(), &s3tables.GetTableBucketPolicyInput{TableBucketARN: bucket.Arn}); err == nil {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					arn, StringValue(bucket.Name), "aws_s3tables_table_bucket_policy", "aws", defaultAllowEmptyValues))
 			}
 
 			bucketARN := arn
 			for np := s3tables.NewListNamespacesPaginator(svc, &s3tables.ListNamespacesInput{TableBucketARN: &bucketARN}); np.HasMorePages(); {
-				npage, err := np.NextPage(context.TODO())
+				npage, err := np.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -68,7 +66,7 @@ func (g *S3TablesGenerator) InitResources() error {
 				}
 			}
 			for tp := s3tables.NewListTablesPaginator(svc, &s3tables.ListTablesInput{TableBucketARN: &bucketARN}); tp.HasMorePages(); {
-				tpage, err := tp.NextPage(context.TODO())
+				tpage, err := tp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -82,7 +80,7 @@ func (g *S3TablesGenerator) InitResources() error {
 					}
 					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 						bucketARN+";"+ns+";"+tn, ns+"_"+tn, "aws_s3tables_table", "aws", defaultAllowEmptyValues))
-					if _, err := svc.GetTablePolicy(context.TODO(), &s3tables.GetTablePolicyInput{
+					if _, err := svc.GetTablePolicy(awsContext(), &s3tables.GetTablePolicyInput{
 						TableBucketARN: &bucketARN, Namespace: &ns, Name: &tn,
 					}); err == nil {
 						g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/networkfirewall"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *NetworkFirewallGenerator) InitResources() error {
 		return e
 	}
 	svc := networkfirewall.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	firewalls := networkfirewall.NewListFirewallsPaginator(svc, &networkfirewall.ListFirewallsInput{})
 	for firewalls.HasMorePages() {

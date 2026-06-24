@@ -70,7 +70,7 @@ func (g ProjectGenerator) createResources(projectList []godo.Project) []terrafor
 
 func (g *ProjectGenerator) InitResources() error {
 	client := g.generateClient()
-	output, err := g.listProjects(context.TODO(), client)
+	output, err := g.listProjects(runContext(), client)
 	if err != nil {
 		return err
 	}

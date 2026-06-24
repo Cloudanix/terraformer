@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/bedrockagent"
 
@@ -33,7 +31,7 @@ func (g *BedrockAgentGenerator) InitResources() error {
 		return e
 	}
 	svc := bedrockagent.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	var agentIDs []string
 	p := bedrockagent.NewListAgentsPaginator(svc, &bedrockagent.ListAgentsInput{})
 	for p.HasMorePages() {
@@ -124,6 +122,36 @@ func (g *BedrockAgentGenerator) InitResources() error {
 						id+","+kbID, kbID+"_"+id, "aws_bedrockagent_data_source", "aws", defaultAllowEmptyValues))
 				}
 			}
+		}
+	}
+
+	for fp := bedrockagent.NewListFlowsPaginator(svc, &bedrockagent.ListFlowsInput{}); fp.HasMorePages(); {
+		page, err := fp.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, f := range page.FlowSummaries {
+			id := StringValue(f.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(f.Name), "aws_bedrockagent_flow", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for pp := bedrockagent.NewListPromptsPaginator(svc, &bedrockagent.ListPromptsInput{}); pp.HasMorePages(); {
+		page, err := pp.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, p := range page.PromptSummaries {
+			id := StringValue(p.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(p.Name), "aws_bedrockagent_prompt", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

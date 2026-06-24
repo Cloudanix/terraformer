@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 	"log"
 	"strings"
@@ -38,7 +37,7 @@ func (g *Route53Generator) createZonesResources(svc *route53.Client) []terraform
 	var resources []terraformutils.Resource
 	p := route53.NewListHostedZonesPaginator(svc, &route53.ListHostedZonesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			return resources
@@ -61,7 +60,7 @@ func (g *Route53Generator) createZonesResources(svc *route53.Client) []terraform
 			resources = append(resources, records...)
 
 			// Additional VPC associations on a private hosted zone.
-			if detail, err := svc.GetHostedZone(context.TODO(), &route53.GetHostedZoneInput{Id: aws.String(zoneID)}); err == nil {
+			if detail, err := svc.GetHostedZone(awsContext(), &route53.GetHostedZoneInput{Id: aws.String(zoneID)}); err == nil {
 				for _, vpc := range detail.VPCs {
 					vpcID := StringValue(vpc.VPCId)
 					if vpcID == "" {
@@ -73,7 +72,7 @@ func (g *Route53Generator) createZonesResources(svc *route53.Client) []terraform
 			}
 
 			// VPC association authorizations pending acceptance on this zone.
-			if auths, err := svc.ListVPCAssociationAuthorizations(context.TODO(),
+			if auths, err := svc.ListVPCAssociationAuthorizations(awsContext(),
 				&route53.ListVPCAssociationAuthorizationsInput{HostedZoneId: aws.String(zoneID)}); err == nil {
 				for _, vpc := range auths.VPCs {
 					vpcID := StringValue(vpc.VPCId)
@@ -98,7 +97,7 @@ func (Route53Generator) createRecordsResources(svc *route53.Client, zoneID strin
 	}
 
 	for {
-		sets, err = svc.ListResourceRecordSets(context.TODO(), listParams)
+		sets, err = svc.ListResourceRecordSets(awsContext(), listParams)
 		if err != nil {
 			log.Println(err)
 			return resources
@@ -138,7 +137,7 @@ func (Route53Generator) createHealthChecksResources(svc *route53.Client) []terra
 
 	p := route53.NewListHealthChecksPaginator(svc, &route53.ListHealthChecksInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			return resources
@@ -186,7 +185,7 @@ func (Route53Generator) createDNSSECResources(svc *route53.Client) []terraformut
 	var resources []terraformutils.Resource
 	zones := route53.NewListHostedZonesPaginator(svc, &route53.ListHostedZonesInput{})
 	for zones.HasMorePages() {
-		page, err := zones.NextPage(context.TODO())
+		page, err := zones.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			return resources
@@ -196,7 +195,7 @@ func (Route53Generator) createDNSSECResources(svc *route53.Client) []terraformut
 			if zoneID == "" {
 				continue
 			}
-			out, err := svc.GetDNSSEC(context.TODO(), &route53.GetDNSSECInput{HostedZoneId: &zoneID})
+			out, err := svc.GetDNSSEC(awsContext(), &route53.GetDNSSECInput{HostedZoneId: &zoneID})
 			if err != nil || len(out.KeySigningKeys) == 0 {
 				continue
 			}
@@ -217,7 +216,7 @@ func (Route53Generator) createDNSSECResources(svc *route53.Client) []terraformut
 
 func (Route53Generator) createTrafficPolicyInstanceResources(svc *route53.Client) []terraformutils.Resource {
 	var resources []terraformutils.Resource
-	out, err := svc.ListTrafficPolicyInstances(context.TODO(), &route53.ListTrafficPolicyInstancesInput{})
+	out, err := svc.ListTrafficPolicyInstances(awsContext(), &route53.ListTrafficPolicyInstancesInput{})
 	if err != nil {
 		log.Println(err)
 		return resources
@@ -235,7 +234,7 @@ func (Route53Generator) createTrafficPolicyInstanceResources(svc *route53.Client
 
 func (Route53Generator) createTrafficPolicyResources(svc *route53.Client) []terraformutils.Resource {
 	var resources []terraformutils.Resource
-	out, err := svc.ListTrafficPolicies(context.TODO(), &route53.ListTrafficPoliciesInput{})
+	out, err := svc.ListTrafficPolicies(awsContext(), &route53.ListTrafficPoliciesInput{})
 	if err != nil {
 		log.Println(err)
 		return resources
@@ -255,7 +254,7 @@ func (Route53Generator) createCidrCollectionResources(svc *route53.Client) []ter
 	var resources []terraformutils.Resource
 	p := route53.NewListCidrCollectionsPaginator(svc, &route53.ListCidrCollectionsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			return resources
@@ -270,7 +269,7 @@ func (Route53Generator) createCidrCollectionResources(svc *route53.Client) []ter
 
 			collectionID := id
 			for lp := route53.NewListCidrLocationsPaginator(svc, &route53.ListCidrLocationsInput{CollectionId: &collectionID}); lp.HasMorePages(); {
-				lpage, err := lp.NextPage(context.TODO())
+				lpage, err := lp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -292,7 +291,7 @@ func (Route53Generator) createDelegationSetResources(svc *route53.Client) []terr
 	var resources []terraformutils.Resource
 	var marker *string
 	for {
-		out, err := svc.ListReusableDelegationSets(context.TODO(), &route53.ListReusableDelegationSetsInput{Marker: marker})
+		out, err := svc.ListReusableDelegationSets(awsContext(), &route53.ListReusableDelegationSetsInput{Marker: marker})
 		if err != nil {
 			log.Println(err)
 			return resources
@@ -316,7 +315,7 @@ func (Route53Generator) createQueryLogResources(svc *route53.Client) []terraform
 	var resources []terraformutils.Resource
 	p := route53.NewListQueryLoggingConfigsPaginator(svc, &route53.ListQueryLoggingConfigsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			log.Println(err)
 			return resources

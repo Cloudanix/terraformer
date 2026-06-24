@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/acmpca"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -37,7 +35,7 @@ func (g *ACMPCAGenerator) InitResources() error {
 
 	p := acmpca.NewListCertificateAuthoritiesPaginator(svc, &acmpca.ListCertificateAuthoritiesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,17 +47,17 @@ func (g *ACMPCAGenerator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				arn, arn, "aws_acmpca_certificate_authority", "aws", defaultAllowEmptyValues))
 			// The installed CA certificate is a singleton imported by the CA ARN.
-			if cert, err := svc.GetCertificateAuthorityCertificate(context.TODO(), &acmpca.GetCertificateAuthorityCertificateInput{CertificateAuthorityArn: ca.Arn}); err == nil && StringValue(cert.Certificate) != "" {
+			if cert, err := svc.GetCertificateAuthorityCertificate(awsContext(), &acmpca.GetCertificateAuthorityCertificateInput{CertificateAuthorityArn: ca.Arn}); err == nil && StringValue(cert.Certificate) != "" {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					arn, arn, "aws_acmpca_certificate_authority_certificate", "aws", defaultAllowEmptyValues))
 			}
 			// A resource-based policy on the CA (cross-account sharing).
-			if pol, err := svc.GetPolicy(context.TODO(), &acmpca.GetPolicyInput{ResourceArn: ca.Arn}); err == nil && StringValue(pol.Policy) != "" {
+			if pol, err := svc.GetPolicy(awsContext(), &acmpca.GetPolicyInput{ResourceArn: ca.Arn}); err == nil && StringValue(pol.Policy) != "" {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					arn, arn, "aws_acmpca_policy", "aws", defaultAllowEmptyValues))
 			}
 			// ACM service principal permissions delegated on the CA.
-			if perms, err := svc.ListPermissions(context.TODO(), &acmpca.ListPermissionsInput{CertificateAuthorityArn: ca.Arn}); err == nil {
+			if perms, err := svc.ListPermissions(awsContext(), &acmpca.ListPermissionsInput{CertificateAuthorityArn: ca.Arn}); err == nil {
 				for _, p := range perms.Permissions {
 					principal := StringValue(p.Principal)
 					if principal == "" {

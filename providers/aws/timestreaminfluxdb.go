@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/timestreaminfluxdb"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *TimestreamInfluxDBGenerator) InitResources() error {
 
 	p := timestreaminfluxdb.NewListDbInstancesPaginator(svc, &timestreaminfluxdb.ListDbInstancesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -47,6 +45,21 @@ func (g *TimestreamInfluxDBGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(inst.Name), "aws_timestreaminfluxdb_db_instance", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for cp := timestreaminfluxdb.NewListDbClustersPaginator(svc, &timestreaminfluxdb.ListDbClustersInput{}); cp.HasMorePages(); {
+		page, err := cp.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, c := range page.Items {
+			id := StringValue(c.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(c.Name), "aws_timestreaminfluxdb_db_cluster", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

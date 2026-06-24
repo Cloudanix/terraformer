@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/dax"
 	"github.com/aws/aws-sdk-go-v2/service/dax/types"
 )
@@ -37,7 +35,7 @@ func (g *DaxGenerator) InitResources() error {
 
 	var nextToken *string
 	for {
-		output, err := svc.DescribeClusters(context.TODO(), &dax.DescribeClustersInput{NextToken: nextToken})
+		output, err := svc.DescribeClusters(awsContext(), &dax.DescribeClustersInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}
@@ -53,7 +51,7 @@ func (g *DaxGenerator) InitResources() error {
 
 	nextToken = nil
 	for {
-		out, err := svc.DescribeParameterGroups(context.TODO(), &dax.DescribeParameterGroupsInput{NextToken: nextToken})
+		out, err := svc.DescribeParameterGroups(awsContext(), &dax.DescribeParameterGroupsInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}
@@ -69,7 +67,7 @@ func (g *DaxGenerator) InitResources() error {
 
 	nextToken = nil
 	for {
-		out, err := svc.DescribeSubnetGroups(context.TODO(), &dax.DescribeSubnetGroupsInput{NextToken: nextToken})
+		out, err := svc.DescribeSubnetGroups(awsContext(), &dax.DescribeSubnetGroupsInput{NextToken: nextToken})
 		if err != nil {
 			return err
 		}

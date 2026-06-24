@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -43,7 +42,7 @@ func (g *BackupGenerator) InitResources() error {
 		return e
 	}
 	svc := backup.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	var vaultNames []string
 	vaults := backup.NewListBackupVaultsPaginator(svc, &backup.ListBackupVaultsInput{})

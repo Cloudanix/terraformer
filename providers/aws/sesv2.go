@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/sesv2"
 	"github.com/aws/aws-sdk-go-v2/service/sesv2/types"
 
@@ -39,7 +37,7 @@ func (g *SESv2Generator) InitResources() error {
 
 	p := sesv2.NewListEmailIdentitiesPaginator(svc, &sesv2.ListEmailIdentitiesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -57,12 +55,23 @@ func (g *SESv2Generator) InitResources() error {
 				name, name, "aws_sesv2_email_identity_feedback_attributes", "aws", defaultAllowEmptyValues))
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_sesv2_email_identity_mail_from_attributes", "aws", defaultAllowEmptyValues))
+			// Authorization policies on the identity (separate resource).
+			// Import id "<email_identity>|<policy_name>".
+			if pol, err := svc.GetEmailIdentityPolicies(awsContext(), &sesv2.GetEmailIdentityPoliciesInput{EmailIdentity: i.IdentityName}); err == nil {
+				for pn := range pol.Policies {
+					if pn == "" {
+						continue
+					}
+					g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+						name+"|"+pn, name+"_"+pn, "aws_sesv2_email_identity_policy", "aws", defaultAllowEmptyValues))
+				}
+			}
 		}
 	}
 
 	configSets := sesv2.NewListConfigurationSetsPaginator(svc, &sesv2.ListConfigurationSetsInput{})
 	for configSets.HasMorePages() {
-		page, err := configSets.NextPage(context.TODO())
+		page, err := configSets.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -73,7 +82,7 @@ func (g *SESv2Generator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_sesv2_configuration_set", "aws", defaultAllowEmptyValues))
 			setName := name
-			if dest, err := svc.GetConfigurationSetEventDestinations(context.TODO(), &sesv2.GetConfigurationSetEventDestinationsInput{ConfigurationSetName: &setName}); err == nil {
+			if dest, err := svc.GetConfigurationSetEventDestinations(awsContext(), &sesv2.GetConfigurationSetEventDestinationsInput{ConfigurationSetName: &setName}); err == nil {
 				for _, ed := range dest.EventDestinations {
 					edName := StringValue(ed.Name)
 					if edName == "" {
@@ -88,7 +97,7 @@ func (g *SESv2Generator) InitResources() error {
 
 	contactLists := sesv2.NewListContactListsPaginator(svc, &sesv2.ListContactListsInput{})
 	for contactLists.HasMorePages() {
-		page, err := contactLists.NextPage(context.TODO())
+		page, err := contactLists.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -104,7 +113,7 @@ func (g *SESv2Generator) InitResources() error {
 
 	ipPools := sesv2.NewListDedicatedIpPoolsPaginator(svc, &sesv2.ListDedicatedIpPoolsInput{})
 	for ipPools.HasMorePages() {
-		page, err := ipPools.NextPage(context.TODO())
+		page, err := ipPools.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -115,7 +124,7 @@ func (g *SESv2Generator) InitResources() error {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				name, name, "aws_sesv2_dedicated_ip_pool", "aws", defaultAllowEmptyValues))
 			poolName := name
-			if ips, err := svc.GetDedicatedIps(context.TODO(), &sesv2.GetDedicatedIpsInput{PoolName: &poolName}); err == nil {
+			if ips, err := svc.GetDedicatedIps(awsContext(), &sesv2.GetDedicatedIpsInput{PoolName: &poolName}); err == nil {
 				for _, ip := range ips.DedicatedIps {
 					addr := StringValue(ip.Ip)
 					if addr == "" {
@@ -134,7 +143,7 @@ func (g *SESv2Generator) InitResources() error {
 		return err
 	}
 	if accountID := StringValue(account); accountID != "" {
-		if out, err := svc.GetAccount(context.TODO(), &sesv2.GetAccountInput{}); err == nil {
+		if out, err := svc.GetAccount(awsContext(), &sesv2.GetAccountInput{}); err == nil {
 			if out.SuppressionAttributes != nil {
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 					accountID, accountID, "aws_sesv2_account_suppression_attributes", "aws", defaultAllowEmptyValues))

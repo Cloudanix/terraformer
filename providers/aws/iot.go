@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/iot"
 )
@@ -54,7 +52,7 @@ func (g *IotGenerator) InitResources() error {
 // loadIotExtras enumerates additional top-level IoT resources, each a List*
 // paginator returning a name. Import ID is the name.
 func (g *IotGenerator) loadIotExtras(svc *iot.Client) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(name, tfType string) {
 		if name != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -145,7 +143,7 @@ func (g *IotGenerator) loadIotExtras(svc *iot.Client) {
 }
 
 func (g *IotGenerator) loadThingTypes(svc *iot.Client) error {
-	output, err := svc.ListThingTypes(context.TODO(), &iot.ListThingTypesInput{})
+	output, err := svc.ListThingTypes(awsContext(), &iot.ListThingTypesInput{})
 	if err != nil {
 		return err
 	}
@@ -166,7 +164,7 @@ func (g *IotGenerator) loadThingTypes(svc *iot.Client) error {
 }
 
 func (g *IotGenerator) loadThings(svc *iot.Client) error {
-	output, err := svc.ListThings(context.TODO(), &iot.ListThingsInput{})
+	output, err := svc.ListThings(awsContext(), &iot.ListThingsInput{})
 	if err != nil {
 		return err
 	}
@@ -183,7 +181,7 @@ func (g *IotGenerator) loadThings(svc *iot.Client) error {
 			iotAllowEmptyValues,
 			map[string]interface{}{},
 		))
-		if principals, err := svc.ListThingPrincipals(context.TODO(), &iot.ListThingPrincipalsInput{ThingName: thing.ThingName}); err == nil {
+		if principals, err := svc.ListThingPrincipals(awsContext(), &iot.ListThingPrincipalsInput{ThingName: thing.ThingName}); err == nil {
 			for _, principal := range principals.Principals {
 				if principal == "" {
 					continue
@@ -197,7 +195,7 @@ func (g *IotGenerator) loadThings(svc *iot.Client) error {
 }
 
 func (g *IotGenerator) loadTopicRules(svc *iot.Client) error {
-	output, err := svc.ListTopicRules(context.TODO(), &iot.ListTopicRulesInput{})
+	output, err := svc.ListTopicRules(awsContext(), &iot.ListTopicRulesInput{})
 	if err != nil {
 		return err
 	}
@@ -213,7 +211,7 @@ func (g *IotGenerator) loadTopicRules(svc *iot.Client) error {
 }
 
 func (g *IotGenerator) loadRoleAliases(svc *iot.Client) error {
-	output, err := svc.ListRoleAliases(context.TODO(), &iot.ListRoleAliasesInput{})
+	output, err := svc.ListRoleAliases(awsContext(), &iot.ListRoleAliasesInput{})
 	if err != nil {
 		return err
 	}

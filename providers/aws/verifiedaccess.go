@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *VerifiedAccessGenerator) InitResources() error {
 		return e
 	}
 	svc := ec2.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	instances := ec2.NewDescribeVerifiedAccessInstancesPaginator(svc, &ec2.DescribeVerifiedAccessInstancesInput{})
 	for instances.HasMorePages() {

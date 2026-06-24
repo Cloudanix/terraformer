@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strings"
 
 	"github.com/aws/aws-sdk-go-v2/service/datasync"
@@ -74,7 +73,7 @@ func (g *DataSyncGenerator) InitResources() error {
 		return e
 	}
 	svc := datasync.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	tasks := datasync.NewListTasksPaginator(svc, &datasync.ListTasksInput{})
 	for tasks.HasMorePages() {

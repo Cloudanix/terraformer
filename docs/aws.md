@@ -35,10 +35,47 @@ terraformer import aws --resources=sg --regions=us-east-1
 
 *   `dsql`
     * `aws_dsql_cluster`
+*   `bedrock-agentcore-control`
+    * `aws_bedrockagentcore_agent_runtime`
+    * `aws_bedrockagentcore_browser`
+    * `aws_bedrockagentcore_code_interpreter`
+    * `aws_bedrockagentcore_gateway`
+    * `aws_bedrockagentcore_memory`
+    * `aws_bedrockagentcore_workload_identity`
+    * `aws_bedrockagentcore_evaluator`
+    * `aws_bedrockagentcore_policy`
+    * `aws_bedrockagentcore_policy_engine`
+    * `aws_bedrockagentcore_harness`
+    * `aws_bedrockagentcore_api_key_credential_provider`
+    * `aws_bedrockagentcore_online_evaluation_config`
+*   `s3files`
+    * `aws_s3files_file_system`
+    * `aws_s3files_file_system_policy`
+    * `aws_s3files_synchronization_configuration`
+    * `aws_s3files_access_point`
+    * `aws_s3files_mount_target`
+*   `uxc`
+    * `aws_uxc_account_customizations`
+*   `vpc-route-server`
+    * `aws_vpc_route_server`
+    * `aws_vpc_route_server_endpoint`
+    * `aws_vpc_route_server_peer`
+    * `aws_vpc_route_server_vpc_association`
+    * `aws_vpc_route_server_propagation`
+*   `s3vectors`
+    * `aws_s3vectors_vector_bucket`
+    * `aws_s3vectors_index`
+    * `aws_s3vectors_vector_bucket_policy`
+*   `arc-region-switch`
+    * `aws_arcregionswitch_plan`
+*   `arc-zonal-shift`
+    * `aws_arczonalshift_zonal_autoshift_configuration`
+    * `aws_arczonalshift_autoshift_observer_notification_status`
 *   `workmail`
     * `aws_workmail_organization`
     * `aws_workmail_group`
     * `aws_workmail_user`
+    * `aws_workmail_domain`
 *   `odb`
     * `aws_odb_network`
     * `aws_odb_cloud_vm_cluster`
@@ -69,6 +106,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_account_primary_contact`
 *   `compute-optimizer`
     * `aws_computeoptimizer_enrollment_status`
+    * `aws_computeoptimizer_recommendation_preferences`
 *   `cost-optimization-hub`
     * `aws_costoptimizationhub_enrollment_status`
     * `aws_costoptimizationhub_preferences`
@@ -112,6 +150,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bedrock_guardrail`
     * `aws_bedrock_guardrail_version`
     * `aws_bedrock_provisioned_model_throughput`
+    * `aws_bedrock_inference_profile`
     * `aws_bedrock_model_invocation_logging_configuration`
 *   `bcmdataexports`
     * `aws_bcmdataexports_export`
@@ -122,6 +161,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_bedrockagent_agent_knowledge_base_association`
     * `aws_bedrockagent_knowledge_base`
     * `aws_bedrockagent_data_source`
+    * `aws_bedrockagent_flow`
+    * `aws_bedrockagent_prompt`
 *   `ce`
     * `aws_ce_anomaly_monitor`
     * `aws_ce_anomaly_subscription`
@@ -138,6 +179,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_comprehend_entity_recognizer`
 *   `cur`
     * `aws_cur_report_definition`
+*   `drs`
+    * `aws_drs_replication_configuration_template`
 *   `cloudsearch`
     * `aws_cloudsearch_domain`
     * `aws_cloudsearch_domain_service_access_policy`
@@ -266,6 +309,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appintegrations_event_integration`
 *   `appsync`
     * `aws_appsync_graphql_api`
+    * `aws_appsync_api`
+    * `aws_appsync_channel_namespace`
     * `aws_appsync_datasource`
     * `aws_appsync_function`
     * `aws_appsync_api_key`
@@ -277,6 +322,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_appsync_source_api_association`
 *   `athena`
     * `aws_athena_workgroup`
+    * `aws_athena_capacity_reservation`
     * `aws_athena_data_catalog`
     * `aws_athena_database`
     * `aws_athena_named_query`
@@ -334,6 +380,11 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudfront_continuous_deployment_policy`
     * `aws_cloudfront_realtime_log_config`
     * `aws_cloudfront_monitoring_subscription`
+    * `aws_cloudfront_vpc_origin`
+    * `aws_cloudfront_anycast_ip_list`
+    * `aws_cloudfront_distribution_tenant`
+    * `aws_cloudfront_connection_group`
+    * `aws_cloudfront_trust_store`
 *   `cloudhsm`
     * `aws_cloudhsm_v2_cluster`
     * `aws_cloudhsm_v2_hsm`
@@ -342,11 +393,13 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudtrail_event_data_store`
 *   `cloudwatch`
     * `aws_cloudwatch_dashboard`
+    * `aws_cloudwatch_contributor_insight_rule`
     * `aws_cloudwatch_event_rule`
     * `aws_cloudwatch_event_target`
     * `aws_cloudwatch_metric_alarm`
     * `aws_cloudwatch_composite_alarm`
     * `aws_cloudwatch_event_bus`
+    * `aws_cloudwatch_event_bus_policy`
     * `aws_cloudwatch_event_connection`
     * `aws_cloudwatch_event_api_destination`
     * `aws_cloudwatch_event_archive`
@@ -380,6 +433,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_codestarnotifications_notification_rule`
 *   `controltower`
     * `aws_controltower_landing_zone`
+    * `aws_controltower_control`
 *   `chime-sdk-mediapipelines`
     * `aws_chimesdkmediapipelines_media_insights_pipeline_configuration`
 *   `chime-sdk-voice`
@@ -387,6 +441,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_chimesdkvoice_sip_media_application`
     * `aws_chimesdkvoice_sip_rule`
     * `aws_chimesdkvoice_voice_profile_domain`
+    * `aws_chimesdkvoice_global_settings`
     * `aws_chime_voice_connector`
     * `aws_chime_voice_connector_group`
     * `aws_chime_voice_connector_origination`
@@ -444,6 +499,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_datazone_environment`
     * `aws_datazone_environment_profile`
     * `aws_datazone_environment_blueprint_configuration`
+    * `aws_datazone_glossary`
+    * `aws_datazone_glossary_term`
     * `aws_datazone_asset_type`
     * `aws_datazone_form_type`
     * `aws_datazone_user_profile`
@@ -666,6 +723,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_emr_cluster`
     * `aws_emr_security_configuration`
     * `aws_emr_studio`
+    * `aws_emr_block_public_access_configuration`
     * `aws_emr_studio_session_mapping`
     * `aws_emr_instance_fleet`
     * `aws_emr_instance_group`
@@ -763,6 +821,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_glue_catalog_table_optimizer`
     * `aws_glue_data_catalog_encryption_settings`
     * `aws_glue_resource_policy`
+    * `aws_glue_catalog`
     * `aws_glue_user_defined_function`
 *   `guardduty`
     * `aws_guardduty_detector`
@@ -918,6 +977,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_lakeformation_lf_tag`
     * `aws_lakeformation_data_cells_filter`
     * `aws_lakeformation_data_lake_settings`
+    * `aws_lakeformation_lf_tag_expression`
 *   `kms`
     * `aws_kms_key`
     * `aws_kms_alias`
@@ -948,6 +1008,10 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_cloudwatch_log_resource_policy`
     * `aws_cloudwatch_log_account_policy`
     * `aws_cloudwatch_query_definition`
+    * `aws_cloudwatch_log_anomaly_detector`
+    * `aws_cloudwatch_log_delivery`
+    * `aws_cloudwatch_log_delivery_destination`
+    * `aws_cloudwatch_log_delivery_source`
     * `aws_cloudwatch_log_metric_filter`
     * `aws_cloudwatch_log_subscription_filter`
 *   `macie2`
@@ -965,6 +1029,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_memorydb_snapshot`
     * `aws_memorydb_subnet_group`
     * `aws_memorydb_user`
+    * `aws_memorydb_multi_region_cluster`
 *   `neptune`
     * `aws_neptune_cluster`
     * `aws_neptune_cluster_parameter_group`
@@ -984,11 +1049,14 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_opensearch_vpc_endpoint`
     * `aws_opensearch_outbound_connection`
     * `aws_opensearch_package`
+    * `aws_opensearch_application`
+    * `aws_opensearch_authorize_vpc_endpoint_access`
     * `aws_opensearch_package_association`
 *   `opensearchserverless`
     * `aws_opensearchserverless_collection`
     * `aws_opensearchserverless_security_config`
     * `aws_opensearchserverless_vpc_endpoint`
+    * `aws_opensearchserverless_collection_group`
     * `aws_opensearchserverless_access_policy`
     * `aws_opensearchserverless_security_policy`
     * `aws_opensearchserverless_lifecycle_policy`
@@ -1000,6 +1068,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_pinpointsmsvoicev2_opt_out_list`
 *   `pinpoint`
     * `aws_pinpoint_app`
+    * `aws_pinpoint_email_template`
     * `aws_pinpoint_adm_channel`
     * `aws_pinpoint_apns_channel`
     * `aws_pinpoint_apns_sandbox_channel`
@@ -1036,6 +1105,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpclattice_service_network`
     * `aws_vpclattice_target_group`
     * `aws_vpclattice_service_network_vpc_association`
+    * `aws_vpclattice_resource_gateway`
     * `aws_vpclattice_listener`
     * `aws_vpclattice_listener_rule`
     * `aws_vpclattice_access_log_subscription`
@@ -1170,6 +1240,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_rds_cluster_parameter_group`
     * `aws_rds_cluster_endpoint`
     * `aws_rds_reserved_instance`
+    * `aws_rds_shard_group`
+    * `aws_rds_custom_db_engine_version`
+    * `aws_rds_certificate`
     * `aws_rds_integration`
     * `aws_rds_export_task`
 *   `quicksight`
@@ -1208,6 +1281,9 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sagemaker_endpoint`
     * `aws_sagemaker_endpoint_configuration`
     * `aws_sagemaker_code_repository`
+    * `aws_sagemaker_model_card`
+    * `aws_sagemaker_algorithm`
+    * `aws_sagemaker_mlflow_app`
     * `aws_sagemaker_app_image_config`
     * `aws_sagemaker_device_fleet`
     * `aws_sagemaker_device`
@@ -1237,6 +1313,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_schemas_schema`
 *   `timestream-influxdb`
     * `aws_timestreaminfluxdb_db_instance`
+    * `aws_timestreaminfluxdb_db_cluster`
 *   `timestream-write`
     * `aws_timestreamwrite_database`
     * `aws_timestreamwrite_table`
@@ -1244,6 +1321,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_redshift_cluster`
     * `aws_redshift_cluster_iam_roles`
     * `aws_redshift_resource_policy`
+    * `aws_redshift_integration`
     * `aws_redshift_data_share_authorization`
     * `aws_redshift_partner`
     * `aws_redshift_snapshot_copy_grant`
@@ -1370,6 +1448,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_securityhub_product_subscription`
     * `aws_securityhub_organization_admin_account`
     * `aws_securityhub_organization_configuration`
+    * `aws_securityhub_automation_rule_v2`
     * `aws_securityhub_standards_control`
 *   `servicecatalog`
     * `aws_servicecatalog_portfolio`
@@ -1405,6 +1484,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_ses_template`
     * `aws_ses_domain_dkim`
     * `aws_ses_domain_identity_verification`
+    * `aws_ses_identity_policy`
     * `aws_ses_domain_mail_from`
     * `aws_ses_receipt_filter`
     * `aws_ses_active_receipt_rule_set`
@@ -1414,6 +1494,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_sesv2_email_identity`
     * `aws_sesv2_email_identity_feedback_attributes`
     * `aws_sesv2_email_identity_mail_from_attributes`
+    * `aws_sesv2_email_identity_policy`
     * `aws_sesv2_configuration_set`
     * `aws_sesv2_contact_list`
     * `aws_sesv2_dedicated_ip_pool`
@@ -1510,6 +1591,8 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_transfer_connector`
     * `aws_transfer_profile`
     * `aws_transfer_workflow`
+    * `aws_transfer_web_app`
+    * `aws_transfer_host_key`
     * `aws_transfer_ssh_key`
     * `aws_transfer_user`
     * `aws_transfer_access`
@@ -1527,6 +1610,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_vpc_ipv4_cidr_block_association`
     * `aws_vpc_ipv6_cidr_block_association`
     * `aws_vpc_network_performance_metric_subscription`
+    * `aws_vpc_block_public_access_options`
 *   `vpc_endpoint`
     * `aws_vpc_endpoint`
     * `aws_vpc_endpoint_connection_notification`
@@ -1574,6 +1658,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_wafv2_rule_group`
     * `aws_wafv2_web_acl`
     * `aws_wafv2_web_acl_logging_configuration`
+    * `aws_wafv2_api_key`
 *   `wafv2_regional`
     * `aws_wafv2_ip_set`
     * `aws_wafv2_regex_pattern_set`
@@ -1581,6 +1666,7 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_wafv2_web_acl`
     * `aws_wafv2_web_acl_association`
     * `aws_wafv2_web_acl_logging_configuration`
+    * `aws_wafv2_api_key`
 *   `workspaces`
     * `aws_workspaces_directory`
     * `aws_workspaces_ip_group`
@@ -1588,6 +1674,15 @@ terraformer import aws --resources=sg --regions=us-east-1
     * `aws_workspaces_workspace`
 *   `workspaces-web`
     * `aws_workspacesweb_portal`
+    * `aws_workspacesweb_identity_provider`
+    * `aws_workspacesweb_browser_settings`
+    * `aws_workspacesweb_network_settings`
+    * `aws_workspacesweb_ip_access_settings`
+    * `aws_workspacesweb_user_settings`
+    * `aws_workspacesweb_data_protection_settings`
+    * `aws_workspacesweb_user_access_logging_settings`
+    * `aws_workspacesweb_trust_store`
+    * `aws_workspacesweb_session_logger`
 *   `xray`
     * `aws_xray_sampling_rule`
     * `aws_xray_group`

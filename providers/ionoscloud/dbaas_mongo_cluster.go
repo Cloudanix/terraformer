@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *DBaaSMongoClusterGenerator) InitResources() error {
 	dbaasMongoClient := client.DBaaSMongoAPIClient
 	resourceType := "ionoscloud_mongo_cluster"
 
-	response, _, err := dbaasMongoClient.ClustersApi.ClustersGet(context.TODO()).Execute()
+	response, _, err := dbaasMongoClient.ClustersApi.ClustersGet(runContext()).Execute()
 	if err != nil {
 		return err
 	}

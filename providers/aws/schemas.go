@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/schemas"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *SchemasGenerator) InitResources() error {
 	}
 	svc := schemas.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	var registryNames []string
 	p := schemas.NewListRegistriesPaginator(svc, &schemas.ListRegistriesInput{})
 	for p.HasMorePages() {

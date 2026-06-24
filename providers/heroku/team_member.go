@@ -15,7 +15,6 @@
 package heroku
 
 import (
-	"context"
 	"fmt"
 	"log"
 
@@ -30,7 +29,7 @@ type TeamMemberGenerator struct {
 func (g TeamMemberGenerator) createResources(svc *heroku.Service, teamList []heroku.Team) []terraformutils.Resource {
 	var resources []terraformutils.Resource
 	for _, team := range teamList {
-		output, err := svc.TeamMemberList(context.TODO(), team.ID, &heroku.ListRange{Field: "id"})
+		output, err := svc.TeamMemberList(runContext(), team.ID, &heroku.ListRange{Field: "id"})
 		if err != nil {
 			log.Println(err)
 		}
@@ -48,7 +47,7 @@ func (g TeamMemberGenerator) createResources(svc *heroku.Service, teamList []her
 
 func (g *TeamMemberGenerator) InitResources() error {
 	svc := g.generateService()
-	output, err := svc.TeamList(context.TODO(), &heroku.ListRange{Field: "id"})
+	output, err := svc.TeamList(runContext(), &heroku.ListRange{Field: "id"})
 	if err != nil {
 		return err
 	}

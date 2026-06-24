@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,7 +31,7 @@ type ElasticIPGenerator struct {
 
 func (g *ElasticIPGenerator) createElasticIpsResources(svc *ec2.Client) []terraformutils.Resource {
 	resources := []terraformutils.Resource{}
-	addresses, err := svc.DescribeAddresses(context.TODO(), &ec2.DescribeAddressesInput{})
+	addresses, err := svc.DescribeAddresses(awsContext(), &ec2.DescribeAddressesInput{})
 
 	if err != nil {
 		log.Println(err)
@@ -58,7 +57,7 @@ func (g *ElasticIPGenerator) createElasticIpsResources(svc *ec2.Client) []terraf
 	for p := ec2.NewDescribeAddressesAttributePaginator(svc, &ec2.DescribeAddressesAttributeInput{
 		Attribute: ec2types.AddressAttributeNameDomainName,
 	}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			break
 		}

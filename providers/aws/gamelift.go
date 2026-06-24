@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/gamelift"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +31,7 @@ func (g *GameLiftGenerator) InitResources() error {
 		return e
 	}
 	svc := gamelift.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	fleets := gamelift.NewListFleetsPaginator(svc, &gamelift.ListFleetsInput{})
 	for fleets.HasMorePages() {

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/autoscalingplans"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *AutoScalingPlansGenerator) InitResources() error {
 
 	var token *string
 	for {
-		out, err := svc.DescribeScalingPlans(context.TODO(), &autoscalingplans.DescribeScalingPlansInput{NextToken: token})
+		out, err := svc.DescribeScalingPlans(awsContext(), &autoscalingplans.DescribeScalingPlansInput{NextToken: token})
 		if err != nil {
 			return err
 		}

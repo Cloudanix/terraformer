@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/kafkaconnect"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *KafkaConnectGenerator) InitResources() error {
 
 	p := kafkaconnect.NewListConnectorsPaginator(svc, &kafkaconnect.ListConnectorsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +49,7 @@ func (g *KafkaConnectGenerator) InitResources() error {
 	}
 
 	for cp := kafkaconnect.NewListCustomPluginsPaginator(svc, &kafkaconnect.ListCustomPluginsInput{}); cp.HasMorePages(); {
-		page, err := cp.NextPage(context.TODO())
+		page, err := cp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -65,7 +63,7 @@ func (g *KafkaConnectGenerator) InitResources() error {
 		}
 	}
 	for wp := kafkaconnect.NewListWorkerConfigurationsPaginator(svc, &kafkaconnect.ListWorkerConfigurationsInput{}); wp.HasMorePages(); {
-		page, err := wp.NextPage(context.TODO())
+		page, err := wp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

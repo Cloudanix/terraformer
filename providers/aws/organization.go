@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -32,7 +31,7 @@ type OrganizationGenerator struct {
 }
 
 func (g *OrganizationGenerator) traverseNode(svc *organizations.Client, parentID string) {
-	accountsForParent, err := svc.ListAccountsForParent(context.TODO(),
+	accountsForParent, err := svc.ListAccountsForParent(awsContext(),
 		&organizations.ListAccountsForParentInput{ParentId: aws.String(parentID)})
 	if err != nil {
 		return
@@ -64,7 +63,7 @@ func (g *OrganizationGenerator) traverseNode(svc *organizations.Client, parentID
 		))
 	}
 
-	unitsForParent, err := svc.ListOrganizationalUnitsForParent(context.TODO(),
+	unitsForParent, err := svc.ListOrganizationalUnitsForParent(awsContext(),
 		&organizations.ListOrganizationalUnitsForParentInput{ParentId: aws.String(parentID)})
 	if err != nil {
 		return
@@ -93,7 +92,7 @@ func (g *OrganizationGenerator) InitResources() error {
 	}
 	svc := organizations.NewFromConfig(config)
 
-	roots, err := svc.ListRoots(context.TODO(), &organizations.ListRootsInput{})
+	roots, err := svc.ListRoots(awsContext(), &organizations.ListRootsInput{})
 	if err != nil {
 		return err
 	}
@@ -107,7 +106,7 @@ func (g *OrganizationGenerator) InitResources() error {
 		Filter: types.PolicyTypeServiceControlPolicy,
 	})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -127,7 +126,7 @@ func (g *OrganizationGenerator) InitResources() error {
 				map[string]interface{}{},
 			))
 
-			targetsForPolicy, err := svc.ListTargetsForPolicy(context.TODO(),
+			targetsForPolicy, err := svc.ListTargetsForPolicy(awsContext(),
 				&organizations.ListTargetsForPolicyInput{PolicyId: policy.Id})
 			if err != nil {
 				fmt.Println(err.Error())
@@ -151,7 +150,7 @@ func (g *OrganizationGenerator) InitResources() error {
 	}
 
 	for ap := organizations.NewListDelegatedAdministratorsPaginator(svc, &organizations.ListDelegatedAdministratorsInput{}); ap.HasMorePages(); {
-		page, err := ap.NextPage(context.TODO())
+		page, err := ap.NextPage(awsContext())
 		if err != nil {
 			break
 		}
@@ -166,7 +165,7 @@ func (g *OrganizationGenerator) InitResources() error {
 	}
 
 	// Org-wide resource policy (singleton; present only when one is attached).
-	if rp, err := svc.DescribeResourcePolicy(context.TODO(), &organizations.DescribeResourcePolicyInput{}); err == nil &&
+	if rp, err := svc.DescribeResourcePolicy(awsContext(), &organizations.DescribeResourcePolicyInput{}); err == nil &&
 		rp.ResourcePolicy != nil && rp.ResourcePolicy.ResourcePolicySummary != nil {
 		policyID := StringValue(rp.ResourcePolicy.ResourcePolicySummary.Id)
 		if policyID != "" {

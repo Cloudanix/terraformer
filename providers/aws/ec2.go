@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strings"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -50,7 +49,7 @@ func (g *Ec2Generator) InitResources() error {
 		Filters: filters,
 	})
 	for p.HasMorePages() {
-		page, e := p.NextPage(context.TODO())
+		page, e := p.NextPage(awsContext())
 		if e != nil {
 			return e
 		}
@@ -62,7 +61,7 @@ func (g *Ec2Generator) InitResources() error {
 						name = *tag.Value
 					}
 				}
-				attr, err := svc.DescribeInstanceAttribute(context.TODO(), &ec2.DescribeInstanceAttributeInput{
+				attr, err := svc.DescribeInstanceAttribute(awsContext(), &ec2.DescribeInstanceAttributeInput{
 					Attribute:  types.InstanceAttributeNameUserData,
 					InstanceId: instance.InstanceId,
 				})
@@ -99,7 +98,7 @@ func (g *Ec2Generator) InitResources() error {
 // loadMoreEc2 enumerates additional top-level EC2 resources that each have a
 // Describe* paginator returning an id. Snapshots are scoped to "self".
 func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(id, tfType string) {
 		if id != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
@@ -516,7 +515,7 @@ func (g *Ec2Generator) loadMoreEc2(svc *ec2.Client) error {
 // gateways. AMIs and prefix lists are scoped to "self" so AWS-owned public
 // resources aren't dumped.
 func (g *Ec2Generator) loadEc2Extras(svc *ec2.Client) error {
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	images := ec2.NewDescribeImagesPaginator(svc, &ec2.DescribeImagesInput{Owners: []string{"self"}})
 	for images.HasMorePages() {

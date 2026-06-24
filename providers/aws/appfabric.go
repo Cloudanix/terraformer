@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/aws"
 	"github.com/aws/aws-sdk-go-v2/service/appfabric"
 
@@ -33,7 +31,7 @@ func (g *AppFabricGenerator) InitResources() error {
 		return e
 	}
 	svc := appfabric.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 	var bundleArns []string
 	p := appfabric.NewListAppBundlesPaginator(svc, &appfabric.ListAppBundlesInput{})
 	for p.HasMorePages() {

@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/route53profiles"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *Route53ProfilesGenerator) InitResources() error {
 
 	p := route53profiles.NewListProfilesPaginator(svc, &route53profiles.ListProfilesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -49,7 +47,7 @@ func (g *Route53ProfilesGenerator) InitResources() error {
 				id, StringValue(profile.Name), "aws_route53profiles_profile", "aws", defaultAllowEmptyValues))
 			profileID := id
 			for rp := route53profiles.NewListProfileResourceAssociationsPaginator(svc, &route53profiles.ListProfileResourceAssociationsInput{ProfileId: &profileID}); rp.HasMorePages(); {
-				rpage, err := rp.NextPage(context.TODO())
+				rpage, err := rp.NextPage(awsContext())
 				if err != nil {
 					break
 				}
@@ -66,7 +64,7 @@ func (g *Route53ProfilesGenerator) InitResources() error {
 	}
 
 	for ap := route53profiles.NewListProfileAssociationsPaginator(svc, &route53profiles.ListProfileAssociationsInput{}); ap.HasMorePages(); {
-		page, err := ap.NextPage(context.TODO())
+		page, err := ap.NextPage(awsContext())
 		if err != nil {
 			break
 		}

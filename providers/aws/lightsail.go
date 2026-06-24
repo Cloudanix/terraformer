@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/service/lightsail"
@@ -47,7 +46,7 @@ func (g *LightsailGenerator) InitResources() error {
 
 	var token *string
 	for {
-		out, err := svc.GetInstances(context.TODO(), &lightsail.GetInstancesInput{PageToken: token})
+		out, err := svc.GetInstances(awsContext(), &lightsail.GetInstancesInput{PageToken: token})
 		if err != nil {
 			return err
 		}
@@ -76,7 +75,7 @@ func (g *LightsailGenerator) InitResources() error {
 // Get* returning a named list. Import ID is the resource name. Errors are
 // logged via a skip so one missing permission doesn't abort the whole import.
 func (g *LightsailGenerator) addLightsailExtras(svc *lightsail.Client) {
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(name, tfType string) {
 		if name != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

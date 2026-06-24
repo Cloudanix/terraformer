@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -36,7 +35,7 @@ func (g *VPCLatticeGenerator) InitResources() error {
 		return e
 	}
 	svc := vpclattice.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	// authPolicy emits aws_vpclattice_auth_policy (import resource id) and
 	// resourcePolicy emits aws_vpclattice_resource_policy (import resource ARN)
@@ -209,6 +208,21 @@ func (g *VPCLatticeGenerator) InitResources() error {
 			}
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_vpclattice_service_network_vpc_association", "aws", defaultAllowEmptyValues))
+		}
+	}
+
+	for rg := vpclattice.NewListResourceGatewaysPaginator(svc, &vpclattice.ListResourceGatewaysInput{}); rg.HasMorePages(); {
+		page, err := rg.NextPage(awsContext())
+		if err != nil {
+			return err
+		}
+		for _, r := range page.Items {
+			id := StringValue(r.Id)
+			if id == "" {
+				continue
+			}
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				id, StringValue(r.Name), "aws_vpclattice_resource_gateway", "aws", defaultAllowEmptyValues))
 		}
 	}
 	return nil

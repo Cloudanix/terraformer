@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +32,7 @@ func (g *DirectConnectGenerator) getDirectConnectGateways(svc *directconnect.Cli
 	input := &directconnect.DescribeDirectConnectGatewaysInput{}
 	for {
 		// Fetch a page of results
-		output, err := svc.DescribeDirectConnectGateways(context.TODO(), input)
+		output, err := svc.DescribeDirectConnectGateways(awsContext(), input)
 		if err != nil {
 			return err
 		}
@@ -48,7 +47,7 @@ func (g *DirectConnectGenerator) getDirectConnectGateways(svc *directconnect.Cli
 				"aws",
 				dxAllowEmptyValues,
 			))
-			if assocs, err := svc.DescribeDirectConnectGatewayAssociations(context.TODO(),
+			if assocs, err := svc.DescribeDirectConnectGatewayAssociations(awsContext(),
 				&directconnect.DescribeDirectConnectGatewayAssociationsInput{DirectConnectGatewayId: dx.DirectConnectGatewayId}); err == nil {
 				for _, a := range assocs.DirectConnectGatewayAssociations {
 					if a.AssociatedGateway == nil {
@@ -77,7 +76,7 @@ func (g *DirectConnectGenerator) getDirectConnectGateways(svc *directconnect.Cli
 
 func (g *DirectConnectGenerator) getDirectConnectConnections(svc *directconnect.Client) error {
 	input := &directconnect.DescribeConnectionsInput{}
-	output, err := svc.DescribeConnections(context.TODO(), input)
+	output, err := svc.DescribeConnections(awsContext(), input)
 	if err != nil {
 		return err
 	}
@@ -110,7 +109,7 @@ func (g *DirectConnectGenerator) getDirectConnectConnections(svc *directconnect.
 func (g *DirectConnectGenerator) getGatewayAssociationProposals(svc *directconnect.Client) error {
 	input := &directconnect.DescribeDirectConnectGatewayAssociationProposalsInput{}
 	for {
-		output, err := svc.DescribeDirectConnectGatewayAssociationProposals(context.TODO(), input)
+		output, err := svc.DescribeDirectConnectGatewayAssociationProposals(awsContext(), input)
 		if err != nil {
 			return err
 		}
@@ -132,7 +131,7 @@ func (g *DirectConnectGenerator) getGatewayAssociationProposals(svc *directconne
 
 func (g *DirectConnectGenerator) getDirectConnectVritualInterfaces(svc *directconnect.Client) error {
 	input := &directconnect.DescribeVirtualInterfacesInput{}
-	output, err := svc.DescribeVirtualInterfaces(context.TODO(), input)
+	output, err := svc.DescribeVirtualInterfaces(awsContext(), input)
 	if err != nil {
 		return err
 	}
@@ -198,7 +197,7 @@ func (g *DirectConnectGenerator) InitResources() error {
 }
 
 func (g *DirectConnectGenerator) getDirectConnectLags(svc *directconnect.Client) error {
-	output, err := svc.DescribeLags(context.TODO(), &directconnect.DescribeLagsInput{})
+	output, err := svc.DescribeLags(awsContext(), &directconnect.DescribeLagsInput{})
 	if err != nil {
 		return err
 	}

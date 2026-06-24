@@ -15,7 +15,6 @@
 package aws
 
 import (
-	"context"
 	"strconv"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -36,7 +35,7 @@ func (g *AppConfigGenerator) InitResources() error {
 	}
 	svc := appconfig.NewFromConfig(config)
 
-	ctx := context.TODO()
+	ctx := awsContext()
 	add := func(id, name, tfType string) {
 		if id != "" {
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(

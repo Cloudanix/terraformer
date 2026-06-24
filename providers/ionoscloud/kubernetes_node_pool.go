@@ -1,7 +1,6 @@
 package ionoscloud
 
 import (
-	"context"
 	"log"
 
 	"github.com/GoogleCloudPlatform/terraformer/providers/ionoscloud/helpers"
@@ -17,7 +16,7 @@ func (g *KubernetesNodePoolGenerator) InitResources() error {
 	cloudAPIClient := client.CloudAPIClient
 	resourceType := "ionoscloud_k8s_node_pool"
 
-	kubernetesClusters, _, err := cloudAPIClient.KubernetesApi.K8sGet(context.TODO()).Execute()
+	kubernetesClusters, _, err := cloudAPIClient.KubernetesApi.K8sGet(runContext()).Execute()
 	if err != nil {
 		return err
 	}
@@ -26,7 +25,7 @@ func (g *KubernetesNodePoolGenerator) InitResources() error {
 		return nil
 	}
 	for _, kubernetesCluster := range *kubernetesClusters.Items {
-		kubernetesNodePools, _, err := cloudAPIClient.KubernetesApi.K8sNodepoolsGet(context.TODO(), *kubernetesCluster.Id).Depth(1).Execute()
+		kubernetesNodePools, _, err := cloudAPIClient.KubernetesApi.K8sNodepoolsGet(runContext(), *kubernetesCluster.Id).Depth(1).Execute()
 		if err != nil {
 			return err
 		}

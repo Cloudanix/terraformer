@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail"
 	"github.com/aws/aws-sdk-go-v2/service/cloudtrail/types"
@@ -48,7 +46,7 @@ func (g *CloudTrailGenerator) InitResources() error {
 		return e
 	}
 	svc := cloudtrail.NewFromConfig(config)
-	output, err := svc.DescribeTrails(context.TODO(), &cloudtrail.DescribeTrailsInput{})
+	output, err := svc.DescribeTrails(awsContext(), &cloudtrail.DescribeTrailsInput{})
 	if err != nil {
 		return err
 	}
@@ -56,7 +54,7 @@ func (g *CloudTrailGenerator) InitResources() error {
 
 	stores := cloudtrail.NewListEventDataStoresPaginator(svc, &cloudtrail.ListEventDataStoresInput{})
 	for stores.HasMorePages() {
-		page, err := stores.NextPage(context.TODO())
+		page, err := stores.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

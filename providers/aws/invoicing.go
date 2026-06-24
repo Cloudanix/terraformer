@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/invoicing"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -33,7 +31,7 @@ func (g *InvoicingGenerator) InitResources() error {
 	}
 	svc := invoicing.NewFromConfig(config)
 	for p := invoicing.NewListInvoiceUnitsPaginator(svc, &invoicing.ListInvoiceUnitsInput{}); p.HasMorePages(); {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}

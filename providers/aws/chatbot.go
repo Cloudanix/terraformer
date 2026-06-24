@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/chatbot"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -34,7 +32,7 @@ func (g *ChatbotGenerator) InitResources() error {
 		return e
 	}
 	svc := chatbot.NewFromConfig(config)
-	ctx := context.TODO()
+	ctx := awsContext()
 
 	slack := chatbot.NewDescribeSlackChannelConfigurationsPaginator(svc, &chatbot.DescribeSlackChannelConfigurationsInput{})
 	for slack.HasMorePages() {

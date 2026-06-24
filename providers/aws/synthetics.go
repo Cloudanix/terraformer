@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/aws/aws-sdk-go-v2/service/synthetics"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
@@ -36,7 +34,7 @@ func (g *SyntheticsGenerator) InitResources() error {
 
 	p := synthetics.NewDescribeCanariesPaginator(svc, &synthetics.DescribeCanariesInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -51,7 +49,7 @@ func (g *SyntheticsGenerator) InitResources() error {
 	}
 
 	for gp := synthetics.NewListGroupsPaginator(svc, &synthetics.ListGroupsInput{}); gp.HasMorePages(); {
-		page, err := gp.NextPage(context.TODO())
+		page, err := gp.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
@@ -64,7 +62,7 @@ func (g *SyntheticsGenerator) InitResources() error {
 				name, name, "aws_synthetics_group", "aws", defaultAllowEmptyValues))
 			groupName := name
 			for rp := synthetics.NewListGroupResourcesPaginator(svc, &synthetics.ListGroupResourcesInput{GroupIdentifier: &groupName}); rp.HasMorePages(); {
-				rpage, err := rp.NextPage(context.TODO())
+				rpage, err := rp.NextPage(awsContext())
 				if err != nil {
 					break
 				}

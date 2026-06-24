@@ -15,8 +15,6 @@
 package aws
 
 import (
-	"context"
-
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 
 	"github.com/aws/aws-sdk-go-v2/service/ec2"
@@ -79,14 +77,14 @@ func (g *VpcGenerator) InitResources() error {
 	svc := ec2.NewFromConfig(config)
 	p := ec2.NewDescribeVpcsPaginator(svc, &ec2.DescribeVpcsInput{})
 	for p.HasMorePages() {
-		page, err := p.NextPage(context.TODO())
+		page, err := p.NextPage(awsContext())
 		if err != nil {
 			return err
 		}
 		g.Resources = append(g.Resources, g.createResources(page)...)
 	}
 
-	if subs, err := svc.DescribeAwsNetworkPerformanceMetricSubscriptions(context.TODO(),
+	if subs, err := svc.DescribeAwsNetworkPerformanceMetricSubscriptions(awsContext(),
 		&ec2.DescribeAwsNetworkPerformanceMetricSubscriptionsInput{}); err == nil {
 		for _, s := range subs.Subscriptions {
 			src, dst := StringValue(s.Source), StringValue(s.Destination)
@@ -96,6 +94,23 @@ func (g *VpcGenerator) InitResources() error {
 			id := src + "/" + dst + "/" + string(s.Metric) + "/" + string(s.Statistic)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, id, "aws_vpc_network_performance_metric_subscription", "aws", VpcAllowEmptyValues))
+		}
+	}
+
+	// Region-level VPC Block Public Access — only when actually turned on
+	// (default is "off", which is not managed state). Imported by region.
+	if opt, err := svc.DescribeVpcBlockPublicAccessOptions(awsContext(),
+		&ec2.DescribeVpcBlockPublicAccessOptionsInput{}); err == nil &&
+		opt.VpcBlockPublicAccessOptions != nil &&
+		opt.VpcBlockPublicAccessOptions.InternetGatewayBlockMode != "" &&
+		opt.VpcBlockPublicAccessOptions.InternetGatewayBlockMode != "off" {
+		region := StringValue(opt.VpcBlockPublicAccessOptions.AwsRegion)
+		if region == "" {
+			region = config.Region
+		}
+		if region != "" {
+			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+				region, region, "aws_vpc_block_public_access_options", "aws", VpcAllowEmptyValues))
 		}
 	}
 	return nil

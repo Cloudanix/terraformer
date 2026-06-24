@@ -1,3 +1,32 @@
+# Missing resources — status
+
+This is NOT a plain TODO list. Of the original 184 `aws_*` types here, **15 were
+added** (now removed from this list) — see git log `feat(aws): add …`. The
+**169 below are NOT reverse-importable by terraformer** and are excluded by
+design; reasons in `no-list-api.md`. Categories:
+
+- **Double-manage parent inline attr** — `*_policy` (sqs/sns/kms/vpc_endpoint/
+  api_gateway/s3control…), `*_exclusive`. The parent generator already captures
+  the policy as an inline attribute; a separate resource would conflict. (SES /
+  event-bus policies WERE added because those are genuinely separate resources.)
+- **No List/Describe API** — `*_association`, `*_attachment`, `*_tag(s)`,
+  `*_membership`, `autoscaling_*`, `route`, `networkmanager_*`. AWS offers no way
+  to enumerate them independently.
+- **Two-account handshake** — every `*_accepter`, `*_invite(_accepter)`,
+  `dx_hosted_*`, `ram_*_accepter`. Needs both accounts; no single-account list.
+- **Data-plane / action / no-import** — `s3_object`, `dynamodb_table_item`,
+  `kms_ciphertext`, `lambda_invocation`, `*_instance_state`, `ami_copy`,
+  `*_snapshot_copy/import`, `secretsmanager_secret_version`, `redshiftdata_statement`…
+- **`aws_default_*`** — adopt-existing, skipped by design.
+- **AWS-deprecated / EOL** — `evidently_*`, `elastictranscoder_preset`, `lex_*`
+  (v1), `simpledb_*`, `worklink_*`, `kinesis_analytics_application`.
+- **Singletons that are always the AWS default** — only emitted when configured;
+  the non-importable ones (`iot_logging_options`, `sns_sms_preferences`,
+  `ec2_instance_metadata_defaults`, `iam_security_token_service_preferences`)
+  have no `terraform import` support.
+
+To regenerate this list run `gen-gap-list.sh` (needs the schema dump).
+
 aws_acm_certificate_validation
 aws_acmpca_certificate
 aws_ami_copy
@@ -13,12 +42,10 @@ aws_autoscaling_attachment
 aws_autoscaling_group_tag
 aws_autoscaling_notification
 aws_autoscaling_traffic_source_attachment
-aws_chimesdkvoice_global_settings
 aws_cloudcontrolapi_resource
 aws_cloudformation_stack_instances
 aws_cloudfrontkeyvaluestore_key
 aws_cloudtrail_organization_delegated_admin_account
-aws_cloudwatch_event_bus_policy
 aws_cloudwatch_event_endpoint
 aws_cloudwatch_event_permission
 aws_codecatalyst_dev_environment
@@ -26,13 +53,9 @@ aws_codecatalyst_project
 aws_codecatalyst_source_repository
 aws_cognito_identity_pool_provider_principal_tag
 aws_cognito_managed_user_pool_client
-aws_computeoptimizer_recommendation_preferences
 aws_connect_bot_association
-aws_controltower_control
 aws_customerprofiles_profile
 aws_dataexchange_revision
-aws_datazone_glossary
-aws_datazone_glossary_term
 aws_db_instance_automated_backups_replication
 aws_db_snapshot_copy
 aws_default_route_table
@@ -42,7 +65,6 @@ aws_default_vpc
 aws_default_vpc_dhcp_options
 aws_detective_invitation_accepter
 aws_directory_service_shared_directory_accepter
-aws_drs_replication_configuration_template
 aws_dx_bgp_peer
 aws_dx_connection_confirmation
 aws_dx_hosted_connection
@@ -70,7 +92,6 @@ aws_ec2_transit_gateway_vpc_attachment_accepter
 aws_ecs_tag
 aws_elastictranscoder_preset
 aws_elb_attachment
-aws_emr_block_public_access_configuration
 aws_evidently_feature
 aws_evidently_launch
 aws_evidently_segment
@@ -122,17 +143,13 @@ aws_networkmanager_core_network_policy_attachment
 aws_networkmanager_customer_gateway_association
 aws_networkmanager_link_association
 aws_networkmanager_transit_gateway_connect_peer_association
-aws_opensearch_authorize_vpc_endpoint_access
 aws_opensearch_inbound_connection_accepter
 aws_opsworks_permission
-aws_pinpoint_email_template
 aws_quicksight_folder_membership
 aws_quicksight_ingestion
 aws_ram_resource_share_accepter
 aws_ram_sharing_with_organization
-aws_rds_certificate
 aws_rds_cluster_activity_stream
-aws_rds_custom_db_engine_version
 aws_rds_instance_state
 aws_redshift_data_share_consumer_association
 aws_redshiftdata_statement
@@ -155,8 +172,6 @@ aws_securityhub_standards_control_association
 aws_securitylake_subscriber_notification
 aws_serverlessapplicationrepository_cloudformation_stack
 aws_servicecatalog_organizations_access
-aws_ses_identity_policy
-aws_sesv2_email_identity_policy
 aws_simpledb_domain
 aws_snapshot_create_volume_permission
 aws_sns_sms_preferences
@@ -169,7 +184,6 @@ aws_ssm_service_setting
 aws_transfer_tag
 aws_verifiedaccess_instance_trust_provider_attachment
 aws_vpc_block_public_access_exclusion
-aws_vpc_block_public_access_options
 aws_vpc_dhcp_options_association
 aws_vpc_endpoint_connection_accepter
 aws_vpc_endpoint_policy
