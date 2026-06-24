@@ -17,21 +17,69 @@ package azure
 import (
 	"strings"
 
-	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/arm"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/cloud"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/hashicorp/go-azure-helpers/authentication"
 )
+
+// defaultAllowEmptyValues lists attribute prefixes that may be empty without
+// being dropped. Azure tags map the same way across every service, so this
+// package var replaces the per-file empty slices used by Track 1 generators.
+var defaultAllowEmptyValues = []string{"tags."}
 
 type AzureService struct { //nolint
 	terraformutils.Service
 }
 
-func (az *AzureService) getClientArgs() (subscriptionID string, resourceGroup string, authorizer autorest.Authorizer, resourceManagerEndpoint string) {
-	subs := az.Args["config"].(authentication.Config).SubscriptionID
-	auth := az.Args["authorizer"].(autorest.Authorizer)
-	resg := az.Args["resource_group"].(string)
-	rEndpoint := az.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	return subs, resg, auth, rEndpoint
+// getClientOptions returns the subscription ID, the azcore credential, and
+// *arm.ClientOptions (sovereign cloud + retry preconfigured) for constructing
+// armXxx clients. All Azure generators are now Track 2.
+func (az *AzureService) getClientOptions() (subscriptionID string, cred azcore.TokenCredential, opts *arm.ClientOptions) {
+	cfg := az.Args["config"].(authentication.Config)
+	subscriptionID = cfg.SubscriptionID
+	cred, _ = az.Args["token_credential"].(azcore.TokenCredential)
+	opts = &arm.ClientOptions{
+		ClientOptions: policy.ClientOptions{
+			Cloud: cloudConfig(cfg.Environment),
+			Retry: policy.RetryOptions{MaxRetries: 5},
+		},
+	}
+	return subscriptionID, cred, opts
+}
+
+// cloudConfig maps the autorest environment name to an azcore cloud config so
+// Gov/China users keep working after the Track 2 swap (replaces the Track 1
+// CustomResourceManagerEndpoint behavior).
+func cloudConfig(environment string) cloud.Configuration {
+	switch strings.ToLower(strings.ReplaceAll(environment, " ", "")) {
+	case "usgovernment", "usgovernmentcloud", "azureusgovernment", "azureusgovernmentcloud":
+		return cloud.AzureGovernment
+	case "china", "chinacloud", "azurechina", "azurechinacloud":
+		return cloud.AzureChina
+	default:
+		return cloud.AzurePublic
+	}
+}
+
+// resourceGroups returns the requested resource groups. The -R flag accepts a
+// colon-separated list (resource_group=name1:name2:name3); an empty value means
+// subscription scope (caller should use the subscription-wide List instead of
+// ListByResourceGroup).
+func (az *AzureService) resourceGroups() []string {
+	raw, _ := az.Args["resource_group"].(string)
+	if raw == "" {
+		return nil
+	}
+	var out []string
+	for _, rg := range strings.Split(raw, ":") {
+		if rg = strings.TrimSpace(rg); rg != "" {
+			out = append(out, rg)
+		}
+	}
+	return out
 }
 
 func (az *AzureService) AppendSimpleResource(id string, resourceName string, resourceType string) {

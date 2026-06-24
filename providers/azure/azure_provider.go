@@ -15,16 +15,14 @@
 package azure
 
 import (
-	"context"
 	"errors"
 	"fmt"
 	"os"
 	"strings"
 
-	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/hashicorp/go-azure-helpers/authentication"
-	"github.com/hashicorp/go-azure-helpers/sender"
-	"github.com/manicminer/hamilton/environments"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils/providerwrapper"
@@ -33,7 +31,7 @@ import (
 type AzureProvider struct { //nolint
 	terraformutils.Provider
 	config        authentication.Config
-	authorizer    autorest.Authorizer
+	credential    azcore.TokenCredential
 	resourceGroup string
 }
 
@@ -84,37 +82,27 @@ func (p *AzureProvider) setEnvConfig() error {
 	return nil
 }
 
-func (p *AzureProvider) getAuthorizer() (autorest.Authorizer, error) {
-	env, err := authentication.DetermineEnvironment(p.config.Environment)
-	if err != nil {
-		return nil, err
+// getCredential builds the azcore credential used by every (Track 2) generator.
+// DefaultAzureCredential reads AZURE_* env vars / MSI / Azure CLI / workload
+// identity. We bridge the terraformer ARM_* vars onto AZURE_* first so the
+// existing ARM_* credentials keep working. Construction does not authenticate;
+// tokens are fetched lazily on first use.
+func (p *AzureProvider) getCredential() (azcore.TokenCredential, error) {
+	bridge := map[string]string{
+		"ARM_CLIENT_ID":                   "AZURE_CLIENT_ID",
+		"ARM_TENANT_ID":                   "AZURE_TENANT_ID",
+		"ARM_CLIENT_SECRET":               "AZURE_CLIENT_SECRET",
+		"ARM_CLIENT_CERTIFICATE_PATH":     "AZURE_CLIENT_CERTIFICATE_PATH",
+		"ARM_CLIENT_CERTIFICATE_PASSWORD": "AZURE_CLIENT_CERTIFICATE_PASSWORD",
 	}
-	p.config.CustomResourceManagerEndpoint = env.ResourceManagerEndpoint
-	oauthConfig, err := p.config.BuildOAuthConfig(env.ActiveDirectoryEndpoint)
-	if err != nil {
-		return nil, err
-	}
-	if oauthConfig == nil {
-		return nil, fmt.Errorf("unable to configure OAuthConfig for tenant %s", p.config.TenantID)
-	}
-	sender := sender.BuildSender("terraformer")
-	ctx := context.Background()
-	var auth autorest.Authorizer
-
-	if p.config.UseMicrosoftGraph {
-		hamiltonEnv, ero := environments.EnvironmentFromString(p.config.Environment)
-		if ero != nil {
-			return nil, ero
+	for arm, azure := range bridge {
+		if os.Getenv(azure) == "" {
+			if v := os.Getenv(arm); v != "" {
+				os.Setenv(azure, v)
+			}
 		}
-		auth, err = p.config.GetMSALToken(ctx, hamiltonEnv.ResourceManager, sender, oauthConfig, env.TokenAudience)
-	} else {
-		// Deprecated
-		auth, err = p.config.GetADALToken(ctx, sender, oauthConfig, env.ResourceManagerEndpoint)
 	}
-	if err != nil {
-		return nil, err
-	}
-	return auth, nil
+	return azidentity.NewDefaultAzureCredential(nil)
 }
 
 func (p *AzureProvider) Init(args []string) error {
@@ -123,11 +111,12 @@ func (p *AzureProvider) Init(args []string) error {
 		return err
 	}
 
-	authorizer, err := p.getAuthorizer()
+	credential, err := p.getCredential()
 	if err != nil {
 		return err
 	}
-	p.authorizer = authorizer
+	p.credential = credential
+
 	p.resourceGroup = args[0]
 
 	return nil
@@ -350,40 +339,125 @@ func (AzureProvider) GetResourceConnections() map[string]map[string][]string {
 func (p *AzureProvider) GetSupportedService() map[string]terraformutils.ServiceGenerator {
 	return map[string]terraformutils.ServiceGenerator{
 		"analysis":                             &AnalysisGenerator{},
+		"apim":                                 &APIManagementGenerator{},
+		"app_configuration":                    &AppConfigurationGenerator{},
 		"app_service":                          &AppServiceGenerator{},
+		"elastic":                              &ElasticGenerator{},
+		"iotcentral":                           &IoTCentralGenerator{},
+		"maintenance":                          &MaintenanceGenerator{},
+		"redis_enterprise":                     &RedisEnterpriseGenerator{},
+		"service_networking":                   &ServiceNetworkingGenerator{},
+		"application_insights":                 &ApplicationInsightsGenerator{},
+		"arc":                                  &ArcGenerator{},
+		"arc_kubernetes":                       &ArcKubernetesGenerator{},
+		"bastion":                              &BastionGenerator{},
+		"batch":                                &BatchGenerator{},
+		"data_share":                           &DataShareGenerator{},
+		"dashboard":                            &DashboardGenerator{},
+		"elastic_san":                          &ElasticSANGenerator{},
+		"hdinsight":                            &HDInsightGenerator{},
+		"healthcare":                           &HealthcareGenerator{},
+		"hpc_cache":                            &HPCCacheGenerator{},
+		"load_test":                            &LoadTestGenerator{},
+		"private_dns_resolver":                 &PrivateDNSResolverGenerator{},
+		"spring_cloud":                         &SpringCloudGenerator{},
+		"digital_twins":                        &DigitalTwinsGenerator{},
+		"maps":                                 &MapsGenerator{},
+		"notification_hub":                     &NotificationHubGenerator{},
+		"relay":                                &RelayGenerator{},
+		"web_pubsub":                           &WebPubSubGenerator{},
+		"attestation":                          &AttestationGenerator{},
+		"automanage":                           &AutomanageGenerator{},
+		"automation":                           &AutomationGenerator{},
+		"cognitive":                            &CognitiveGenerator{},
+		"data_protection":                      &DataProtectionGenerator{},
+		"databox_edge":                         &DataBoxEdgeGenerator{},
+		"database_migration":                   &DatabaseMigrationGenerator{},
+		"dev_test_lab":                         &DevTestLabGenerator{},
+		"device_update":                        &DeviceUpdateGenerator{},
+		"lab_service":                          &LabServiceGenerator{},
+		"kubernetes_fleet":                     &KubernetesFleetGenerator{},
+		"virtual_desktop":                      &VirtualDesktopGenerator{},
+		"datadog":                              &DatadogGenerator{},
+		"dynatrace":                            &DynatraceGenerator{},
 		"application_gateway":                  &ApplicationGatewayGenerator{},
+		"cdn":                                  &CDNGenerator{},
+		"chaos_studio":                         &ChaosStudioGenerator{},
+		"communication":                        &CommunicationGenerator{},
+		"confidential_ledger":                  &ConfidentialLedgerGenerator{},
 		"cosmosdb":                             &CosmosDBGenerator{},
 		"container":                            &ContainerGenerator{},
+		"custom_provider":                      &CustomProviderGenerator{},
+		"portal":                               &PortalGenerator{},
+		"container_app":                        &ContainerAppGenerator{},
 		"database":                             &DatabasesGenerator{},
 		"databricks":                           &DatabricksGenerator{},
 		"data_factory":                         &DataFactoryGenerator{},
+		"ddos":                                 &DDoSGenerator{},
+		"dev_center":                           &DevCenterGenerator{},
 		"disk":                                 &DiskGenerator{},
 		"dns":                                  &DNSGenerator{},
+		"fluid_relay":                          &FluidRelayGenerator{},
+		"eventgrid":                            &EventGridGenerator{},
 		"eventhub":                             &EventHubGenerator{},
+		"firewall":                             &FirewallGenerator{},
+		"frontdoor":                            &FrontDoorGenerator{},
+		"iothub":                               &IoTHubGenerator{},
 		"keyvault":                             &KeyVaultGenerator{},
+		"kubernetes":                           &KubernetesGenerator{},
+		"kusto":                                &KustoGenerator{},
+		"lighthouse":                           &LighthouseGenerator{},
 		"load_balancer":                        &LoadBalancerGenerator{},
+		"log_analytics":                        &LogAnalyticsGenerator{},
+		"machine_learning":                     &MachineLearningGenerator{},
+		"managed_identity":                     &ManagedIdentityGenerator{},
+		"management_group":                     &ManagementGroupGenerator{},
 		"management_lock":                      &ManagementLockGenerator{},
+		"mobile_network":                       &MobileNetworkGenerator{},
+		"monitor":                              &MonitorGenerator{},
+		"mssql":                                &MSSQLGenerator{},
+		"nat_gateway":                          &NatGatewayGenerator{},
+		"netapp":                               &NetAppGenerator{},
+		"new_relic":                            &NewRelicGenerator{},
+		"nginx":                                &NginxGenerator{},
+		"storage_mover":                        &StorageMoverGenerator{},
+		"vmware":                               &VMwareGenerator{},
 		"network_interface":                    &NetworkInterfaceGenerator{},
 		"network_security_group":               &NetworkSecurityGroupGenerator{},
 		"network_watcher":                      &NetworkWatcherGenerator{},
+		"oracle":                               &OracleGenerator{},
+		"orbital":                              &OrbitalGenerator{},
+		"policy":                               &PolicyGenerator{},
 		"private_dns":                          &PrivateDNSGenerator{},
 		"private_endpoint":                     &PrivateEndpointGenerator{},
+		"powerbi":                              &PowerBIGenerator{},
 		"public_ip":                            &PublicIPGenerator{},
 		"purview":                              &PurviewGenerator{},
+		"recovery_services":                    &RecoveryServicesGenerator{},
 		"redis":                                &RedisGenerator{},
 		"resource_group":                       &ResourceGroupGenerator{},
+		"role_assignment":                      &RoleAssignmentGenerator{},
 		"route_table":                          &RouteTableGenerator{},
 		"scaleset":                             &ScaleSetGenerator{},
+		"search":                               &SearchGenerator{},
+		"servicebus":                           &ServiceBusGenerator{},
+		"signalr":                              &SignalRGenerator{},
 		"security_center_contact":              &SecurityCenterContactGenerator{},
 		"security_center_subscription_pricing": &SecurityCenterSubscriptionPricingGenerator{},
+		"service_fabric":                       &ServiceFabricGenerator{},
+		"spatial_anchors":                      &SpatialAnchorsGenerator{},
 		"ssh_public_key":                       &SSHPublicKeyGenerator{},
 		"storage_account":                      &StorageAccountGenerator{},
 		"storage_blob":                         &StorageBlobGenerator{},
 		"storage_container":                    &StorageContainerGenerator{},
+		"stream_analytics":                     &StreamAnalyticsGenerator{},
 		"synapse":                              &SynapseGenerator{},
 		"subnet":                               &SubnetGenerator{},
+		"traffic_manager":                      &TrafficManagerGenerator{},
 		"virtual_machine":                      &VirtualMachineGenerator{},
+		"voice_services":                       &VoiceServicesGenerator{},
 		"virtual_network":                      &VirtualNetworkGenerator{},
+		"virtual_wan":                          &VirtualWanGenerator{},
 	}
 }
 
@@ -397,9 +471,9 @@ func (p *AzureProvider) InitService(serviceName string, verbose bool) error {
 	p.Service.SetVerbose(verbose)
 	p.Service.SetProviderName(p.GetName())
 	p.Service.SetArgs(map[string]interface{}{
-		"config":         p.config,
-		"authorizer":     p.authorizer,
-		"resource_group": p.resourceGroup,
+		"config":           p.config,
+		"token_credential": p.credential,
+		"resource_group":   p.resourceGroup,
 	})
 	return nil
 }

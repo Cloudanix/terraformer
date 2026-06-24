@@ -16,94 +16,104 @@ package azure
 
 import (
 	"context"
-	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2020-03-01/network"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7"
 )
 
 type NetworkWatcherGenerator struct {
 	AzureService
 }
 
-func (az *NetworkWatcherGenerator) listResources() ([]network.Watcher, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewWatchersClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		resources network.WatcherListResult
-		err       error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		resources, err = client.List(ctx, resourceGroup)
-	} else {
-		resources, err = client.ListAll(ctx)
+// InitResources imports azurerm_network_watcher and its nested flow logs, packet
+// captures and connection monitors. Migrated to the Track 2 armnetwork SDK.
+func (g *NetworkWatcherGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	return *resources.Value, nil
-}
-
-func (az *NetworkWatcherGenerator) appendResource(resource *network.Watcher) {
-	az.AppendSimpleResource(*resource.ID, *resource.Name, "azurerm_network_watcher")
-}
-
-func (az *NetworkWatcherGenerator) appendFlowLogs(parent *network.Watcher, resourceGroupID *ResourceID) error {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewFlowLogsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	iterator, err := client.ListComplete(ctx, resourceGroupID.ResourceGroup, *parent.Name)
+	watchersClient, err := armnetwork.NewWatchersClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for iterator.NotDone() {
-		item := iterator.Value()
-		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_network_watcher_flow_log")
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
+	flowLogsClient, err := armnetwork.NewFlowLogsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	capturesClient, err := armnetwork.NewPacketCapturesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	monitorsClient, err := armnetwork.NewConnectionMonitorsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+
+	watchers, err := g.listWatchers(watchersClient)
+	if err != nil {
+		return err
+	}
+	for _, watcher := range watchers {
+		watcherID := valueOrEmpty(watcher.ID)
+		if watcherID == "" {
+			continue
+		}
+		g.AppendSimpleResource(watcherID, valueOrEmpty(watcher.Name), "azurerm_network_watcher")
+		parsed, err := ParseAzureResourceID(watcherID)
+		if err != nil {
+			return err
+		}
+		rg, watcherName := parsed.ResourceGroup, valueOrEmpty(watcher.Name)
+
+		if err := appendFromPager(&g.AzureService, flowLogsClient.NewListPager(rg, watcherName, nil),
+			func(p armnetwork.FlowLogsClientListResponse) []*armnetwork.FlowLog { return p.Value },
+			func(i *armnetwork.FlowLog) string { return valueOrEmpty(i.ID) },
+			func(i *armnetwork.FlowLog) string { return valueOrEmpty(i.Name) },
+			"azurerm_network_watcher_flow_log"); err != nil {
+			return err
+		}
+		if err := appendFromPager(&g.AzureService, capturesClient.NewListPager(rg, watcherName, nil),
+			func(p armnetwork.PacketCapturesClientListResponse) []*armnetwork.PacketCaptureResult { return p.Value },
+			func(i *armnetwork.PacketCaptureResult) string { return valueOrEmpty(i.ID) },
+			func(i *armnetwork.PacketCaptureResult) string { return valueOrEmpty(i.Name) },
+			"azurerm_network_packet_capture"); err != nil {
+			return err
+		}
+		if err := appendFromPager(&g.AzureService, monitorsClient.NewListPager(rg, watcherName, nil),
+			func(p armnetwork.ConnectionMonitorsClientListResponse) []*armnetwork.ConnectionMonitorResult {
+				return p.Value
+			},
+			func(i *armnetwork.ConnectionMonitorResult) string { return valueOrEmpty(i.ID) },
+			func(i *armnetwork.ConnectionMonitorResult) string { return valueOrEmpty(i.Name) },
+			"azurerm_network_connection_monitor"); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (az *NetworkWatcherGenerator) appendPacketCaptures(parent *network.Watcher, resourceGroupID *ResourceID) error {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewPacketCapturesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	resources, err := client.List(ctx, resourceGroupID.ResourceGroup, *parent.Name)
-	if err != nil {
-		return err
-	}
-	for _, item := range *resources.Value {
-		az.AppendSimpleResource(*item.ID, *item.Name, "azurerm_network_packet_capture")
-	}
-	return nil
-}
-
-func (az *NetworkWatcherGenerator) InitResources() error {
-
-	resources, err := az.listResources()
-	if err != nil {
-		return err
-	}
-	for _, resource := range resources {
-		az.appendResource(&resource)
-		resourceGroupID, err := ParseAzureResourceID(*resource.ID)
-		if err != nil {
-			return err
+func (g *NetworkWatcherGenerator) listWatchers(client *armnetwork.WatchersClient) ([]*armnetwork.Watcher, error) {
+	var watchers []*armnetwork.Watcher
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListAllPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			watchers = append(watchers, page.Value...)
 		}
-		err = az.appendFlowLogs(&resource, resourceGroupID)
-		if err != nil {
-			return err
-		}
-		err = az.appendPacketCaptures(&resource, resourceGroupID)
-		if err != nil {
-			return err
+		return watchers, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			watchers = append(watchers, page.Value...)
 		}
 	}
-	return nil
+	return watchers, nil
 }

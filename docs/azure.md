@@ -1,5 +1,13 @@
 # Use with Azure
 
+## Supported provider version (floor)
+
+Terraformer refreshes generated resources through the real
+`terraform-provider-azurerm` plugin you have installed. The resource coverage
+and gap list are measured against **azurerm v4.78.0** — treat this as the
+supported floor. Older providers may lack resources terraformer emits (refresh
+will fail); newer providers are a superset and work.
+
 ## Authentication
 
 ### Supported Methods
@@ -55,15 +63,29 @@ export ARM_USE_ADAL=true
 *   `analysis`
     * `azurerm_analysis_services_server`
 *   `app_service`
-    * `azurerm_app_service`
+    * `azurerm_linux_function_app`
+    * `azurerm_linux_web_app`
+    * `azurerm_service_plan`
+    * `azurerm_windows_function_app`
+    * `azurerm_windows_web_app`
 *   `application_gateway`
     * `azurerm_application_gateway`
 *   `container`
     * `azurerm_container_group`
     * `azurerm_container_registry`
+    * `azurerm_container_registry_replication`
+    * `azurerm_container_registry_task`
     * `azurerm_container_registry_webhook`
+*   `custom_provider`
+    * `azurerm_custom_provider`
 *   `cosmosdb`
     * `azurerm_cosmosdb_account`
+    * `azurerm_cosmosdb_cassandra_keyspace`
+    * `azurerm_cosmosdb_cassandra_table`
+    * `azurerm_cosmosdb_gremlin_database`
+    * `azurerm_cosmosdb_gremlin_graph`
+    * `azurerm_cosmosdb_mongo_collection`
+    * `azurerm_cosmosdb_mongo_database`
     * `azurerm_cosmosdb_sql_container`
     * `azurerm_cosmosdb_sql_database`
     * `azurerm_cosmosdb_table`
@@ -119,11 +141,13 @@ export ARM_USE_ADAL=true
     * `azurerm_mysql_configuration`
     * `azurerm_mysql_database`
     * `azurerm_mysql_firewall_rule`
+    * `azurerm_mysql_flexible_server`
     * `azurerm_mysql_server`
     * `azurerm_mysql_virtual_network_rule`
     * `azurerm_postgresql_configuration`
     * `azurerm_postgresql_database`
     * `azurerm_postgresql_firewall_rule`
+    * `azurerm_postgresql_flexible_server`
     * `azurerm_postgresql_server`
     * `azurerm_postgresql_virtual_network_rule`
     * `azurerm_sql_active_directory_administrator`
@@ -133,8 +157,14 @@ export ARM_USE_ADAL=true
     * `azurerm_sql_firewall_rule`
     * `azurerm_sql_server`
     * `azurerm_sql_virtual_network_rule`
+*   `database_migration`
+    * `azurerm_database_migration_service`
 *   `databricks`
     * `azurerm_databricks_workspace`
+*   `device_update`
+    * `azurerm_iothub_device_update_account`
+*   `dev_test_lab`
+    * `azurerm_dev_test_lab`
 *   `disk`
     * `azurerm_managed_disk`
 *   `dns`
@@ -150,20 +180,208 @@ export ARM_USE_ADAL=true
     * `azurerm_dns_zone`
 *   `eventhub`
     * `azurerm_eventhub`
+    * `azurerm_eventhub_authorization_rule`
     * `azurerm_eventhub_consumer_group`
     * `azurerm_eventhub_namespace`
     * `azurerm_eventhub_namespace_authorization_rule`
+    * `azurerm_eventhub_namespace_disaster_recovery_config`
+*   `ddos`
+    * `azurerm_network_ddos_protection_plan`
+*   `firewall`
+    * `azurerm_firewall`
+*   `kubernetes_fleet`
+    * `azurerm_kubernetes_fleet_manager`
+*   `frontdoor`
+    * `azurerm_frontdoor`
+*   `kubernetes`
+    * `azurerm_kubernetes_cluster`
+    * `azurerm_kubernetes_cluster_node_pool`
+*   `application_insights`
+    * `azurerm_application_insights`
+*   `arc_kubernetes`
+    * `azurerm_arc_kubernetes_cluster`
+*   `arc`
+    * `azurerm_arc_machine`
+*   `attestation`
+    * `azurerm_attestation_provider`
+*   `automanage`
+    * `azurerm_automanage_configuration`
+*   `automation`
+    * `azurerm_automation_account`
+*   `data_protection`
+    * `azurerm_data_protection_backup_vault`
+*   `app_configuration`
+    * `azurerm_app_configuration`
+*   `apim`
+    * `azurerm_api_management`
+*   `bastion`
+    * `azurerm_bastion_host`
+*   `batch`
+    * `azurerm_batch_account`
+*   `dashboard`
+    * `azurerm_dashboard_grafana`
+*   `data_share`
+    * `azurerm_data_share_account`
+*   `databox_edge`
+    * `azurerm_databox_edge_device`
+*   `datadog`
+    * `azurerm_datadog_monitor`
+*   `dynatrace`
+    * `azurerm_dynatrace_monitor`
+*   `digital_twins`
+    * `azurerm_digital_twins_instance`
+*   `elastic`
+    * `azurerm_elastic_cloud_elasticsearch`
+*   `elastic_san`
+    * `azurerm_elastic_san`
+*   `hdinsight`
+    * `azurerm_hdinsight_hadoop_cluster`
+    * `azurerm_hdinsight_hbase_cluster`
+    * `azurerm_hdinsight_interactive_query_cluster`
+    * `azurerm_hdinsight_kafka_cluster`
+    * `azurerm_hdinsight_ml_services_cluster`
+    * `azurerm_hdinsight_rserver_cluster`
+    * `azurerm_hdinsight_spark_cluster`
+    * `azurerm_hdinsight_storm_cluster`
+*   `healthcare`
+    * `azurerm_healthcare_service`
+*   `hpc_cache`
+    * `azurerm_hpc_cache`
+*   `load_test`
+    * `azurerm_load_test`
+*   `private_dns_resolver`
+    * `azurerm_private_dns_resolver`
+*   `spring_cloud`
+    * `azurerm_spring_cloud_service`
+*   `cdn`
+    * `azurerm_cdn_endpoint`
+    * `azurerm_cdn_profile`
+*   `chaos_studio`
+    * `azurerm_chaos_studio_experiment`
+*   `communication`
+    * `azurerm_communication_service`
+*   `confidential_ledger`
+    * `azurerm_confidential_ledger`
+*   `dev_center`
+    * `azurerm_dev_center`
+*   `fluid_relay`
+    * `azurerm_fluid_relay_server`
+*   `cognitive`
+    * `azurerm_cognitive_account`
+*   `container_app`
+    * `azurerm_container_app`
+*   `iotcentral`
+    * `azurerm_iotcentral_application`
+*   `iothub`
+    * `azurerm_iothub`
+*   `kusto`
+    * `azurerm_kusto_cluster`
+*   `maintenance`
+    * `azurerm_maintenance_configuration`
+*   `management_group`
+    * `azurerm_management_group`
+*   `stream_analytics`
+    * `azurerm_stream_analytics_job`
+*   `mobile_network`
+    * `azurerm_mobile_network`
+*   `monitor`
+    * `azurerm_monitor_action_group`
+    * `azurerm_monitor_activity_log_alert`
+    * `azurerm_monitor_autoscale_setting`
+    * `azurerm_monitor_metric_alert`
+*   `eventgrid`
+    * `azurerm_eventgrid_domain`
+    * `azurerm_eventgrid_topic`
+*   `recovery_services`
+    * `azurerm_recovery_services_vault`
+*   `role_assignment`
+    * `azurerm_role_assignment`
+*   `search`
+    * `azurerm_search_service`
+*   `servicebus`
+    * `azurerm_servicebus_namespace`
+*   `signalr`
+    * `azurerm_signalr_service`
+*   `lighthouse`
+    * `azurerm_lighthouse_assignment`
+    * `azurerm_lighthouse_definition`
+*   `lab_service`
+    * `azurerm_lab_service_lab`
 *   `load_balancer`
     * `azurerm_lb`
+*   `log_analytics`
+    * `azurerm_log_analytics_workspace`
+*   `machine_learning`
+    * `azurerm_machine_learning_workspace`
+*   `managed_identity`
+    * `azurerm_user_assigned_identity`
+*   `service_networking`
+    * `azurerm_application_load_balancer`
+*   `service_fabric`
+    * `azurerm_service_fabric_cluster`
+*   `spatial_anchors`
+    * `azurerm_spatial_anchors_account`
+*   `storage_mover`
+    * `azurerm_storage_mover`
+*   `traffic_manager`
+    * `azurerm_traffic_manager_profile`
+*   `virtual_desktop`
+    * `azurerm_virtual_desktop_application_group`
+    * `azurerm_virtual_desktop_host_pool`
+    * `azurerm_virtual_desktop_scaling_plan`
+    * `azurerm_virtual_desktop_workspace`
+*   `vmware`
+    * `azurerm_vmware_private_cloud`
+*   `voice_services`
+    * `azurerm_voice_services_communications_gateway`
+*   `virtual_wan`
+    * `azurerm_virtual_hub`
+    * `azurerm_virtual_wan`
     * `azurerm_lb_backend_address_pool`
     * `azurerm_lb_nat_rule`
+    * `azurerm_lb_outbound_rule`
     * `azurerm_lb_probe`
+    * `azurerm_lb_rule`
+*   `mssql`
+    * `azurerm_mssql_managed_instance`
+*   `nat_gateway`
+    * `azurerm_nat_gateway`
+*   `maps`
+    * `azurerm_maps_account`
+*   `netapp`
+    * `azurerm_netapp_account`
+*   `new_relic`
+    * `azurerm_new_relic_monitor`
+*   `nginx`
+    * `azurerm_nginx_deployment`
+*   `notification_hub`
+    * `azurerm_notification_hub_namespace`
+*   `relay`
+    * `azurerm_relay_namespace`
+*   `web_pubsub`
+    * `azurerm_web_pubsub`
+*   `oracle`
+    * `azurerm_oracle_autonomous_database`
+    * `azurerm_oracle_cloud_vm_cluster`
+    * `azurerm_oracle_exadata_infrastructure`
+*   `orbital`
+    * `azurerm_orbital_contact_profile`
+    * `azurerm_orbital_spacecraft`
+*   `policy`
+    * `azurerm_policy_assignment`
+    * `azurerm_policy_definition`
+    * `azurerm_policy_set_definition`
+*   `portal`
+    * `azurerm_portal_dashboard`
+*   `powerbi`
+    * `azurerm_powerbi_embedded`
 *   `network_interface`
     * `azurerm_network_interface`
 *   `network_security_group`
     * `azurerm_network_security_group`
     * `azurerm_network_security_rule`
 *   `network_watcher`
+    * `azurerm_network_connection_monitor`
     * `azurerm_network_packet_capture`
     * `azurerm_network_watcher`
     * `azurerm_network_watcher_flow_log`
@@ -185,8 +403,12 @@ export ARM_USE_ADAL=true
     * `azurerm_public_ip_prefix`
 *   `purview`
     * `azurerm_purview_account`
+*   `redis_enterprise`
+    * `azurerm_redis_enterprise_cluster`
 *   `redis`
     * `azurerm_redis_cache`
+    * `azurerm_redis_firewall_rule`
+    * `azurerm_redis_linked_server`
 *   `resource_group`
     * `azurerm_management_lock`
     * `azurerm_resource_group`
@@ -221,6 +443,10 @@ export ARM_USE_ADAL=true
     * `azurerm_virtual_machine`
 *   `virtual_network`
     * `azurerm_virtual_network`
+    * `azurerm_virtual_network_gateway`
+    * `azurerm_local_network_gateway`
+    * `azurerm_virtual_network_gateway_connection`
+    * `azurerm_virtual_network_peering`
 
 ## Notes
 

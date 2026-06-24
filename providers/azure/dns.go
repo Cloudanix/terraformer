@@ -16,130 +16,110 @@ package azure
 
 import (
 	"context"
-	"log"
 	"strings"
 
-	"github.com/Azure/azure-sdk-for-go/services/dns/mgmt/2018-05-01/dns"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/dns/armdns"
 )
 
 type DNSGenerator struct {
 	AzureService
 }
 
-func (g *DNSGenerator) listRecordSets(resourceGroupName string, zoneName string, top *int32) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	RecordSetsClient := dns.NewRecordSetsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	RecordSetsClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	recordSetIterator, err := RecordSetsClient.ListAllByDNSZoneComplete(ctx, resourceGroupName, zoneName, top, "")
-	if err != nil {
-		return nil, err
-	}
-	for recordSetIterator.NotDone() {
-		recordSet := recordSetIterator.Value()
-		// NOTE:
-		// Format example: "Microsoft.Network/dnszones/AAAA"
-		recordTypeSplitted := strings.Split(*recordSet.Type, "/")
-		recordType := recordTypeSplitted[len(recordTypeSplitted)-1]
-		typeResourceNameMap := map[string]string{
-			"A":     "azurerm_dns_a_record",
-			"AAAA":  "azurerm_dns_aaaa_record",
-			"CAA":   "azurerm_dns_caa_record",
-			"CNAME": "azurerm_dns_cname_record",
-			"MX":    "azurerm_dns_mx_record",
-			"NS":    "azurerm_dns_ns_record",
-			"PTR":   "azurerm_dns_ptr_record",
-			"SRV":   "azurerm_dns_srv_record",
-			"TXT":   "azurerm_dns_txt_record",
-		}
-		if resName, exist := typeResourceNameMap[recordType]; exist {
-			resources = append(resources, terraformutils.NewSimpleResource(
-				*recordSet.ID,
-				*recordSet.Name,
-				resName,
-				g.ProviderName,
-				[]string{}))
-		}
-
-		if err := recordSetIterator.Next(); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-
-	}
-	return resources, nil
+// dnsRecordResourceType maps a DNS record-set ARM type
+// (e.g. "Microsoft.Network/dnszones/AAAA") to its azurerm resource type, or ""
+// for record types terraformer does not import (SOA).
+func dnsRecordResourceType(armType string) string {
+	parts := strings.Split(armType, "/")
+	recordType := parts[len(parts)-1]
+	return map[string]string{
+		"A":     "azurerm_dns_a_record",
+		"AAAA":  "azurerm_dns_aaaa_record",
+		"CAA":   "azurerm_dns_caa_record",
+		"CNAME": "azurerm_dns_cname_record",
+		"MX":    "azurerm_dns_mx_record",
+		"NS":    "azurerm_dns_ns_record",
+		"PTR":   "azurerm_dns_ptr_record",
+		"SRV":   "azurerm_dns_srv_record",
+		"TXT":   "azurerm_dns_txt_record",
+	}[recordType]
 }
 
-func (g *DNSGenerator) listAndAddForDNSZone() ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	DNSZonesClient := dns.NewZonesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	DNSZonesClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	var pageSize int32 = 50
-
-	var (
-		dnsZoneIterator dns.ZoneListResultIterator
-		err             error
-	)
-
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		dnsZoneIterator, err = DNSZonesClient.ListByResourceGroupComplete(ctx, rg, &pageSize)
-	} else {
-		dnsZoneIterator, err = DNSZonesClient.ListComplete(ctx, &pageSize)
-	}
-	if err != nil {
-		return nil, err
-	}
-	for dnsZoneIterator.NotDone() {
-		zone := dnsZoneIterator.Value()
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*zone.ID,
-			*zone.Name,
-			"azurerm_dns_zone",
-			g.ProviderName,
-			[]string{}))
-
-		id, err := ParseAzureResourceID(*zone.ID)
-		if err != nil {
-			return nil, err
-		}
-
-		records, err := g.listRecordSets(id.ResourceGroup, *zone.Name, &pageSize)
-		if err != nil {
-			return nil, err
-		}
-		resources = append(resources, records...)
-
-		if err := dnsZoneIterator.Next(); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-
-	return resources, nil
-}
-
+// InitResources imports azurerm_dns_zone and its record sets. Migrated to the
+// Track 2 armdns SDK (was Track 1 services/dns).
 func (g *DNSGenerator) InitResources() error {
-	functions := []func() ([]terraformutils.Resource, error){
-		g.listAndAddForDNSZone,
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	zonesClient, err := armdns.NewZonesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	recordsClient, err := armdns.NewRecordSetsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
 
-	for _, f := range functions {
-		resources, err := f()
+	zones, err := g.listZones(zonesClient)
+	if err != nil {
+		return err
+	}
+	for _, zone := range zones {
+		zoneID := valueOrEmpty(zone.ID)
+		if zoneID == "" {
+			continue
+		}
+		g.AppendSimpleResource(zoneID, valueOrEmpty(zone.Name), "azurerm_dns_zone")
+		parsed, err := ParseAzureResourceID(zoneID)
 		if err != nil {
 			return err
 		}
-		g.Resources = append(g.Resources, resources...)
+		pager := recordsClient.NewListAllByDNSZonePager(parsed.ResourceGroup, valueOrEmpty(zone.Name), nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return err
+			}
+			for _, rs := range page.Value {
+				if rs == nil {
+					continue
+				}
+				tfType := dnsRecordResourceType(valueOrEmpty(rs.Type))
+				if tfType == "" {
+					continue
+				}
+				if id := valueOrEmpty(rs.ID); id != "" {
+					g.AppendSimpleResource(id, valueOrEmpty(rs.Name), tfType)
+				}
+			}
+		}
 	}
-
 	return nil
+}
+
+func (g *DNSGenerator) listZones(client *armdns.ZonesClient) ([]*armdns.Zone, error) {
+	var zones []*armdns.Zone
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			zones = append(zones, page.Value...)
+		}
+		return zones, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListByResourceGroupPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			zones = append(zones, page.Value...)
+		}
+	}
+	return zones, nil
 }

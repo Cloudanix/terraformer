@@ -15,56 +15,38 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2019-08-01/network"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7"
 )
 
 type NetworkInterfaceGenerator struct {
 	AzureService
 }
 
-func (g NetworkInterfaceGenerator) createResources(interfaceListResult network.InterfaceListResultIterator) ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	for interfaceListResult.NotDone() {
-		networkInterface := interfaceListResult.Value()
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*networkInterface.ID,
-			*networkInterface.Name,
-			"azurerm_network_interface",
-			"azurerm",
-			[]string{}))
-		if err := interfaceListResult.Next(); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
+// InitResources imports azurerm_network_interface. Migrated to the Track 2
+// armnetwork SDK (was Track 1 services/network).
 func (g *NetworkInterfaceGenerator) InitResources() error {
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	interfacesClient := network.NewInterfacesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	interfacesClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-	var (
-		output network.InterfaceListResultIterator
-		err    error
-	)
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		output, err = interfacesClient.ListComplete(ctx, rg)
-	} else {
-		output, err = interfacesClient.ListAllComplete(ctx)
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
+	client, err := armnetwork.NewInterfacesClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	g.Resources, err = g.createResources(output)
-	return err
+	id := func(i *armnetwork.Interface) string { return valueOrEmpty(i.ID) }
+	name := func(i *armnetwork.Interface) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListAllPager(nil),
+			func(p armnetwork.InterfacesClientListAllResponse) []*armnetwork.Interface { return p.Value },
+			id, name, "azurerm_network_interface")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListPager(rg, nil),
+			func(p armnetwork.InterfacesClientListResponse) []*armnetwork.Interface { return p.Value },
+			id, name, "azurerm_network_interface"); err != nil {
+			return err
+		}
+	}
+	return nil
 }

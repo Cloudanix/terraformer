@@ -15,57 +15,42 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2016-09-01/locks"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armlocks"
 )
 
 type ManagementLockGenerator struct {
 	AzureService
 }
 
-func (az *ManagementLockGenerator) listResources() ([]locks.ManagementLockObject, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := locks.NewManagementLocksClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator locks.ManagementLockListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListAtResourceGroupLevelComplete(ctx, resourceGroup, "")
-	} else {
-		iterator, err = client.ListAtSubscriptionLevelComplete(ctx, "")
+// InitResources imports azurerm_management_lock. Migrated to the Track 2
+// armlocks SDK (was Track 1 services/resources/locks).
+func (g *ManagementLockGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []locks.ManagementLockObject
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *ManagementLockGenerator) appendResource(resource *locks.ManagementLockObject) {
-	az.AppendSimpleResource(*resource.ID, *resource.Name, "azurerm_management_lock")
-}
-
-func (az *ManagementLockGenerator) InitResources() error {
-
-	resources, err := az.listResources()
+	client, err := armlocks.NewManagementLocksClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for _, resource := range resources {
-		az.appendResource(&resource)
+	id := func(i *armlocks.ManagementLockObject) string { return valueOrEmpty(i.ID) }
+	name := func(i *armlocks.ManagementLockObject) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListAtSubscriptionLevelPager(nil),
+			func(p armlocks.ManagementLocksClientListAtSubscriptionLevelResponse) []*armlocks.ManagementLockObject {
+				return p.Value
+			},
+			id, name, "azurerm_management_lock")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListAtResourceGroupLevelPager(rg, nil),
+			func(p armlocks.ManagementLocksClientListAtResourceGroupLevelResponse) []*armlocks.ManagementLockObject {
+				return p.Value
+			},
+			id, name, "azurerm_management_lock"); err != nil {
+			return err
+		}
 	}
 	return nil
 }

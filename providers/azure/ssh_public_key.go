@@ -15,57 +15,42 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/compute/mgmt/2020-12-01/compute"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/compute/armcompute/v6"
 )
 
 type SSHPublicKeyGenerator struct {
 	AzureService
 }
 
-func (az *SSHPublicKeyGenerator) listResources() ([]compute.SSHPublicKeyResource, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := compute.NewSSHPublicKeysClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator compute.SSHPublicKeysGroupListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListByResourceGroupComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListBySubscriptionComplete(ctx)
+// InitResources imports azurerm_ssh_public_key. Migrated to the Track 2
+// armcompute SDK (was Track 1 services/compute).
+func (g *SSHPublicKeyGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []compute.SSHPublicKeyResource
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *SSHPublicKeyGenerator) appendResource(resource *compute.SSHPublicKeyResource) {
-	az.AppendSimpleResource(*resource.ID, *resource.Name, "azurerm_ssh_public_key")
-}
-
-func (az *SSHPublicKeyGenerator) InitResources() error {
-
-	resources, err := az.listResources()
+	client, err := armcompute.NewSSHPublicKeysClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for _, resource := range resources {
-		az.appendResource(&resource)
+	id := func(i *armcompute.SSHPublicKeyResource) string { return valueOrEmpty(i.ID) }
+	name := func(i *armcompute.SSHPublicKeyResource) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListBySubscriptionPager(nil),
+			func(p armcompute.SSHPublicKeysClientListBySubscriptionResponse) []*armcompute.SSHPublicKeyResource {
+				return p.Value
+			},
+			id, name, "azurerm_ssh_public_key")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armcompute.SSHPublicKeysClientListByResourceGroupResponse) []*armcompute.SSHPublicKeyResource {
+				return p.Value
+			},
+			id, name, "azurerm_ssh_public_key"); err != nil {
+			return err
+		}
 	}
 	return nil
 }

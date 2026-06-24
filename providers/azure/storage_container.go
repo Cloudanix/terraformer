@@ -1,13 +1,25 @@
+// Copyright 2019 The Terraformer Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
 package azure
 
 import (
 	"context"
 	"fmt"
 
-	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
-	"github.com/Azure/go-autorest/autorest"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
 )
 
 const (
@@ -18,23 +30,18 @@ type StorageContainerGenerator struct {
 	AzureService
 }
 
-func NewStorageContainerGenerator(resourceManagerEndpoint string, subscriptionID string, authorizer autorest.Authorizer, rg string) *StorageContainerGenerator {
-	storageContainerGenerator := new(StorageContainerGenerator)
-	storageContainerGenerator.Args = map[string]interface{}{}
-	storageContainerGenerator.Args["config"] = authentication.Config{CustomResourceManagerEndpoint: resourceManagerEndpoint, SubscriptionID: subscriptionID}
-	storageContainerGenerator.Args["authorizer"] = authorizer
-	storageContainerGenerator.Args["resource_group"] = rg
-
-	return storageContainerGenerator
-}
-
-func (g StorageContainerGenerator) ListBlobContainers() ([]terraformutils.Resource, error) {
+// ListBlobContainers enumerates azurerm_storage_container across the storage
+// accounts in scope. Migrated to the Track 2 armstorage SDK.
+func (g *StorageContainerGenerator) ListBlobContainers() ([]terraformutils.Resource, error) {
 	var containerResources []terraformutils.Resource
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	blobContainersClient := storage.NewBlobContainersClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	blobContainersClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-	ctx := context.Background()
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return containerResources, nil
+	}
+	containersClient, err := armstorage.NewBlobContainersClient(subscriptionID, cred, opts)
+	if err != nil {
+		return nil, err
+	}
 
 	accounts, err := g.getStorageAccounts()
 	if err != nil {
@@ -42,32 +49,37 @@ func (g StorageContainerGenerator) ListBlobContainers() ([]terraformutils.Resour
 	}
 
 	for _, storageAccount := range accounts {
-		parsedStorageAccountResourceID, err := ParseAzureResourceID(*storageAccount.ID)
+		accountID := valueOrEmpty(storageAccount.ID)
+		if accountID == "" {
+			continue
+		}
+		parsed, err := ParseAzureResourceID(accountID)
 		if err != nil {
 			break
 		}
-		containerItemsIterator, err := blobContainersClient.ListComplete(ctx, parsedStorageAccountResourceID.ResourceGroup, *storageAccount.Name, "", "", "")
-		if err != nil {
-			return containerResources, err
-		}
-
-		for containerItemsIterator.NotDone() {
-			containerItem := containerItemsIterator.Value()
-			containerResources = append(containerResources,
-				terraformutils.NewResource(
-					fmt.Sprintf(containerIDFormat, *storageAccount.Name, *containerItem.Name),
-					*containerItem.Name,
+		accountName := valueOrEmpty(storageAccount.Name)
+		pager := containersClient.NewListPager(parsed.ResourceGroup, accountName, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return containerResources, err
+			}
+			for _, containerItem := range page.Value {
+				if containerItem == nil {
+					continue
+				}
+				name := valueOrEmpty(containerItem.Name)
+				containerResources = append(containerResources, terraformutils.NewResource(
+					fmt.Sprintf(containerIDFormat, accountName, name),
+					name,
 					"azurerm_storage_container",
 					"azurerm",
 					map[string]string{
-						"storage_account_name": *storageAccount.Name,
-						"name":                 *containerItem.Name,
+						"storage_account_name": accountName,
+						"name":                 name,
 					},
 					[]string{},
 					map[string]interface{}{}))
-
-			if err := containerItemsIterator.NextWithContext(ctx); err != nil {
-				return containerResources, err
 			}
 		}
 	}
@@ -75,46 +87,43 @@ func (g StorageContainerGenerator) ListBlobContainers() ([]terraformutils.Resour
 	return containerResources, nil
 }
 
-func (g *StorageContainerGenerator) getStorageAccounts() ([]storage.Account, error) {
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	accountsClient := storage.NewAccountsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	accountsClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-	var accounts []storage.Account
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		accountsResult, err := accountsClient.ListByResourceGroup(ctx, rg)
-		if err != nil {
-			return nil, err
-		}
-		if paccounts := accountsResult.Value; paccounts != nil {
-			accounts = append(accounts, *paccounts...)
-		}
-	} else {
-		accountsIterator, err := accountsClient.ListComplete(ctx)
-		if err != nil {
-			return nil, err
-		}
-		for accountsIterator.NotDone() {
-			account := accountsIterator.Value()
-			accounts = append(accounts, account)
-			if err := accountsIterator.NextWithContext(ctx); err != nil {
-				return accounts, err
+func (g *StorageContainerGenerator) getStorageAccounts() ([]*armstorage.Account, error) {
+	subscriptionID, cred, opts := g.getClientOptions()
+	client, err := armstorage.NewAccountsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return nil, err
+	}
+	var accounts []*armstorage.Account
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
 			}
+			accounts = append(accounts, page.Value...)
+		}
+		return accounts, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListByResourceGroupPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			accounts = append(accounts, page.Value...)
 		}
 	}
-
 	return accounts, nil
 }
 
 func (g *StorageContainerGenerator) InitResources() error {
-	storageAccounts, err := g.ListBlobContainers()
+	resources, err := g.ListBlobContainers()
 	if err != nil {
 		return err
 	}
-
-	g.Resources = storageAccounts
-
+	g.Resources = resources
 	return nil
 }

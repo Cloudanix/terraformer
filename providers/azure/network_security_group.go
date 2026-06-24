@@ -16,83 +16,93 @@ package azure
 
 import (
 	"context"
-	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/network/mgmt/2020-03-01/network"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/network/armnetwork/v7"
 )
 
 type NetworkSecurityGroupGenerator struct {
 	AzureService
 }
 
-func (az *NetworkSecurityGroupGenerator) listResources() ([]network.SecurityGroup, error) {
-	subscriptionID, resourceGroup, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewSecurityGroupsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	var (
-		iterator network.SecurityGroupListResultIterator
-		err      error
-	)
-	ctx := context.Background()
-	if resourceGroup != "" {
-		iterator, err = client.ListComplete(ctx, resourceGroup)
-	} else {
-		iterator, err = client.ListAllComplete(ctx)
+// InitResources imports azurerm_network_security_group (+ nested
+// azurerm_network_security_rule). Migrated to the Track 2 armnetwork SDK;
+// preserves duplicate-name handling.
+func (g *NetworkSecurityGroupGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
 	}
-	if err != nil {
-		return nil, err
-	}
-	var resources []network.SecurityGroup
-	for iterator.NotDone() {
-		item := iterator.Value()
-		resources = append(resources, item)
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
-func (az *NetworkSecurityGroupGenerator) appendResource(resource *network.SecurityGroup) {
-	az.AppendSimpleResourceWithDuplicateCheck(*resource.ID, *resource.Name, "azurerm_network_security_group")
-}
-
-func (az *NetworkSecurityGroupGenerator) appendRules(parent *network.SecurityGroup, resourceGroupID *ResourceID) error {
-	subscriptionID, _, authorizer, resourceManagerEndpoint := az.getClientArgs()
-	client := network.NewSecurityRulesClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	client.Authorizer = authorizer
-	ctx := context.Background()
-	iterator, err := client.ListComplete(ctx, resourceGroupID.ResourceGroup, *parent.Name)
+	nsgClient, err := armnetwork.NewSecurityGroupsClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	for iterator.NotDone() {
-		item := iterator.Value()
-		az.AppendSimpleResourceWithDuplicateCheck(*item.ID, *item.Name, "azurerm_network_security_rule")
-		if err := iterator.NextWithContext(ctx); err != nil {
-			log.Println(err)
+	rulesClient, err := armnetwork.NewSecurityRulesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+
+	groups, err := g.listSecurityGroups(nsgClient)
+	if err != nil {
+		return err
+	}
+	for _, nsg := range groups {
+		nsgID := valueOrEmpty(nsg.ID)
+		if nsgID == "" {
+			continue
+		}
+		g.AppendSimpleResourceWithDuplicateCheck(nsgID, valueOrEmpty(nsg.Name), "azurerm_network_security_group")
+		parsed, err := ParseAzureResourceID(nsgID)
+		if err != nil {
+			return err
+		}
+		if err := g.appendRules(rulesClient, parsed.ResourceGroup, valueOrEmpty(nsg.Name)); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func (az *NetworkSecurityGroupGenerator) InitResources() error {
-
-	resources, err := az.listResources()
-	if err != nil {
-		return err
+func (g *NetworkSecurityGroupGenerator) listSecurityGroups(client *armnetwork.SecurityGroupsClient) ([]*armnetwork.SecurityGroup, error) {
+	var groups []*armnetwork.SecurityGroup
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListAllPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			groups = append(groups, page.Value...)
+		}
+		return groups, nil
 	}
-	for _, resource := range resources {
-		az.appendResource(&resource)
-		resourceGroupID, err := ParseAzureResourceID(*resource.ID)
+	for _, rg := range rgs {
+		pager := client.NewListPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			groups = append(groups, page.Value...)
+		}
+	}
+	return groups, nil
+}
+
+func (g *NetworkSecurityGroupGenerator) appendRules(client *armnetwork.SecurityRulesClient, resourceGroup, nsgName string) error {
+	pager := client.NewListPager(resourceGroup, nsgName, nil)
+	for pager.More() {
+		page, err := pager.NextPage(context.TODO())
 		if err != nil {
 			return err
 		}
-		err = az.appendRules(&resource, resourceGroupID)
-		if err != nil {
-			return err
+		for _, rule := range page.Value {
+			if rule == nil {
+				continue
+			}
+			if id := valueOrEmpty(rule.ID); id != "" {
+				g.AppendSimpleResourceWithDuplicateCheck(id, valueOrEmpty(rule.Name), "azurerm_network_security_rule")
+			}
 		}
 	}
 	return nil

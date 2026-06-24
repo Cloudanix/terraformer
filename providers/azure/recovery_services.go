@@ -1,0 +1,56 @@
+// Copyright 2019 The Terraformer Authors.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//      http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+package azure
+
+import (
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/recoveryservices/armrecoveryservices"
+)
+
+type RecoveryServicesGenerator struct {
+	AzureService
+}
+
+func (g *RecoveryServicesGenerator) InitResources() error {
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	client, err := armrecoveryservices.NewVaultsClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+
+	id := func(i *armrecoveryservices.Vault) string { return valueOrEmpty(i.ID) }
+	name := func(i *armrecoveryservices.Vault) string { return valueOrEmpty(i.Name) }
+
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListBySubscriptionIDPager(nil),
+			func(p armrecoveryservices.VaultsClientListBySubscriptionIDResponse) []*armrecoveryservices.Vault {
+				return p.Value
+			},
+			id, name, "azurerm_recovery_services_vault")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armrecoveryservices.VaultsClientListByResourceGroupResponse) []*armrecoveryservices.Vault {
+				return p.Value
+			},
+			id, name, "azurerm_recovery_services_vault"); err != nil {
+			return err
+		}
+	}
+	return nil
+}

@@ -16,59 +16,91 @@ package azure
 
 import (
 	"context"
-	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/redis/mgmt/2018-03-01/redis"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/redis/armredis"
 )
 
 type RedisGenerator struct {
 	AzureService
 }
 
-func (g *RedisGenerator) listRedisServers() ([]terraformutils.Resource, error) {
-	var resources []terraformutils.Resource
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	RedisClient := redis.NewClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	redisServersIterator, err := RedisClient.ListComplete(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	for redisServersIterator.NotDone() {
-		redisServer := redisServersIterator.Value()
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*redisServer.ID,
-			*redisServer.Name,
-			"azurerm_redis_cache",
-			g.ProviderName,
-			[]string{}))
-
-		if err := redisServersIterator.Next(); err != nil {
-			log.Println(err)
-			break
-		}
-	}
-
-	return resources, nil
-}
-
+// InitResources imports azurerm_redis_cache and its firewall rules and linked
+// servers. Migrated to the Track 2 armredis SDK (was Track 1 services/redis).
 func (g *RedisGenerator) InitResources() error {
-	functions := []func() ([]terraformutils.Resource, error){
-		g.listRedisServers,
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	cacheClient, err := armredis.NewClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	firewallClient, err := armredis.NewFirewallRulesClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
+	}
+	linkedClient, err := armredis.NewLinkedServerClient(subscriptionID, cred, opts)
+	if err != nil {
+		return err
 	}
 
-	for _, f := range functions {
-		resources, err := f()
+	caches, err := g.listCaches(cacheClient)
+	if err != nil {
+		return err
+	}
+	for _, cache := range caches {
+		cacheID := valueOrEmpty(cache.ID)
+		if cacheID == "" {
+			continue
+		}
+		g.AppendSimpleResource(cacheID, valueOrEmpty(cache.Name), "azurerm_redis_cache")
+		parsed, err := ParseAzureResourceID(cacheID)
 		if err != nil {
 			return err
 		}
-		g.Resources = append(g.Resources, resources...)
-	}
+		rg, cacheName := parsed.ResourceGroup, valueOrEmpty(cache.Name)
 
+		if err := appendFromPager(&g.AzureService, firewallClient.NewListPager(rg, cacheName, nil),
+			func(p armredis.FirewallRulesClientListResponse) []*armredis.FirewallRule { return p.Value },
+			func(i *armredis.FirewallRule) string { return valueOrEmpty(i.ID) },
+			func(i *armredis.FirewallRule) string { return valueOrEmpty(i.Name) },
+			"azurerm_redis_firewall_rule"); err != nil {
+			return err
+		}
+		if err := appendFromPager(&g.AzureService, linkedClient.NewListPager(rg, cacheName, nil),
+			func(p armredis.LinkedServerClientListResponse) []*armredis.LinkedServerWithProperties { return p.Value },
+			func(i *armredis.LinkedServerWithProperties) string { return valueOrEmpty(i.ID) },
+			func(i *armredis.LinkedServerWithProperties) string { return valueOrEmpty(i.Name) },
+			"azurerm_redis_linked_server"); err != nil {
+			return err
+		}
+	}
 	return nil
+}
+
+func (g *RedisGenerator) listCaches(client *armredis.Client) ([]*armredis.ResourceInfo, error) {
+	var caches []*armredis.ResourceInfo
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		pager := client.NewListBySubscriptionPager(nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			caches = append(caches, page.Value...)
+		}
+		return caches, nil
+	}
+	for _, rg := range rgs {
+		pager := client.NewListByResourceGroupPager(rg, nil)
+		for pager.More() {
+			page, err := pager.NextPage(context.TODO())
+			if err != nil {
+				return nil, err
+			}
+			caches = append(caches, page.Value...)
+		}
+	}
+	return caches, nil
 }

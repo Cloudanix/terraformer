@@ -15,71 +15,38 @@
 package azure
 
 import (
-	"context"
-	"log"
-
-	"github.com/Azure/azure-sdk-for-go/services/storage/mgmt/2019-04-01/storage"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/storage/armstorage"
 )
 
 type StorageAccountGenerator struct {
 	AzureService
 }
 
-func (g StorageAccountGenerator) createResourcesByResourceGroup(ctx context.Context, client storage.AccountsClient, rg string) ([]terraformutils.Resource, error) {
-	accountListResult, err := client.ListByResourceGroup(ctx, rg)
-	if err != nil {
-		return nil, err
-	}
-	var resources []terraformutils.Resource
-	if accounts := accountListResult.Value; accounts != nil {
-		for _, account := range *accounts {
-			resources = append(resources, terraformutils.NewSimpleResource(
-				*account.ID,
-				*account.Name,
-				"azurerm_storage_account",
-				"azurerm",
-				[]string{}))
-		}
-	}
-	return resources, nil
-}
-func (g StorageAccountGenerator) createResources(ctx context.Context, client storage.AccountsClient) ([]terraformutils.Resource, error) {
-	accountListResultIterator, err := client.ListComplete(ctx)
-	if err != nil {
-		return nil, err
-	}
-	var resources []terraformutils.Resource
-	for accountListResultIterator.NotDone() {
-		account := accountListResultIterator.Value()
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*account.ID,
-			*account.Name,
-			"azurerm_storage_account",
-			"azurerm",
-			[]string{}))
-		if err := accountListResultIterator.Next(); err != nil {
-			log.Println(err)
-			return resources, err
-		}
-	}
-	return resources, nil
-}
-
+// InitResources imports azurerm_storage_account. Migrated to the Track 2
+// armstorage SDK (was Track 1 services/storage).
 func (g *StorageAccountGenerator) InitResources() error {
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	accountsClient := storage.NewAccountsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-	accountsClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		output, err := g.createResourcesByResourceGroup(ctx, accountsClient, rg)
-		g.Resources = output
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
+		return nil
+	}
+	client, err := armstorage.NewAccountsClient(subscriptionID, cred, opts)
+	if err != nil {
 		return err
 	}
-	output, err := g.createResources(ctx, accountsClient)
-	g.Resources = output
-	return err
+	id := func(i *armstorage.Account) string { return valueOrEmpty(i.ID) }
+	name := func(i *armstorage.Account) string { return valueOrEmpty(i.Name) }
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armstorage.AccountsClientListResponse) []*armstorage.Account { return p.Value },
+			id, name, "azurerm_storage_account")
+	}
+	for _, rg := range rgs {
+		if err := appendFromPager(&g.AzureService, client.NewListByResourceGroupPager(rg, nil),
+			func(p armstorage.AccountsClientListByResourceGroupResponse) []*armstorage.Account { return p.Value },
+			id, name, "azurerm_storage_account"); err != nil {
+			return err
+		}
+	}
+	return nil
 }

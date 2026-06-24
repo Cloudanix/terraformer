@@ -16,63 +16,45 @@ package azure
 
 import (
 	"context"
-	"log"
 
-	"github.com/Azure/azure-sdk-for-go/services/resources/mgmt/2019-05-01/resources"
-	"github.com/Azure/go-autorest/autorest"
-	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
-	"github.com/hashicorp/go-azure-helpers/authentication"
+	"github.com/Azure/azure-sdk-for-go/sdk/resourcemanager/resources/armresources"
 )
 
 type ResourceGroupGenerator struct {
 	AzureService
 }
 
-func (g ResourceGroupGenerator) createResources(groupListResultIterator resources.GroupListResultIterator) []terraformutils.Resource {
-	var resources []terraformutils.Resource
-	for groupListResultIterator.NotDone() {
-		group := groupListResultIterator.Value()
-		resources = append(resources, terraformutils.NewSimpleResource(
-			*group.ID,
-			*group.Name,
-			"azurerm_resource_group",
-			"azurerm",
-			[]string{}))
-		if err := groupListResultIterator.Next(); err != nil {
-			log.Println(err)
-			break
-		}
-	}
-	return resources
-}
-
+// InitResources imports azurerm_resource_group. Migrated to the Track 2
+// armresources SDK (was Track 1 services/resources). When -R names specific
+// resource groups it Gets each; otherwise it lists all groups in the subscription.
 func (g *ResourceGroupGenerator) InitResources() error {
-	ctx := context.Background()
-	subscriptionID := g.Args["config"].(authentication.Config).SubscriptionID
-	resourceManagerEndpoint := g.Args["config"].(authentication.Config).CustomResourceManagerEndpoint
-	groupsClient := resources.NewGroupsClientWithBaseURI(resourceManagerEndpoint, subscriptionID)
-
-	groupsClient.Authorizer = g.Args["authorizer"].(autorest.Authorizer)
-
-	if rg := g.Args["resource_group"].(string); rg != "" {
-		group, err := groupsClient.Get(ctx, rg)
-		if err != nil {
-			return err
-		}
-		g.Resources = []terraformutils.Resource{
-			terraformutils.NewSimpleResource(
-				*group.ID,
-				*group.Name,
-				"azurerm_resource_group",
-				"azurerm",
-				[]string{}),
-		}
+	subscriptionID, cred, opts := g.getClientOptions()
+	if cred == nil {
 		return nil
 	}
-	output, err := groupsClient.ListComplete(ctx, "", nil)
+	client, err := armresources.NewResourceGroupsClient(subscriptionID, cred, opts)
 	if err != nil {
 		return err
 	}
-	g.Resources = g.createResources(output)
+
+	rgs := g.resourceGroups()
+	if len(rgs) == 0 {
+		return appendFromPager(&g.AzureService, client.NewListPager(nil),
+			func(p armresources.ResourceGroupsClientListResponse) []*armresources.ResourceGroup {
+				return p.Value
+			},
+			func(i *armresources.ResourceGroup) string { return valueOrEmpty(i.ID) },
+			func(i *armresources.ResourceGroup) string { return valueOrEmpty(i.Name) },
+			"azurerm_resource_group")
+	}
+	for _, rg := range rgs {
+		resp, err := client.Get(context.TODO(), rg, nil)
+		if err != nil {
+			return err
+		}
+		if id := valueOrEmpty(resp.ID); id != "" {
+			g.AppendSimpleResource(id, valueOrEmpty(resp.Name), "azurerm_resource_group")
+		}
+	}
 	return nil
 }
