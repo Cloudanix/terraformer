@@ -312,3 +312,11 @@ Coverage **88 → 600** emitted types; **105 services**; full repo green incl. `
 1. **SDK not in `google.golang.org/api v0.286.0`** (need `go get google.golang.org/api@latest`): chronicle (~13), gemini/cloudaicompanion (~12), ces (~9), scc-management/securitycentermanagement (~10). Plain `go get` does NOT bump the module.
 2. **No List API** (~560): every `*_iam_binding`/`_policy`, `*_signed_url_key`, `*_with_rules`, config singletons, `*_acl`/access_control, attachment/membership sub-blocks, `firestore_document`, `storage_bucket_object`, apigee per-env keyvaluemaps/keystores/references (get-by-name only), datacatalog tag_template/entry/tag. Correctly excluded — listing impossible.
 3. **scc v2** (~10): securitycenter/v2 API surface (separate from v1, deferred).
+
+---
+
+## SDK-bump path: confirmed dead-end (463 commits)
+
+`go get google.golang.org/api@latest` resolves to **v0.286.0** (already pinned) — it is the latest published version and does **not** contain `securitycentermanagement`, `chronicle`, `cloudaicompanion` (gemini), or `ces` packages. `go mod tidy` reverts any speculative bump because nothing can import a non-existent package. These services have no discovery client in `google.golang.org/api`; the terraform-provider-google reaches them via GAPIC (`cloud.google.com/go/*`) or internal clients not currently in this repo's `go.mod`. Adding them would require new GAPIC module deps + proto-based code written blind (unverifiable offline) — out of scope for the build-validated approach.
+
+**Final session-2 coverage: 600 emitted types, 105 services, fully green (build/vet/gofmt/SA1019=0/`go test ./providers/gcp/`).** Remaining ~682 = no-List-API (correctly excluded) + 44 with no Go client in the pinned/latest SDK.
