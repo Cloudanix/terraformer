@@ -120,8 +120,18 @@ func (g *LogsGenerator) InitResources() error {
 				if stream == "" {
 					continue
 				}
-				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-					group+":"+stream, group+"_"+stream, "aws_cloudwatch_log_stream", "aws", logsAllowEmptyValues))
+				// AWS provider v6 aws_cloudwatch_log_stream Read fetches by the
+				// log_group_name/name attributes, not by parsing the ID (that only
+				// happens on `terraform import`). Terraformer does a plain Refresh, so
+				// these must be seeded or DescribeLogStreams fails with
+				// "Either LogGroupName or LogGroupArn must be provided".
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					group+":"+stream, group+"_"+stream, "aws_cloudwatch_log_stream", "aws",
+					map[string]string{
+						"log_group_name": group,
+						"name":           stream,
+					},
+					logsAllowEmptyValues, map[string]interface{}{}))
 			}
 		}
 		if dp, err := svc.GetDataProtectionPolicy(ctx, &cloudwatchlogs.GetDataProtectionPolicyInput{LogGroupIdentifier: &group}); err == nil &&
