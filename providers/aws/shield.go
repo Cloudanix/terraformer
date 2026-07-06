@@ -15,7 +15,10 @@
 package aws
 
 import (
+	"errors"
+
 	"github.com/aws/aws-sdk-go-v2/service/shield"
+	"github.com/aws/smithy-go"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -39,6 +42,13 @@ func (g *ShieldGenerator) InitResources() error {
 	for protections.HasMorePages() {
 		page, err := protections.NextPage(ctx)
 		if err != nil {
+			// Shield Advanced is opt-in; the API returns ResourceNotFoundException
+			// ("The subscription does not exist") when it isn't enabled. Nothing to
+			// import in that case, so skip the whole service instead of aborting.
+			var apiErr smithy.APIError
+			if errors.As(err, &apiErr) && apiErr.ErrorCode() == "ResourceNotFoundException" {
+				return nil
+			}
 			return err
 		}
 		for _, p := range page.Protections {
