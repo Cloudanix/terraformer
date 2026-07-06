@@ -15,7 +15,10 @@
 package aws
 
 import (
+	"errors"
+
 	"github.com/aws/aws-sdk-go-v2/service/invoicing"
+	"github.com/aws/smithy-go"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -33,6 +36,12 @@ func (g *InvoicingGenerator) InitResources() error {
 	for p := invoicing.NewListInvoiceUnitsPaginator(svc, &invoicing.ListInvoiceUnitsInput{}); p.HasMorePages(); {
 		page, err := p.NextPage(awsContext())
 		if err != nil {
+			// Invoicing is an opt-in service; skip when the SSO role lacks
+			// invoicing:ListInvoiceUnits rather than aborting the whole import.
+			var apiErr smithy.APIError
+			if errors.As(err, &apiErr) && apiErr.ErrorCode() == "AccessDeniedException" {
+				return nil
+			}
 			return err
 		}
 		for _, u := range page.InvoiceUnits {
