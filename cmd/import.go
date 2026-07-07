@@ -238,8 +238,16 @@ func initServiceResources(service string, provider terraformutils.ProviderGenera
 	}
 	err = provider.GetService().InitResources()
 	if err != nil {
-		log.Printf("%s error initializing resources in service %s, err: %s\n", provider.GetName(), service, err)
-		return err
+		if isBenignServiceInitErr(err) {
+			// The service simply isn't available for this account/region (opt-in
+			// not enabled, not onboarded, unsupported in region, nothing to
+			// enumerate). Not a failure: keep whatever was collected and let the
+			// import continue instead of dropping the service.
+			log.Printf("%s skipping service %s (not available for this account/region): %s\n", provider.GetName(), service, err)
+		} else {
+			log.Printf("%s error initializing resources in service %s, err: %s\n", provider.GetName(), service, err)
+			return err
+		}
 	}
 
 	provider.GetService().PopulateIgnoreKeys(providerWrapper)
@@ -247,6 +255,49 @@ func initServiceResources(service string, provider terraformutils.ProviderGenera
 	log.Println(provider.GetName() + " done importing " + service)
 
 	return nil
+}
+
+// benignServiceInitErrs are substrings of InitResources errors that mean a
+// service is simply not available for the current account/region — an opt-in
+// service that isn't enabled/onboarded, an operation the region doesn't support,
+// or an empty "nothing to enumerate" response. These are not import failures, so
+// the service is skipped rather than dropped-with-error. Matched as lowercased
+// message/error-code substrings to stay provider-agnostic (no SDK type coupling).
+// NOTE: permission-denied (AccessDenied/Unauthorized/Forbidden) and transient
+// (5xx/throttle) errors are deliberately excluded — those still surface.
+var benignServiceInitErrs = []string{
+	"subscription does not exist",
+	"onboarded",
+	"account not initialized",
+	"uninitializedaccountexception",
+	"feature is not enabled",
+	"not enabled for",
+	"no default admin",
+	"service role not found",
+	"tagoption migration not complete",
+	"tagoptionnotmigrated",
+	"telemetry evaluation is not enabled",
+	"access denied to api version",
+	"not available in this region",
+	"not supported in this region",
+	"not supported in the called region",
+	"is not valid for this web service",
+	"unknown operation",
+	"unknownoperationexception",
+	"unsupportedoperation",
+	"invalidaction",
+	"schema registry is not available",
+	"no replications found",
+}
+
+func isBenignServiceInitErr(err error) bool {
+	msg := strings.ToLower(err.Error())
+	for _, s := range benignServiceInitErrs {
+		if strings.Contains(msg, s) {
+			return true
+		}
+	}
+	return false
 }
 
 func ImportFromPlan(provider terraformutils.ProviderGenerator, plan *ImportPlan) error {
