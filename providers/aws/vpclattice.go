@@ -144,19 +144,24 @@ func (g *VPCLatticeGenerator) InitResources() error {
 		}
 	}
 
-	snServiceAssocs := vpclattice.NewListServiceNetworkServiceAssociationsPaginator(svc, &vpclattice.ListServiceNetworkServiceAssociationsInput{})
-	for snServiceAssocs.HasMorePages() {
-		page, err := snServiceAssocs.NextPage(ctx)
-		if err != nil {
-			return err
-		}
-		for _, a := range page.Items {
-			id := StringValue(a.Id)
-			if id == "" {
-				continue
+	// ListServiceNetworkServiceAssociations requires at least one of
+	// serviceNetworkIdentifier / serviceIdentifier — an empty input is a
+	// ValidationException. Scope the query to each discovered service.
+	for _, serviceID := range serviceIDs {
+		sid := serviceID
+		for snServiceAssocs := vpclattice.NewListServiceNetworkServiceAssociationsPaginator(svc, &vpclattice.ListServiceNetworkServiceAssociationsInput{ServiceIdentifier: &sid}); snServiceAssocs.HasMorePages(); {
+			page, err := snServiceAssocs.NextPage(ctx)
+			if err != nil {
+				break
 			}
-			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				id, id, "aws_vpclattice_service_network_service_association", "aws", defaultAllowEmptyValues))
+			for _, a := range page.Items {
+				id := StringValue(a.Id)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_vpclattice_service_network_service_association", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 
