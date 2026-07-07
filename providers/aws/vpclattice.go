@@ -126,6 +126,7 @@ func (g *VPCLatticeGenerator) InitResources() error {
 		}
 	}
 
+	var networkIDs []string
 	networks := vpclattice.NewListServiceNetworksPaginator(svc, &vpclattice.ListServiceNetworksInput{})
 	for networks.HasMorePages() {
 		page, err := networks.NextPage(ctx)
@@ -137,6 +138,7 @@ func (g *VPCLatticeGenerator) InitResources() error {
 			if id == "" {
 				continue
 			}
+			networkIDs = append(networkIDs, id)
 			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
 				id, StringValue(n.Name), "aws_vpclattice_service_network", "aws", defaultAllowEmptyValues))
 			authPolicy(id)
@@ -200,19 +202,24 @@ func (g *VPCLatticeGenerator) InitResources() error {
 		}
 	}
 
-	snVpcAssocs := vpclattice.NewListServiceNetworkVpcAssociationsPaginator(svc, &vpclattice.ListServiceNetworkVpcAssociationsInput{})
-	for snVpcAssocs.HasMorePages() {
-		page, err := snVpcAssocs.NextPage(ctx)
-		if err != nil {
-			return err
-		}
-		for _, a := range page.Items {
-			id := StringValue(a.Id)
-			if id == "" {
-				continue
+	// ListServiceNetworkVpcAssociations requires at least one of
+	// serviceNetworkIdentifier / vpcIdentifier — an empty input is a
+	// ValidationException. Scope the query to each discovered service network.
+	for _, networkID := range networkIDs {
+		nid := networkID
+		for snVpcAssocs := vpclattice.NewListServiceNetworkVpcAssociationsPaginator(svc, &vpclattice.ListServiceNetworkVpcAssociationsInput{ServiceNetworkIdentifier: &nid}); snVpcAssocs.HasMorePages(); {
+			page, err := snVpcAssocs.NextPage(ctx)
+			if err != nil {
+				break
 			}
-			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				id, id, "aws_vpclattice_service_network_vpc_association", "aws", defaultAllowEmptyValues))
+			for _, a := range page.Items {
+				id := StringValue(a.Id)
+				if id == "" {
+					continue
+				}
+				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
+					id, id, "aws_vpclattice_service_network_vpc_association", "aws", defaultAllowEmptyValues))
+			}
 		}
 	}
 
