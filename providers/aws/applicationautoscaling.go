@@ -15,10 +15,12 @@
 package aws
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/service/applicationautoscaling"
 	"github.com/aws/aws-sdk-go-v2/service/applicationautoscaling/types"
+	"github.com/aws/smithy-go"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
 )
@@ -42,11 +44,19 @@ func (g *AppAutoScalingGenerator) InitResources() error {
 	svc := applicationautoscaling.NewFromConfig(config)
 	ctx := awsContext()
 
+nextNamespace:
 	for _, namespace := range types.ServiceNamespace("").Values() {
 		targets := applicationautoscaling.NewDescribeScalableTargetsPaginator(svc, &applicationautoscaling.DescribeScalableTargetsInput{ServiceNamespace: namespace})
 		for targets.HasMorePages() {
 			page, err := targets.NextPage(ctx)
 			if err != nil {
+				// The SDK's ServiceNamespace enum can be ahead of the regional
+				// API, which rejects unknown namespaces (e.g. "workspaces") with
+				// ValidationException. Skip the whole namespace instead of aborting.
+				var apiErr smithy.APIError
+				if errors.As(err, &apiErr) && apiErr.ErrorCode() == "ValidationException" {
+					continue nextNamespace
+				}
 				return err
 			}
 			for _, t := range page.ScalableTargets {
