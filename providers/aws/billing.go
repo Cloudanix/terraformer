@@ -40,8 +40,13 @@ func (g *BillingGenerator) InitResources() error {
 			if arn == "" {
 				continue
 			}
-			g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-				arn, arn, "aws_billing_view", "aws", defaultAllowEmptyValues))
+			// aws_billing_view Read fetches by the arn attribute, not the ID.
+			// Terraformer does a plain Refresh, so seed arn or GetBillingView
+			// fails with "Value at 'arn' failed to satisfy constraint" (null arn).
+			g.Resources = append(g.Resources, terraformutils.NewResource(
+				arn, arn, "aws_billing_view", "aws",
+				map[string]string{"arn": arn},
+				defaultAllowEmptyValues, map[string]interface{}{}))
 		}
 	}
 	return nil
