@@ -17,9 +17,12 @@ package aws
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"regexp"
+	"strings"
 	"sync"
+	"time"
 
 	"github.com/aws/aws-sdk-go-v2/service/sts"
 
@@ -158,6 +161,10 @@ func (s *AWSService) generateConfig() (aws.Config, error) {
 		return baseConfig, e
 	}
 
+	// Log the principal the API calls run as (once per region, on cache miss),
+	// so it's clear from the logs which role/session's privileges are in effect.
+	logCallerIdentity(region, baseConfig, creds)
+
 	// terraform cannot ask for MFA token, so we need to pass STS session token, which might contain credentials with MFA requirement
 	accessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
 	if accessKey == "" {
@@ -205,4 +212,44 @@ func (s *AWSService) getAccountNumber(config aws.Config) (*string, error) {
 		return nil, err
 	}
 	return identity.Account, nil
+}
+
+// maskAccessKeyID keeps the first 4 chars (ASIA = temporary session, AKIA =
+// long-lived IAM user) and the last 4, masking the middle. The access key ID is
+// identifying but not itself secret; the secret key and session token are never
+// logged.
+func maskAccessKeyID(id string) string {
+	if len(id) <= 8 {
+		return "****"
+	}
+	return id[:4] + strings.Repeat("*", len(id)-8) + id[len(id)-4:]
+}
+
+// logCallerIdentity records which principal the API calls run as (assumed-role
+// ARN, account, user id) plus whether the credentials are temporary and when
+// they expire. Called once per region on config cache-miss. Best-effort: an STS
+// failure is logged but never aborts the import.
+func logCallerIdentity(region string, cfg aws.Config, creds aws.Credentials) {
+	credType := "long-lived"
+	if creds.SessionToken != "" || strings.HasPrefix(creds.AccessKeyID, "ASIA") {
+		credType = "temporary"
+	}
+	expiry := "none"
+	if creds.CanExpire {
+		expiry = creds.Expires.UTC().Format(time.RFC3339)
+	}
+	source := creds.Source
+	if source == "" {
+		source = "unknown"
+	}
+
+	identity, err := sts.NewFromConfig(cfg).GetCallerIdentity(awsContext(), &sts.GetCallerIdentityInput{})
+	if err != nil {
+		log.Printf("aws [%s] caller identity lookup failed (%s creds, source=%s): %v",
+			region, credType, source, err)
+		return
+	}
+	log.Printf("aws [%s] API calls run as: arn=%s account=%s userId=%s | creds=%s accessKeyId=%s source=%s expires=%s",
+		region, StringValue(identity.Arn), StringValue(identity.Account), StringValue(identity.UserId),
+		credType, maskAccessKeyID(creds.AccessKeyID), source, expiry)
 }

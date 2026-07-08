@@ -186,3 +186,22 @@ func TestGenerateConfigCacheConcurrent(t *testing.T) {
 	}
 	wg.Wait()
 }
+
+func TestMaskAccessKeyID(t *testing.T) {
+	cases := map[string]string{
+		"ASIAIOSFODNN7EXAMPLE": "ASIA************MPLE", // 20-char temp session key
+		"AKIAIOSFODNN7EXAMPLE": "AKIA************MPLE", // 20-char long-lived key
+		"SHORT":                "****",                 // too short to reveal anything
+		"":                     "****",
+	}
+	for in, want := range cases {
+		got := maskAccessKeyID(in)
+		if got != want {
+			t.Errorf("maskAccessKeyID(%q) = %q, want %q", in, got, want)
+		}
+		// the middle of a real key must never survive verbatim
+		if len(in) > 8 && got == in {
+			t.Errorf("maskAccessKeyID(%q) leaked the full key", in)
+		}
+	}
+}
