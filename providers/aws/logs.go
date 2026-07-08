@@ -120,13 +120,18 @@ func (g *LogsGenerator) InitResources() error {
 				if stream == "" {
 					continue
 				}
-				// AWS provider v6 aws_cloudwatch_log_stream Read fetches by the
-				// log_group_name/name attributes, not by parsing the ID (that only
-				// happens on `terraform import`). Terraformer does a plain Refresh, so
-				// these must be seeded or DescribeLogStreams fails with
-				// "Either LogGroupName or LogGroupArn must be provided".
+				// aws_cloudwatch_log_stream Read calls
+				// findLogStreamByTwoPartKey(log_group_name, d.Id()) — it uses the
+				// resource ID as the stream-name prefix and reads the log group from
+				// the log_group_name attribute. The provider's Create sets the ID to
+				// the bare stream name (d.SetId(name)); the "<group>:<stream>" form is
+				// only valid as a `terraform import` CLI arg (resourceStreamImport
+				// splits it and resets the ID to the stream name). So the refresh ID
+				// must be the bare stream name — using "<group>:<stream>" sends the
+				// colon as LogStreamNamePrefix and fails the [^:*]* constraint. The
+				// log group is carried by the seeded log_group_name attribute.
 				g.Resources = append(g.Resources, terraformutils.NewResource(
-					group+":"+stream, group+"_"+stream, "aws_cloudwatch_log_stream", "aws",
+					stream, group+"_"+stream, "aws_cloudwatch_log_stream", "aws",
 					map[string]string{
 						"log_group_name": group,
 						"name":           stream,
