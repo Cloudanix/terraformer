@@ -36,6 +36,20 @@ type ProviderWithSource interface {
 	GetSource() string
 }
 
+// CallerIdentityLogger is an optional interface a ProviderGenerator may
+// implement to report which principal / credentials its API calls run as. The
+// engine calls LogCallerIdentity once, right after Init, so every import records
+// the identity (and thus the privilege) in effect — useful for understanding
+// what an import could and couldn't read.
+//
+// Implementations MUST be best-effort: log what they can and never fail the
+// import. Never log secret material (secret keys, client secrets, raw tokens) —
+// only identifiers (ARNs, principals, subscription/project/tenant ids) and
+// credential metadata (temporary vs long-lived, expiry).
+type CallerIdentityLogger interface {
+	LogCallerIdentity()
+}
+
 type Provider struct {
 	Service ServiceGenerator
 	Config  cty.Value

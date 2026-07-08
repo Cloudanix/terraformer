@@ -15,12 +15,16 @@
 package azure
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/Azure/azure-sdk-for-go/sdk/azcore"
+	"github.com/Azure/azure-sdk-for-go/sdk/azcore/policy"
 	"github.com/Azure/azure-sdk-for-go/sdk/azidentity"
 	"github.com/hashicorp/go-azure-helpers/authentication"
 
@@ -124,6 +128,51 @@ func (p *AzureProvider) Init(args []string) error {
 
 func (p *AzureProvider) GetName() string {
 	return "azurerm"
+}
+
+// LogCallerIdentity records which credentials the import runs as (best-effort).
+// Azure has no cheap "get caller identity" call, so it logs the subscription /
+// tenant / client id already in the environment plus the auth method, and probes
+// the credential for an ARM access-token expiry. The token itself and the client
+// secret are never logged.
+func (p *AzureProvider) LogCallerIdentity() {
+	subscription := os.Getenv("ARM_SUBSCRIPTION_ID")
+	tenant := firstNonEmpty(os.Getenv("ARM_TENANT_ID"), os.Getenv("AZURE_TENANT_ID"))
+	client := firstNonEmpty(os.Getenv("ARM_CLIENT_ID"), os.Getenv("AZURE_CLIENT_ID"))
+
+	authMethod := "azure-cli / managed-identity"
+	if client != "" {
+		authMethod = "service-principal"
+	}
+
+	expiry := "none"
+	if p.credential != nil {
+		tok, err := p.credential.GetToken(context.Background(), policy.TokenRequestOptions{
+			Scopes: []string{"https://management.azure.com/.default"},
+		})
+		if err == nil && !tok.ExpiresOn.IsZero() {
+			expiry = tok.ExpiresOn.UTC().Format(time.RFC3339)
+		}
+	}
+
+	log.Printf("azurerm API calls run as: auth=%s clientId=%s | subscription=%s tenant=%s tokenExpires=%s",
+		authMethod, orUnknown(client), orUnknown(subscription), orUnknown(tenant), expiry)
+}
+
+func firstNonEmpty(vals ...string) string {
+	for _, v := range vals {
+		if v != "" {
+			return v
+		}
+	}
+	return ""
+}
+
+func orUnknown(s string) string {
+	if s == "" {
+		return "unknown"
+	}
+	return s
 }
 
 func (p *AzureProvider) GetProviderData(arg ...string) map[string]interface{} {

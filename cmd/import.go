@@ -138,6 +138,12 @@ func initOptionsAndWrapper(provider terraformutils.ProviderGenerator, options Im
 		return nil, options, err
 	}
 
+	// Record which principal/credentials the import runs as (best-effort; a
+	// provider opts in by implementing CallerIdentityLogger).
+	if l, ok := provider.(terraformutils.CallerIdentityLogger); ok {
+		l.LogCallerIdentity()
+	}
+
 	if terraformerstring.ContainsString(options.Resources, "*") {
 		log.Println("Attempting an import of ALL resources in " + provider.GetName())
 		options.Resources = providerServices(provider)

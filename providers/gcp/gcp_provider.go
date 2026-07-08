@@ -16,11 +16,14 @@ package gcp
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
 	"os"
+	"time"
 
 	"github.com/GoogleCloudPlatform/terraformer/terraformutils"
+	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
 )
 
@@ -91,6 +94,51 @@ func (p *GCPProvider) GetName() string {
 		return "google-" + p.providerType
 	}
 	return "google"
+}
+
+// LogCallerIdentity records which credentials the import runs as (best-effort).
+// Uses Application Default Credentials — the same resolution every generator's
+// SDK client uses. Logs the service-account email (when the ADC is a service
+// account key), the credential type, and the access-token expiry. The token
+// itself is never logged.
+func (p *GCPProvider) LogCallerIdentity() {
+	ctx := context.Background()
+	creds, err := google.FindDefaultCredentials(ctx, compute.CloudPlatformScope)
+	if err != nil {
+		log.Printf("google [%s] caller identity lookup failed: %v", p.projectName, err)
+		return
+	}
+
+	principal := "unknown"
+	credType := "application-default (user / metadata)"
+	if len(creds.JSON) > 0 {
+		var j struct {
+			Type        string `json:"type"`
+			ClientEmail string `json:"client_email"`
+		}
+		if json.Unmarshal(creds.JSON, &j) == nil {
+			if j.Type != "" {
+				credType = j.Type
+			}
+			if j.ClientEmail != "" {
+				principal = j.ClientEmail
+			}
+		}
+	}
+
+	expiry := "none"
+	if creds.TokenSource != nil {
+		if tok, err := creds.TokenSource.Token(); err == nil && !tok.Expiry.IsZero() {
+			expiry = tok.Expiry.UTC().Format(time.RFC3339)
+		}
+	}
+
+	project := p.projectName
+	if creds.ProjectID != "" {
+		project = creds.ProjectID
+	}
+	log.Printf("google API calls run as: principal=%s | project=%s credType=%s tokenExpires=%s",
+		principal, project, credType, expiry)
 }
 
 func (p *GCPProvider) InitService(serviceName string, verbose bool) error {
