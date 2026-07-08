@@ -39,6 +39,7 @@ func TestIsBenignServiceInitErr(t *testing.T) {
 		"operation error SNS: ListPlatformApplications, api error InvalidAction: Operation (ListPlatformApplications) is not supported in this region",
 		"operation error EC2: DescribeVerifiedAccessInstances, api error InvalidAction: The action DescribeVerifiedAccessInstances is not valid for this web service.",
 		"operation error EFS: DescribeReplicationConfigurations, ReplicationNotFound: No replications found.",
+		"operation error QuickSight: ListAnalyses, exceeded maximum number of attempts, 5, StatusCode: 503, deserialization failed, failed to decode response body, invalid character '<' looking for beginning of value",
 	}
 	for _, msg := range benign {
 		if !isBenignServiceInitErr(errors.New(msg)) {

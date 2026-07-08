@@ -288,6 +288,12 @@ var benignServiceInitErrs = []string{
 	"invalidaction",
 	"schema registry is not available",
 	"no replications found",
+	// A 5xx whose body is HTML instead of JSON ("invalid character '<'") means
+	// the service has no working API endpoint in this region (e.g. QuickSight
+	// outside its supported regions returns an HTML error page). Not a retryable
+	// throttle — the SDK exhausts its retries then fails. Skip it. A plain 5xx
+	// with a normal JSON body is NOT matched here, so real throttles stay loud.
+	"invalid character '<' looking for beginning of value",
 }
 
 func isBenignServiceInitErr(err error) bool {
