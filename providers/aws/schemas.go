@@ -82,8 +82,12 @@ func (g *SchemasGenerator) InitResources() error {
 				if name == "" {
 					continue
 				}
+				// aws_schemas_schema import ID is "<schema-name>/<registry-name>"
+				// (schemaParseResourceID splits d.Id() on "/"); a "registry:name"
+				// form fails Read with "unexpected format for ID ..., expected
+				// SCHEMA_NAME/REGISTRY_NAME".
 				g.Resources = append(g.Resources, terraformutils.NewSimpleResource(
-					reg+":"+name, reg+"_"+name, "aws_schemas_schema", "aws", defaultAllowEmptyValues))
+					name+"/"+reg, reg+"_"+name, "aws_schemas_schema", "aws", defaultAllowEmptyValues))
 			}
 		}
 	}
