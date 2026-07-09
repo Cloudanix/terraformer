@@ -66,8 +66,24 @@ func (g *Route53Generator) createZonesResources(svc *route53.Client) []terraform
 					if vpcID == "" {
 						continue
 					}
-					resources = append(resources, terraformutils.NewSimpleResource(
-						zoneID+":"+vpcID, zoneID+"_"+vpcID, "aws_route53_zone_association", "aws", route53AllowEmptyValues))
+					// aws_route53_zone_association Read resolves the VPC region from the
+					// ID, then the vpc_region attribute, then the provider region — which
+					// is "aws-global" for this global service and fails
+					// ListHostedZonesByVPC with "Invalid region name aws-global". Put the
+					// VPC's real region in the ID and seed the attributes.
+					vpcRegion := string(vpc.VPCRegion)
+					id := zoneID + ":" + vpcID
+					if vpcRegion != "" {
+						id += ":" + vpcRegion
+					}
+					resources = append(resources, terraformutils.NewResource(
+						id, zoneID+"_"+vpcID, "aws_route53_zone_association", "aws",
+						map[string]string{
+							"zone_id":    zoneID,
+							"vpc_id":     vpcID,
+							"vpc_region": vpcRegion,
+						},
+						route53AllowEmptyValues, route53AdditionalFields))
 				}
 			}
 
