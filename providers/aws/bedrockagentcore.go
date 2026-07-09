@@ -99,7 +99,15 @@ func (g *BedrockAgentCoreGenerator) InitResources() error {
 			break
 		}
 		for _, x := range page.Evaluators {
-			emit(StringValue(x.EvaluatorId), StringValue(x.EvaluatorId), "aws_bedrockagentcore_evaluator")
+			// aws_bedrockagentcore_evaluator (Plugin Framework) Read fetches by the
+			// evaluator_id attribute, not the ID, so a plain Refresh must seed it or
+			// GetEvaluator fails with "evaluatorId must not be empty".
+			if id := StringValue(x.EvaluatorId); id != "" {
+				g.Resources = append(g.Resources, terraformutils.NewResource(
+					id, id, "aws_bedrockagentcore_evaluator", "aws",
+					map[string]string{"evaluator_id": id},
+					defaultAllowEmptyValues, map[string]interface{}{}))
+			}
 		}
 	}
 	for p := bedrockagentcorecontrol.NewListPoliciesPaginator(svc, &bedrockagentcorecontrol.ListPoliciesInput{}); p.HasMorePages(); {
