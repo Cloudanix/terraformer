@@ -15,9 +15,40 @@
 package terraformutils
 
 import (
+	"encoding/json"
 	"strings"
 	"testing"
 )
+
+func TestSortPolicyJSONArrays(t *testing.T) {
+	var doc interface{}
+	if err := json.Unmarshal([]byte(`{
+		"Version":"2012-10-17",
+		"Statement":[{
+			"Effect":"Allow",
+			"Principal":{"AWS":["arn:c","arn:a","arn:b"]},
+			"Action":["s3:PutObject","s3:GetObject"]
+		}],
+		"Mixed":["z",1,"a"]
+	}`), &doc); err != nil {
+		t.Fatal(err)
+	}
+	sortPolicyJSONArrays(doc)
+	out, _ := json.Marshal(doc)
+	s := string(out)
+
+	// order-insensitive string arrays are sorted → stable output
+	if !strings.Contains(s, `["arn:a","arn:b","arn:c"]`) {
+		t.Errorf("Principal.AWS not sorted: %s", s)
+	}
+	if !strings.Contains(s, `["s3:GetObject","s3:PutObject"]`) {
+		t.Errorf("Action not sorted: %s", s)
+	}
+	// mixed-type array must be left in its original order (could be order-sensitive)
+	if !strings.Contains(s, `["z",1,"a"]`) {
+		t.Errorf("mixed array must be untouched: %s", s)
+	}
+}
 
 func TestPrintResource(t *testing.T) {
 	var resources []Resource

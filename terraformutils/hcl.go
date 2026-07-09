@@ -54,6 +54,37 @@ func sortHclTree(tree interface{}) {
 	}
 }
 
+// sortPolicyJSONArrays makes an IAM policy document render deterministically by
+// sorting its order-insensitive string arrays (e.g. Principal AWS/Service lists,
+// Action, Resource). AWS returns these in arbitrary order, which otherwise churns
+// the generated heredoc on every import. Only all-string arrays are sorted, so
+// order-sensitive/mixed arrays (Fn::Join and the like) are left untouched; the
+// caller gates this on the doc actually being an IAM policy. IAM treats these
+// arrays as sets, so sorting is semantically a no-op and terraform's policy
+// diff-equivalence keeps `plan` clean.
+func sortPolicyJSONArrays(v interface{}) {
+	switch t := v.(type) {
+	case map[string]interface{}:
+		for _, val := range t {
+			sortPolicyJSONArrays(val)
+		}
+	case []interface{}:
+		for _, e := range t {
+			sortPolicyJSONArrays(e)
+		}
+		allStrings := true
+		for _, e := range t {
+			if _, ok := e.(string); !ok {
+				allStrings = false
+				break
+			}
+		}
+		if allStrings {
+			sort.Slice(t, func(i, j int) bool { return t[i].(string) < t[j].(string) })
+		}
+	}
+}
+
 // sanitizer fixes up an invalid HCL AST, as produced by the HCL parser for JSON
 type astSanitizer struct {
 	sort bool
@@ -137,6 +168,16 @@ func (v *astSanitizer) visitObjectItem(o *ast.ObjectItem) {
 				err = json.Unmarshal([]byte(jsonTest), &tmp)
 			}
 			if err == nil {
+				// An IAM policy document (identified by a top-level Statement) has
+				// only order-insensitive arrays; sort them so the heredoc is stable
+				// across imports instead of following AWS's arbitrary ordering.
+				if v.sort {
+					if m, ok := tmp.(map[string]interface{}); ok {
+						if _, isPolicy := m["Statement"]; isPolicy {
+							sortPolicyJSONArrays(tmp)
+						}
+					}
+				}
 				dataJSONBytes, err := json.MarshalIndent(tmp, "", "  ")
 				if err == nil {
 					jsonData := strings.Split(string(dataJSONBytes), "\n")
