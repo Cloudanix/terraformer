@@ -135,7 +135,56 @@ func (s *AWSService) wrapPolicyAttribute(resources []terraformutils.Resource, at
 var (
 	configCache   = map[string]*aws.Config{}
 	configCacheMu sync.Mutex
+	// managingEnvCreds is true once terraformer has bridged resolved credentials
+	// into the AWS_* env vars for the provider plugin. It stays false when the
+	// user exported static AWS_SECRET_ACCESS_KEY themselves — in that case we
+	// neither overwrite nor try to refresh their credentials.
+	managingEnvCreds bool
 )
+
+// setAWSEnvCreds bridges resolved credentials to the AWS_* env vars the provider
+// plugin reads at startup. Secret material only touches the environment, never
+// the logs.
+func setAWSEnvCreds(creds aws.Credentials) {
+	os.Setenv("AWS_ACCESS_KEY_ID", creds.AccessKeyID)
+	os.Setenv("AWS_SECRET_ACCESS_KEY", creds.SecretAccessKey)
+	if creds.SessionToken != "" {
+		os.Setenv("AWS_SESSION_TOKEN", creds.SessionToken)
+	}
+}
+
+// RefreshAWSCredentials re-resolves credentials for every cached region config
+// and re-bridges them to the AWS_* env vars, so a long import that outlived its
+// temporary session token can continue. Invalidating each region's credential
+// cache forces the underlying source (SSO / assumed role) to mint a fresh token;
+// terraformer's own SDK clients pick it up automatically, and the refreshed env
+// vars are read by the provider plugin when it is restarted. No-op (and no
+// error) when the user supplied their own static env credentials.
+func RefreshAWSCredentials() error {
+	configCacheMu.Lock()
+	defer configCacheMu.Unlock()
+	if !managingEnvCreds {
+		return nil
+	}
+	var lastErr error
+	refreshed := false
+	for _, cfg := range configCache {
+		if cache, ok := cfg.Credentials.(*aws.CredentialsCache); ok {
+			cache.Invalidate()
+		}
+		creds, err := cfg.Credentials.Retrieve(awsContext())
+		if err != nil {
+			lastErr = err
+			continue
+		}
+		setAWSEnvCreds(creds)
+		refreshed = true
+	}
+	if !refreshed && lastErr != nil {
+		return lastErr
+	}
+	return nil
+}
 
 func (s *AWSService) generateConfig() (aws.Config, error) {
 	region, _ := s.GetArgs()["region"].(string)
@@ -165,15 +214,13 @@ func (s *AWSService) generateConfig() (aws.Config, error) {
 	// so it's clear from the logs which role/session's privileges are in effect.
 	logCallerIdentity(region, baseConfig, creds)
 
-	// terraform cannot ask for MFA token, so we need to pass STS session token, which might contain credentials with MFA requirement
-	accessKey := os.Getenv("AWS_SECRET_ACCESS_KEY")
-	if accessKey == "" {
-		os.Setenv("AWS_ACCESS_KEY_ID", creds.AccessKeyID)
-		os.Setenv("AWS_SECRET_ACCESS_KEY", creds.SecretAccessKey)
-
-		if creds.SessionToken != "" {
-			os.Setenv("AWS_SESSION_TOKEN", creds.SessionToken)
-		}
+	// terraform cannot ask for MFA token, so we need to pass STS session token, which might contain credentials with MFA requirement.
+	// Bridge the resolved creds to the env unless the user exported their own
+	// static AWS_SECRET_ACCESS_KEY. Once we own the env creds, keep refreshing
+	// them (managingEnvCreds) so RefreshAWSCredentials can update them mid-run.
+	if managingEnvCreds || os.Getenv("AWS_SECRET_ACCESS_KEY") == "" {
+		setAWSEnvCreds(creds)
+		managingEnvCreds = true
 	}
 	configCache[region] = &baseConfig
 	return baseConfig, nil

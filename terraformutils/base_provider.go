@@ -36,6 +36,17 @@ type ProviderWithSource interface {
 	GetSource() string
 }
 
+// CredentialRefresher is an optional interface a ProviderGenerator may
+// implement to re-resolve (and re-bridge to the provider plugin) fresh
+// credentials mid-run. The engine calls RefreshCredentials before the long
+// refresh phase and again whenever a plugin call fails with an expired-token
+// error, so a run that outlives a temporary session token (SSO / assumed role)
+// can keep going instead of drowning in stale-token errors. Best-effort:
+// implementations return an error only so the caller can log it.
+type CredentialRefresher interface {
+	RefreshCredentials() error
+}
+
 // CallerIdentityLogger is an optional interface a ProviderGenerator may
 // implement to report which principal / credentials its API calls run as. The
 // engine calls LogCallerIdentity once, right after Init, so every import records

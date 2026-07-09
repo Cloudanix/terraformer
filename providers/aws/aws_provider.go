@@ -229,6 +229,13 @@ func (p *AWSProvider) GetName() string {
 	return "aws"
 }
 
+// RefreshCredentials re-resolves the AWS credentials and re-bridges them to the
+// provider-plugin environment, so an import that outlives its temporary session
+// token can keep going. Implements terraformutils.CredentialRefresher.
+func (p *AWSProvider) RefreshCredentials() error {
+	return RefreshAWSCredentials()
+}
+
 func (p *AWSProvider) InitService(serviceName string, verbose bool) error {
 	var isSupported bool
 	if _, isSupported = p.GetSupportedService()[serviceName]; !isSupported {

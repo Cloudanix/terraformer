@@ -118,6 +118,13 @@ func Import(provider terraformutils.ProviderGenerator, options ImportOptions, ar
 		return err
 	}
 
+	// The enumeration phase above can run long enough that the plugin's session
+	// token is near expiry; refresh credentials and restart the plugin before the
+	// (also long) refresh phase so it starts with a full token lifetime.
+	if rerr := providerWrapper.RefreshCredentialsAndRestart(); rerr != nil {
+		log.Printf("WARN: could not refresh credentials before refresh phase: %v", rerr)
+	}
+
 	err = terraformutils.RefreshResourcesByProvider(providerMapping, providerWrapper)
 	if err != nil {
 		return err
@@ -169,6 +176,12 @@ func initOptionsAndWrapper(provider terraformutils.ProviderGenerator, options Im
 	providerWrapper, err := providerwrapper.NewProviderWrapper(provider.GetName(), provider.GetConfig(), options.Verbose, map[string]int{"retryCount": options.RetryCount, "retrySleepMs": options.RetrySleepMs})
 	if err != nil {
 		return nil, options, err
+	}
+
+	// Let providers that can re-resolve temporary credentials (e.g. AWS SSO /
+	// assumed role) refresh + restart the plugin when its session token expires.
+	if r, ok := provider.(terraformutils.CredentialRefresher); ok {
+		providerWrapper.SetCredentialRefresher(r.RefreshCredentials)
 	}
 
 	return providerWrapper, options, nil
