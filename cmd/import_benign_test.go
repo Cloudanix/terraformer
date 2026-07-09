@@ -86,3 +86,32 @@ func TestIsBenignServiceInitErr(t *testing.T) {
 		}
 	}
 }
+
+func TestIsUnrecoverableAuthErr(t *testing.T) {
+	// Expired SSO/OIDC session — must abort the whole run.
+	dead := []string{
+		"operation error CloudWatch Logs: DescribeLogGroups, OIDC: CreateToken, https response error StatusCode: 400, RequestID: x, InvalidGrantException: ",
+		"operation error EC2: DescribeInstances, OIDC: CreateToken, StatusCode: 400, InvalidGrantException:",
+		"the SSO session associated with this profile has expired or is otherwise invalid",
+		"error loading SSO token: the SSO session's token has expired",
+	}
+	for _, msg := range dead {
+		if !isUnrecoverableAuthErr(errors.New(msg)) {
+			t.Errorf("expected unrecoverable-auth for: %s", msg)
+		}
+	}
+
+	// Per-service failures that must NOT abort the whole run.
+	survivable := []string{
+		"operation error Macie2: ListClassificationJobs, AccessDeniedException: Macie is not enabled.",
+		"operation error EC2: DescribeCarrierGateways, UnsupportedOperation: not available in this region.",
+		"operation error S3: ListBuckets, ExpiredToken: token expired", // role-cred expiry: refreshable, not fatal
+		"dial tcp: i/o timeout",
+		"",
+	}
+	for _, msg := range survivable {
+		if isUnrecoverableAuthErr(errors.New(msg)) {
+			t.Errorf("did not expect unrecoverable-auth for: %q", msg)
+		}
+	}
+}

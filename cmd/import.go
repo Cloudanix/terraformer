@@ -210,6 +210,15 @@ func initAllServicesResources(providersMapping *terraformutils.ProvidersMapping,
 		err = initServiceResources(service, serviceProvider, options, providerWrapper)
 		if err != nil {
 			failedServices = append(failedServices, service)
+			// An expired SSO/OIDC session can't be recovered in-process (the token
+			// refresh itself fails). Every remaining service would fail identically,
+			// so stop now with one clear, actionable message instead of a flood.
+			if isUnrecoverableAuthErr(err) {
+				log.Printf("FATAL: AWS credentials are no longer valid (%s). "+
+					"Run `aws sso login` (or refresh your credentials) and re-run the import. "+
+					"Skipping the remaining services.", err)
+				break
+			}
 		}
 	}
 
@@ -345,6 +354,33 @@ var benignServiceInitErrs = []string{
 func isBenignServiceInitErr(err error) bool {
 	msg := strings.ToLower(err.Error())
 	for _, s := range benignServiceInitErrs {
+		if strings.Contains(msg, s) {
+			return true
+		}
+	}
+	return false
+}
+
+// unrecoverableAuthErrs are substrings that mean the whole run's credentials are
+// dead and cannot be refreshed in-process — most commonly an expired AWS SSO
+// session, where the SDK's OIDC CreateToken refresh fails with InvalidGrant.
+// Every remaining service would fail identically, so the run should stop and the
+// user must re-authenticate.
+var unrecoverableAuthErrs = []string{
+	"invalidgrantexception",
+	"createtoken", // OIDC CreateToken failure — SSO token refresh path
+	"sso session associated with this profile has expired",
+	"the sso session's token has expired",
+	"error loading sso token",
+	"the ssooidc token has expired",
+}
+
+func isUnrecoverableAuthErr(err error) bool {
+	if err == nil {
+		return false
+	}
+	msg := strings.ToLower(err.Error())
+	for _, s := range unrecoverableAuthErrs {
 		if strings.Contains(msg, s) {
 			return true
 		}
