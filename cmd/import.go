@@ -300,6 +300,33 @@ var benignServiceInitErrs = []string{
 	// throttle — the SDK exhausts its retries then fails. Skip it. A plain 5xx
 	// with a normal JSON body is NOT matched here, so real throttles stay loud.
 	"invalid character '<' looking for beginning of value",
+
+	// Service/feature/account not enabled, onboarded, subscribed, allowlisted, or
+	// retired — the account simply can't enumerate the service. Under a broad role
+	// (e.g. AdministratorAccess) these still come back as AccessDenied/Forbidden/
+	// Validation errors, so they are matched by message, not error code. Each
+	// phrase is specific enough that a genuine IAM gap (which names the principal
+	// and action: "User: arn:... is not authorized to perform: <action>") is not
+	// caught here and still surfaces.
+	"to enable this action in this account", // Audit Manager setup incomplete
+	"this feature is not available",         // Chime SDK media pipelines
+	"feature is not accessible",             // DMS
+	"not allowlisted",                       // Aurora DSQL preview
+	"no longer available",                   // IoT Events (retired)
+	"is not enabled",                        // Macie ("Macie is not enabled")
+	"not subscribed",                        // QuickSight ("not subscribed for QuickSight")
+	"only existing timestream",              // Timestream query/write not onboarded
+	"account not found for the request",     // SSM Contacts not set up
+	"not supported on this account",         // CloudSearch
+	"operation is not supported in",         // Glue GetDevEndpoints (region-scoped)
+	"setting up this region",                // Lightsail region provisioning
+	"operation is currently unavailable",    // MemoryDB multi-region
+	"not supported for your account",        // OpenSearch DisabledOperation
+	"account is not authorized to make this call",       // Comprehend, Kendra
+	"account isn't authorized to call this operation",   // Transcribe
+	"account is not authorized to perform this operation", // Security Lake
+	"action index not authorized",           // MediaPackage (region)
+	"unable to determine service/operation name", // Lambda/DRS/Neptune region-endpoint quirk
 }
 
 func isBenignServiceInitErr(err error) bool {

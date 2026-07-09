@@ -40,6 +40,26 @@ func TestIsBenignServiceInitErr(t *testing.T) {
 		"operation error EC2: DescribeVerifiedAccessInstances, api error InvalidAction: The action DescribeVerifiedAccessInstances is not valid for this web service.",
 		"operation error EFS: DescribeReplicationConfigurations, ReplicationNotFound: No replications found.",
 		"operation error QuickSight: ListAnalyses, exceeded maximum number of attempts, 5, StatusCode: 503, deserialization failed, failed to decode response body, invalid character '<' looking for beginning of value",
+		// service/feature/account not enabled, onboarded, subscribed, allowlisted, retired
+		"operation error Audit Manager: ListAssessments, AccessDeniedException: Please complete AWS Audit Manager setup from home page to enable this action in this account.",
+		"operation error Chime SDK Media Pipelines: ListMediaInsightsPipelineConfigurations, ForbiddenException: This feature is not available",
+		"operation error Database Migration Service: DescribeReplicationConfigs, AccessDeniedException: Feature is not accessible",
+		"operation error DSQL: ListClusters, AccessDeniedException: Caller is not allowlisted",
+		"operation error IoT Events: ListDetectorModels, AccessDeniedException: AWS IoT Events is no longer available to any customers.",
+		"operation error Macie2: ListClassificationJobs, AccessDeniedException: Macie is not enabled.",
+		"operation error QuickSight: ListAnalyses, UnsupportedUserEditionException: Account 774118602354 is not subscribed for QuickSight",
+		"operation error Timestream Write: ListDatabases, api error AccessDeniedException: Only existing Timestream for LiveAnalytics customers can access this API.",
+		"operation error SSM Contacts: ListRotations, ValidationException: Invalid value provided - Account not found for the request",
+		"operation error CloudSearch: DescribeDomains, NotAuthorized: New domain creation not supported on this account.",
+		"operation error Glue: GetDevEndpoints, InvalidInputException: Operation is not supported in <eu-south-2> region",
+		"operation error Lightsail: GetInstances, RegionSetupInProgressException: Lightsail is setting up this region for your account, please try again later.",
+		"operation error MemoryDB: DescribeMultiRegionClusters, InvalidParameterValueException: This API operation is currently unavailable.",
+		"operation error OpenSearch: ListApplications, DisabledOperationException: This Operation is currently not supported for your account",
+		"operation error Comprehend: ListDocumentClassifiers, NotAuthorizedException: Your account is not authorized to make this call.",
+		"operation error Transcribe: ListLanguageModels, BadRequestException: Your account isn't authorized to call this operation.",
+		"operation error SecurityLake: ListDataLakes, AccessDeniedException: The request failed because your account is not authorized to perform this operation.",
+		"operation error MediaPackage: ListChannels, ForbiddenException: error Action index not authorized",
+		"operation error Lambda: ListFunctionUrlConfigs, AccessDeniedException: Unable to determine service/operation name to be authorized",
 	}
 	for _, msg := range benign {
 		if !isBenignServiceInitErr(errors.New(msg)) {
@@ -47,13 +67,17 @@ func TestIsBenignServiceInitErr(t *testing.T) {
 		}
 	}
 
-	// Errors that must still surface (permission / transient / real bugs).
+	// Errors that must still surface: genuine IAM/authz denials (which name the
+	// principal + action), ambiguous empty AccessDenied, real throttles/5xx, and
+	// infra errors. These must NOT be swallowed.
 	fatal := []string{
 		"operation error synthetics: ListGroups, StatusCode: 401, UnauthorizedException: Unauthorized",
-		"operation error MediaPackage: ListChannels, ForbiddenException: error Action index not authorized",
+		"operation error synthetics: ListGroups, AccessDeniedException: User: arn:aws:sts::774118602354:assumed-role/AWSReservedSSO_AdministratorAccess/x is not authorized to perform: synthetics:ListGroups on resource: arn:aws:synthetics:...",
+		"operation error Bedrock AgentCore Control: ListAgentRuntimes, AccessDeniedException: User: arn:aws:sts::774118602354:assumed-role/x is not authorized to perform: bedrock-agentcore:ListAgentRuntimes",
+		"operation error Backup: ListFrameworks, AccessDeniedException: Insufficient privileges to perform this action.",
 		"operation error Timestream InfluxDB: ListDbInstances, AccessDeniedException: ",
 		"operation error QuickSight: ListAnalyses, exceeded maximum number of attempts, 5, StatusCode: 503",
-		"operation error Lambda: ListFunctionUrlConfigs, AccessDeniedException: Unable to determine service/operation name to be authorized",
+		"operation error S3 Control: ListStorageLensConfigurations, StatusCode: 403, UnknownError: UnknownError",
 		"dial tcp: lookup sts.amazonaws.com: no such host",
 	}
 	for _, msg := range fatal {
